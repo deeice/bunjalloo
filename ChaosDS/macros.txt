@@ -1,0 +1,11 @@
+soffice my_doc "macro://./Standard.Module1.my_macro()" 
+
+I copy paste the solution from one of the links above :
+Code:
+soffice "C:\Documents and Settings\dbrewer\Desktop\test.sxc" "macro://test/Standard.Module1.MeowMix()"
+
+It works fine for me
+
+Thanks
+
+Dujo

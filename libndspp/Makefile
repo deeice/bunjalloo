@@ -1,0 +1,105 @@
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+#---------------------------------------------------------------------------------
+ifeq ($(strip $(DEVKITARM)),)
+$(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM")
+endif
+
+include $(DEVKITARM)/ds_rules
+
+#---------------------------------------------------------------------------------
+BUILD		:= build
+
+ARM9SOURCES :=	source/arm9 source/common
+ARM7SOURCES :=	source/arm7 source/common
+
+DATESTRING	:=	$(shell date +%Y)$(shell date +%m)$(shell date +%d)
+
+export PATH		:=	$(DEVKITARM)/bin:$(PATH)
+
+export BASEDIR	:=	$(CURDIR)
+export LIBDIR	:=	$(BASEDIR)/lib
+export DEPENDS	:=	$(BASEDIR)/deps
+export INCDIR	:=	$(BASEDIR)/include
+export BUILDDIR	:=	$(BASEDIR)/$(BUILD)
+
+ARM9CFILES	:=	$(foreach dir,$(ARM9SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+ARM9CPPFILES	:=	$(foreach dir,$(ARM9SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+ARM9SFILES	:=	$(foreach dir,$(ARM9SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+ARM9BINFILES	:=	$(foreach dir,$(ARM9SOURCES),$(notdir $(wildcard $(dir)/*.bin)))
+
+ARM7CFILES	:=	$(foreach dir,$(ARM7SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+ARM7CPPFILES	:=	$(foreach dir,$(ARM7SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+ARM7SFILES	:=	$(foreach dir,$(ARM7SOURCES),$(notdir $(wildcard $(dir)/*.s)))
+
+export ARM9_VPATH	:=	$(foreach dir,$(ARM9SOURCES),$(BASEDIR)/$(dir))
+export ARM7_VPATH	:=	$(foreach dir,$(ARM7SOURCES),$(BASEDIR)/$(dir))
+
+export ARM9OBJS :=	$(ARM9BINFILES:.bin=.o) $(ARM9CFILES:.c=.o) $(ARM9SFILES:.s=.o) $(ARM9CPPFILES:.cpp=.o)
+export ARM9INC	:=	-I$(BUILDDIR)/arm9 -I$(LIBNDS)/include 
+export ARM7OBJS :=	$(ARM7CFILES:.c=.o) $(ARM7SFILES:.s=.o) $(ARM7CPPFILES:.cpp=.o)
+export ARM7INC	:=	-I$(BUILDDIR)/arm7 -I$(LIBNDS)/include 
+
+export ARCH	:=	-mthumb -mthumb-interwork
+
+export ARM9FLAGS	:=	$(ARCH) -march=armv5te -mtune=arm946e-s -DARM9
+export ARM7FLAGS	:=	$(ARCH) -mcpu=arm7tdmi -mtune=arm7tdmi -DARM7
+
+export BASEFLAGS	:=	-g -Wall -O2\
+				-fomit-frame-pointer\
+				-ffast-math \
+				-I$(INCDIR)
+
+
+.PHONY:	all libs dist docs
+
+#---------------------------------------------------------------------------------
+all:	$(DEPENDS)/arm7 $(DEPENDS)/arm9 lib $(BUILD)/arm9 $(BUILD)/arm7
+#---------------------------------------------------------------------------------
+	@make -C $(BUILD)/arm9 -f $(BASEDIR)/Makefile.arm9
+	@make -C $(BUILD)/arm7 -f $(BASEDIR)/Makefile.arm7
+
+#---------------------------------------------------------------------------------
+$(BUILD)/arm7:
+#---------------------------------------------------------------------------------
+	mkdir -p $@
+#---------------------------------------------------------------------------------
+$(BUILD)/arm9:
+#---------------------------------------------------------------------------------
+	mkdir -p $@
+#---------------------------------------------------------------------------------
+$(DEPENDS)/arm7:
+#---------------------------------------------------------------------------------
+	mkdir -p $@/arm7
+#---------------------------------------------------------------------------------
+$(DEPENDS)/arm9:
+#---------------------------------------------------------------------------------
+	mkdir -p $@/arm9
+
+#---------------------------------------------------------------------------------
+lib:
+#---------------------------------------------------------------------------------
+	mkdir -p lib
+
+#---------------------------------------------------------------------------------
+clean:
+#---------------------------------------------------------------------------------
+	rm -fr $(DEPENDS) $(BUILD) *.bz2
+
+#---------------------------------------------------------------------------------
+dist: all
+#---------------------------------------------------------------------------------
+	@tar --exclude=*CVS* -cvjf libndspp-src-$(DATESTRING).tar.bz2 source include license.txt Makefile Makefile.arm9 Makefile.arm7
+	@tar --exclude=*CVS* -cvjf libndspp-$(DATESTRING).tar.bz2 include lib license.txt
+
+#---------------------------------------------------------------------------------
+install: dist
+#---------------------------------------------------------------------------------
+	mkdir -p $(DEVKITPRO)/libndspp
+	bzip2 -cd libndspp-$(DATESTRING).tar.bz2 | tar -xv -C $(DEVKITPRO)/libndspp
+
+#---------------------------------------------------------------------------------
+docs:
+#---------------------------------------------------------------------------------
+	doxygen libndspp.doxy.cfg
+

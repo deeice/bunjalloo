@@ -1,0 +1,134 @@
+#include <nds.h>
+#include <stdio.h>
+#include "Splash.h"
+#include "Graphics.h"
+#include "Arena.h"
+#include "Text16.h"
+#include "Palette.h"
+#include "Video.h"
+#include "Misc.h"
+#include "GameState.h"
+#include "CreatePlayers.h"
+
+using namespace nds;
+
+void Splash::show()
+{
+  Graphics::clearPalettes();
+  Text16::instance().clear();
+  Arena::instance().clear();
+  Graphics::instance().setAnimationParams(31,-8);
+  m_menuOn = 0;
+  m_hilightItem = 0;
+  Text16 & textBg = Text16::instance();
+  textBg.setColour(1, Color(31,0,31));
+  textBg.print("CHAOS -THE BATTLE OF WIZARDS", 2, 2, 1);
+  textBg.print("By Julian Gollop", 7,4, 2);  
+  
+  textBg.setColour(3, Color(0,30,30));
+  textBg.print("NDS version" , 9,10, 3);  
+  textBg.print("by Quirky", 10, 12, 3);
+  
+  textBg.setColour(12, Color(31,31,0));
+  textBg.print("Press START", 9,17, 12);  
+  m_animationPalette = 12;
+  Arena::instance().decorativeBorder(15, Color(31,0,0),Color(31,0,31)); 
+  Video::instance(0).fade(false);
+}
+
+void Splash::animate()
+{
+  Misc::churnRand();
+  Color c(31,31,0);
+  Graphics::instance().animateSelection(m_animationPalette, c);
+}
+
+CurrentScreen_t Splash::getId() const
+{
+  return SCR_SPLASH;
+}
+
+void Splash::selectItem(int item) {
+  m_animationPalette = 12 + item;
+  Text16::instance().setColour(m_animationPalette, Color(31,31,0));
+  Text16::instance().setColour(13-item, Color(20,20,0));
+}
+
+void Splash::handleKeys()
+{
+  u16 keysSlow = keysDownRepeat();
+
+  if (keysSlow & KEY_LEFT) {
+    left();
+  } 
+  if (keysSlow & KEY_RIGHT) {
+    right();
+  } 
+  if (keysSlow & KEY_A) {
+    a();
+  } 
+  if (keysSlow & KEY_START) {
+    start();
+  } 
+}
+
+// start key pressed, for now start the game
+void Splash::start(void) {
+  if (!m_menuOn) {
+    m_menuOn = true;
+    m_hilightItem = 0;
+    Text16 & textBg = Text16::instance();
+    textBg.print("                    ", 2,17, 12);
+    textBg.print("START",    7, 17, 12);
+    textBg.print("OPTIONS", 15, 17, 13);
+    selectItem(0);
+  }
+  else {
+    Video::instance().fade();
+    selectItem(0);
+    //show_create_players();
+    GameState::instance().nextScreen(new CreatePlayers());
+  }
+}
+
+void Splash::right(void) {
+  if (m_menuOn == 0)
+    return;
+    
+  if (m_hilightItem == 0)  {
+    m_hilightItem = 1;
+    selectItem(m_hilightItem);
+  }
+  
+}
+
+void Splash::left(void) {
+  if (m_menuOn == 0)
+    return;
+  
+  if (m_hilightItem == 1) {
+    m_hilightItem = 0;
+    selectItem(m_hilightItem);
+  }
+  
+}
+
+void Splash::a(void) {
+  if (m_menuOn == 0)
+    return;
+  
+  /*
+  if (m_hilightItem == 1) {
+    fade_down();
+    show_options();
+    //GameState::instance().nextScreen(new OptionScreen());
+    fade_up();
+  } else {
+    selectItem(0);
+    fade_down();
+    show_create_players();
+    //GameState::instance().nextScreen(new CreatePlayers());
+    fade_up();
+  }
+  */
+}
