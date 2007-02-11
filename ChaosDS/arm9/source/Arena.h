@@ -6,6 +6,7 @@
 class Arena
 {
   public:
+    static const int WIZARD_INDEX;
     static Arena & instance();
     void reset();
     void clear();
@@ -17,6 +18,7 @@ class Arena
     int players() const;
     void players(int );
 
+    void setWizardSquare(int square, int id);
     void drawGfx8(
         const unsigned short * gfx,
         const unsigned short * map,

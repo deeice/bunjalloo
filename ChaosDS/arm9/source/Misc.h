@@ -8,5 +8,6 @@ namespace Misc
   void seedRand(unsigned int);
   void churnRand();
   char * trim(char * str);
+  void orderTable(int count, unsigned char * table);
 }
 #endif

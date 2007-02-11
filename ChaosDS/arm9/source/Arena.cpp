@@ -21,6 +21,7 @@ static const int BG_SOLID_TILE(604);
 
 static const int X_LIMIT(31);
 static const int Y_LIMIT(23);
+const int Arena::WIZARD_INDEX(0x2A);
 
 // namespace usage
 using namespace nds;
@@ -209,3 +210,10 @@ void Arena::setPalette8(int x, int y, int palette)
   mapData[tile[2]] &= ~0xF000; mapData[tile[2]] |= (palette<<12)&0xF000;
   mapData[tile[3]] &= ~0xF000; mapData[tile[3]] |= (palette<<12)&0xF000;
 }
+
+void Arena::setWizardSquare(int square, int id)
+{
+  m_arena[0][square] = id+WIZARD_INDEX;
+  m_arena[3][square] = id;
+}
+

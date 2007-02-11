@@ -46,3 +46,36 @@ char * Misc::trim(char * str) {
   } 
   return str;
 }
+
+// based on code at c64c
+void Misc::orderTable(int count, unsigned char * table) {
+  // orders "count" entries in the given table by priority
+  // table contains priority, index pairs
+  
+  for (int i = 0; i < count; i++) {
+    int index = 0;
+    for (int j = 0; j < count; j++) {
+      // priority 1, 2, value 1, 2
+      unsigned char p1(table[index]);
+      index++;  
+      unsigned char val1(table[index]);
+      index++;  
+      unsigned char p2(table[index]);
+      index++;
+      unsigned char val2(table[index]);
+      index--;   // points to prio 2
+      if (p2 > p1) {
+        index++;  // points to val 2
+        table[index] = val1;
+        index--;  // points to prio 2
+        table[index] = p1;
+        index--;  // points to val 1
+        table[index] = val2;
+        index--;  // points to prio 1
+        table[index] = p2;
+        index++;  // points to val 1
+        index++;  // points to prio 2
+      }
+    }
+  }
+}

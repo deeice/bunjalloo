@@ -113,6 +113,16 @@ void Wizard::createDefaultWizards()
   s_players[0].m_playerType = PLYR_HUMAN;
 }
 
+const u8 s_positionTable[56] = {
+
+  0x41,0x4d,0x00,0x00,0x00,0x00,0x00,0x00,
+  0x17,0x81,0x8d,0x00,0x00,0x00,0x00,0x00,
+  0x11,0x1d,0x81,0x8d,0x00,0x00,0x00,0x00,
+  0x07,0x30,0x3e,0x93,0x9b,0x00,0x00,0x00,
+  0x07,0x10,0x1e,0x80,0x97,0x8e,0x00,0x00,
+  0x07,0x11,0x1d,0x60,0x6e,0x94,0x9a,0x00,
+  0x00,0x07,0x0e,0x40,0x4e,0x90,0x97,0x9e
+};
 void Wizard::initialisePlayers()
 {
   int playerCount = Arena::instance().players();
@@ -160,7 +170,7 @@ void Wizard::initialisePlayers()
 
     for (int spell = 1; spell < player.m_spellCount; spell++) {
       spellid = getRand(255) & 0x3F;
-      /* FIXME
+      /* FIXME : need to sort out the spell stuff ASAP!
       while (spellid < SPELL_KING_COBRA || spellid > SPELL_RAISE_DEAD) {
         spellid = getRand(255) & 0x3F;
       }
@@ -189,17 +199,16 @@ void Wizard::initialisePlayers()
     player.m_spells[41] = 0;
     if (player.isCpu()) {
       // order the spells by priority  
-      order_table(20, player.m_spells);
+      orderTable(20, player.m_spells);
     }
     
     // set the player positions..
-    int square = position_table[offset+loop];
-    arena[0][square] = loop+WIZARD_INDEX;
-    arena[3][square] = loop;
+    int square = s_positionTable[offset+loop];
+    Arena::instance().setWizardSquare(square, loop);
     
   }
   
-  dead_wizards = 0;
+  // FIXME: dead_wizards = 0;
 }
 
 void Wizard::draw8(int x, int y, int frame)
