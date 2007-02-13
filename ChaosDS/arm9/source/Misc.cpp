@@ -26,7 +26,7 @@ char * Misc::trim(char * str) {
   // eat trailing white space
   while (*s)
     s++;
-  while (str < s && isspace(*(s-1)))
+  while (str < s and isspace(*(s-1)))
     *s-- = '\0';
   
   *s = '\0';

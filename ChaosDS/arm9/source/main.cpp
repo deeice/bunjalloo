@@ -1,14 +1,12 @@
 #include <nds.h>
 #include <stdio.h>
+#include "ndspp.h"
 #include "Graphics.h"
 #include "Interrupt.h"
-#include "Video.h"
 #include "Arena.h"
 #include "GameState.h"
 #include "Splash.h"
-#include "Background.h"
 #include "Text16.h"
-#include "Palette.h"
 
 int main(void) {
   irqInit();

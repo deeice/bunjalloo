@@ -1,10 +1,10 @@
-#include "Arena.h"
+
 #include <nds.h>
 #include <stdio.h>
+#include "ndspp.h"
+#include "Arena.h"
 #include "ChaosData.h"
 #include "Graphics.h"
-
-#include "Palette.h"
 
 
 // external data
@@ -192,6 +192,17 @@ void Arena::players(int p)
 {
   m_playerCount = p;
 }
+int Arena::currentPlayer() const
+{
+  return m_currentPlayer;
+}
+void Arena::currentPlayer(int p)
+{
+  m_currentPlayer = p;
+}
+
+
+
 void Arena::setPalette8(int x, int y, int palette)
 {
   // 8 bit resolution, 4 square size setting...

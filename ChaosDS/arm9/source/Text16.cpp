@@ -1,7 +1,7 @@
-#include "Text16.h"
 #include <nds.h>
 #include <stdio.h>
-#include "Palette.h"
+#include "ndspp.h"
+#include "Text16.h"
 // external data
 extern const u16 _binary_chaosfont_raw_start[];
 
@@ -9,7 +9,7 @@ extern const u16 _binary_chaosfont_raw_start[];
 const static int DEFAULT_OFFSET(605);
 const static int TEXT_PALETTE_ENTRY(1);
 
-const static int FIRST_CHAR_INDEX((int) '\'');
+const int Text16::FIRST_CHAR_INDEX((int) '\'');
 const static int SPACE_CHAR_INDEX(32);
 const static int FILLED_CHAR_INDEX((int)('z'+2));
 const static int TRANSP_CHAR_INDEX((int)('z'+1));

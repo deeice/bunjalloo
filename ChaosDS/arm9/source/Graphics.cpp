@@ -1,8 +1,7 @@
 #include <nds.h>
+#include "ndspp.h"
 #include "Text16.h"
 #include "Graphics.h"
-#include "Video.h"
-#include "Palette.h"
 #include "GfxData.h"
 
 using namespace nds;

@@ -17,6 +17,8 @@ class Arena
 
     int players() const;
     void players(int );
+    int currentPlayer() const;
+    void currentPlayer(int );
 
     void setWizardSquare(int square, int id);
     void drawGfx8(
@@ -28,6 +30,7 @@ class Arena
   private:
     nds::Background * m_bg;
     int m_playerCount;
+    int m_currentPlayer;
     
     // the 6 arena tables... 960 bytes
     /*

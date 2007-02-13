@@ -1,11 +1,10 @@
 #include <nds.h>
 #include <stdio.h>
+#include "ndspp.h"
 #include "Splash.h"
 #include "Graphics.h"
 #include "Arena.h"
 #include "Text16.h"
-#include "Palette.h"
-#include "Video.h"
 #include "Misc.h"
 #include "GameState.h"
 #include "CreatePlayers.h"
@@ -117,18 +116,12 @@ void Splash::a(void) {
   if (m_menuOn == 0)
     return;
   
-  /*
   if (m_hilightItem == 1) {
-    fade_down();
-    show_options();
+    Video::instance().fade();
+    //show_options();
     //GameState::instance().nextScreen(new OptionScreen());
-    fade_up();
   } else {
-    selectItem(0);
-    fade_down();
-    show_create_players();
-    //GameState::instance().nextScreen(new CreatePlayers());
-    fade_up();
+    Video::instance().fade();
+    GameState::instance().nextScreen(new CreatePlayers());
   }
-  */
 }

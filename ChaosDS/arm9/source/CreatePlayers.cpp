@@ -1,11 +1,14 @@
 #include <nds.h>
 #include <algorithm>
+#include <functional>
+#include "ndspp.h"
+
 #include "CreatePlayers.h"
+#include "GameMenu.h"
+#include "GameState.h"
 #include "Arena.h"
 #include "Graphics.h"
 #include "Text16.h"
-#include "Palette.h"
-#include "Video.h"
 #include "Wizard.h"
 
 using namespace nds;
@@ -107,7 +110,7 @@ void CreatePlayers::deselectItem() {
     Text16::instance().setColour(m_hilightItem-1, c);
 }
 
-class DrawWizard {
+class DrawWizard: public std::unary_function<Wizard,bool> {
   private:
     int m_index;
     int m_hilightItem;
@@ -120,7 +123,7 @@ class DrawWizard {
     { }
     
     // for each element in the player array...
-    void operator() (Wizard & element) {
+    result_type operator() (argument_type & element) {
       element.updateColour();
       element.draw8(0, m_index*2 + PLAYER_WIZ_Y, 0);
       if (m_index == (m_hilightItem - 1)) {
@@ -132,6 +135,7 @@ class DrawWizard {
       element.nameAt(6, 3+m_index*2);
       element.printLevelAt(16,3+m_index*2);
       m_index++;
+      return true;
     }
 };
 
@@ -273,26 +277,22 @@ void CreatePlayers::a() {
 
 void CreatePlayers::start(void) {
   //PlaySoundFX(SND_CHOSEN);
-
   // was init_players 
   Wizard::initialisePlayers();
-  /*
-  current_player = 0;
-  round_count = 0;
+  Arena::instance().currentPlayer(0);
+  // round_count = 0; //FIXME - part of casting and movement
   // check if we need to show game menu...
-  if (IS_CPU(0)) 
-    current_player = get_next_human(0);
-  else
-    current_player = 0;
-  
-  if (current_player == 9) {
+  Wizard & player0 = Wizard::getPlayers()[0];
+  if (player0.isCpu()) 
+    Arena::instance().currentPlayer(Wizard::getNextHuman());
+  if (Arena::instance().currentPlayer() == 9) 
+  {
     // there is no human player!
-    
-    continue_game();
+    // continue_game(); // FIXME
+    // Arena::instance().continue();
   } else {
-    fade_down();
-    show_game_menu();
-    fade_up();
+    Video::instance().fade();
+    GameState::instance().nextScreen(new GameMenu());
+    // fade_up();
   }
-  */
 }

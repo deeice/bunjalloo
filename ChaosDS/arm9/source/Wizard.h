@@ -9,11 +9,15 @@ class Wizard
     static void resetPlayers();
     static void createDefaultWizards();
     static Wizard * getPlayers();
+    static Wizard & getCurrentPlayer();
     static void initialisePlayers();
+    static int getNextHuman(int startIndex=0);
 
     void draw8(int x, int y, int frame);
     void updateColour();
-    void nameAt(int x, int y);
+    //! print the wizard name at x, y, using the given palette
+    //! if no palette is given, then use the wizard id
+    void nameAt(int x, int y, int pal=-1);
     void printLevelAt(int x, int y);
 
     int level() const;
@@ -26,6 +30,16 @@ class Wizard
     void image(int);
 
     bool isCpu() const;
+    bool isDead() const;
+
+    //! removes used spells from spell list and resorts
+    //! human wizards only
+    void removeNullSpells();
+
+    const char * const name();
+
+    int spell(int) const;
+    int spellCount() const;
 
     enum Player_t {
       PLYR_HUMAN=0,

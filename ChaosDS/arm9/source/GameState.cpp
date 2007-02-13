@@ -17,8 +17,8 @@ GameState::GameState():
 void GameState::checkVblankAnimation() {
   CurrentScreen_t currentScreen = m_currentScreen->getId();
   if (currentScreen == SCR_EXAMINE_BOARD 
-      || currentScreen == SCR_CASTING 
-      || currentScreen == SCR_MOVEMENT) 
+      or currentScreen == SCR_CASTING 
+      or currentScreen == SCR_MOVEMENT) 
   {
     Arena::instance().countdownAnim();
   }

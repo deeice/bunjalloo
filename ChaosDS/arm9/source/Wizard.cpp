@@ -1,13 +1,11 @@
 #include <algorithm>
 #include <string.h>
-#include <nds/arm9/video.h>
-#include <nds/bios.h>
-#include <nds/dma.h>
+#include <nds.h>
+#include "ndspp.h"
 #include "Wizard.h"
 #include "Arena.h"
 #include "Misc.h"
 #include "Text16.h"
-#include "Palette.h"
 #include "WizardData.h"
 
 using namespace Misc;
@@ -211,6 +209,16 @@ void Wizard::initialisePlayers()
   // FIXME: dead_wizards = 0;
 }
 
+int Wizard::getNextHuman(int startIndex) 
+{
+  for (int i = startIndex+1; i < Arena::instance().players(); ++i) 
+  {
+    if (not s_players[i].isCpu() and not s_players[i].isDead())
+      return i;
+  }
+  return 9;
+}
+
 void Wizard::draw8(int x, int y, int frame)
 {
   Arena::instance().setPalette8(x,y,9);
@@ -266,9 +274,15 @@ Wizard * Wizard::getPlayers() {
   return s_players;
 }
 
-void Wizard::nameAt(int x, int y)
+Wizard & Wizard::getCurrentPlayer() {
+  return s_players[Arena::instance().currentPlayer()];
+}
+
+void Wizard::nameAt(int x, int y, int pal)
 {
-  Text16::instance().print(m_name, x, y, m_id);
+  if (pal == -1)
+    pal = m_id;
+  Text16::instance().print(m_name, x, y, pal);
 }
 
 void Wizard::printLevelAt(int x, int y) 
@@ -294,7 +308,7 @@ int Wizard::level() const
 
 void Wizard::level(int newLevel)
 {
-  if (!newLevel) {
+  if (not newLevel) {
     m_playerType = PLYR_HUMAN;
   }
   else {
@@ -305,6 +319,10 @@ void Wizard::level(int newLevel)
 bool Wizard::isCpu() const
 {
   return m_playerType & PLYR_CPU;
+}
+bool Wizard::isDead() const
+{
+  return (m_modifierFlag & 0x10);
 }
 
 int Wizard::colour() const
@@ -323,4 +341,48 @@ int Wizard::image() const
 void Wizard::image(int i) 
 {
   m_image = i;
+}
+
+void Wizard::removeNullSpells()
+{
+  if (isCpu()) return;
+
+  int newCount = 0;
+  u8 newSpells[20];
+  for (int i = 0; i < 20; i++) {
+    int index = i*2+1;
+    if (m_spells[index] != 0) {
+      newSpells[newCount++] = m_spells[index];
+    }
+  }
+  // copy the valid spells back again
+  for (int i = 0; i < 20; i++) {
+    if (i < newCount) {
+      m_spells[i*2]   = 0x12; // default priority...
+      m_spells[i*2+1] = newSpells[i];
+    } else {
+      m_spells[i*2+1] = 0;
+    }
+  }
+  m_spells[0] = 0;
+  m_spellCount = newCount-1;
+  
+}
+
+const char * const Wizard::name()
+{
+  return m_name;
+}
+
+
+int Wizard::spell(int index) const
+{
+  if (index > m_spellCount)
+    return 0;
+  return m_spells[1+index*2];
+}
+
+int Wizard::spellCount() const
+{
+  return m_spellCount;
 }

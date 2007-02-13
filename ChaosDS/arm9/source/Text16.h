@@ -6,6 +6,7 @@ class Text16
 {
 
   public:
+    static const int FIRST_CHAR_INDEX;
     static Text16 & instance();
     void clear();
     void setColour(int palette, int colour);
