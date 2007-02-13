@@ -1,5 +1,6 @@
 #include <string.h>
 #include "ndspp.h"
+#include "SpellData.h"
 #include "SpellSelect.h"
 #include "Text16.h"
 #include "Arena.h"
@@ -47,17 +48,30 @@ void SpellSelect::show()
 
 void SpellSelect::animate()
 {}
+
 CurrentScreen_t SpellSelect::getId() const
 {
   return SCR_SELECT_SPELL;
 }
+
 void SpellSelect::handleKeys()
 {}
 
+const static u16 s_castingChancePalette[6] = {
+  Color(31,0,0),    //Red = 0-10%       p
+  Color(31,0,31),   //purple = 20-30%   
+  Color(0,31,0),    //Green = 40-50%    
+  Color(0,31,31),   //LightBlue = 60-70%
+  Color(31,31,0),   //Yellow = 80-90%   
+  Color(31,31,31),  //White = 100%      
+};
 
 void SpellSelect::initPalettes()
 {
   // for each palette...
+  for (int loop = 0; loop < 6; loop++) {
+    Text16::instance().setColour(loop, s_castingChancePalette[loop]);
+  }
 }
 
 void SpellSelect::listSpells() {
@@ -79,9 +93,9 @@ void SpellSelect::listSpells() {
   while (loop < 8 && spellIndex < 20) 
   {
     //int index(1+spellIndex*2);
-    if (currentPlayer.spell(spellIndex) != 0) {
-      // TODO: spells should be object oriented
-      // currentPlayer.spell(spellIndex)->printName(1,y);
+    const SpellData * spell = currentPlayer.spell(spellIndex);
+    if (spell != 0) {
+      spell->printName(1,y);
       // print_spell_name(players[current_player].spells[index], 1, y);
       y+=2;
       loop++;

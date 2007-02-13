@@ -1,6 +1,7 @@
 #ifndef Wizard_h_seen
 #define Wizard_h_seen
 
+struct SpellData;
 class Wizard
 {
 
@@ -38,7 +39,7 @@ class Wizard
 
     const char * const name();
 
-    int spell(int) const;
+    const SpellData * spell(int) const;
     int spellCount() const;
 
     enum Player_t {

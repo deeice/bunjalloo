@@ -7,6 +7,7 @@
 #include "Misc.h"
 #include "Text16.h"
 #include "WizardData.h"
+#include "SpellData.h"
 
 using namespace Misc;
 static const int PLAYER_COUNT(8);
@@ -375,11 +376,12 @@ const char * const Wizard::name()
 }
 
 
-int Wizard::spell(int index) const
+const SpellData * Wizard::spell(int index) const
 {
   if (index > m_spellCount)
     return 0;
-  return m_spells[1+index*2];
+  iprintf("%d ", m_spells[1+index*2]);
+  return &s_spellData[m_spells[1+index*2]];
 }
 
 int Wizard::spellCount() const

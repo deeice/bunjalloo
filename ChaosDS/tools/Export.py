@@ -100,11 +100,12 @@ def writeHeader(headerFile, row0, types):
   
   headerFile.write('#ifndef SpellData_h_seen\n#define SpellData_h_seen\n')
   headerFile.write('typedef void (*FunctionPtr_t)(void);\n')
-  headerFile.write('typedef struct  {\n')
+  headerFile.write('struct SpellData {\n')
   for i in range(len(types)):
     headerFile.write('  '+types[i]+' '+row0[i]+';\n')
-  headerFile.write('} SpellData_t;\n')
-  headerFile.write('extern const SpellData_t s_spellData[];\n')
+  headerFile.write('#include "SpellDataImpl.h"\n')
+  headerFile.write('};\n')
+  headerFile.write('extern const SpellData s_spellData[];\n')
   headerFile.write('#endif\n')
 
 def writeBody(bodyFile, spells):
@@ -112,7 +113,7 @@ def writeBody(bodyFile, spells):
   bodyFile.write('#include "SpellData.h"\n')
   bodyFile.write('#include "images.h"\n')
   bodyFile.write('#include "magic.h"\n')
-  bodyFile.write('const SpellData_t s_spellData[] = {\n')
+  bodyFile.write('const SpellData s_spellData[] = {\n')
   for i in spells:
     bodyFile.write('  '+str(i)+'\n')
   bodyFile.write('};\n')

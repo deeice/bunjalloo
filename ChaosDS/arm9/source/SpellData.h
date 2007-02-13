@@ -1,7 +1,8 @@
 #ifndef SpellData_h_seen
 #define SpellData_h_seen
+#include <nds/jtypes.h>
 typedef void (*FunctionPtr_t)(void);
-typedef struct  {
+struct SpellData {
   const char * spellName;
   s8 chaosRating;
   u8 castChance;
@@ -18,6 +19,7 @@ typedef struct  {
   FunctionPtr_t spellFunction;
   const u16 * gfxData;
   const u16 * mapData;
-} SpellData_t;
-extern const SpellData_t s_spellData[];
+#include "SpellDataImpl.h"
+};
+extern const SpellData s_spellData[];
 #endif
