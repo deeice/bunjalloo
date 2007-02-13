@@ -1,9 +1,6 @@
 #ifndef Video_h_seen
 #define Video_h_seen
 
-#ifndef BIT
-#define BIT(number) (1<<(number))
-#endif
 namespace nds
 {
   /*! @brief Controls the video hardware */
@@ -52,12 +49,12 @@ namespace nds
 
       //! Defines the backgrounds to blend between
       typedef enum {
-        BLDMOD_BG0=BIT(0), //!< Layer 0
-        BLDMOD_BG1=BIT(1), //!< Layer 1
-        BLDMOD_BG2=BIT(2), //!< Layer 2
-        BLDMOD_BG3=BIT(3), //!< Layer 3
-        BLDMOD_OBJ=BIT(4), //!< Layer 4
-        BLDMOD_BD =BIT(5)  //!< Backdrop layer
+        BLDMOD_BG0=1,  //!< Layer 0
+        BLDMOD_BG1=2,  //!< Layer 1
+        BLDMOD_BG2=4,  //!< Layer 2
+        BLDMOD_BG3=8,  //!< Layer 3
+        BLDMOD_OBJ=16, //!< Layer 4
+        BLDMOD_BD =32  //!< Backdrop layer
       } BLDMOD_BG_t;
 
       //! Defines the type of blending between layers
