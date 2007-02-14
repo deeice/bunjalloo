@@ -30,7 +30,7 @@ static const int BORDER_PALETTE(11<<12);
 static const int SECOND_TILEBANK_0(32*32);
 
 static const int X_LIMIT(31);
-static const int Y_LIMIT(23);
+const int Arena::HEIGHT(23);
 const int Arena::WIZARD_INDEX(0x2A);
 
 // namespace usage
@@ -152,7 +152,7 @@ void Arena::countdownAnim()
 
 
 
-void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2) {
+void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2, int height) {
   
   // set the colours
   Palette palette(ARENA_SCREEN,pal);
@@ -171,9 +171,9 @@ void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2)
   // top right corner
   mapData[X_LIMIT] = ARENA_CORNER_TILE|TILE_FLIP_HORZ|(pal<<12);
   // bottom left corner
-  mapData[Y_LIMIT*32] = ARENA_CORNER_TILE|TILE_FLIP_VERT|(pal<<12);
+  mapData[height*32] = ARENA_CORNER_TILE|TILE_FLIP_VERT|(pal<<12);
   // bottom right corner
-  mapData[X_LIMIT+Y_LIMIT*32] = ARENA_CORNER_TILE|TILE_FLIP_HORZ|TILE_FLIP_VERT|(pal<<12);
+  mapData[X_LIMIT+height*32] = ARENA_CORNER_TILE|TILE_FLIP_HORZ|TILE_FLIP_VERT|(pal<<12);
   // now fill the sides
   // top edge
   for (int x=1; x < X_LIMIT; x++) {
@@ -182,17 +182,17 @@ void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2)
   
   // bottom edge
   for (int x=1; x < X_LIMIT; x++) {
-    mapData[x+Y_LIMIT*32] = ARENA_HORZ_EDGE_TILE|TILE_FLIP_VERT|(pal<<12);
+    mapData[x+height*32] = ARENA_HORZ_EDGE_TILE|TILE_FLIP_VERT|(pal<<12);
     
   }
   
   // left edge
-  for (int y=1; y < Y_LIMIT; y++) {
+  for (int y=1; y < height; y++) {
     mapData[y*32] = ARENA_VERT_EDGE_TILE|(pal<<12);
   }
   
   // right edge
-  for (int y=1; y < Y_LIMIT; y++) {
+  for (int y=1; y < height; y++) {
     mapData[X_LIMIT+y*32] = ARENA_VERT_EDGE_TILE|TILE_FLIP_HORZ|(pal<<12);
   }
   m_bg->xScroll(0);
@@ -245,7 +245,7 @@ void Arena::setWizardSquare(int square, int id)
 }
 
 void Arena::gameBorder() {
-  decorativeBorder(11, Color(31,0,0), Color(21,0,0));
+  decorativeBorder(11, Color(31,0,0), Color(21,0,0), HEIGHT-2);
 #if 0
   u16 * mapData = m_bg->mapData();
   u16 * tileData = m_bg->tileData();

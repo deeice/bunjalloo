@@ -8,6 +8,7 @@ class Arena
   public:
     //! number that represents a wizard-type creature
     static const int WIZARD_INDEX;
+    static const int HEIGHT;
     /*! @brief Get the arena.
      * @returns singleton instance of an Arena.
      */
@@ -25,8 +26,9 @@ class Arena
      * @param pal the palette to use
      * @param col1 colour 1 of the frame in RGB format
      * @param col2 colour 2 of the frame in RGB format
+     * @param height the height of the border, default Y_LIMIT
      */
-    void decorativeBorder(int pal, unsigned short col1,  unsigned short col2);
+    void decorativeBorder(int pal, unsigned short col1,  unsigned short col2, int height=HEIGHT);
 
     /*! @brief Set the palette used at the given location
      * @param x the x position 0-29
