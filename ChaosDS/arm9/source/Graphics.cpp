@@ -1,5 +1,6 @@
 #include <nds.h>
 #include "ndspp.h"
+#include "images.h"
 #include "Text16.h"
 #include "Graphics.h"
 #include "GfxData.h"
@@ -26,11 +27,17 @@ void Graphics::initialiseScreen()
   Video & subScreen  = Video::instance(1);
   subScreen.mode(0);
   mainScreen.mode(0);
+  mainScreen.enableObjects();
   mainScreen.setWhite(16);
   subScreen.setToTop();
 
   // initialise all palettes.
   loadAllPalettes();
+  
+  // load the sprite palette...
+  ObjectPalette p(0);
+  p.load(_binary_paletteb_pal_start, 128);
+
   nds::Video::instance(0).whiteout(false, 1);
 }
 
@@ -40,6 +47,12 @@ void Graphics::clearPalettes(void) {
     Palette p(0,i);
     p.clear();
   }
+}
+
+void Graphics::loadSprite(const unsigned short * gfx, 
+        const unsigned short * map)
+{
+
 }
 
 Graphics::Graphics():

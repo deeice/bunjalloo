@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <functional>
 #include "ndspp.h"
+#include "images.h"
 #include "Arena.h"
 #include "Text16.h"
 #include "ChaosData.h"
@@ -36,7 +37,9 @@ const int Arena::WIZARD_INDEX(0x2A);
 // namespace usage
 using namespace nds;
 
-Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28)),m_playerCount(0)
+Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28)),
+  m_cursor(new Sprite(0, 16, 16, 0, 256)),
+  m_playerCount(0)
 {
   reset();
   m_bg->enable();
@@ -354,7 +357,6 @@ void Arena::display() {
   m_bg->update();
   reset();
   gameBorder();
-  setBorderColour(0);
   // draw all the creatures in the arena array
   drawCreatures();
   Wizard * players = Wizard::getPlayers();
@@ -362,3 +364,35 @@ void Arena::display() {
   using std::mem_fun_ref;
   for_each(players, players+m_playerCount, mem_fun_ref(&Wizard::updateColour));
 }
+
+// map Cursor_t to cursor gfx
+static const unsigned short * const s_cursorGfx[][2] = {
+  {_binary_cursor_spell_raw_start,  _binary_cursor_spell_map_start },
+  {_binary_cursor_engaged_raw_start,_binary_cursor_engaged_map_start },
+  {_binary_cursor_fire_raw_start,   _binary_cursor_fire_map_start },
+  {_binary_cursor_fly_raw_start,    _binary_cursor_fly_map_start },
+  {_binary_cursor_ground_raw_start, _binary_cursor_ground_map_start },
+  {_binary_cursor_raw_start,        _binary_cursor_map_start }
+};
+
+void Arena::initialiseCursor(int x, int y, Cursor_t type)
+{
+  if (type != CURSOR_NOT_DRAWN) {
+    m_cursor->loadTileMapData(s_cursorGfx[type][0],
+        s_cursorGfx[type][1],
+        4);
+    m_cursor->enable();
+  } else {
+    m_cursor->enable(false);
+  }
+  setCursor(x, y);
+}
+
+void Arena::setCursor(int x, int y)
+{
+  m_cursorPosition.x = x;
+  m_cursorPosition.y = y;
+  m_cursor->setXY(8+m_cursorPosition.x*16, 8+m_cursorPosition.y*16);
+  m_cursor->update();
+}
+

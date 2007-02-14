@@ -1,8 +1,10 @@
 #ifndef Arena_h_seen
 #define Arena_h_seen
 
-#include "Background.h"
-
+namespace nds {
+  class Background;
+  class Sprite;
+};
 class Arena
 {
   public:
@@ -77,15 +79,43 @@ class Arena
      */
     void display();
 
+    typedef enum {
+      CURSOR_SPELL_GFX,
+      CURSOR_ENGAGED_GFX,
+      CURSOR_FIRE_GFX,
+      CURSOR_FLY_GFX,
+      CURSOR_GROUND_GFX,
+      CURSOR_NORMAL_GFX,
+      CURSOR_NOT_DRAWN
+    } Cursor_t;
     //! set the border colour to match the given player
     void setBorderColour(unsigned char playerid);
+
+    /*! @brief set the cursor position and possibly draw it.
+     * @param x the cursor tile position
+     * @param y the cursor tile position
+     * @param type cursor type to draw the cursor
+     */
+    void initialiseCursor(int x, int y, Cursor_t type=CURSOR_NORMAL_GFX);
+
+    /*! @brief set the cursor position without updating drawing style.
+     * @param x the cursor tile position
+     * @param y the cursor tile position
+     */
+    void setCursor(int x, int y);
 
     //! clear a square here
     void clearSquare(int x, int y);
   private:
     nds::Background * m_bg;
+    nds::Sprite * m_cursor;
     int m_playerCount;
     int m_currentPlayer;
+    typedef struct {
+      short x;
+      short y;
+    } CursorPosition_t;
+    CursorPosition_t m_cursorPosition;
     
     // the 6 arena tables... 960 bytes
     /*

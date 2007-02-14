@@ -24,6 +24,9 @@ class Graphics
     
     //! fetch the gfx instance
     static Graphics & instance();
+
+    static void loadSprite(const unsigned short * gfx, 
+        const unsigned short * map);
     
     // member functions
     /*! @brief set the parameters used to animate text

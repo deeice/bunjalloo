@@ -551,17 +551,20 @@ void Sprite::loadTileMapData(const void * t, const void * m, unsigned int length
   if (this->color() == 256) {
     thisTile /= 2;
   }
+  // ???
   thisTile *= 64;
   uint16 * OAMData = SPRITE_GFX;
   if (m_screen) {
     OAMData = SPRITE_GFX_SUB;
   }
   
+  int amount = this->color()==256?64:32;
+  int stepSize = this->color()==256?32:16; 
   // get start address in screen
   for (unsigned int loop = 0; loop < length; loop++) {
     // id = <the tile id in the map file at this position>
     int id = map[loop];
-    dmaCopy(&(gfx[id*16]), &OAMData[loop*16+thisTile],32);
+    dmaCopy(&(gfx[id*stepSize]), &OAMData[loop*stepSize+thisTile],amount);
   }
 }
 

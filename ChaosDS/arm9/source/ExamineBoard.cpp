@@ -8,9 +8,12 @@ using namespace nds;
 void ExamineBoard::show()
 {
   Interrupt::disable();
-  Arena::instance().display();
+  Arena & theArena(Arena::instance());
+  theArena.display();
+  theArena.setBorderColour(0);
+  theArena.initialiseCursor(7,4);
+
 #if 0
-  set_border_col(0);
   cursor_x = 7;
   cursor_y = 4;
   draw_cursor(CURSOR_NORMAL_GFX);
