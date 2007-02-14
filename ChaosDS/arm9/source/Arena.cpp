@@ -1,23 +1,33 @@
-
 #include <nds.h>
 #include <stdio.h>
+#include <algorithm>
+#include <functional>
 #include "ndspp.h"
 #include "Arena.h"
+#include "Text16.h"
 #include "ChaosData.h"
 #include "Graphics.h"
+#include "Wizard.h"
 
 
 // external data
 extern const unsigned short _binary_bg_raw_start[];
 
 // static defines
+static const int ARENA_SIZE(0x9f);
 static const int ARENA_SCREEN(0);
 static const int ARENA_BORDER_1(2);
 static const int ARENA_BORDER_2(1);
 static const int ARENA_CORNER_TILE(601);
 static const int ARENA_VERT_EDGE_TILE(602);
 static const int ARENA_HORZ_EDGE_TILE(603);
+static const int BG_CORNER_TILE(601);
+static const int BG_VERT_EDGE_TILE(602);
+static const int BG_HORZ_EDGE_TILE(603);
 static const int BG_SOLID_TILE(604);
+static const int BORDER_PALETTE(11<<12);
+// the second bank of 256*256 start at tile 32*32...
+static const int SECOND_TILEBANK_0(32*32);
 
 static const int X_LIMIT(31);
 static const int Y_LIMIT(23);
@@ -28,7 +38,7 @@ using namespace nds;
 
 Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28)),m_playerCount(0)
 {
-  this->reset();
+  reset();
   m_bg->enable();
 }
 Arena::~Arena()
@@ -45,8 +55,13 @@ Arena & Arena::instance()
 void Arena::reset()
 {
   unsigned short * mapData = m_bg->mapData();
-  for (int i=1, y=2; y < 22; y++) {
-    for (int x=2; x < 32; x++) {
+  for (int x = 0; x < 32; x++) {
+    for (int y = 0; y < 32; y++) {
+      mapData[x+y*32] = 0;
+    }
+  }
+  for (int i=1, y=1; y < 21; y++) {
+    for (int x=1; x < 31; x++) {
       mapData[x+y*32] = i++;
     }
   }
@@ -116,7 +131,7 @@ void Arena::countdownAnim()
   // counts down the arena[1] values and updates the arena 2 val if needed
   int i;   
   // FIXME - hardcoded...
-  for (i = 0; i < 0x9f; i++) {
+  for (i = 0; i < ARENA_SIZE; i++) {
     if (m_arena[0][i] >= 2) {
       if ( (--m_arena[1][i]) == 0) {
         m_arena[2][i]++;
@@ -212,7 +227,8 @@ void Arena::setPalette8(int x, int y, int palette)
   // 66 comes from the fact that there are 2 rows before hand (32 *2) and 2 blocks
   // at the start of each row
   // x = 0 = 132
-  tile[0] = 66+x+y*32;    tile[1] = 66+1+x+y*32;
+  int offset = 33; // 66
+  tile[0] = offset+x+y*32;    tile[1] = offset+1+x+y*32;
   tile[2] = tile[0]+32;   tile[3] = tile[1]+32;
   
   u16 * mapData = m_bg->mapData();
@@ -228,3 +244,121 @@ void Arena::setWizardSquare(int square, int id)
   m_arena[3][square] = id;
 }
 
+void Arena::gameBorder() {
+  decorativeBorder(11, Color(31,0,0), Color(21,0,0));
+#if 0
+  u16 * mapData = m_bg->mapData();
+  u16 * tileData = m_bg->tileData();
+  // draws the game border, which is tiles in bg
+  // place the tiles at the end of the creature data, i.e. 150 creatures, 4 tiles each = 600
+  // use tile 600 to 607 = 0x4b00 19200 to 19392 (= 32 bytes per tile
+  dmaCopy(_binary_bg_raw_start, &tileData[16 + (19200/2)], 128);
+  
+  // top left corner
+  mapData[0] = BG_CORNER_TILE|BORDER_PALETTE;
+  // top right corner
+  mapData[SECOND_TILEBANK_0+1] = BG_CORNER_TILE|TILE_FLIP_HORZ|BORDER_PALETTE;
+  // bottom left corner
+  mapData[23*32] = BG_CORNER_TILE|TILE_FLIP_VERT|BORDER_PALETTE;
+  // bottom right corner
+  mapData[SECOND_TILEBANK_0+1+23*32] = BG_CORNER_TILE|TILE_FLIP_HORZ|TILE_FLIP_VERT|BORDER_PALETTE;
+  
+  // now fill in the sides
+  // top / bottom edges
+  for (int x=1; x < 32; x++) {
+    // top
+    mapData[x] = BG_HORZ_EDGE_TILE|BORDER_PALETTE;
+    mapData[x+32] = BG_SOLID_TILE|BORDER_PALETTE;
+    // bottom edge
+    mapData[x+23*32] = BG_HORZ_EDGE_TILE|TILE_FLIP_VERT|BORDER_PALETTE;
+    mapData[x+22*32] = BG_SOLID_TILE|BORDER_PALETTE;
+  }
+  // left over top edge tile...
+  mapData[SECOND_TILEBANK_0+0] = BG_HORZ_EDGE_TILE|BORDER_PALETTE;
+  // left over bottom edge tile...
+  mapData[SECOND_TILEBANK_0+23*32] = BG_HORZ_EDGE_TILE|TILE_FLIP_VERT|BORDER_PALETTE;
+  
+  // left and right edges
+  for (int y=1; y < 23; y++) {
+    // left
+    mapData[y*32] = BG_VERT_EDGE_TILE|BORDER_PALETTE;
+    mapData[1+y*32] = BG_SOLID_TILE|BORDER_PALETTE;
+    
+    // right edge
+    mapData[SECOND_TILEBANK_0+1+y*32] = BG_VERT_EDGE_TILE|TILE_FLIP_HORZ|BORDER_PALETTE;
+    mapData[SECOND_TILEBANK_0+y*32] = BG_SOLID_TILE|BORDER_PALETTE;
+    
+  }
+#endif
+}
+
+void Arena::setBorderColour(unsigned char playerid) {
+  // set the border colour based on the player colour
+  if (playerid < 8) 
+  {
+    Color playerColour(Wizard::getPlayers()[playerid].getColour());
+    Color playerColourDark( playerColour.red()-8,
+                            playerColour.green()-8,
+                            playerColour.blue()-8);
+    Palette borderPal(0, 11);
+    borderPal[1] = playerColour;
+    borderPal[2] = playerColourDark;
+  }
+}
+
+void Arena::getXY2(int index, int & x, int & y)
+{
+  x = ((index & 0xf) * 2)+1;
+  y = ((index & 0xf0) / 8) + 1;
+}
+
+void Arena::getXY(int index, int & x, int & y)
+{
+  getXY2(index, x, y);
+  x = (x/2) + 1;
+  y = (y/2) + 1;
+}
+
+
+void Arena::drawCreatures(void) {
+  for (int i = 0; i < ARENA_SIZE; i++) {
+    int x,y;
+    getXY(i, x, y);
+    if (m_arena[0][i] >= 2) {
+      
+      if (m_arena[0][i] < WIZARD_INDEX) {
+        //draw_creature(x-1, y-1, m_arena[0][i], m_arena[2][i]);
+      } else {
+        int playerIndex = m_arena[0][i]-WIZARD_INDEX;
+        int frame = m_arena[2][i];
+        iprintf("Draw %d @ %d %d\n", playerIndex, x, y);
+        Wizard::getPlayers()[playerIndex].draw(x-1,y-1, frame);
+      }
+    } 
+    else {
+      if (x > 0 and x < 0x10 and y > 0 and y < 0xB) {
+        clearSquare(x-1,y-1);
+      }
+    }
+    
+  }
+}
+void Arena::display() {
+  // redraw the arena...
+  Text16::instance().clear();
+  clear();
+  Graphics::instance().clearPalettes();
+  Graphics::loadAllPalettes();
+  m_bg->xScroll(0);
+  m_bg->yScroll(0);
+  m_bg->update();
+  reset();
+  gameBorder();
+  setBorderColour(0);
+  // draw all the creatures in the arena array
+  drawCreatures();
+  Wizard * players = Wizard::getPlayers();
+  using std::for_each;
+  using std::mem_fun_ref;
+  for_each(players, players+m_playerCount, mem_fun_ref(&Wizard::updateColour));
+}

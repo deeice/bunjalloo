@@ -19,7 +19,7 @@ namespace nds
        * @param green component, allowed values 0-31.
        * @param blue component, allowed values 0-31.
        */
-      Color(unsigned int red, unsigned int green, unsigned int blue);
+      Color(int red, int green, int blue);
 
       //! get the red component of the color
       inline unsigned int red() const;
@@ -39,7 +39,7 @@ namespace nds
        * @param green component
        * @param blue component
        */
-      void set(unsigned int red, unsigned int green, unsigned int blue);
+      void set(int red, int green, int blue);
 
       /*! @brief operator to cast to an unsigned short
       * @returns NDS representation of color.

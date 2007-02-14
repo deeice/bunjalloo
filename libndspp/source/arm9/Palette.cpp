@@ -7,14 +7,22 @@ using namespace nds;
 
 Color::Color(unsigned short s):m_c(s)
 {}
-Color::Color(unsigned int r, 
-    unsigned int g, 
-    unsigned int b):
-  m_c(RGB5(r&31,g&31,b&31))
-{ }
+Color::Color(int r, 
+    int g, 
+    int b)
+{ 
+  set(r,g,b);
+}
 
-void Color::set(unsigned int red, unsigned int green, unsigned int blue)
+void Color::set(int red, int green, int blue)
 {
+  if (red > 31) red = 31;
+  if (green > 31) green = 31;
+  if (blue > 31) blue = 31;
+  if (red < 0) red = 0;
+  if (green < 0) green = 0;
+  if (blue < 0) blue = 0;
+  
   m_c = RGB5(red&31,green&31, blue&31);
 }
 

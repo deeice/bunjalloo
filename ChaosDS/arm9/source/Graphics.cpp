@@ -10,7 +10,7 @@ void Graphics::loadPalette(int from, int to)
   Palette p(0,to);
   p.load(s_paletteData[from].data, s_paletteData[from].size);
 }
-static void loadAllPalettes()
+void Graphics::loadAllPalettes()
 {
   // load palettes to memory
   for (int i = 0; i < 10; ++i)

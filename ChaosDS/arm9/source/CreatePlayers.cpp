@@ -12,7 +12,7 @@
 #include "Wizard.h"
 
 using namespace nds;
-static const int PLAYER_WIZ_Y(1);
+static const int PLAYER_WIZ_Y(2);
 
 // from IF ScreenI
 void CreatePlayers::show()
@@ -125,7 +125,7 @@ class DrawWizard: public std::unary_function<Wizard,bool> {
     // for each element in the player array...
     result_type operator() (argument_type & element) {
       element.updateColour();
-      element.draw8(0, m_index*2 + PLAYER_WIZ_Y, 0);
+      element.draw8(1, m_index*2 + PLAYER_WIZ_Y, 0);
       if (m_index == (m_hilightItem - 1)) {
         m_text16.setColour(m_index, Color(31,30,30));
       } 

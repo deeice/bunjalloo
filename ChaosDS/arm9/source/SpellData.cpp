@@ -1,3 +1,4 @@
+#include <nds/jtypes.h>
 #include "SpellData.h"
 #include "images.h"
 #include "magic.h"

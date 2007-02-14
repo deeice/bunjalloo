@@ -6,8 +6,8 @@
 class Casting: public ScreenI
 {
   public:
+    //! get the current global chaos value
     static int getWorldChaos();
-
     
     virtual void show();
     virtual void animate();

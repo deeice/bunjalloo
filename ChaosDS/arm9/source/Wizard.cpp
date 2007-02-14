@@ -150,7 +150,7 @@ void Wizard::initialisePlayers()
       player.m_ability = getRand(10)/4;     
     
     // change from index representation to the actual 15 bit colour value
-    player.m_colour = s_chaosColours[player.m_colour];
+    // player.m_colour = s_chaosColours[player.m_colour];
      
     // generate the spells...
     int spellindex = 0;
@@ -167,16 +167,17 @@ void Wizard::initialisePlayers()
     player.m_spells[spellindex] = spellid;
     spellindex++;
 
-    for (int spell = 1; spell < player.m_spellCount; spell++) {
+    for (int spell = 1; spell < player.m_spellCount; spell++) 
+    {
       spellid = getRand(255) & 0x3F;
-      /* FIXME : need to sort out the spell stuff ASAP!
-      while (spellid < SPELL_KING_COBRA || spellid > SPELL_RAISE_DEAD) {
+      // TODO : change this
+      while (spellid < SPELL_KING_COBRA or spellid > SPELL_RAISE_DEAD) 
+      {
         spellid = getRand(255) & 0x3F;
       }
        
-      player.m_spells[spellindex] =
-       	CHAOS_SPELLS.pSpellDataTable[spellid]->castPriority; // priority
-      */
+      player.m_spells[spellindex] = s_spellData[spellid].castPriority;
+      
       spellindex++;
       player.m_spells[spellindex] = spellid;
       spellindex++;
@@ -263,12 +264,28 @@ void Wizard::draw8(int x, int y, int frame)
   Arena::instance().drawGfx8((unsigned short*)maskedGfx, s_defaultMap, x, y, 0);
 }
 
+void Wizard::draw(int x, int y, int frame)
+{
+  if ( (m_modifierFlag & 0x8) && frame == 3) {
+    // shadow form, do not draw this frame
+    iprintf("shadowform");
+    Arena::instance().clearSquare(x,y);
+    return;
+  }
+  draw8(x*2, y*2, frame);
+}
+
 void Wizard::updateColour()
 {
   // 9th palette
   nds::Palette p(0, 9);
   // 8+id is the colour index
-  p[m_id+8] = s_chaosColours[m_colour];
+  p[m_id+8] = getColour();
+}
+
+unsigned short Wizard::getColour()
+{
+  return s_chaosColours[m_colour];
 }
 
 Wizard * Wizard::getPlayers() {
@@ -376,15 +393,19 @@ const char * const Wizard::name()
 }
 
 
-const SpellData * Wizard::spell(int index) const
+const SpellData * Wizard::getSpell(int index) const
 {
   if (index > m_spellCount)
     return 0;
-  iprintf("%d ", m_spells[1+index*2]);
   return &s_spellData[m_spells[1+index*2]];
 }
 
 int Wizard::spellCount() const
 {
   return m_spellCount;
+}
+
+int Wizard::getAbility() const
+{
+  return m_ability;
 }

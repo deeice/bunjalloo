@@ -16,14 +16,17 @@ class SpellSelect: public ScreenI
 
     void initPalettes();
     void listSpells();
-#if 0
 
-    void deselectItem(int item);
-    inline void deselectItem() { deselectItem(m_hilightItem); };
-    void selectItem();
+    void deselectSpell(int item);
+    inline void deselectSpell() { deselectSpell(m_hilightItem); };
+    void selectSpell();
+
     void up(); 
     void down();
+    void left(); 
+    void right();
+    void r();
     void a();
-#endif
+    void b();
 };
 #endif

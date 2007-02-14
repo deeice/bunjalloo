@@ -8,6 +8,7 @@
 #include "Wizard.h"
 #include "SpellSelect.h"
 #include "GameState.h"
+#include "ExamineBoard.h"
 
 using namespace nds;
 static const int MENU_XPOS(4);
@@ -141,7 +142,7 @@ void GameMenu::a() {
     case 1: 
       // view arena
       Video::instance().fade();
-      // examine_board();    
+      GameState::instance().nextScreen(new ExamineBoard());
       break;
     case 2: 
       // continue game

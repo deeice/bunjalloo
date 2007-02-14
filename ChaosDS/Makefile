@@ -16,7 +16,7 @@ export TOPDIR		:=	$(CURDIR)
 #---------------------------------------------------------------------------------
 export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 
-.PHONY: $(TARGET).arm7 $(TARGET).arm9 tags
+.PHONY: $(TARGET).arm7 $(TARGET).arm9 tags docs
 
 #---------------------------------------------------------------------------------
 # main targets
