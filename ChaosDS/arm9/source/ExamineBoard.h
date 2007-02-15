@@ -9,5 +9,10 @@ class ExamineBoard: public ScreenI
     virtual void animate();
     virtual CurrentScreen_t getId() const;
     virtual void handleKeys();
+
+  private:
+
+    void a();
+    void b();
 };
 #endif

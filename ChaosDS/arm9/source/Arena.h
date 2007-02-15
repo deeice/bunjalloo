@@ -104,6 +104,12 @@ class Arena
      */
     void setCursor(int x, int y);
 
+    void cursorUp();
+    void cursorDown();
+    void cursorLeft();
+    void cursorRight();
+    void removeCursor();
+
     //! clear a square here
     void clearSquare(int x, int y);
   private:
@@ -146,6 +152,7 @@ class Arena
     Arena();
     ~Arena();
     void gameBorder();
+    void drawCreature(int x, int y, int creature, int frame);
     void drawCreatures();
 };
 

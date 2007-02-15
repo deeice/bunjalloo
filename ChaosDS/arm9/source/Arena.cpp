@@ -7,6 +7,7 @@
 #include "Arena.h"
 #include "Text16.h"
 #include "ChaosData.h"
+#include "SpellData.h"
 #include "Graphics.h"
 #include "Wizard.h"
 
@@ -322,6 +323,12 @@ void Arena::getXY(int index, int & x, int & y)
   y = (y/2) + 1;
 }
 
+void Arena::drawCreature(int x, int y, int creature, int frame)
+{
+  const SpellData & spell(s_spellData[creature]);
+  setPalette8(x*2,y*2,spell.palette);
+  drawGfx8(spell.gfxData, spell.mapData, x*2, y*2, frame);
+}
 
 void Arena::drawCreatures(void) {
   for (int i = 0; i < ARENA_SIZE; i++) {
@@ -330,7 +337,9 @@ void Arena::drawCreatures(void) {
     if (m_arena[0][i] >= 2) {
       
       if (m_arena[0][i] < WIZARD_INDEX) {
-        //draw_creature(x-1, y-1, m_arena[0][i], m_arena[2][i]);
+        int creature = m_arena[0][i];
+        int frame = m_arena[2][i];
+        drawCreature(x-1,y-1,creature,frame);
       } else {
         int playerIndex = m_arena[0][i]-WIZARD_INDEX;
         int frame = m_arena[2][i];
@@ -396,3 +405,29 @@ void Arena::setCursor(int x, int y)
   m_cursor->update();
 }
 
+void Arena::removeCursor()
+{
+  m_cursor->enable(false);
+  m_cursor->update();
+}
+
+void Arena::cursorUp()
+{
+  if (m_cursorPosition.y)
+    setCursor(m_cursorPosition.x,m_cursorPosition.y-1);
+}
+void Arena::cursorDown()
+{
+    if (m_cursorPosition.y<9)
+      setCursor(m_cursorPosition.x,m_cursorPosition.y+1);
+}
+void Arena::cursorLeft()
+{
+  if (m_cursorPosition.x)
+    setCursor(m_cursorPosition.x-1,m_cursorPosition.y);
+}
+void Arena::cursorRight()
+{
+  if (m_cursorPosition.x<14)
+    setCursor(m_cursorPosition.x+1,m_cursorPosition.y);
+}
