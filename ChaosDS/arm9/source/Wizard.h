@@ -49,9 +49,18 @@ class Wizard
      * @param y the tile y position
      * @param pal the palette index to use
      */
-    void nameAt(int x, int y, int pal=-1);
+    void nameAt(int x, int y, int pal=-1) const;
     //! print the CPU level or human at the given tile coords.
-    void printLevelAt(int x, int y);
+    void printLevelAt(int x, int y) const;
+
+    inline bool hasMagicWings() const
+    {
+      return m_modifierFlag & 0x20;
+    }
+    inline bool hasShadowForm() const
+    {
+      return m_modifierFlag & 0x8;
+    }
 
     //! @returns the current level. 0 is human.
     int level() const;
@@ -88,6 +97,9 @@ class Wizard
 
     //! @returns the ability flag.
     int getAbility() const;
+
+    //! helper function for the examine screen
+    void displayData() const;
 
     enum Player_t {
       PLYR_HUMAN=0, //!< indicates that is human

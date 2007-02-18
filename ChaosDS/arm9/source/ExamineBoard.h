@@ -10,6 +10,8 @@ class ExamineBoard: public ScreenI
     virtual CurrentScreen_t getId() const;
     virtual void handleKeys();
 
+    ~ExamineBoard();
+
   private:
 
     void a();

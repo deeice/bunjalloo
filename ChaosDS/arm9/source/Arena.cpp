@@ -431,3 +431,15 @@ void Arena::cursorRight()
   if (m_cursorPosition.x<14)
     setCursor(m_cursorPosition.x+1,m_cursorPosition.y);
 }
+
+int Arena::getCursorContents() const
+{
+  return m_arena[0][m_cursorPosition.x+m_cursorPosition.y*16];
+}
+void Arena::getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const
+{
+  int index(m_cursorPosition.x+m_cursorPosition.y*16);
+  theCreature      = m_arena[0][index];
+  theOneUnderneath = m_arena[4][index];
+  theFlags         = m_arena[3][index];
+}

@@ -1,12 +1,18 @@
 #include <nds.h>
+#include <stdio.h>
 #include "ndspp.h"
 #include "Interrupt.h"
 #include "ExamineBoard.h"
+#include "ExamineCreature.h"
 #include "GameState.h"
 #include "GameMenu.h"
 #include "Arena.h"
 
 using namespace nds;
+ExamineBoard::~ExamineBoard()
+{
+  // iprintf("~ExamineBoard;\n");
+}
 
 void ExamineBoard::show()
 {
@@ -50,23 +56,14 @@ void ExamineBoard::handleKeys()
 
 void ExamineBoard::a() 
 {
-#if 0
+  int theCreature = Arena::instance().getCursorContents();
   // return instantly if we examine an empty square
-  if (arena[0][index] == 0) {
+  if (theCreature == 0) {
     return;
   }
-  s32 bgx = bg_level.x_scroll;
-  s32 bgy = bg_level.y_scroll;
-  examine_creature(index);
-  fade_down();
-  display_arena();
-  SET_CURSOR_POSITION(cursor_x, cursor_y, bgx,bgy);
-  clear_message();
-  set_border_col(current_player);
-  redraw_cursor();
-  display_cursor_contents(index);
-  fade_up();
-#endif
+  Video::instance().fade();
+  GameState::instance().nextScreen(new ExamineCreature(new ExamineBoard()));
+  Arena::instance().removeCursor();
 }
 
 void ExamineBoard::b() {

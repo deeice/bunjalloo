@@ -6,6 +6,7 @@
 #include "Arena.h"
 #include "Misc.h"
 #include "Text16.h"
+#include "ExamineCreature.h"
 #include "WizardData.h"
 #include "SpellData.h"
 
@@ -296,14 +297,14 @@ Wizard & Wizard::getCurrentPlayer() {
   return s_players[Arena::instance().currentPlayer()];
 }
 
-void Wizard::nameAt(int x, int y, int pal)
+void Wizard::nameAt(int x, int y, int pal) const
 {
   if (pal == -1)
     pal = m_id;
   Text16::instance().print(m_name, x, y, pal);
 }
 
-void Wizard::printLevelAt(int x, int y) 
+void Wizard::printLevelAt(int x, int y) const
 {
   if ((m_playerType & PLYR_CPU)) {
     char str[30];
@@ -408,4 +409,105 @@ int Wizard::spellCount() const
 int Wizard::getAbility() const
 {
   return m_ability;
+}
+
+
+void Wizard::displayData() const
+{
+  Text16 & text16(Text16::instance());
+
+  // print name in yellow
+  nameAt(2,1,1);
+  bool need_comma(false);
+  int x = 2;
+  if (m_modifierFlag & 0x2) {
+    // bit 1 set, "KNIFE"
+    const char * const str = "KNIFE";
+    if (need_comma) {
+      // draw a comma...
+      text16.print(",", x,3, 1);
+      x++;
+    }
+    // write value
+    text16.print(str, x,3, 1);
+    x+=strlen(str);
+    need_comma = true;
+  }
+  if (m_modifierFlag & 0x4) {
+    // bit 2 set,
+    const char * const str = "SWORD";
+    if (need_comma) {
+      // draw a comma...
+      text16.print(",", x,3, 1);
+      x++;
+    }
+    // write value
+    text16.print(str, x,3, 1);
+    x+=strlen(str);
+    need_comma = true;
+  }
+
+  if ((m_modifierFlag & 0xC0) == 0xC0) {
+    // "ARMOUR"
+    const char * str = "ARMOUR";
+    if (need_comma) {
+      // draw a comma...
+      text16.print(",", x,3, 1);
+      x++;
+    }
+    // write value
+    text16.print(str, x,3, 1);
+    x+=strlen(str);
+    need_comma = true;
+  }
+  if ((m_modifierFlag & 0xC0) == 0x40) {
+    // "SHIELD"
+    const char * str = "SHIELD";
+    if (need_comma) {
+      // draw a comma...
+      text16.print(",", x,3, 1);
+      x++;
+    }
+    // write value
+    text16.print(str, x,3, 1);
+    x+=strlen(str);
+    need_comma = true;
+  }
+
+  if (hasMagicWings()) {
+    // bit 5
+    // FLYING
+    const char * str = "FLYING";
+    if (need_comma) {
+      // draw a comma...
+      text16.print(",", x,3, 1);
+      x++;
+    }
+    // write value
+    text16.print(str, x,3, 1);
+    x+=strlen(str);
+    need_comma = true;
+  }
+
+  if (hasShadowForm()) {
+    // bit 3
+    // SHADOW
+    const char * str = "SHADOW";
+    if (need_comma) {
+      // draw a comma...
+      text16.print(",", x,3, 1);
+      x++;
+    }
+    // write value
+    text16.print(str, x,3, 1);
+    x+=strlen(str);
+    need_comma = true;
+  }
+
+  // now draw the actual stats... nice hack!
+  ExamineCreature::drawStats(&this->m_combat);
+  
+  // spells and ability
+  ExamineCreature::printStat(m_spellCount, 8, 2, 3);
+  ExamineCreature::printStat(m_ability, 9, 2, 3);
 }

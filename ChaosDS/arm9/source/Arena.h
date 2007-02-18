@@ -112,6 +112,10 @@ class Arena
 
     //! clear a square here
     void clearSquare(int x, int y);
+
+    //! return the creature here
+    int getCursorContents() const;
+    void getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const;
   private:
     nds::Background * m_bg;
     nds::Sprite * m_cursor;
