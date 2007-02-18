@@ -116,6 +116,8 @@ class Arena
     //! return the creature here
     int getCursorContents() const;
     void getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const;
+
+    void resetAnimFrames();
   private:
     nds::Background * m_bg;
     nds::Sprite * m_cursor;

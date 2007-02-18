@@ -15,6 +15,7 @@ class Casting: public ScreenI
     virtual void handleKeys();
   private:
     static int s_worldChaos;
+    void startCastRound();
     
 };
 #endif

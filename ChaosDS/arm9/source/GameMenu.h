@@ -19,5 +19,6 @@ class GameMenu: public ScreenI
     void up(); 
     void down();
     void a();
+    void continueGame();
 };
 #endif

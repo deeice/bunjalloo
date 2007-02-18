@@ -10,6 +10,7 @@
 #include "SpellData.h"
 #include "Graphics.h"
 #include "Wizard.h"
+#include "Interrupt.h"
 
 
 // external data
@@ -443,3 +444,19 @@ void Arena::getCursorContents(int & theCreature, int & theOneUnderneath, int & t
   theOneUnderneath = m_arena[4][index];
   theFlags         = m_arena[3][index];
 }
+
+void Arena::resetAnimFrames(void) {
+  // initialises the arena tables - code based on that at c0dd
+  Interrupt::disable();
+  for (int i = 0; i < 0xA0; i++) {
+    if ((i + 1) & 0xF) {
+      if (m_arena[0][i] == 0) {
+        // arena[0][i] = 0; // set to one in the actual game...
+        m_arena[2][i] = 0;        
+      }      
+    }
+    m_arena[1][i] = 1;
+  }
+  Interrupt::enable();  
+}
+

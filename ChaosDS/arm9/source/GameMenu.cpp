@@ -128,6 +128,19 @@ void GameMenu::down() {
   selectItem();
 }
 
+void GameMenu::continueGame() 
+{
+  Video::instance().fade();
+  int nextPlayer = Wizard::getNextHuman(Arena::instance().currentPlayer());
+  if (nextPlayer == 9) {
+    // continue game after spell selection... this is roughly at 95c7
+    GameState::instance().nextScreen(new Casting());
+  } else {
+    Arena::instance().currentPlayer(nextPlayer);
+    GameState::instance().nextScreen(new GameMenu());
+  }
+}
+
 void GameMenu::a() {
   // get the hilited item...
   //PlaySoundFX(SND_CHOSEN);
@@ -146,7 +159,7 @@ void GameMenu::a() {
       break;
     case 2: 
       // continue game
-      // continue_game();
+      continueGame();
       break;
       /*
          case 3: // sleep mode
