@@ -150,6 +150,7 @@ class Wizard
     unsigned char m_timid; // ??
     //! player id - used for colouring in
     unsigned char m_id;
+    unsigned char m_castAmount; // temp_cast_amount in original code.
 
     Wizard();
     void reset();
