@@ -6,7 +6,7 @@
 #include "Arena.h"
 #include "Misc.h"
 #include "Text16.h"
-#include "ExamineCreature.h"
+#include "ExamineSquare.h"
 #include "WizardData.h"
 #include "SpellData.h"
 
@@ -510,11 +510,11 @@ void Wizard::displayData() const
   }
 
   // now draw the actual stats... nice hack!
-  ExamineCreature::drawStats(&this->m_combat);
+  ExamineSquare::drawStats(&this->m_combat);
   
   // spells and ability
-  ExamineCreature::printStat(m_spellCount, 8, 2, 3);
-  ExamineCreature::printStat(m_ability, 9, 2, 3);
+  ExamineSquare::printStat(m_spellCount, 8, 2, 3);
+  ExamineSquare::printStat(m_ability, 9, 2, 3);
 }
 
 void Wizard::removeSelectedSpell()

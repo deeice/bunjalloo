@@ -1,8 +1,8 @@
-#ifndef ExamineCreature_h_seen
-#define ExamineCreature_h_seen
+#ifndef ExamineSquare_h_seen
+#define ExamineSquare_h_seen
 #include "ScreenI.h"
 
-class ExamineCreature: public ScreenI
+class ExamineSquare: public ScreenI
 {
   public:
     static void printStat(int value, int index, int palette, 
@@ -13,8 +13,8 @@ class ExamineCreature: public ScreenI
      * shown when this one ends.
      * @param returnScreen screen to show when the user exits this one.
      */
-    ExamineCreature(ScreenI * returnScreen);
-    ~ExamineCreature();
+    ExamineSquare(ScreenI * returnScreen);
+    ~ExamineSquare();
     virtual void show();
     virtual void animate();
     virtual CurrentScreen_t getId() const;

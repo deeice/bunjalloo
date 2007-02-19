@@ -3,7 +3,7 @@
 #include "ndspp.h"
 #include "Interrupt.h"
 #include "ExamineBoard.h"
-#include "ExamineCreature.h"
+#include "ExamineSquare.h"
 #include "GameState.h"
 #include "GameMenu.h"
 #include "Arena.h"
@@ -62,7 +62,7 @@ void ExamineBoard::a()
     return;
   }
   Video::instance().fade();
-  GameState::instance().nextScreen(new ExamineCreature(new ExamineBoard()));
+  GameState::instance().nextScreen(new ExamineSquare(new ExamineBoard()));
   Arena::instance().removeCursor();
 }
 

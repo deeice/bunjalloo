@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "ndspp.h"
-#include "ExamineCreature.h"
+#include "ExamineSquare.h"
 #include "GameState.h"
 #include "Arena.h"
 #include "Wizard.h"
@@ -46,7 +46,7 @@ static const char * const s_statStrings [] = {
 
 using namespace nds;
 
-ExamineCreature::ExamineCreature(ScreenI * returnScreen):
+ExamineSquare::ExamineSquare(ScreenI * returnScreen):
   m_first(true), 
   m_showCastChance(false),
   m_returnScreen(returnScreen)
@@ -54,12 +54,12 @@ ExamineCreature::ExamineCreature(ScreenI * returnScreen):
   Arena::instance().getCursorContents(m_creature, m_underneath, m_flags);
   iprintf("Creat %d under %d flags %d\n", m_creature, m_underneath, m_flags);
 }
-ExamineCreature::~ExamineCreature()
+ExamineSquare::~ExamineSquare()
 {
-  // iprintf("~ExamineCreature;\n");
+  // iprintf("~ExamineSquare;\n");
 }
 
-void ExamineCreature::show()
+void ExamineSquare::show()
 {
   Text16 & text16(Text16::instance());
   Arena & arena(Arena::instance());
@@ -88,13 +88,13 @@ void ExamineCreature::show()
   }
   Video::instance().fade(false);
 }
-void ExamineCreature::animate()
+void ExamineSquare::animate()
 {}
-CurrentScreen_t ExamineCreature::getId() const
+CurrentScreen_t ExamineSquare::getId() const
 {
   return SCR_EXAMINE_BOARD;
 }
-void ExamineCreature::handleKeys()
+void ExamineSquare::handleKeys()
 {
   u16 keysSlow = keysDownRepeat();
   if (keysSlow & KEY_B) {
@@ -108,7 +108,7 @@ void ExamineCreature::handleKeys()
   }
 }
 
-void ExamineCreature::printStat(int value, int index, int palette, 
+void ExamineSquare::printStat(int value, int index, int palette, 
     int palette2,
     bool percent)
 {
@@ -129,7 +129,7 @@ void ExamineCreature::printStat(int value, int index, int palette,
 
 }
 
-void ExamineCreature::drawStats(const unsigned char * stat_pointer) 
+void ExamineSquare::drawStats(const unsigned char * stat_pointer) 
 {
   // loop over the 7 stats... this is a nice way to do it as it works for creatures and wizards, 
   // but it relies on structures being unpadded (devkitadvance doesn't pad to 4 byte boundaries)
@@ -143,7 +143,7 @@ void ExamineCreature::drawStats(const unsigned char * stat_pointer)
 }
 
 // void display_creature_data(u8 id, u8 arena4, u8 arena3)
-void ExamineCreature::displayCreatureData(int creature, int underneath, int flags)
+void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
 {
   if (creature != 0) {
     Text16 & text16(Text16::instance());
@@ -261,7 +261,7 @@ void ExamineCreature::displayCreatureData(int creature, int underneath, int flag
 }
 
 // void display_spell_data(u8 id);
-void ExamineCreature::displaySpellData(int spellId)
+void ExamineSquare::displaySpellData(int spellId)
 {
   // code from 94e2
   // this is used for displaying a spell sheet...
@@ -323,6 +323,6 @@ void ExamineCreature::displaySpellData(int spellId)
   text16.print(statval, start_x+6, start_y, 1);
 }
 
-void ExamineCreature::showCastChance(bool castChance) {
+void ExamineSquare::showCastChance(bool castChance) {
   m_showCastChance = castChance;
 }

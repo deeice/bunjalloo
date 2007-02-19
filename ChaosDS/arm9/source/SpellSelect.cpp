@@ -3,7 +3,7 @@
 #include "ndspp.h"
 #include "SpellData.h"
 #include "SpellSelect.h"
-#include "ExamineCreature.h"
+#include "ExamineSquare.h"
 #include "Text16.h"
 #include "Arena.h"
 #include "Graphics.h"
@@ -248,7 +248,7 @@ void SpellSelect::r(void) {
   SpellSelect * spellSelect(new SpellSelect());
   spellSelect->m_hilightItem = m_hilightItem;
   spellSelect->m_topIndex = m_topIndex;
-  ExamineCreature * examineScreen(new ExamineCreature(spellSelect));
+  ExamineSquare * examineScreen(new ExamineSquare(spellSelect));
   examineScreen->showCastChance(true);
   GameState::instance().nextScreen(examineScreen);
 }
