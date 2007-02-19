@@ -92,6 +92,11 @@ class Wizard
     //! @returns pointer to the spell at the given index
     //! @param index the index of the spell, 0-19
     const SpellData * getSpell(int index) const;
+
+    //! @returns the spell id at the given index
+    //! @param index the index of the spell, 0-19
+    const int getSpellId(int index) const;
+
     //! @returns the total number of spells available.
     int spellCount() const;
 
@@ -100,6 +105,19 @@ class Wizard
 
     //! helper function for the examine screen
     void displayData() const;
+
+    /*! @brief Set the spell that has been chosen from the list
+     * @param index the spell index in the list
+     */
+    void setSelectedSpell(int index);
+    /*! @brief Set if the spell to be cast is an illusion.
+     * @param isIllusion true for illusion spells.
+     */
+    void setIllusion(bool isIllusion);
+
+    void updateCreatureCount();
+
+    void doAISpell();
 
     enum Player_t {
       PLYR_HUMAN=0, //!< indicates that is human

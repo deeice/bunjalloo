@@ -267,9 +267,8 @@ void Wizard::draw8(int x, int y, int frame)
 
 void Wizard::draw(int x, int y, int frame)
 {
-  if ( (m_modifierFlag & 0x8) && frame == 3) {
+  if ( hasShadowForm() and frame == 3) {
     // shadow form, do not draw this frame
-    iprintf("shadowform");
     Arena::instance().clearSquare(x,y);
     return;
   }
@@ -394,11 +393,17 @@ const char * const Wizard::name()
 }
 
 
+const int Wizard::getSpellId(int index) const
+{
+  if (index > m_spellCount)
+    return 0;
+  return m_spells[1+index*2];
+}
 const SpellData * Wizard::getSpell(int index) const
 {
   if (index > m_spellCount)
     return 0;
-  return &s_spellData[m_spells[1+index*2]];
+  return &s_spellData[getSpellId(index)];
 }
 
 int Wizard::spellCount() const
@@ -510,4 +515,106 @@ void Wizard::displayData() const
   // spells and ability
   ExamineCreature::printStat(m_spellCount, 8, 2, 3);
   ExamineCreature::printStat(m_ability, 9, 2, 3);
+}
+
+void Wizard::setSelectedSpell(int index)
+{
+  m_selectedSpell = index*2 + 1;
+  m_illusionCast = false;
+}
+void Wizard::setIllusion(bool isIllusion)
+{
+  m_illusionCast = isIllusion;
+}
+
+void Wizard::updateCreatureCount() 
+{
+  
+  if (Arena::instance().roundNumber() < 6) {
+    m_timid = 0;
+    return;
+  }
+  
+  Arena & arena(Arena::instance());
+  for (int i = 0; i < 0x9f; i++) {
+    int creature = arena.get(0,i);
+    if (creature >= SPELL_KING_COBRA and creature < SPELL_GOOEY_BLOB) 
+    {
+      // is a creature
+      int underneath = arena.get(4,i);
+      if (underneath != Arena::WIZARD_INDEX+m_id) {
+        // is not a ridden creature
+        int flags = arena.get(3,i);
+        int owner = flags&0x7;
+        if (owner == m_id) {
+          m_timid = 0;
+          return;
+        }
+      }
+    }
+  }
+  
+  // if we are past round 6 and have no creatures
+  // then "be brave"...
+  m_timid = 0x14;
+}
+
+void Wizard::doAISpell()
+{
+#if 0
+  /*
+    set spell 0 priorty = 0x0c + GetRand(10) (I imagine this is in case Disbelieve was top priority?)
+    order the spell list by priority
+    best spell = 0
+    while (best spell < spell list length) {
+      select the best spell 
+      select the best square for this spell
+      if no square is good
+        best spell ++
+      else
+        break
+    }
+    
+    if a spell has been chosen...
+      cast spell at chosen square
+      remove casted spell from list
+    
+    move on to next player...
+  */
+  
+  if (IS_WIZARD_DEAD(players[current_player].modifier_flag)) {
+    return;
+  }
+  
+  temp_cast_amount = 0;
+  players[current_player].spells[0] = 0x0c + GetRand(10);
+  order_table(players[current_player].spell_count, players[current_player].spells);
+  u8 best_spell = 0;
+  while (best_spell < players[current_player].spell_count) {
+    current_spell = players[current_player].spells[best_spell*2 + 1];
+    // "cast" the spell... each casting routine has the CPU AI code for that spell built into it.
+    // if no good square was found, then go to the next spell
+    target_square_found = 0;
+    if (current_spell != 0) {
+      target_square_found = 1;
+      set_current_spell_chance();
+      CHAOS_SPELLS.pSpellDataTable[current_spell]->pFunc();
+
+    }
+    
+    if (target_square_found) {
+      
+      // spell was cast succesfully
+      if (current_spell != 0x1) {
+        // spell used (if not disblv)
+        players[current_player].spells[best_spell*2 + 1] = 0;
+      }
+//      break;
+      return;
+    } else {
+      best_spell++;
+    }
+  }
+  
+#endif
 }

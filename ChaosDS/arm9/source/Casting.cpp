@@ -1,6 +1,7 @@
 #include "ndspp.h"
 #include "Casting.h"
 #include "Arena.h"
+#include "Wizard.h"
 
 using namespace nds;
 
@@ -32,33 +33,32 @@ void Casting::handleKeys()
 // approximately at 95ee
 void Casting::startCastRound() 
 {
-  int currentPlayer(Arena::instance().currentPlayer());
-  int playerCount(Arena::instance().players());
-#if 0
+  Arena & arena(Arena::instance());
+  int currentPlayer(arena.currentPlayer());
+  int playerCount(arena.players());
   if (currentPlayer < playerCount) 
   {
-    temp_cast_amount = 0;
-    if (IS_WIZARD_DEAD(players[current_player].modifier_flag)) {
+    Wizard & player(Wizard::getCurrentPlayer());
+    // temp_cast_amount = 0; // moved to Wizard - the amount of goes this spell has
+    if (player.isDead()) {
       // player is dead...
-      update_creaturecount();
-      current_player++;
+      player.updateCreatureCount();
+      arena.currentPlayer(currentPlayer+1);
       startCastRound();
     } else {
-      current_screen = SCR_CASTING;
-      hilite_item = 0;
       // this moves to the player, even if they don't have a spell to cast
-      // need to rethink this....
-      set_current_player_index();
-      if (IS_CPU(current_player)) {
+      arena.setCurrentPlayerIndex();
+      if (player.isCpu()) {
         // cpu spell casting...
         // jump 96f3
-        remove_cursor();
-        do_ai_spell();
-        delay(10);
-        update_creaturecount();
-        current_player++;
+        arena.removeCursor();
+        player.doAISpell();
+        // delay(10); //FIXME
+        player.updateCreatureCount();
+        arena.currentPlayer(currentPlayer+1);
         startCastRound();
       } else {
+#if 0
         current_spell = players[current_player].spells[players[current_player].selected_spell];
         if (current_spell == 0) {
           update_creaturecount();
@@ -98,11 +98,13 @@ void Casting::startCastRound()
           }
         }
         
+#endif
       }
     } 
   } 
   else 
   {
+#if 0
     // start movement round..
     unset_moved_flags();
     round_count++;
@@ -120,6 +122,6 @@ void Casting::startCastRound()
     }
     
     start_movement_round();
-  }
 #endif  
+  }
 }

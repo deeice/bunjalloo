@@ -41,7 +41,7 @@ using namespace nds;
 
 Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28)),
   m_cursor(new Sprite(0, 16, 16, 0, 256)),
-  m_playerCount(0)
+  m_playerCount(0), m_roundNumber(0)
 {
   reset();
   m_bg->enable();
@@ -460,3 +460,33 @@ void Arena::resetAnimFrames(void) {
   Interrupt::enable();  
 }
 
+void Arena::setSpellAt(int x, int y, int spellID)
+{
+  m_arena[0][x+y*16] = spellID;
+}
+
+int Arena::roundNumber() const
+{
+  return m_roundNumber;
+}
+
+
+// code from 97d1 - sets the index of the current player for spell casting
+void Arena::setCurrentPlayerIndex() {
+  for (int i = 0; i < ARENA_SIZE; i++) {
+    if (m_arena[0][i] - WIZARD_INDEX == m_currentPlayer) {
+        setCurrentIndex(i);
+        return;         
+    }
+    if (m_arena[4][i] - WIZARD_INDEX == m_currentPlayer) {
+      setCurrentIndex(i);
+      return;
+    }
+  }
+}
+
+void Arena::setCurrentIndex(int index) {
+  m_wizardIndex = index;
+  m_startIndex = index;
+  m_targetIndex = index;
+}

@@ -3,12 +3,14 @@
 #include "ndspp.h"
 #include "SpellData.h"
 #include "SpellSelect.h"
+#include "ExamineCreature.h"
 #include "Text16.h"
 #include "Arena.h"
 #include "Graphics.h"
 #include "Wizard.h"
 #include "GameState.h"
 #include "GameMenu.h"
+#include "IllusionPicker.h"
 
 using namespace nds;
 static const int ARROWHEAD_CHAR('+' - Text16::FIRST_CHAR_INDEX);
@@ -21,13 +23,14 @@ const static u16 s_castingChancePalette[6] = {
   Color(31,31,31),  // White = 100%      
 };
 
+SpellSelect::SpellSelect():
+  m_hilightItem(0), m_topIndex(0) 
+{ }
+
 // implement ScreenI
 void SpellSelect::show()
 {
   char str[30];
-  
-  m_topIndex = 0;
-  m_hilightItem = 0;
   
   Wizard & currentPlayer(Wizard::getCurrentPlayer());
   // need to sort out the players spells here...
@@ -36,6 +39,8 @@ void SpellSelect::show()
   Text16 & text16(Text16::instance());
   Text16::instance().clear();
   Arena::instance().clear();
+  // remove any examined spell...
+  Arena::instance().setSpellAt(15, 0, 0);
   Graphics::instance().clearPalettes();
   // set up the palette so that 0-5 are the spell colours
   initPalettes();
@@ -88,6 +93,9 @@ void SpellSelect::handleKeys()
   } 
   if (keysSlow & KEY_RIGHT) {
     right();
+  } 
+  if (keysSlow & KEY_R) {
+    r();
   } 
   if (keysSlow & KEY_A) {
     a();
@@ -233,77 +241,34 @@ void SpellSelect::right(void) {
 }
 
 void SpellSelect::r(void) {
-  
-#if 0
-  // cast_chance_needed is for examine_spell, whether to show the chance or not
-  cast_chance_needed = 1;
-  u8 spellindex = m_hilightItem+m_topIndex;
-  u8 selected_spell = players[current_player].spells[spellindex*2+1];
-  arena[0][15] = selected_spell;
-  
-  u8 ti = m_topIndex;
-  u8 hi = m_hilightItem;
-  examine_spell(15);
-  arena[0][15] = 0;
-  fade_down();
-  show_spell_screen();
-  cast_chance_needed = 0;
-  m_hilightItem = hi;
-  m_topIndex = ti;
-  listSpells();
-  select_spell(hi);
-  fade_up();
-#endif
+  Arena & arena(Arena::instance());
+  arena.setCursor(15,0);
+  arena.setSpellAt(15, 0, Wizard::getCurrentPlayer().getSpellId(m_hilightItem+m_topIndex));
+  Video::instance().fade();
+  SpellSelect * spellSelect(new SpellSelect());
+  spellSelect->m_hilightItem = m_hilightItem;
+  spellSelect->m_topIndex = m_topIndex;
+  ExamineCreature * examineScreen(new ExamineCreature(spellSelect));
+  examineScreen->showCastChance(true);
+  GameState::instance().nextScreen(examineScreen);
 }
 
 
 void SpellSelect::a(void) {
   
-#if 0
   // store the spell...
-  int spellindex = m_hilightItem+m_topIndex;
-  players[current_player].illusion_cast = 0;
-  players[current_player].selected_spell = spellindex*2+1;
+  Wizard & player(Wizard::getCurrentPlayer());
+  int currentSpellIndex(m_hilightItem+m_topIndex);
+  player.setSelectedSpell(currentSpellIndex);
+  int spellId(player.getSpellId(currentSpellIndex));
   // check for illusion...
-  if (players[current_player].spells[players[current_player].selected_spell] < SPELL_KING_COBRA ||
-    players[current_player].spells[players[current_player].selected_spell] >= SPELL_GOOEY_BLOB) {
-    PlaySoundFX(SND_CHOSEN);
-    fade_down();
-    show_game_menu();
-    fade_up();
+  if (spellId < SPELL_KING_COBRA or spellId >= SPELL_GOOEY_BLOB) 
+  {
+    // PlaySoundFX(SND_CHOSEN);
+    b();
     return;
   }
-
-  // ask if they want an illusion and wait for response
-  set_text16_colour(14, 0);  
-  set_text16_colour(12, RGB16(31,31,31)); // white
-  print_text16("ILLUSION?", 18,8, 12);  
-  print_text16("(A=YES B=NO)", 17,10, 12);
-
-  wait_for_letgo();
-  while (1) {
-    wait_vsync_int();
-    anim_spell_select();
-    UpdateKeys();
-    if (KeyPressedNoBounce(KEY_A,50))
-      break;
-    if (KeyPressedNoBounce(KEY_B,50)) {
-      PlaySoundFX(SND_CHOSEN);
-      wait_for_letgo();
-      fade_down();
-      show_game_menu();
-      fade_up();
-      return;
-    }
-  }
-  PlaySoundFX(SND_CHOSEN);
-  wait_for_letgo();
-  players[current_player].illusion_cast = 1;
-  fade_down();
-  show_game_menu();
-  fade_up();
-  
-#endif
+  GameState::instance().nextScreen(new IllusionPicker());
 }
 
 void SpellSelect::b(void) {

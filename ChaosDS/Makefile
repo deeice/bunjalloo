@@ -5,6 +5,8 @@ ifeq ($(strip $(DEVKITARM)),)
 $(error "Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM)
 endif
 
+SHELL = bash
+
 include $(DEVKITARM)/ds_rules
 
 export TARGET		:=	$(shell basename $(CURDIR))
@@ -16,7 +18,7 @@ export TOPDIR		:=	$(CURDIR)
 #---------------------------------------------------------------------------------
 export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 
-.PHONY: $(TARGET).arm7 $(TARGET).arm9 tags docs
+.PHONY: $(TARGET).arm7 $(TARGET).arm9 docs
 
 #---------------------------------------------------------------------------------
 # main targets
@@ -55,7 +57,7 @@ clean:
 wmb:
 	wmb $(TARGET).nds
 
-tags:
+tags: $(shell ls arm[7-9]/source/*.{cpp,h}) 
 	ctags -R .
 
 docs:

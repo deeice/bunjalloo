@@ -117,7 +117,22 @@ class Arena
     int getCursorContents() const;
     void getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const;
 
+    //! Reset the animation details in arena 1 and 2 based upon the info in arena 0
     void resetAnimFrames();
+
+    void setSpellAt(int x, int y, int spellID);
+
+    inline int get(int i, int j)
+    {
+      return m_arena[i][j];
+    }
+
+    //! get the current round number
+    int roundNumber() const;
+
+    // set the target information for the current player
+    void setCurrentPlayerIndex();
+    
   private:
     nds::Background * m_bg;
     nds::Sprite * m_cursor;
@@ -128,6 +143,11 @@ class Arena
       short y;
     } CursorPosition_t;
     CursorPosition_t m_cursorPosition;
+    int m_roundNumber;
+    int m_wizardIndex;  // index into arena of current player
+    int m_startIndex;   // index into arena for start square of current spell
+    int m_targetIndex;  // index into arena for target square of current spell
+    
     
     // the 6 arena tables... 960 bytes
     /*
@@ -160,6 +180,9 @@ class Arena
     void gameBorder();
     void drawCreature(int x, int y, int creature, int frame);
     void drawCreatures();
+
+    // set the current index for all targets
+    void setCurrentIndex(int i);
 };
 
 #endif

@@ -6,6 +6,7 @@
 class SpellSelect: public ScreenI
 {
   public:
+    SpellSelect();
     virtual void show();
     virtual void animate();
     virtual CurrentScreen_t getId() const;
@@ -27,6 +28,7 @@ class SpellSelect: public ScreenI
     void right();
     void r();
     void a();
+  protected:
     void b();
 };
 #endif
