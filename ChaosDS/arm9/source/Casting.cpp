@@ -1,5 +1,6 @@
 #include "ndspp.h"
 #include "Casting.h"
+#include "SpellData.h"
 #include "Arena.h"
 #include "Wizard.h"
 
@@ -58,31 +59,34 @@ void Casting::startCastRound()
         arena.currentPlayer(currentPlayer+1);
         startCastRound();
       } else {
-#if 0
-        current_spell = players[current_player].spells[players[current_player].selected_spell];
-        if (current_spell == 0) {
-          update_creaturecount();
-          current_player++;
+        int currentSpellId(player.getSelectedSpellId());
+        if (currentSpellId == 0) {
+          player.updateCreatureCount();
+          arena.currentPlayer(currentPlayer+1);
           startCastRound();
         } else {
-          
-          if (current_spell != SPELL_DISBELIEVE) {
+          if (currentSpellId != SPELL_DISBELIEVE) {
             // set the current spell to 0 if it isn't disblv.
-            players[current_player].spells[players[current_player].selected_spell] = 0;
+            player.removeSelectedSpell();
           }
-          players[current_player].selected_spell = 0; // set to 0 for "no spell selected"
-          
+          player.setNoSpell();
           // sets the success flag, etc
-          setup_human_player_cast();
+          //   setup_human_player_cast();
+          player.setupHumanPlayerCast();
           
           // auto cast certain spells...
-          if (current_spell == SPELL_MAGIC_WOOD || current_spell == SPELL_TURMOIL ||
-          (current_spell >= SPELL_MAGIC_SHIELD && current_spell <= SPELL_SHADOW_FORM) ) {
-            remove_cursor();
-            CHAOS_SPELLS.pSpellDataTable[current_spell]->pFunc();
-            next_player_cast();
+          if (currentSpellId == SPELL_MAGIC_WOOD or currentSpellId == SPELL_TURMOIL 
+              or (currentSpellId >= SPELL_MAGIC_SHIELD and currentSpellId <= SPELL_SHADOW_FORM) 
+             )
+          {
+            arena.removeCursor();
+            s_spellData[currentSpellId].spellFunction();
+            /* next_player_cast(); */
             
-          } else if (current_spell >= SPELL_VENGEANCE && current_spell <= SPELL_JUSTICE) {
+          } 
+          else if (currentSpellId >= SPELL_VENGEANCE and currentSpellId <= SPELL_JUSTICE) 
+          {
+#if 0
             // set up the casting chance first... if fails go to the next player
             set_spell_success();
             if (temp_success_flag == 0) {
@@ -92,13 +96,14 @@ void Casting::startCastRound()
               temp_cast_amount = 0;
               next_player_cast();
             } 
+#endif
           } else {
+#if 0
             draw_cursor(CURSOR_SPELL_GFX);
             redraw_cursor();
+#endif
           }
         }
-        
-#endif
       }
     } 
   } 

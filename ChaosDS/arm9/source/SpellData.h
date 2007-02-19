@@ -23,6 +23,7 @@ struct SpellData {
 };
 extern const SpellData s_spellData[];
 typedef enum {
+  SPELL_NONE,
   SPELL_DISBELIEVE,
   SPELL_KING_COBRA,
   SPELL_DIRE_WOLF,

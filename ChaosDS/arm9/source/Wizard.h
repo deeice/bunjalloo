@@ -110,6 +110,11 @@ class Wizard
      * @param index the spell index in the list
      */
     void setSelectedSpell(int index);
+    //! set no spell...
+    void setNoSpell();
+    int getSelectedSpellId() const;
+    void removeSelectedSpell();
+    void setupHumanPlayerCast();
     /*! @brief Set if the spell to be cast is an illusion.
      * @param isIllusion true for illusion spells.
      */

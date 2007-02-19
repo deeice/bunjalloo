@@ -3,6 +3,7 @@
 #include "images.h"
 #include "magic.h"
 const SpellData s_spellData[] = {
+  {"None", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, cast_disbelieve, 0, 0, },
   {"Disbelieve", 0, 10, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, cast_disbelieve, 0, 0, },
   {"King Cobra", 1, 10, 1, 18, 0, 4, 0, 0, 1, 1, 6, 1, cast_creature, _binary_king_cobra_raw_start, _binary_king_cobra_map_start, },
   {"Dire Wolf", -1, 9, 1, 18, 1, 3, 0, 0, 2, 3, 7, 2, cast_creature, _binary_dire_wolf_raw_start, _binary_dire_wolf_map_start, },

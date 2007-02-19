@@ -517,11 +517,30 @@ void Wizard::displayData() const
   ExamineCreature::printStat(m_ability, 9, 2, 3);
 }
 
+void Wizard::removeSelectedSpell()
+{
+  m_spells[m_selectedSpell] = 0;
+}
+
+void Wizard::setNoSpell()
+{
+  m_selectedSpell = 0;
+}
+
 void Wizard::setSelectedSpell(int index)
 {
   m_selectedSpell = index*2 + 1;
   m_illusionCast = false;
 }
+
+int Wizard::getSelectedSpellId() const
+{
+  if (m_selectedSpell)
+    return m_spells[m_selectedSpell];
+  else 
+    return 0;
+}
+
 void Wizard::setIllusion(bool isIllusion)
 {
   m_illusionCast = isIllusion;
@@ -562,6 +581,7 @@ void Wizard::updateCreatureCount()
 void Wizard::doAISpell()
 {
 #if 0
+  FIXME
   /*
     set spell 0 priorty = 0x0c + GetRand(10) (I imagine this is in case Disbelieve was top priority?)
     order the spell list by priority
@@ -615,6 +635,31 @@ void Wizard::doAISpell()
       best_spell++;
     }
   }
+  
+#endif
+}
+
+void Wizard::setupHumanPlayerCast()
+{
+#if 0
+  FIXME
+  set_current_spell_chance();
+  // print player name and spell...
+  remove_cursor();
+  print_name_spell();
+  
+  wait_for_keypress();
+  redraw_cursor();
+  // clear message display
+  clear_message();
+  
+  temp_illusion_flag = players[current_player].illusion_cast;
+
+  // NB: Spell Success is calculated twice for some spells!
+  // not sure if that is a bug or not
+  // e.g. for creatures, this code is called once -> here
+  // Magic Wood, it is called here and again just before the cast
+  set_spell_success();
   
 #endif
 }
