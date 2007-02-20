@@ -63,11 +63,11 @@ void ExamineBoard::a()
   }
   Video::instance().fade();
   GameState::instance().nextScreen(new ExamineSquare(new ExamineBoard()));
-  Arena::instance().removeCursor();
+  Arena::instance().enableCursor(false);
 }
 
 void ExamineBoard::b() {
   Video::instance().fade();
   GameState::instance().nextScreen(new GameMenu());
-  Arena::instance().removeCursor();
+  Arena::instance().enableCursor(false);
 }

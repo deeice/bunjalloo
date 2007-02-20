@@ -81,7 +81,8 @@ void ExamineSquare::show()
 
   Text16::instance().clear();
   // which creature is here?
-  if (creature > SPELL_DISBELIEVE and creature < SPELL_GOOEY_BLOB) {
+  if ((creature > SPELL_DISBELIEVE and creature < SPELL_GOOEY_BLOB)
+      or creature >= Arena::WIZARD_INDEX) {
     displayCreatureData(creature, underneath, m_flags);
   } else {
     displaySpellData(creature);

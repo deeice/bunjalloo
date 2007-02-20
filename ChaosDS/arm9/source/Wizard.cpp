@@ -5,6 +5,7 @@
 #include "Wizard.h"
 #include "Arena.h"
 #include "Misc.h"
+#include "Casting.h"
 #include "Text16.h"
 #include "ExamineSquare.h"
 #include "WizardData.h"
@@ -519,11 +520,9 @@ void Wizard::displayData() const
 
 void Wizard::removeSelectedSpell()
 {
-  m_spells[m_selectedSpell] = 0;
-}
-
-void Wizard::setNoSpell()
-{
+  if (m_spells[m_selectedSpell] != SPELL_DISBELIEVE) {
+    m_spells[m_selectedSpell] = 0;
+  }
   m_selectedSpell = 0;
 }
 
@@ -693,27 +692,39 @@ void Wizard::printNameSpell(void)
 #endif
 }
 
+void Wizard::waitForKeypress() 
+{
+  if (isCpu())
+    return;
+  bool pressed(false);
+  while (!pressed) 
+  {
+    pressed = Misc::getKeypressWait();
+  }
+  
+}
+
+
 void Wizard::setupHumanPlayerCast()
 {
   // set_current_spell_chance(); - not needed
 
   // print player name and spell...
-  Arena::instance().removeCursor();
+  Arena::instance().enableCursor(false);
   printNameSpell();
   
+  waitForKeypress();
 #if 0
-  wait_for_keypress();
   redraw_cursor();
-  // clear message display
-  clear_message();
-  
-  temp_illusion_flag = players[current_player].illusion_cast;
+#endif
 
+  // clear message display
+  Text16::instance().clearMessage();
+  
   // NB: Spell Success is calculated twice for some spells!
   // not sure if that is a bug or not
   // e.g. for creatures, this code is called once -> here
   // Magic Wood, it is called here and again just before the cast
-  set_spell_success();
+  Casting::setSpellSuccess();
   
-#endif
 }

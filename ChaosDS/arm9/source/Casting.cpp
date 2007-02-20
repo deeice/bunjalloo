@@ -4,10 +4,14 @@
 #include "SpellData.h"
 #include "Arena.h"
 #include "Wizard.h"
+#include "Misc.h"
+#include "Text16.h"
 
 using namespace nds;
 
 int Casting::s_worldChaos(0);
+bool Casting::s_castSuccess(false);
+
 int Casting::getWorldChaos() {
   return s_worldChaos;
 }
@@ -19,8 +23,8 @@ void Casting::show()
   arena.currentPlayer(0);
   arena.setBorderColour(0);
   arena.initialiseCursor(0,0,Arena::CURSOR_NORMAL_GFX);
-  startCastRound();
   Video::instance().fade(false);
+  startCastRound();
 }
 void Casting::animate()
 {
@@ -79,7 +83,7 @@ void Casting::startCastRound()
       if (player.isCpu()) {
         // cpu spell casting...
         // jump 96f3
-        arena.removeCursor();
+        arena.enableCursor(false);
         player.doAISpell();
         // delay(10); //FIXME
         player.updateCreatureCount();
@@ -96,39 +100,32 @@ void Casting::startCastRound()
           //   setup_human_player_cast();
           player.setupHumanPlayerCast();
           
-          // now remove the spell from the player's collection...
-          if (currentSpellId != SPELL_DISBELIEVE) {
-            // set the current spell to 0 if it isn't disblv.
-            player.removeSelectedSpell();
-          }
-          player.setNoSpell();
           // auto cast certain spells...
           if (currentSpellId == SPELL_MAGIC_WOOD or currentSpellId == SPELL_TURMOIL 
               or (currentSpellId >= SPELL_MAGIC_SHIELD and currentSpellId <= SPELL_SHADOW_FORM) 
              )
           {
-            arena.removeCursor();
+            arena.enableCursor(false);
             s_spellData[currentSpellId].spellFunction();
-            /* next_player_cast(); */
+            nextPlayerCast();
           } 
           else if (currentSpellId >= SPELL_VENGEANCE and currentSpellId <= SPELL_JUSTICE) 
           {
-#if 0
             // set up the casting chance first... if fails go to the next player
-            set_spell_success();
-            if (temp_success_flag == 0) {
+            setSpellSuccess();
+            if (not s_castSuccess) {
               // print spell success/fail message...
-              print_success_status();
+              printSuccessStatus();
+#if 0
               delay(20);
               temp_cast_amount = 0;
-              next_player_cast();
+#endif
+              nextPlayerCast();
             } 
-#endif
           } else {
-#if 0
-            draw_cursor(CURSOR_SPELL_GFX);
-            redraw_cursor();
-#endif
+            // creature spells
+            arena.drawCursor(Arena::CURSOR_SPELL_GFX);
+            arena.enableCursor();
           }
         }
       }
@@ -152,7 +149,6 @@ void Casting::startCastRound()
       win_contest();
       return;
     }
-    
     start_movement_round();
 #endif  
   }
@@ -163,4 +159,63 @@ void Casting::cancel() {
 
 void Casting::execute() 
 {
+}
+
+void Casting::nextPlayerCast() 
+{
+  // need checks here for if CPU, if less than playercount, etc,
+  Arena & arena(Arena::instance());
+  int currentPlayer(Arena::instance().currentPlayer());
+  int playerCount(Arena::instance().players());
+  if (currentPlayer < playerCount) {
+    Wizard & player(Wizard::getCurrentPlayer());
+
+    player.updateCreatureCount();
+    // set the current spell to 0 if it isn't disblv.
+    player.removeSelectedSpell();
+
+    arena.currentPlayer(currentPlayer+1);
+    arena.drawCursor(Arena::CURSOR_NORMAL_GFX);
+    startCastRound();
+  } 
+  /* else  // end round */
+}
+
+void Casting::printSuccessStatus() 
+{
+  // based on 97a3
+  Text16 & text16(Text16::instance());
+  text16.clearMessage();
+  if (not s_castSuccess) {
+    // print spell fails in purple
+    text16.setColour(12, Color(31,0,30)); // purple
+    text16.displayMessage("SPELL FAILS");
+  } else {
+    text16.setColour(12, Color(31,31,31)); // white
+    text16.displayMessage("SPELL SUCCEEDS");
+  }
+#if 0 
+  delay(30);
+#endif
+
+}
+void Casting::setSpellSuccess() 
+{
+  s_castSuccess = false;
+  Wizard & player(Wizard::getCurrentPlayer());
+  if (player.illusionCast()) {
+    s_castSuccess = true;
+  } else {
+    int r = Misc::getRand(10);
+    int currentSpellId(player.getSelectedSpellId());
+    const SpellData & spellData(s_spellData[currentSpellId]);
+    int currentSpellChance(spellData.getCastChance()+1);
+    if (r < currentSpellChance) {
+      s_castSuccess = true;
+      s_worldChaos += spellData.chaosRating;
+    } 
+  } 
+#ifdef DEBUG
+  s_castSuccess = true;
+#endif
 }

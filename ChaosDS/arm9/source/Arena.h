@@ -105,11 +105,13 @@ class Arena
      */
     void setCursor(int x, int y);
 
+    void drawCursor(Cursor_t type=CURSOR_NORMAL_GFX);
+
     void cursorUp();
     void cursorDown();
     void cursorLeft();
     void cursorRight();
-    void removeCursor();
+    void enableCursor(bool enable=true);
 
     //! clear a square here
     void clearSquare(int x, int y);

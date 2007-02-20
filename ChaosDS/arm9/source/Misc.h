@@ -28,5 +28,7 @@ namespace Misc
    * @param table the table to order
    */
   void orderTable(int count, unsigned char * table);
+
+  bool getKeypressWait();
 }
 #endif

@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <nds.h>
 #include "Misc.h"
 
 // default seed
@@ -78,4 +79,16 @@ void Misc::orderTable(int count, unsigned char * table) {
       }
     }
   }
+}
+
+bool Misc::getKeypressWait()
+{
+    scanKeys();
+    swiWaitForVBlank();
+    u16 keysSlow = keysDownRepeat();
+    if ( keysSlow & (KEY_A|KEY_B|KEY_L|KEY_R|
+                     KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT|
+                     KEY_START|KEY_SELECT|KEY_X|KEY_Y)) 
+      return true;
+    return false;
 }

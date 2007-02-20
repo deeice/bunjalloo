@@ -111,15 +111,19 @@ class Wizard
      */
     void setSelectedSpell(int index);
     //! set no spell...
-    void setNoSpell();
-    int getSelectedSpellId() const;
     void removeSelectedSpell();
+    int getSelectedSpellId() const;
     void setupHumanPlayerCast();
     /*! @brief Set if the spell to be cast is an illusion.
      * @param isIllusion true for illusion spells.
      */
     void setIllusion(bool isIllusion);
+    inline bool illusionCast()const
+    {
+      return m_illusionCast;
+    }
 
+    void waitForKeypress();
     void updateCreatureCount();
 
     void doAISpell();

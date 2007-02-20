@@ -394,10 +394,9 @@ static const unsigned short * const s_cursorGfx[][2] = {
 void Arena::initialiseCursor(int x, int y, Cursor_t type)
 {
   if (type != CURSOR_NOT_DRAWN) {
-    m_cursor->loadTileMapData(s_cursorGfx[type][0],
-        s_cursorGfx[type][1],
-        4);
+    drawCursor(type);
     m_cursor->enable();
+    m_cursor->update();
   } else {
     m_cursor->enable(false);
   }
@@ -412,9 +411,19 @@ void Arena::setCursor(int x, int y)
   m_cursor->update();
 }
 
-void Arena::removeCursor()
+void Arena::drawCursor(Cursor_t type)
 {
-  m_cursor->enable(false);
+  if (type != CURSOR_NOT_DRAWN) {
+    m_cursor->loadTileMapData(
+        s_cursorGfx[type][0],
+        s_cursorGfx[type][1],
+        4);
+  }
+}
+
+void Arena::enableCursor(bool enable)
+{
+  m_cursor->enable(enable);
   m_cursor->update();
 }
 
