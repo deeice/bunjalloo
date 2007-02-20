@@ -15,6 +15,7 @@ class Arena
      * @returns singleton instance of an Arena.
      */
     static Arena & instance();
+
     /*! @brief Reset the arena map values.  */
     void reset();
 
@@ -132,6 +133,11 @@ class Arena
 
     // set the target information for the current player
     void setCurrentPlayerIndex();
+
+    void getCurrentPlayerXY(int & x, int &y);
+    
+    //! Needs to be public to animate arena
+    void drawCreatures();
     
   private:
     nds::Background * m_bg;
@@ -179,7 +185,6 @@ class Arena
     ~Arena();
     void gameBorder();
     void drawCreature(int x, int y, int creature, int frame);
-    void drawCreatures();
 
     // set the current index for all targets
     void setCurrentIndex(int i);

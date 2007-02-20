@@ -8,11 +8,14 @@ extern const u16 _binary_chaosfont_raw_start[];
 // static data
 const static int DEFAULT_OFFSET(605);
 const static int TEXT_PALETTE_ENTRY(1);
+static const int SPACE_CHAR_INDEX(32);
+static const int FILLED_CHAR_INDEX((int)('z'+2));
+static const int TRANSP_CHAR_INDEX((int)('z'+1));
+static const char EMPTY_MESSAGE[] = "                               ";
 
 const int Text16::FIRST_CHAR_INDEX((int) '\'');
-const static int SPACE_CHAR_INDEX(32);
-const static int FILLED_CHAR_INDEX((int)('z'+2));
-const static int TRANSP_CHAR_INDEX((int)('z'+1));
+const int Text16::MESSAGE_X(0);
+const int Text16::MESSAGE_Y(22);
 
 // namespaces
 using namespace nds;
@@ -112,4 +115,13 @@ void Text16::clear()  {
       mapData[x+y*32] = 0; 
     }
   }
+}
+
+void Text16::clearMessage() {
+  print(EMPTY_MESSAGE, MESSAGE_X,MESSAGE_Y, 12);
+}
+void Text16::displayMessage(const char * message) {
+  print(EMPTY_MESSAGE, MESSAGE_X,MESSAGE_Y, 12);
+  setColour(12, Color(0,30,30));
+  print(message, MESSAGE_X,MESSAGE_Y, 12);
 }

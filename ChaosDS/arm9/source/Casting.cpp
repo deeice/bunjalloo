@@ -1,3 +1,4 @@
+#include <nds.h>
 #include "ndspp.h"
 #include "Casting.h"
 #include "SpellData.h"
@@ -22,13 +23,39 @@ void Casting::show()
   Video::instance().fade(false);
 }
 void Casting::animate()
-{}
+{
+  Arena::instance().drawCreatures();
+}
+
 CurrentScreen_t Casting::getId() const
 {
   return SCR_CASTING;
 }
 void Casting::handleKeys()
-{}
+{
+  u16 keysSlow = keysDownRepeat();
+  Arena & arena(Arena::instance());
+  if (keysSlow & KEY_UP) {
+    arena.cursorUp();
+  }
+  if (keysSlow & KEY_DOWN) {
+    arena.cursorDown();
+  }
+  if (keysSlow & KEY_LEFT) {
+    arena.cursorLeft();
+  }
+  if (keysSlow & KEY_RIGHT) {
+    arena.cursorRight();
+  }
+  // cast...
+  if (keysSlow & KEY_A) {
+    execute();
+  }
+  // cancel...
+  if (keysSlow & KEY_B) {
+    cancel();
+  }
+}
 
 
 // approximately at 95ee
@@ -65,15 +92,16 @@ void Casting::startCastRound()
           arena.currentPlayer(currentPlayer+1);
           startCastRound();
         } else {
+          // sets the success flag, etc
+          //   setup_human_player_cast();
+          player.setupHumanPlayerCast();
+          
+          // now remove the spell from the player's collection...
           if (currentSpellId != SPELL_DISBELIEVE) {
             // set the current spell to 0 if it isn't disblv.
             player.removeSelectedSpell();
           }
           player.setNoSpell();
-          // sets the success flag, etc
-          //   setup_human_player_cast();
-          player.setupHumanPlayerCast();
-          
           // auto cast certain spells...
           if (currentSpellId == SPELL_MAGIC_WOOD or currentSpellId == SPELL_TURMOIL 
               or (currentSpellId >= SPELL_MAGIC_SHIELD and currentSpellId <= SPELL_SHADOW_FORM) 
@@ -82,7 +110,6 @@ void Casting::startCastRound()
             arena.removeCursor();
             s_spellData[currentSpellId].spellFunction();
             /* next_player_cast(); */
-            
           } 
           else if (currentSpellId >= SPELL_VENGEANCE and currentSpellId <= SPELL_JUSTICE) 
           {
@@ -129,4 +156,11 @@ void Casting::startCastRound()
     start_movement_round();
 #endif  
   }
+}
+
+void Casting::cancel() {
+}
+
+void Casting::execute() 
+{
 }

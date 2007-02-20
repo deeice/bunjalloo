@@ -154,6 +154,7 @@ class Wizard
 
     Wizard();
     void reset();
+    void printNameSpell(void);
     
     static Wizard s_players[8];
 	

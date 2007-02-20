@@ -324,6 +324,13 @@ void Arena::getXY(int index, int & x, int & y)
   y = (y/2) + 1;
 }
 
+void Arena::getCurrentPlayerXY(int & x, int &y)
+{
+  getXY(m_wizardIndex, x, y);
+  x -= 1;
+  y -= 1;
+}
+
 void Arena::drawCreature(int x, int y, int creature, int frame)
 {
   const SpellData & spell(s_spellData[creature]);
@@ -344,7 +351,6 @@ void Arena::drawCreatures(void) {
       } else {
         int playerIndex = m_arena[0][i]-WIZARD_INDEX;
         int frame = m_arena[2][i];
-        iprintf("Draw %d @ %d %d\n", playerIndex, x, y);
         Wizard::getPlayers()[playerIndex].draw(x-1,y-1, frame);
       }
     } 

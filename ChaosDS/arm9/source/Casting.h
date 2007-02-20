@@ -16,6 +16,8 @@ class Casting: public ScreenI
   private:
     static int s_worldChaos;
     void startCastRound();
+    void execute();
+    void cancel();
     
 };
 #endif

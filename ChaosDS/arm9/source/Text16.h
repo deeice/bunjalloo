@@ -8,6 +8,8 @@ class Text16
   public:
     //! Index of the first character.
     static const int FIRST_CHAR_INDEX;
+    static const int MESSAGE_X;
+    static const int MESSAGE_Y;
     //! Singleton instance.
     static Text16 & instance();
     //! Clear all text.
@@ -42,6 +44,14 @@ class Text16
      * @param extraFlags any extra flags to pass to the map (flip flags for example)
      */
     void putChar(int ch, int x, int y, int pal, unsigned int extraFlags);
+
+    /*! @brief clear the in game message */
+    void clearMessage();
+
+    /*! @brief Show an in-game message.
+     * @param message The message to display
+     */ 
+    void displayMessage(const char * message);
 
     /*! @brief convert an integer to a character string using decimal format.
      * @param n the integer value

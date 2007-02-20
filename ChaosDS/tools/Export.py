@@ -41,6 +41,8 @@ class SpellData:
     if self.map['palette'] != None:
       self.map['gfxData'] = self.nameToData('raw')
       self.map['mapData'] = self.nameToData('map')
+    if self.map['castRange'] != 0:
+      self.map['castRange'] = (2*self.map['castRange']) + 1
     
     for key in self.map:
       if self.map[key] == None:

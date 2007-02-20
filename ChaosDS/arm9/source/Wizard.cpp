@@ -639,15 +639,69 @@ void Wizard::doAISpell()
 #endif
 }
 
+void Wizard::printNameSpell(void) 
+{
+  using nds::Color;
+  // print player name, the spell and the range - code from 967a
+  Arena & arena(Arena::instance());
+  if (not isCpu()) {
+    int x,y;
+    arena.getCurrentPlayerXY(x,y);
+    arena.setCursor(x, y);
+  }
+  arena.setBorderColour(m_id);
+  Text16 & text16(Text16::instance());
+  text16.clearMessage();
+
+  // player name in yellow
+  text16.setColour(12, Color(31,30,0));
+  // spell in green
+  text16.setColour(13, Color(0,30,0));
+
+  int x = 0;
+  nameAt(x, Text16::MESSAGE_Y, 12);
+  // do a sound effect...
+#if 0
+  PlaySoundFX(SND_SPELLSTEP);
+  delay(8);
+#endif
+  x += strlen(m_name) + 1;
+  
+  const SpellData & spellData(s_spellData[m_spells[m_selectedSpell]]);
+  text16.print(spellData.spellName, x, Text16::MESSAGE_Y, 13);
+  x += strlen(spellData.spellName) + 1;
+  // do a sound effect...
+#if 0
+  PlaySoundFX(SND_SPELLSTEP);
+  delay(8);
+#endif
+  // range in white
+  int rng = spellData.castRange / 2;
+  if (rng >= 10) {
+    rng = 20;
+  }
+  
+  char str[3];
+  Text16::int2a(rng, str);
+  
+  text16.print(str, x, Text16::MESSAGE_Y, 15);
+  text16.setColour(15, Color(31,30,31));
+#if 0
+  // do a sound effect...
+  PlaySoundFX(SND_SPELLSTEP);
+  delay(8);
+#endif
+}
+
 void Wizard::setupHumanPlayerCast()
 {
-#if 0
-  FIXME
-  set_current_spell_chance();
+  // set_current_spell_chance(); - not needed
+
   // print player name and spell...
-  remove_cursor();
-  print_name_spell();
+  Arena::instance().removeCursor();
+  printNameSpell();
   
+#if 0
   wait_for_keypress();
   redraw_cursor();
   // clear message display
