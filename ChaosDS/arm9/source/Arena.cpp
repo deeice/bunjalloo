@@ -407,6 +407,7 @@ void Arena::setCursor(int x, int y)
 {
   m_cursorPosition.x = x;
   m_cursorPosition.y = y;
+  m_targetIndex = x+y*16;
   m_cursor->setXY(8+m_cursorPosition.x*16, 8+m_cursorPosition.y*16);
   m_cursor->update();
 }

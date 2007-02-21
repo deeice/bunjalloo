@@ -128,6 +128,11 @@ class Wizard
 
     void doAISpell();
 
+    inline int castAmount() const
+    {
+      return m_castAmount;
+    }
+
     enum Player_t {
       PLYR_HUMAN=0, //!< indicates that is human
       PLYR_CPU      //!< indicates that is CPU controlled

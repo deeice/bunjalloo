@@ -159,6 +159,19 @@ void Casting::cancel() {
 
 void Casting::execute() 
 {
+  Arena & arena(Arena::instance());
+  Wizard & player(Wizard::getCurrentPlayer());
+  int currentSpellId(player.getSelectedSpellId());
+  const SpellData & spellData(s_spellData[currentSpellId]);
+  
+  arena.enableCursor(false);
+  spellData.spellFunction();
+  arena.enableCursor();
+  
+  if (player.castAmount() == 0 ) {
+    // next players turn
+    nextPlayerCast();
+  }
 }
 
 void Casting::nextPlayerCast() 
