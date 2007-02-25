@@ -1,0 +1,13 @@
+
+
+Installation:
+
+Copy PatchDLDI to $HOME/.gnome2/nautilus-scripts
+Place your dldi files in $HOME/data
+Script expects dlditool to be in the path
+Requires zenity (try: sudo apt-get install zenity).
+
+Usage:
+Right click an NDS file and select scripts > PatchDLDI
+Choose the patch type.
+
