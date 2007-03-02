@@ -1,6 +1,7 @@
 #include <ctype.h>
 #include <nds.h>
 #include "Misc.h"
+#include "GameState.h"
 
 // default seed
 static unsigned int s_random(14071977);
@@ -91,4 +92,15 @@ bool Misc::getKeypressWait()
                      KEY_START|KEY_SELECT|KEY_X|KEY_Y)) 
       return true;
     return false;
+}
+
+void Misc::delay(int time) 
+{
+  GameState & state(GameState::instance());
+  state.resetGameFrame();
+  while(state.gameFrame() < time) 
+  {
+    swiWaitForVBlank();
+    state.mainLoopExecute();
+  }
 }

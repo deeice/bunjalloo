@@ -67,5 +67,6 @@ class Text16
     nds::Background * m_bg;
     int m_mapOffset;
     Text16();
+    ~Text16();
 };
 #endif

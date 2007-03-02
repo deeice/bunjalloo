@@ -44,6 +44,7 @@ Text16 & Text16::instance()
   static Text16 s_instance;
   return s_instance;
 }
+Text16::~Text16() {}
 
 // set the colour for the text in a given palette
 void Text16::setColour(int pal, int col) {

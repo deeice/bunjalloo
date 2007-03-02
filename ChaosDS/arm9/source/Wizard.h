@@ -132,11 +132,20 @@ class Wizard
     {
       return m_castAmount;
     }
+    inline void setCastAmount(int ca) {
+      m_castAmount = ca;
+    }
+
+    bool castAllowed() const;
+
+#include "WizardCPU.h"
 
     enum Player_t {
       PLYR_HUMAN=0, //!< indicates that is human
       PLYR_CPU      //!< indicates that is CPU controlled
     };
+
+
   private:
     char m_name[12];
     unsigned char m_combat;

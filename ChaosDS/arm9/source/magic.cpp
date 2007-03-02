@@ -1,3 +1,9 @@
+#include <stdio.h>
+#include "Wizard.h"
+#include "Arena.h"
+#include "Misc.h"
+#include "Casting.h"
+
 void cast_disbelieve()
 {}
 
@@ -5,29 +11,30 @@ void cast_creature()
 {  
   // if human just do the check on target_index, if CPU find the optimum square to cast to
   // if CPU and no square, set a target_square_found = 0 and return withough doing anything.
-#if 0
   // temp_cast_amount = 1;  // set this in Wiz
-  if (IS_CPU(current_player)) {
+  Wizard & player(Wizard::getCurrentPlayer());
+  player.setCastAmount(1);
+  if (player.isCpu()) {
     // do the cpu creature cast ai routine 
-    ai_cast_creature();
+    player.aiCastCreature(); // ai_cast_creature();
   } else {
     
     // call code at 9856 - validates player's spell cast
-    if (!player_cast_ok()) {
+    if (not player.castAllowed()) {
       return;
     }
     
-    //set_spell_success();
+    Casting::spellAnimation();
+#if 0
     spell_animation();
     if (temp_success_flag)
       creature_spell_succeeds(target_index);
     print_success_status();
-    temp_cast_amount =0;
-    draw_all_creatures();
-    
-    delay(30);
-  }
 #endif
+    player.setCastAmount(0);
+    Arena::instance().drawCreatures();
+    Misc::delay(30);
+  }
 }
 
 void cast_chaos_law()

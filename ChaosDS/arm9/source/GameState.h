@@ -17,6 +17,8 @@ class GameState
     inline void incrFrames();
     //! fetch the current game frame
     inline int gameFrame() const;
+    //! set the current game frame to 0
+    inline void resetGameFrame();
     //! fetch the current screen id
     inline CurrentScreen_t currentScreen() const;
 

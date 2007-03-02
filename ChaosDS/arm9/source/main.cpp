@@ -1,5 +1,4 @@
 #include <nds.h>
-#include <stdio.h>
 #include "ndspp.h"
 #include "Graphics.h"
 #include "Interrupt.h"
@@ -20,7 +19,6 @@ int main(void) {
   bg.enable();
   BG_PALETTE_SUB[255] = RGB15(31,31,31);
   consoleInitDefault(bg.mapData(), bg.tileData(),16);
-  iprintf("\n\nHello\n");
 
   GameState::instance().nextScreen(new Splash());
   while(1) {

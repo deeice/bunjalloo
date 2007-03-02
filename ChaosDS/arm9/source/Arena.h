@@ -5,12 +5,21 @@ namespace nds {
   class Background;
   class Sprite;
 };
+class Line;
 class Arena
 {
+  friend class Line;
   public:
     //! number that represents a wizard-type creature
     static const int WIZARD_INDEX;
     static const int HEIGHT;
+
+    /** Get the distance between 2 squares.
+     * @param square1 the start index, equal to x + y * 16
+     * @param square1 the start index.
+     */
+    static int getDistance(int square1, int square2);
+    
     /*! @brief Get the arena.
      * @returns singleton instance of an Arena.
      */
@@ -119,6 +128,8 @@ class Arena
     //! return the creature here
     int getCursorContents() const;
     void getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const;
+    void getCursorContents(int & theCreature, int & theOneUnderneath, 
+        int & theFlags, int & theFrame) const;
 
     //! Reset the animation details in arena 1 and 2 based upon the info in arena 0
     void resetAnimFrames();
@@ -140,6 +151,22 @@ class Arena
     
     //! Needs to be public to animate arena
     void drawCreatures();
+
+    /*! @brief check if the currently selected spell can be cast to where the target square.
+     * @param spellId the spell id to check the range of
+     * @returns true if the spell is in range, false otherwise.
+     */
+    bool isSpellInRange(int spellId) const;
+
+    /*! @brief check if there is a tree next to where the current spell is being cast.
+     * @param spellId the spell being cast.
+     * @returns true if there is a tree next to the current target, false otherwise.
+     */
+    bool isTreeAdjacent(int spellId) const;
+    bool isWallAdjacent(int spellId, int wizardId) const;
+    bool isBlockedLOS() const;
+
+    void targetXY(int & x, int & y);
     
   private:
     nds::Background * m_bg;
@@ -190,6 +217,9 @@ class Arena
 
     // set the current index for all targets
     void setCurrentIndex(int i);
+    // from a square to one of its surroundings
+    // returns index+1, if index is 0 it is out of bounds
+    static int applyPositionModifier(int square, int index);
 };
 
 #endif

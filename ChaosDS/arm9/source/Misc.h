@@ -30,5 +30,7 @@ namespace Misc
   void orderTable(int count, unsigned char * table);
 
   bool getKeypressWait();
+
+  void delay(int time);
 }
 #endif

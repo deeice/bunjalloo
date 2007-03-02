@@ -12,6 +12,7 @@
 #include "SpellData.h"
 
 using namespace Misc;
+using nds::Color;
 static const int PLAYER_COUNT(8);
 static const int WIZARD_COLOUR(1);
 static const unsigned short s_defaultMap[] = {
@@ -640,7 +641,6 @@ void Wizard::doAISpell()
 
 void Wizard::printNameSpell(void) 
 {
-  using nds::Color;
   // print player name, the spell and the range - code from 967a
   Arena & arena(Arena::instance());
   if (not isCpu()) {
@@ -727,4 +727,52 @@ void Wizard::setupHumanPlayerCast()
   // Magic Wood, it is called here and again just before the cast
   Casting::setSpellSuccess();
   
+}
+
+
+
+bool Wizard::castAllowed() const
+{
+  Text16 & text16(Text16::instance());
+  Arena & arena(Arena::instance());
+  int spellId = getSelectedSpellId();
+  // check spell is in range .... call 9786
+  if (not arena.isSpellInRange(spellId)) {
+    text16.clearMessage();
+    text16.setColour(12, Color(30,31,0));
+    text16.displayMessage("OUT OF RANGE");
+    return false;
+  }
+  int creature, underneath, flags, frame;
+  arena.getCursorContents(creature, underneath, flags, frame);
+  // in range, so do some more checks 
+  // 9877...
+  if (creature != 0) {
+    if (spellId >= SPELL_MAGIC_WOOD) {
+      return false;
+    }
+    if (frame != 4) {
+      // creature is not dead, can't cast here.
+      return false;
+    }
+  }
+  // 9892... 
+  // do tree check
+  if (arena.isTreeAdjacent(spellId)) {
+    return false;
+  }
+  // do wall check
+  if (arena.isWallAdjacent(spellId, m_id)) {
+    return false;
+  }
+  
+  // do LOS check...
+  if (arena.isBlockedLOS()) {
+    text16.clearMessage();
+    text16.displayMessage("NO LINE OF SIGHT");
+    text16.setColour(12, Color(0,30,31)); // lblue
+    return false;
+  }
+  // call spell anim, etc...
+  return true;
 }

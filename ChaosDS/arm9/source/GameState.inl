@@ -7,6 +7,10 @@ inline int GameState::gameFrame() const
 {
   return m_gameFrames;
 }
+inline void GameState::resetGameFrame()
+{
+  m_gameFrames = 0;
+}
 
 inline CurrentScreen_t GameState::currentScreen() const
 {

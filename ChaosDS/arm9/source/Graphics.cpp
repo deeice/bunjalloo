@@ -1,9 +1,12 @@
 #include <nds.h>
+#include <algorithm>
+#include <functional>
 #include "ndspp.h"
 #include "images.h"
 #include "Text16.h"
 #include "Graphics.h"
 #include "GfxData.h"
+#include "Wizard.h"
 
 using namespace nds;
 void Graphics::loadPalette(int from, int to)
@@ -18,6 +21,8 @@ void Graphics::loadAllPalettes()
   {
     Graphics::loadPalette(i,i);
   }
+  Wizard * wizards(Wizard::getPlayers());
+  std::for_each(wizards, wizards+8, std::mem_fun_ref(&Wizard::updateColour));
 }
 
 void Graphics::initialiseScreen()

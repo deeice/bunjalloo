@@ -9,6 +9,7 @@ class Casting: public ScreenI
     //! get the current global chaos value
     static int getWorldChaos();
     static void setSpellSuccess();
+    static void spellAnimation();
     
     virtual void show();
     virtual void animate();

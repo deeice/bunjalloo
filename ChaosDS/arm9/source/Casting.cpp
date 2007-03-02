@@ -6,8 +6,10 @@
 #include "Wizard.h"
 #include "Misc.h"
 #include "Text16.h"
+#include "Line.h"
 
 using namespace nds;
+using Misc::delay;
 
 int Casting::s_worldChaos(0);
 bool Casting::s_castSuccess(false);
@@ -85,7 +87,7 @@ void Casting::startCastRound()
         // jump 96f3
         arena.enableCursor(false);
         player.doAISpell();
-        // delay(10); //FIXME
+        delay(10);
         player.updateCreatureCount();
         arena.currentPlayer(currentPlayer+1);
         startCastRound();
@@ -116,10 +118,8 @@ void Casting::startCastRound()
             if (not s_castSuccess) {
               // print spell success/fail message...
               printSuccessStatus();
-#if 0
               delay(20);
-              temp_cast_amount = 0;
-#endif
+              player.setCastAmount(0);
               nextPlayerCast();
             } 
           } else {
@@ -207,10 +207,7 @@ void Casting::printSuccessStatus()
     text16.setColour(12, Color(31,31,31)); // white
     text16.displayMessage("SPELL SUCCEEDS");
   }
-#if 0 
   delay(30);
-#endif
-
 }
 void Casting::setSpellSuccess() 
 {
@@ -231,4 +228,33 @@ void Casting::setSpellSuccess()
 #ifdef DEBUG
   s_castSuccess = true;
 #endif
+}
+
+// do the spell animation between start_index and target_index
+void Casting::spellAnimation() 
+{
+  
+  Wizard & player(Wizard::getCurrentPlayer());
+  int currentSpellId(player.getSelectedSpellId());
+  int castRange(s_spellData[currentSpellId].castRange);
+
+  delay(4);
+  // don't do spell line anim for wizard modifier spells...
+  if (castRange != 0 or currentSpellId == SPELL_TURMOIL) 
+  {
+    // PlaySoundFX(SND_BEAM);
+    Line::doLine(Line::SPELL);
+    // wait for redraw..
+    delay(4);
+  }
+  // draw the spell animation gfx...
+  int x, y;
+  Arena::instance().targetXY(x, y);
+  x--;
+  y--;
+  /*PlaySoundFX(SND_SPELLSUCCESS);*/
+  for (int i = 0; i < 18; i++) {
+    swiWaitForVBlank();
+    // draw_spellcast_frame(x, y, spellframetable[i]);
+  }
 }

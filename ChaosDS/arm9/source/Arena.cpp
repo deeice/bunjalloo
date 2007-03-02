@@ -11,6 +11,7 @@
 #include "Graphics.h"
 #include "Wizard.h"
 #include "Interrupt.h"
+#include "Line.h"
 
 
 // external data
@@ -31,6 +32,17 @@ static const int BG_SOLID_TILE(604);
 static const int BORDER_PALETTE(11<<12);
 // the second bank of 256*256 start at tile 32*32...
 static const int SECOND_TILEBANK_0(32*32);
+
+static const signed char s_surroundTable[8][2] = {
+  {-1,-1},
+  {-1, 0},
+  {-1, 1},
+  { 0, 1},
+  { 1, 1},
+  { 1, 0}, 
+  { 1,-1},
+  { 0,-1}
+};
 
 static const int X_LIMIT(31);
 const int Arena::HEIGHT(23);
@@ -460,6 +472,16 @@ void Arena::getCursorContents(int & theCreature, int & theOneUnderneath, int & t
   theOneUnderneath = m_arena[4][index];
   theFlags         = m_arena[3][index];
 }
+void Arena::getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags, int & theFrame) const
+{
+
+  int index(m_cursorPosition.x+m_cursorPosition.y*16);
+  theCreature      = m_arena[0][index];
+  theOneUnderneath = m_arena[4][index];
+  theFlags         = m_arena[3][index];
+  theFrame         = m_arena[2][index];
+
+}
 
 void Arena::resetAnimFrames(void) {
   // initialises the arena tables - code based on that at c0dd
@@ -506,3 +528,114 @@ void Arena::setCurrentIndex(int index) {
   m_startIndex = index;
   m_targetIndex = index;
 }
+
+int Arena::getDistance(int square1, int square2) {
+  // based on code at 9786 and 0xbeef
+  int x1, y1, x2, y2;
+  getXY(square1, x1, y1);
+  getXY(square2, x2, y2);
+  
+  // calculate 2*(larger of xposdiff and yposdiff) + (the smaller of the 2)
+  int xdiff = abs(x2-x1);
+  int ydiff = abs(y2-y1);
+  if (xdiff < ydiff) 
+  {
+    return xdiff + (ydiff * 2);
+  } 
+  return ydiff + (xdiff * 2);
+}
+
+bool Arena::isSpellInRange(int selectedSpellId) const
+{
+  int distance = getDistance(m_wizardIndex, m_targetIndex);
+  int range = s_spellData[selectedSpellId].castRange;
+  if (range >= distance) {
+    return 1;
+  }
+  return 0;
+}
+
+
+int Arena::applyPositionModifier(int square, int index) {
+  // use the look up table to convert the square to a new one 
+  int y, x;
+  getXY(square,x,y);
+  
+  y = y + s_surroundTable[index][0];
+  if (y == 0 || y == 0xB) {
+    return 0;
+  }
+  
+  x = x + s_surroundTable[index][1];
+  if (x == 0 || x == 0x10) {
+    return 0;
+  }
+  
+  y--;
+  
+  int tmp = x + y*16;
+  
+  /*
+  // Add the "3 trees in top corner" bug...
+  if (Options[OPT_OLD_BUGS] && tmp == 2 && current_spell == SPELL_MAGIC_WOOD)
+    tmp = 0;
+  */
+  return tmp;
+  
+}
+
+bool Arena::isTreeAdjacent(int spellId) const
+{
+  if (spellId < SPELL_MAGIC_WOOD or spellId >= SPELL_MAGIC_CASTLE)
+    return false;
+  
+  bool found(false);
+  for (int i = 0; i < 8; i++) {
+    int lookAt = applyPositionModifier(m_targetIndex, i);
+    if (lookAt == 0) {
+      // out of bounds
+      continue;
+    }
+    lookAt--;
+    if (m_arena[0][lookAt] < SPELL_MAGIC_WOOD || m_arena[0][lookAt] >= SPELL_MAGIC_CASTLE) {
+      // not a wood
+      continue;
+    } else {
+      found = true;
+    }
+  }
+  return found;
+}
+
+// 9c0f code - check that the casting wizard isn't next to the wall target square
+bool Arena::isWallAdjacent(int spellId, int wizardId) const
+{
+  if (spellId != SPELL_WALL)
+    return false;
+  // Factorise this into isTreeAdjacent??
+  bool found(false);
+  for (int i = 0; i < 8; i++) {
+    int lookAt = applyPositionModifier(m_targetIndex, i);
+    if (lookAt == 0) {
+      // out of bounds
+      continue;
+    }
+    lookAt--;
+    if (m_arena[0][lookAt] == (WIZARD_INDEX + wizardId)) {
+      // casting wizard is adjacent
+      found = true;
+    }
+  }
+  return found;
+}
+
+void Arena::targetXY(int & x, int & y)
+{
+  getXY(m_targetIndex, x, y);
+}
+
+bool Arena::isBlockedLOS() const
+{
+  return Line::doLine(Line::SIGHT);
+}
+
