@@ -169,6 +169,7 @@ class Wizard
     //! player id - used for colouring in
     unsigned char m_id;
     unsigned char m_castAmount; // temp_cast_amount in original code.
+    bool m_targetSquareFound; // for cpu casting, has the target been found
 
     Wizard();
     void reset();

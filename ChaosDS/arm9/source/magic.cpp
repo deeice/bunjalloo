@@ -18,19 +18,15 @@ void cast_creature()
     // do the cpu creature cast ai routine 
     player.aiCastCreature(); // ai_cast_creature();
   } else {
-    
     // call code at 9856 - validates player's spell cast
     if (not player.castAllowed()) {
       return;
     }
-    
     Casting::spellAnimation();
-#if 0
-    spell_animation();
-    if (temp_success_flag)
-      creature_spell_succeeds(target_index);
-    print_success_status();
-#endif
+    if (Casting::spellSuccess()) {
+      Arena::instance().creatureSpellSucceeds();
+    }
+    Casting::printSuccessStatus();
     player.setCastAmount(0);
     Arena::instance().drawCreatures();
     Misc::delay(30);

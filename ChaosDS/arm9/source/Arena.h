@@ -167,6 +167,9 @@ class Arena
     bool isBlockedLOS() const;
 
     void targetXY(int & x, int & y);
+
+    void drawSpellcastFrame(int x, int y, int frame);
+    void creatureSpellSucceeds();
     
   private:
     nds::Background * m_bg;

@@ -580,8 +580,6 @@ void Wizard::updateCreatureCount()
 
 void Wizard::doAISpell()
 {
-#if 0
-  FIXME
   /*
     set spell 0 priorty = 0x0c + GetRand(10) (I imagine this is in case Disbelieve was top priority?)
     order the spell list by priority
@@ -602,41 +600,34 @@ void Wizard::doAISpell()
     move on to next player...
   */
   
-  if (IS_WIZARD_DEAD(players[current_player].modifier_flag)) {
+  if (isDead()) { 
+    //IS_WIZARD_DEAD(players[current_player].modifier_flag)
     return;
   }
   
-  temp_cast_amount = 0;
-  players[current_player].spells[0] = 0x0c + GetRand(10);
-  order_table(players[current_player].spell_count, players[current_player].spells);
-  u8 best_spell = 0;
-  while (best_spell < players[current_player].spell_count) {
-    current_spell = players[current_player].spells[best_spell*2 + 1];
+  setCastAmount(0);
+  m_spells[0] = 12 + Misc::getRand(10);
+  orderTable(m_spellCount, m_spells);
+  int bestSpell(0);
+  while (bestSpell < m_spellCount) {
+    setSelectedSpell(bestSpell);
     // "cast" the spell... each casting routine has the CPU AI code for that spell built into it.
     // if no good square was found, then go to the next spell
-    target_square_found = 0;
-    if (current_spell != 0) {
-      target_square_found = 1;
-      set_current_spell_chance();
-      CHAOS_SPELLS.pSpellDataTable[current_spell]->pFunc();
-
+    m_targetSquareFound = false;
+    int currentSpellId(getSelectedSpellId());
+    if (currentSpellId != 0) {
+      m_targetSquareFound = true;
+      s_spellData[currentSpellId].spellFunction();
     }
-    
-    if (target_square_found) {
-      
+    if (m_targetSquareFound) {
       // spell was cast succesfully
-      if (current_spell != 0x1) {
-        // spell used (if not disblv)
-        players[current_player].spells[best_spell*2 + 1] = 0;
-      }
-//      break;
+      removeSelectedSpell();
       return;
-    } else {
-      best_spell++;
+    }
+    else {
+      bestSpell++;
     }
   }
-  
-#endif
 }
 
 void Wizard::printNameSpell(void) 

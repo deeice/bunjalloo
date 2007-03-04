@@ -562,12 +562,12 @@ int Arena::applyPositionModifier(int square, int index) {
   getXY(square,x,y);
   
   y = y + s_surroundTable[index][0];
-  if (y == 0 || y == 0xB) {
+  if (y == 0 or y == 0xB) {
     return 0;
   }
   
   x = x + s_surroundTable[index][1];
-  if (x == 0 || x == 0x10) {
+  if (x == 0 or x == 0x10) {
     return 0;
   }
   
@@ -597,7 +597,8 @@ bool Arena::isTreeAdjacent(int spellId) const
       continue;
     }
     lookAt--;
-    if (m_arena[0][lookAt] < SPELL_MAGIC_WOOD || m_arena[0][lookAt] >= SPELL_MAGIC_CASTLE) {
+    if (m_arena[0][lookAt] < SPELL_MAGIC_WOOD 
+        or m_arena[0][lookAt] >= SPELL_MAGIC_CASTLE) {
       // not a wood
       continue;
     } else {
@@ -637,5 +638,32 @@ void Arena::targetXY(int & x, int & y)
 bool Arena::isBlockedLOS() const
 {
   return Line::doLine(Line::SIGHT);
+}
+
+void Arena::drawSpellcastFrame(int x, int y, int frame)
+{
+  setPalette8(x*2, y*2, 0);
+  drawGfx8(_binary_spell_raw_start, _binary_spell_map_start, x*2, y*2, frame);
+}
+
+void Arena::creatureSpellSucceeds() 
+{
+  Wizard & player(Wizard::getCurrentPlayer());
+  int currentSpellId(player.getSelectedSpellId());
+  if (!(currentSpellId == SPELL_GOOEY_BLOB 
+        or currentSpellId == SPELL_MAGIC_FIRE)) 
+  {
+    // whatever is in this square, place in arena 5...
+    m_arena[5][m_targetIndex] = m_arena[0][m_targetIndex];
+  }
+
+  m_arena[0][m_targetIndex] = currentSpellId;
+  m_arena[1][m_targetIndex] = 1;
+  m_arena[2][m_targetIndex] = 0;
+  m_arena[3][m_targetIndex] = currentPlayer();
+  if (player.illusionCast()) {
+    // set bit 4 - illusion
+    m_arena[3][m_targetIndex] |= 0x10;
+  }
 }
 

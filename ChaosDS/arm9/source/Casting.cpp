@@ -209,6 +209,12 @@ void Casting::printSuccessStatus()
   }
   delay(30);
 }
+
+bool Casting::spellSuccess()
+{
+  return s_castSuccess;
+}
+
 void Casting::setSpellSuccess() 
 {
   s_castSuccess = false;
@@ -230,6 +236,13 @@ void Casting::setSpellSuccess()
 #endif
 }
 
+static const u8 s_spellframetable[0x12] = {
+  0, 1, 2, 3,
+  0, 1, 2, 3,
+  0, 1, 2, 3,
+  4, 5, 6, 7,
+  8, 8,
+};
 // do the spell animation between start_index and target_index
 void Casting::spellAnimation() 
 {
@@ -253,8 +266,9 @@ void Casting::spellAnimation()
   x--;
   y--;
   /*PlaySoundFX(SND_SPELLSUCCESS);*/
+  Arena & arena(Arena::instance());
   for (int i = 0; i < 18; i++) {
     swiWaitForVBlank();
-    // draw_spellcast_frame(x, y, spellframetable[i]);
+    arena.drawSpellcastFrame(x, y, s_spellframetable[i]);
   }
 }
