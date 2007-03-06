@@ -2,7 +2,10 @@
 #define Wizard_h_seen
 
 struct SpellData;
-class Wizard
+class WizardCPU;
+#include "Computer.h"
+
+class Wizard : public Computer
 {
 
   public:
@@ -99,6 +102,10 @@ class Wizard
 
     //! @returns the total number of spells available.
     int spellCount() const;
+    inline unsigned char * spellArray()
+    {
+      return m_spells;
+    }
 
     //! @returns the ability flag.
     int getAbility() const;
@@ -126,7 +133,6 @@ class Wizard
     void waitForKeypress();
     void updateCreatureCount();
 
-    void doAISpell();
 
     inline int castAmount() const
     {
@@ -138,13 +144,22 @@ class Wizard
 
     bool castAllowed() const;
 
-#include "WizardCPU.h"
-
     enum Player_t {
       PLYR_HUMAN=0, //!< indicates that is human
       PLYR_CPU      //!< indicates that is CPU controlled
     };
 
+    void printNameSpell();
+    inline int timid() { return m_timid; }
+
+    inline int priorityOffset() const
+    {
+      return 0;
+    }
+
+    // Computer routines
+    virtual void aiCastCreature();
+    virtual void doAISpell();
 
   private:
     char m_name[12];
@@ -169,11 +184,11 @@ class Wizard
     //! player id - used for colouring in
     unsigned char m_id;
     unsigned char m_castAmount; // temp_cast_amount in original code.
-    bool m_targetSquareFound; // for cpu casting, has the target been found
+    Computer * m_computer;
 
     Wizard();
+    ~Wizard();
     void reset();
-    void printNameSpell(void);
     
     static Wizard s_players[8];
 	

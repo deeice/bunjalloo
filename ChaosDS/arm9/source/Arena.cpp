@@ -44,6 +44,25 @@ static const signed char s_surroundTable[8][2] = {
   { 0,-1}
 };
 
+// attack preference array...
+// taken from c6d4
+// except troll, which is new
+static const char s_attackPref[48] = {
+  0x08/*cobra*/,    0x0b/*wolf*/,    0x07/*goblin*/,    0x09/*croc*/,
+  0x09/*troll*/,    0x09/*faun*/,    0x0f/*lion*/,      0x0e/*elf*/,
+  0x06/*orc*/,      0x0e/*bear*/,    0x0b/*goril*/,     0x0a/*ogre*/,
+  0x0d/*hydra*/,    0x09/*rat*/,     0x10/*giant*/,     0x0b/*horse*/,
+  0x0f/*unicor*/,   0x0f/*cent*/,    0x0f/*peg*/,       0x10/*gryph*/,
+  0x15/*manti*/,    0x0f/*bat*/,     0x19/*green*/,     0x19/*red*/,
+  0x1b/*gold*/,     0x11/*harpy*/,   0x12/*eagle*/,     0x13/*vamp*/,
+  0x0d/*ghost*/,    0x09/*spectre*/, 0x0b/*wraith*/,    0x07/*skeleton*/,
+  0x04/*zombie*/,   0x04/*blob*/,    0x04/*fire*/,      0x00/*wood*/,
+  0x01/*shadow*/,   0x00/*castle*/,  0x00/*cit*/,       0x00/*wall*/,
+  /*wizards*/
+  0x09,0x09,0x09,0x09,0x09,0x09,0x09,0x09,};
+  
+
+
 static const int X_LIMIT(31);
 const int Arena::HEIGHT(23);
 const int Arena::WIZARD_INDEX(0x2A);
@@ -667,3 +686,54 @@ void Arena::creatureSpellSucceeds()
   }
 }
 
+int Arena::getWizardIndex(int id) const
+{
+  int wizardId(id+WIZARD_INDEX);
+  for (int i = 0; i < ARENA_SIZE; i++) {
+    if ( (m_arena[0][i] == wizardId) 
+        or (m_arena[4][i] == wizardId) ) 
+    {
+      return i;
+    }
+  }
+  return -1;
+}
+
+int Arena::getOwner(int index) const
+{
+  return m_arena[3][index] & 7; 
+}
+
+// check the square in index to see if it contains a live enemy creature
+// based on code at c67a
+bool Arena::containsEnemy(int index)
+{
+  int creature = m_arena[0][index];
+  if (creature < 2) {
+    return 0; // jr c6d2 - was if creature == 0 jump, but that is buggy
+  }
+  
+  if (m_arena[2][index] == 4) {
+    // frame 4 showing, i.e. dead
+    return 0; // jr c6d2
+  }
+  
+  if (getOwner(index) == m_currentPlayer) {
+    return 0; // jr c6d2
+  }
+  
+  // got to here? contains a living enemy creature....
+  // get the "creature attack preference" value
+  int range = getDistance(index, m_startIndex);
+  int pref = s_attackPref[creature-2] + 4;
+
+  // pref += var_cc55; // no idea what is stored here... 0x60 for lightning
+  // priority_offset .... a big fat global :-/
+  // usually 0, but can be other values when we care about all creatures
+  pref += Wizard::getCurrentPlayer().priorityOffset();
+  if ( (pref - range) < 0) {
+    return 0;
+  } 
+  
+  return (pref - range);
+}

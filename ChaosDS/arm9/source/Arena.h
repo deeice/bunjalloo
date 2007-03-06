@@ -25,6 +25,8 @@ class Arena
      */
     static Arena & instance();
 
+    static void getXY(int index, int & x, int & y);
+
     /*! @brief Reset the arena map values.  */
     void reset();
 
@@ -170,6 +172,17 @@ class Arena
 
     void drawSpellcastFrame(int x, int y, int frame);
     void creatureSpellSucceeds();
+
+    bool containsEnemy(int index);
+    int getOwner(int index) const;
+    int getWizardIndex(int id) const;
+
+    inline int startIndex() const { return m_startIndex; }
+    inline int wizardIndex() const { return m_wizardIndex; }
+    inline int targetIndex() const { return m_targetIndex; }
+    inline void setStartIndex(int i) { m_startIndex = i; }
+    inline void setWizardIndex(int i) { m_wizardIndex = i; }
+    inline void setTargetIndex(int i) { m_targetIndex = i; }
     
   private:
     nds::Background * m_bg;
@@ -210,7 +223,6 @@ class Arena
     unsigned char m_arena[6][160];  
 
     // helper fns for the index handling
-    static void getXY(int index, int & x, int & y);
     static void getXY2(int index, int & x, int & y);
     
     Arena();

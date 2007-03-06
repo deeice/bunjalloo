@@ -215,7 +215,7 @@ bool Casting::spellSuccess()
   return s_castSuccess;
 }
 
-void Casting::setSpellSuccess() 
+bool Casting::setSpellSuccess() 
 {
   s_castSuccess = false;
   Wizard & player(Wizard::getCurrentPlayer());
@@ -234,6 +234,7 @@ void Casting::setSpellSuccess()
 #ifdef DEBUG
   s_castSuccess = true;
 #endif
+  return s_castSuccess;
 }
 
 static const u8 s_spellframetable[0x12] = {

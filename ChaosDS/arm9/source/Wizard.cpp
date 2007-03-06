@@ -9,6 +9,7 @@
 #include "Text16.h"
 #include "ExamineSquare.h"
 #include "WizardData.h"
+#include "WizardCPU.h"
 #include "SpellData.h"
 
 using namespace Misc;
@@ -33,9 +34,14 @@ const unsigned short int  s_chaosColours[] = {
   RGB5(20,20,0), // mustard
 };
 
-Wizard::Wizard()
+Wizard::Wizard():m_computer(new WizardCPU(*this))
 {
   reset();
+}
+
+Wizard::~Wizard()
+{
+  delete m_computer;
 }
 
 void Wizard::reset()
@@ -578,59 +584,7 @@ void Wizard::updateCreatureCount()
   m_timid = 0x14;
 }
 
-void Wizard::doAISpell()
-{
-  /*
-    set spell 0 priorty = 0x0c + GetRand(10) (I imagine this is in case Disbelieve was top priority?)
-    order the spell list by priority
-    best spell = 0
-    while (best spell < spell list length) {
-      select the best spell 
-      select the best square for this spell
-      if no square is good
-        best spell ++
-      else
-        break
-    }
-    
-    if a spell has been chosen...
-      cast spell at chosen square
-      remove casted spell from list
-    
-    move on to next player...
-  */
-  
-  if (isDead()) { 
-    //IS_WIZARD_DEAD(players[current_player].modifier_flag)
-    return;
-  }
-  
-  setCastAmount(0);
-  m_spells[0] = 12 + Misc::getRand(10);
-  orderTable(m_spellCount, m_spells);
-  int bestSpell(0);
-  while (bestSpell < m_spellCount) {
-    setSelectedSpell(bestSpell);
-    // "cast" the spell... each casting routine has the CPU AI code for that spell built into it.
-    // if no good square was found, then go to the next spell
-    m_targetSquareFound = false;
-    int currentSpellId(getSelectedSpellId());
-    if (currentSpellId != 0) {
-      m_targetSquareFound = true;
-      s_spellData[currentSpellId].spellFunction();
-    }
-    if (m_targetSquareFound) {
-      // spell was cast succesfully
-      removeSelectedSpell();
-      return;
-    }
-    else {
-      bestSpell++;
-    }
-  }
-}
-
-void Wizard::printNameSpell(void) 
+void Wizard::printNameSpell() 
 {
   // print player name, the spell and the range - code from 967a
   Arena & arena(Arena::instance());
@@ -705,9 +659,7 @@ void Wizard::setupHumanPlayerCast()
   printNameSpell();
   
   waitForKeypress();
-#if 0
-  redraw_cursor();
-#endif
+  Arena::instance().enableCursor(true);
 
   // clear message display
   Text16::instance().clearMessage();
@@ -766,4 +718,14 @@ bool Wizard::castAllowed() const
   }
   // call spell anim, etc...
   return true;
+}
+
+void Wizard::aiCastCreature()
+{ 
+  m_computer->aiCastCreature(); 
+}
+
+void Wizard::doAISpell()
+{
+  m_computer->doAISpell(); 
 }
