@@ -18,7 +18,7 @@ class Arena
      * @param square1 the start index, equal to x + y * 16
      * @param square1 the start index.
      */
-    static int getDistance(int square1, int square2);
+    static int distance(int square1, int square2);
     
     /*! @brief Get the arena.
      * @returns singleton instance of an Arena.
@@ -58,7 +58,7 @@ class Arena
     /*! @brief set the number of players
      * @param p the number of players (2-8)
      */
-    void players(int p);
+    void setPlayers(int p);
 
     /*! @brief fetch the index of the current player.
      * @returns the index of the current player
@@ -67,7 +67,7 @@ class Arena
     /*! @brief Set the current player index.
      * @param cp the index of the current player
      */
-    void currentPlayer(int cp);
+    void setCurrentPlayer(int cp);
 
     /*! @brief set a square to contain the given wizard id
      * @param square the index of the arena square to set
@@ -128,9 +128,9 @@ class Arena
     void clearSquare(int x, int y);
 
     //! return the creature here
-    int getCursorContents() const;
-    void getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const;
-    void getCursorContents(int & theCreature, int & theOneUnderneath, 
+    int cursorContents() const;
+    void cursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const;
+    void cursorContents(int & theCreature, int & theOneUnderneath, 
         int & theFlags, int & theFrame) const;
 
     //! Reset the animation details in arena 1 and 2 based upon the info in arena 0
@@ -138,7 +138,7 @@ class Arena
 
     void setSpellAt(int x, int y, int spellID);
 
-    inline int get(int i, int j)
+    inline int at(int i, int j)
     {
       return m_arena[i][j];
     }
@@ -149,7 +149,7 @@ class Arena
     // set the target information for the current player
     void setCurrentPlayerIndex();
 
-    void getCurrentPlayerXY(int & x, int &y);
+    void currentPlayerXY(int & x, int &y);
     
     //! Needs to be public to animate arena
     void drawCreatures();
@@ -174,8 +174,13 @@ class Arena
     void creatureSpellSucceeds();
 
     bool containsEnemy(int index);
-    int getOwner(int index) const;
-    int getWizardIndex(int id) const;
+    int owner(int index) const;
+    //! fixme; nothing to do with the m_wizardIndex below!
+    int wizardIndex(int id) const;
+    int wizardId(int index) const;
+    int attackPref(int c) const;
+    bool isUndead(int index) const;
+
 
     inline int startIndex() const { return m_startIndex; }
     inline int wizardIndex() const { return m_wizardIndex; }
@@ -183,6 +188,9 @@ class Arena
     inline void setStartIndex(int i) { m_startIndex = i; }
     inline void setWizardIndex(int i) { m_wizardIndex = i; }
     inline void setTargetIndex(int i) { m_targetIndex = i; }
+
+    // start the next round (what is it doing in arena?)
+    void nextRound();
     
   private:
     nds::Background * m_bg;
@@ -235,6 +243,14 @@ class Arena
     // from a square to one of its surroundings
     // returns index+1, if index is 0 it is out of bounds
     static int applyPositionModifier(int square, int index);
+
+    /** called at the end of the moves round
+     * resets the movement flags so that the creatures can move next time
+     */
+    void unsetMovedFlags();
+    void spreadFireBlob();
+    void destroyCastles();
+    void randomNewSpell();
 };
 
 #endif

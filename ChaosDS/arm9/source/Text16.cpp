@@ -52,7 +52,7 @@ void Text16::setColour(int pal, int col) {
   p[TEXT_PALETTE_ENTRY] = col;
 }
 
-unsigned short Text16::getColour(int pal) const {
+unsigned short Text16::colour(int pal) const {
   Palette p(m_screen, pal);
   return p[TEXT_PALETTE_ENTRY];
 }

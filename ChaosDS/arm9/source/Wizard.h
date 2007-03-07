@@ -15,15 +15,19 @@ class Wizard : public Computer
     /*! @brief create some default wizards for all players */
     static void createDefaultWizards();
     /*! @brief get the array of player instances */
-    static Wizard * getPlayers();
+    static Wizard * players();
+
+    /*! @brief get a player */
+    static Wizard & player(int index);
+
     /*! @breif get the current player wizard.
      * @returns a reference to the current player
      */
-    static Wizard & getCurrentPlayer();
+    static Wizard & currentPlayer();
     /*! @brief initialise the player wizards to the default values. */
     static void initialisePlayers();
     /*! @brief get the next wizard that is not CPU controlled. */
-    static int getNextHuman(int startIndex=0);
+    static int nextHuman(int startIndex=0);
 
     /*! @brief draw a wizard glyph at the given tile position.
      * @param x the x tile position.
@@ -43,16 +47,13 @@ class Wizard : public Computer
      */
     void updateColour();
 
-    //! @returns the colour value for this wizard
-    unsigned short getColour();
-
     /*! @brief Print the wizard name at x, y, using the given palette.
      * if no palette is given, then use the wizard id
      * @param x the tile x position
      * @param y the tile y position
      * @param pal the palette index to use
      */
-    void nameAt(int x, int y, int pal=-1) const;
+    void printNameAt(int x, int y, int pal=-1) const;
     //! print the CPU level or human at the given tile coords.
     void printLevelAt(int x, int y) const;
 
@@ -68,17 +69,21 @@ class Wizard : public Computer
     //! @returns the current level. 0 is human.
     int level() const;
     //! set the current level. 0 is human.
-    void level(int);
+    void setLevel(int);
 
+    //! @returns the "real" colour of this wizard in RGB format.
+    unsigned short colourRGB() const;
+    
     //! @returns the colour index of this wizard.
     int colour() const;
+
     //! set the colour index of this wizard.
-    void colour(int );
+    void setColour(int );
 
     //! @returns the image index of this wizard.
     int image() const;
     //! set the image index of this wizard.
-    void image(int);
+    void setImage(int);
 
     //! @returns true if this wizard is CPU controlled.
     bool isCpu() const;
@@ -90,15 +95,15 @@ class Wizard : public Computer
     void removeNullSpells();
 
     //! @returns the name of this wizard.
-    const char * const name();
+    const char * const name() const;
 
     //! @returns pointer to the spell at the given index
     //! @param index the index of the spell, 0-19
-    const SpellData * getSpell(int index) const;
+    const SpellData * spell(int index) const;
 
     //! @returns the spell id at the given index
     //! @param index the index of the spell, 0-19
-    const int getSpellId(int index) const;
+    const int spellId(int index) const;
 
     //! @returns the total number of spells available.
     int spellCount() const;
@@ -108,7 +113,7 @@ class Wizard : public Computer
     }
 
     //! @returns the ability flag.
-    int getAbility() const;
+    int ability() const;
 
     //! helper function for the examine screen
     void displayData() const;
@@ -117,14 +122,15 @@ class Wizard : public Computer
      * @param index the spell index in the list
      */
     void setSelectedSpell(int index);
+    int selectedSpellId() const;
     //! set no spell...
     void removeSelectedSpell();
-    int getSelectedSpellId() const;
+
     void setupHumanPlayerCast();
     /*! @brief Set if the spell to be cast is an illusion.
      * @param isIllusion true for illusion spells.
      */
-    void setIllusion(bool isIllusion);
+    void setIllusionCast(bool isIllusion);
     inline bool illusionCast()const
     {
       return m_illusionCast;
@@ -142,20 +148,19 @@ class Wizard : public Computer
       m_castAmount = ca;
     }
 
-    bool castAllowed() const;
+    bool isCastAllowed() const;
 
     enum Player_t {
       PLYR_HUMAN=0, //!< indicates that is human
       PLYR_CPU      //!< indicates that is CPU controlled
     };
 
-    void printNameSpell();
-    inline int timid() { return m_timid; }
+    void printNameSpell() const;
+    inline int timid() const { return m_timid; }
 
-    inline int priorityOffset() const
-    {
-      return 0;
-    }
+    inline int priorityOffset() const { return 0; }
+
+    inline int id() const { return m_id; }
 
     // Computer routines
     virtual void aiCastCreature();

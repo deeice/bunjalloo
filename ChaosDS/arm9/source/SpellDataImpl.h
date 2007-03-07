@@ -11,7 +11,8 @@ public:
   /*! @brief get the adjusted casting chance.
    * @returns the casting chance taking world chaos and player ability into account
    */
-  int getCastChance() const;
+  int realCastChance() const;
+
 private:
-  void getFullText(char * str) const;
+  void fullText(char * str) const;
 // }

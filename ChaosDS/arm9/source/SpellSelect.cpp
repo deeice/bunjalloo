@@ -32,7 +32,7 @@ void SpellSelect::show()
 {
   char str[30];
   
-  Wizard & currentPlayer(Wizard::getCurrentPlayer());
+  Wizard & currentPlayer(Wizard::currentPlayer());
   // need to sort out the players spells here...
   // should remove all 0 spells and update spell count accordingly
   currentPlayer.removeNullSpells();
@@ -66,14 +66,14 @@ void SpellSelect::show()
 void SpellSelect::animate()
 {
   int spellIndex = m_hilightItem+m_topIndex;
-  const SpellData * currentSpell = Wizard::getCurrentPlayer().getSpell(spellIndex);
-  int chance = currentSpell->getCastChance()+1;
+  const SpellData * currentSpell = Wizard::currentPlayer().spell(spellIndex);
+  int chance = currentSpell->realCastChance()+1;
   
   Color c(s_castingChancePalette[chance/2]);
   Graphics::instance().animateSelection(10, c);
 }
 
-CurrentScreen_t SpellSelect::getId() const
+CurrentScreen_t SpellSelect::screenId() const
 {
   return SCR_SELECT_SPELL;
 }
@@ -129,11 +129,11 @@ void SpellSelect::listSpells() {
   // set the first spell index to the spell at the top of the list
   int spellIndex(m_topIndex);
   int y(3);
-  Wizard & currentPlayer(Wizard::getCurrentPlayer());
+  Wizard & currentPlayer(Wizard::currentPlayer());
   while (loop < 8 and spellIndex < 20) 
   {
     //int index(1+spellIndex*2);
-    const SpellData * spell = currentPlayer.getSpell(spellIndex);
+    const SpellData * spell = currentPlayer.spell(spellIndex);
     if (spell != 0) {
       spell->printName(1,y);
       // print_spell_name(players[current_player].spells[index], 1, y);
@@ -196,7 +196,7 @@ void SpellSelect::up(void) {
 }
 
 void SpellSelect::down(void) {
-  int spellCount = Wizard::getCurrentPlayer().spellCount();
+  int spellCount = Wizard::currentPlayer().spellCount();
   if ( (m_topIndex + 7) >= spellCount) {
     // no need to scroll
     deselectSpell();
@@ -229,7 +229,7 @@ void SpellSelect::left(void) {
 void SpellSelect::right(void) {
   // go to end of list
   deselectSpell();
-  int spellCount = Wizard::getCurrentPlayer().spellCount();
+  int spellCount = Wizard::currentPlayer().spellCount();
   if (  spellCount < 8) {
     m_hilightItem = spellCount-1;
   } else {
@@ -243,24 +243,24 @@ void SpellSelect::right(void) {
 void SpellSelect::r(void) {
   Arena & arena(Arena::instance());
   arena.setCursor(15,0);
-  arena.setSpellAt(15, 0, Wizard::getCurrentPlayer().getSpellId(m_hilightItem+m_topIndex));
+  arena.setSpellAt(15, 0, Wizard::currentPlayer().spellId(m_hilightItem+m_topIndex));
   Video::instance().fade();
   SpellSelect * spellSelect(new SpellSelect());
   spellSelect->m_hilightItem = m_hilightItem;
   spellSelect->m_topIndex = m_topIndex;
   ExamineSquare * examineScreen(new ExamineSquare(spellSelect));
   examineScreen->showCastChance(true);
-  GameState::instance().nextScreen(examineScreen);
+  GameState::instance().setNextScreen(examineScreen);
 }
 
 
 void SpellSelect::a(void) {
   
   // store the spell...
-  Wizard & player(Wizard::getCurrentPlayer());
+  Wizard & player(Wizard::currentPlayer());
   int currentSpellIndex(m_hilightItem+m_topIndex);
   player.setSelectedSpell(currentSpellIndex);
-  int spellId(player.getSpellId(currentSpellIndex));
+  int spellId(player.spellId(currentSpellIndex));
   // check for illusion...
   if (spellId < SPELL_KING_COBRA or spellId >= SPELL_GOOEY_BLOB) 
   {
@@ -268,12 +268,12 @@ void SpellSelect::a(void) {
     b();
     return;
   }
-  GameState::instance().nextScreen(new IllusionPicker());
+  GameState::instance().setNextScreen(new IllusionPicker());
 }
 
 void SpellSelect::b(void) {
   Video::instance().fade();
-  GameState::instance().nextScreen(new GameMenu());
+  GameState::instance().setNextScreen(new GameMenu());
 }
 
 
@@ -282,11 +282,11 @@ void SpellSelect::selectSpell() {
   
   // get the actual spell id index
   int spellIndex = m_hilightItem+m_topIndex;
-  const SpellData * currentSpell = Wizard::getCurrentPlayer().getSpell(spellIndex);
+  const SpellData * currentSpell = Wizard::currentPlayer().spell(spellIndex);
   
   currentSpell->printName(1,3+m_hilightItem*2, 10);
   
-  int chance = currentSpell->getCastChance() + 1;
+  int chance = currentSpell->realCastChance() + 1;
   Text16 & text16 = Text16::instance();
   text16.print("CASTING", 18,14, 2);
   text16.print("CHANCE=    ", 18,16, 2);
@@ -308,7 +308,7 @@ void SpellSelect::deselectSpell(int item) {
   
   // get the actual spell id index
   int spellIndex = item+m_topIndex;
-  const SpellData * spell = Wizard::getCurrentPlayer().getSpell(spellIndex);
+  const SpellData * spell = Wizard::currentPlayer().spell(spellIndex);
   if (spell)
     spell->printName(1,3+(item*2));
 }

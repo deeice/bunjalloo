@@ -9,9 +9,9 @@ void SpellData::printName(int x, int y, int pal) const
 {
   char str[30];
   // set_current_spell_chance();
-  int chance = getCastChance();
+  int chance = realCastChance();
   chance++;
-  getFullText(str);
+  fullText(str);
   Text16 & text16 = Text16::instance();
   if (pal == -1)
     pal = chance/2;
@@ -20,12 +20,12 @@ void SpellData::printName(int x, int y, int pal) const
 }
 
 // 92f9
-int SpellData::getCastChance() const
+int SpellData::realCastChance() const
 {
   // sets the current spell chance based on default value, world chaos and wizard ability
   // just set to default for now
   int chance = castChance;
-  int worldChaos = Casting::getWorldChaos();
+  int worldChaos = Casting::worldChaos();
   if (worldChaos > 0 and chaosRating > 0) {
     chance += (worldChaos)/4;
   } 
@@ -33,7 +33,7 @@ int SpellData::getCastChance() const
     chance += (-worldChaos)/4;
   }
   // 9353 - add ability
-  chance += Wizard::getCurrentPlayer().getAbility();
+  chance += Wizard::currentPlayer().ability();
   
   if (chance >= 10) {
     chance = 9;
@@ -45,7 +45,7 @@ int SpellData::getCastChance() const
 }
 
 // generate_spell_string
-void SpellData::getFullText(char * str) const
+void SpellData::fullText(char * str) const
 {
   char chaoslvl = '-';
   if (this->chaosRating > 0)
@@ -56,3 +56,4 @@ void SpellData::getFullText(char * str) const
   str[1] = 0;
   strcat(str,this->spellName);
 }
+

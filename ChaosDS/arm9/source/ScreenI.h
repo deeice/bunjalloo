@@ -29,7 +29,7 @@ class ScreenI
     //! Perform any animation tasks.
     virtual void animate() = 0;
     //! Fetch the screen identifier
-    virtual CurrentScreen_t getId() const = 0;
+    virtual CurrentScreen_t screenId() const = 0;
     //! Handle keypad presses
     virtual void handleKeys()=0;
 };

@@ -20,7 +20,7 @@ int main(void) {
   BG_PALETTE_SUB[255] = RGB15(31,31,31);
   consoleInitDefault(bg.mapData(), bg.tileData(),16);
 
-  GameState::instance().nextScreen(new Splash());
+  GameState::instance().setNextScreen(new Splash());
   while(1) {
     scanKeys();
     swiWaitForVBlank();

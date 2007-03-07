@@ -27,12 +27,12 @@ void GameMenu::show()
   Graphics::instance().clearPalettes();
 
   text16.setColour(12, Color(30,31,0));
-  Wizard::getCurrentPlayer().nameAt(4,2,12);
+  Wizard::currentPlayer().printNameAt(4,2,12);
   
   arena.decorativeBorder(15, Color(31,0,0),Color(31,31,0)); 
   
   // draw chaos/law val - colour 13
-  int worldChaos = Casting::getWorldChaos();
+  int worldChaos = Casting::worldChaos();
   if (worldChaos != 0) {
     int x = MENU_XPOS;
     text16.setColour(13, Color(31,30,0));
@@ -82,7 +82,7 @@ void GameMenu::animate()
 {
 }
 
-CurrentScreen_t GameMenu::getId() const
+CurrentScreen_t GameMenu::screenId() const
 {
   return SCR_GAME_MENU;
 }
@@ -131,13 +131,13 @@ void GameMenu::down() {
 void GameMenu::continueGame() 
 {
   Video::instance().fade();
-  int nextPlayer = Wizard::getNextHuman(Arena::instance().currentPlayer());
+  int nextPlayer = Wizard::nextHuman(Arena::instance().currentPlayer());
   if (nextPlayer == 9) {
     // continue game after spell selection... this is roughly at 95c7
-    GameState::instance().nextScreen(new Casting());
+    GameState::instance().setNextScreen(new Casting());
   } else {
-    Arena::instance().currentPlayer(nextPlayer);
-    GameState::instance().nextScreen(new GameMenu());
+    Arena::instance().setCurrentPlayer(nextPlayer);
+    GameState::instance().setNextScreen(new GameMenu());
   }
 }
 
@@ -149,13 +149,13 @@ void GameMenu::a() {
     case 0: 
       // view spells
       Video::instance().fade();
-      GameState::instance().nextScreen(new SpellSelect());
+      GameState::instance().setNextScreen(new SpellSelect());
       // show_spell_screen();
       break;
     case 1: 
       // view arena
       Video::instance().fade();
-      GameState::instance().nextScreen(new ExamineBoard());
+      GameState::instance().setNextScreen(new ExamineBoard());
       break;
     case 2: 
       // continue game

@@ -23,8 +23,8 @@ void IllusionPicker::handleKeys()
   bool choiceMade(false);
 
   if (keysSlow & KEY_A) {
-    Wizard & player(Wizard::getCurrentPlayer());
-    player.setIllusion(true);
+    Wizard & player(Wizard::currentPlayer());
+    player.setIllusionCast(true);
     choiceMade = true;
   } 
   else if (keysSlow & KEY_B) {

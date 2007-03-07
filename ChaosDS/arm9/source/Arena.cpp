@@ -239,7 +239,7 @@ int Arena::players() const
 {
   return m_playerCount;
 }
-void Arena::players(int p)
+void Arena::setPlayers(int p)
 {
   m_playerCount = p;
 }
@@ -247,7 +247,7 @@ int Arena::currentPlayer() const
 {
   return m_currentPlayer;
 }
-void Arena::currentPlayer(int p)
+void Arena::setCurrentPlayer(int p)
 {
   m_currentPlayer = p;
 }
@@ -332,7 +332,7 @@ void Arena::setBorderColour(unsigned char playerid) {
   // set the border colour based on the player colour
   if (playerid < 8) 
   {
-    Color playerColour(Wizard::getPlayers()[playerid].getColour());
+    Color playerColour(Wizard::player(playerid).colourRGB());
     Color playerColourDark( playerColour.red()-8,
                             playerColour.green()-8,
                             playerColour.blue()-8);
@@ -355,7 +355,7 @@ void Arena::getXY(int index, int & x, int & y)
   y = (y/2) + 1;
 }
 
-void Arena::getCurrentPlayerXY(int & x, int &y)
+void Arena::currentPlayerXY(int & x, int &y)
 {
   getXY(m_wizardIndex, x, y);
   x -= 1;
@@ -382,7 +382,7 @@ void Arena::drawCreatures(void) {
       } else {
         int playerIndex = m_arena[0][i]-WIZARD_INDEX;
         int frame = m_arena[2][i];
-        Wizard::getPlayers()[playerIndex].draw(x-1,y-1, frame);
+        Wizard::player(playerIndex).draw(x-1,y-1, frame);
       }
     } 
     else {
@@ -406,7 +406,7 @@ void Arena::display() {
   gameBorder();
   // draw all the creatures in the arena array
   drawCreatures();
-  Wizard * players = Wizard::getPlayers();
+  Wizard * players = Wizard::players();
   using std::for_each;
   using std::mem_fun_ref;
   for_each(players, players+m_playerCount, mem_fun_ref(&Wizard::updateColour));
@@ -480,18 +480,18 @@ void Arena::cursorRight()
     setCursor(m_cursorPosition.x+1,m_cursorPosition.y);
 }
 
-int Arena::getCursorContents() const
+int Arena::cursorContents() const
 {
   return m_arena[0][m_cursorPosition.x+m_cursorPosition.y*16];
 }
-void Arena::getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const
+void Arena::cursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const
 {
   int index(m_cursorPosition.x+m_cursorPosition.y*16);
   theCreature      = m_arena[0][index];
   theOneUnderneath = m_arena[4][index];
   theFlags         = m_arena[3][index];
 }
-void Arena::getCursorContents(int & theCreature, int & theOneUnderneath, int & theFlags, int & theFrame) const
+void Arena::cursorContents(int & theCreature, int & theOneUnderneath, int & theFlags, int & theFrame) const
 {
 
   int index(m_cursorPosition.x+m_cursorPosition.y*16);
@@ -548,7 +548,7 @@ void Arena::setCurrentIndex(int index) {
   m_targetIndex = index;
 }
 
-int Arena::getDistance(int square1, int square2) {
+int Arena::distance(int square1, int square2) {
   // based on code at 9786 and 0xbeef
   int x1, y1, x2, y2;
   getXY(square1, x1, y1);
@@ -566,9 +566,9 @@ int Arena::getDistance(int square1, int square2) {
 
 bool Arena::isSpellInRange(int selectedSpellId) const
 {
-  int distance = getDistance(m_wizardIndex, m_targetIndex);
+  int dist= distance(m_wizardIndex, m_targetIndex);
   int range = s_spellData[selectedSpellId].castRange;
-  if (range >= distance) {
+  if (range >= dist) {
     return 1;
   }
   return 0;
@@ -667,8 +667,8 @@ void Arena::drawSpellcastFrame(int x, int y, int frame)
 
 void Arena::creatureSpellSucceeds() 
 {
-  Wizard & player(Wizard::getCurrentPlayer());
-  int currentSpellId(player.getSelectedSpellId());
+  Wizard & player(Wizard::currentPlayer());
+  int currentSpellId(player.selectedSpellId());
   if (!(currentSpellId == SPELL_GOOEY_BLOB 
         or currentSpellId == SPELL_MAGIC_FIRE)) 
   {
@@ -686,7 +686,17 @@ void Arena::creatureSpellSucceeds()
   }
 }
 
-int Arena::getWizardIndex(int id) const
+int Arena::wizardId(int index) const
+{
+  // check i = 0 and i = 4
+  for (int i = 0; i <= 4; i+= 4) {
+    if (m_arena[i][index] >= WIZARD_INDEX) {
+      return m_arena[i][index]-WIZARD_INDEX;
+    }
+  }
+  return -1;
+}
+int Arena::wizardIndex(int id) const
 {
   int wizardId(id+WIZARD_INDEX);
   for (int i = 0; i < ARENA_SIZE; i++) {
@@ -699,7 +709,7 @@ int Arena::getWizardIndex(int id) const
   return -1;
 }
 
-int Arena::getOwner(int index) const
+int Arena::owner(int index) const
 {
   return m_arena[3][index] & 7; 
 }
@@ -718,22 +728,59 @@ bool Arena::containsEnemy(int index)
     return 0; // jr c6d2
   }
   
-  if (getOwner(index) == m_currentPlayer) {
+  if (owner(index) == m_currentPlayer) {
     return 0; // jr c6d2
   }
   
   // got to here? contains a living enemy creature....
   // get the "creature attack preference" value
-  int range = getDistance(index, m_startIndex);
+  int range = distance(index, m_startIndex);
   int pref = s_attackPref[creature-2] + 4;
 
   // pref += var_cc55; // no idea what is stored here... 0x60 for lightning
   // priority_offset .... a big fat global :-/
   // usually 0, but can be other values when we care about all creatures
-  pref += Wizard::getCurrentPlayer().priorityOffset();
+  pref += Wizard::currentPlayer().priorityOffset();
   if ( (pref - range) < 0) {
     return 0;
   } 
   
   return (pref - range);
 }
+int Arena::attackPref(int c) const
+{
+  return s_attackPref[c];
+}
+bool Arena::isUndead(int index) const
+{
+  return ( (m_arena[3][index]&(1<<6)) or 
+      (m_arena[0][index] >= SPELL_VAMPIRE and m_arena[0][index] <= SPELL_ZOMBIE ) )   ;
+}
+
+void Arena::nextRound()
+{
+  unsetMovedFlags();
+  m_roundNumber++;
+  Text16::instance().clearMessage();
+  m_currentPlayer = 0;
+  spreadFireBlob();
+  destroyCastles();
+  randomNewSpell();
+}
+
+// called at the end of the moves round
+// resets the movement flags so that the creatures can move next time
+void Arena::unsetMovedFlags()
+{
+  for (int i = 0; i < 0x9f; i++) {
+    m_arena[3][i] &= 0x7F;  // unset bit 7
+  }
+}
+
+void Arena::spreadFireBlob()
+{}
+void Arena::destroyCastles()
+{}
+void Arena::randomNewSpell()
+{}
+

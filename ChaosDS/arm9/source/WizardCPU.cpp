@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "WizardCPU.h"
 #include "Wizard.h"
 #include "Arena.h"
@@ -42,7 +43,7 @@ void WizardCPU::doAISpell()
   m_wizard.setCastAmount(0);
   unsigned char * spells(m_wizard.spellArray());
   int spellCount(m_wizard.spellCount());
-  spells[0] = 12 + Misc::getRand(10);
+  spells[0] = 12 + Misc::rand(10);
   Misc::orderTable(spellCount, spells);
 
   int bestSpell(0);
@@ -51,9 +52,14 @@ void WizardCPU::doAISpell()
     // "cast" the spell... each casting routine has the CPU AI code for that spell built into it.
     // if no good square was found, then go to the next spell
     m_targetSquareFound = false;
-    int currentSpellId(m_wizard.getSelectedSpellId());
-    if (currentSpellId != 0) {
+    int currentSpellId(m_wizard.selectedSpellId());
+#if 0
+    if (currentSpellId != 0)   // Correct way to do it
+#endif
+    if (currentSpellId > SPELL_DISBELIEVE and currentSpellId < SPELL_MAGIC_CASTLE)
+    {
       m_targetSquareFound = true;
+      iprintf("Try to cast %d\n", currentSpellId);
       s_spellData[currentSpellId].spellFunction();
     }
     if (m_targetSquareFound) {
@@ -73,14 +79,14 @@ void WizardCPU::aiCastCreature()
   // code based on 9984
   
   // get the square closest to the best target...
-  int strongestIndex(getStrongestWizard(0xFF));
+  int strongestIndex(strongestWizard(0xFF));
   
   /* TODO - this may not be needed
   m_startIndex = m_wizardIndex;
   */
   m_targetSquareFound = false;
   int range = 3;
-  int currentSpellId(m_wizard.getSelectedSpellId());
+  int currentSpellId(m_wizard.selectedSpellId());
   if (currentSpellId >= SPELL_GOOEY_BLOB)
     range = 13;
   
@@ -91,21 +97,21 @@ void WizardCPU::aiCastCreature()
   // also needs access to other Wizard and Arena innards :(
   // Maybe create a class (AIHandler?) that is inside the Wizard?
   m_tableIndex = inRange*2+1;
-  getFurthestInrange();
+  setFurthestInrange();
   
   if (m_targetSquareFound) {
     m_wizard.printNameSpell();
     Misc::delay(80);
     Casting::spellAnimation();
-    m_wizard.setIllusion(false);
+    m_wizard.setIllusionCast(false);
     
     if (currentSpellId < SPELL_GOOEY_BLOB) {
       // randomly cast illusions, but more chance of trying if the spell is tricky to cast
-      int currentSpellChance(s_spellData[currentSpellId].getCastChance());
-      if ( (currentSpellChance < 4 and Misc::getRand(10) > 5) 
-          or (Misc::getRand(10) > 7) )
+      int currentSpellChance(s_spellData[currentSpellId].realCastChance());
+      if ( (currentSpellChance < 4 and Misc::rand(10) > 5) 
+          or (Misc::rand(10) > 7) )
       {
-        m_wizard.setIllusion(true);
+        m_wizard.setIllusionCast(true);
       }
     }
     
@@ -123,7 +129,7 @@ void WizardCPU::aiCastCreature()
 // based on code at c78d
 // additionally, pass in the attakcer - or 0xff if no attacker ready 
 // and check "current spell" value
-int WizardCPU::getStrongestWizard(int attackerIndex) {
+int WizardCPU::strongestWizard(int attackerIndex) {
   if (m_wizard.timid() < 10) {
     // if we have less than 10 in this value, 
     // go for the wizard who's creature is closest to us
@@ -137,7 +143,7 @@ int WizardCPU::getStrongestWizard(int attackerIndex) {
       
       // no dangerous creature found..
       // create the priority table based on "strongest wizard" - one with most/best creatures
-      create_table_wizards();
+      createTableWizards();
       Arena::instance().setTargetIndex(s_priorityTable[1]);
       
       // in the actual game it does a pointless thing here...
@@ -150,16 +156,15 @@ int WizardCPU::getStrongestWizard(int attackerIndex) {
       
       enemy_creature = s_priorityTable[1];
       
-      int enemy_wizard = Arena::instance().getOwner(enemy_creature);
-      // GET_OWNER(arena[3][enemy_creature]); 
+      int enemy_wizard = Arena::instance().owner(enemy_creature);
       
-      enemy_wizard = Arena::instance().getWizardIndex(enemy_wizard);
+      enemy_wizard = Arena::instance().wizardIndex(enemy_wizard);
 
       // enemy wizard = index to the enemy wizard attacking us
       // enemy creature = index to the enemy creature attacking us
       // now see which is closer and attack them
-      int creature_range = Arena::getDistance(enemy_creature, Arena::instance().startIndex());
-      int wizard_range   = Arena::getDistance(enemy_wizard, Arena::instance().startIndex());
+      int creature_range = Arena::distance(enemy_creature, Arena::instance().startIndex());
+      int wizard_range   = Arena::distance(enemy_wizard, Arena::instance().startIndex());
       
       /* 
         Magic Fire close to a wizard confuses the enemy creatures
@@ -169,33 +174,30 @@ int WizardCPU::getStrongestWizard(int attackerIndex) {
       bool attacker_undead(false);
       if (attackerIndex == 0xff) {
         // a creature spell to cast... so use the spellid
-        int current_spell = m_wizard.getSelectedSpellId();
+        int current_spell = m_wizard.selectedSpellId();
         attacker_undead = (current_spell >= SPELL_VAMPIRE and current_spell <= SPELL_ZOMBIE );
       } else {
         // is a valid square
         // see if the attacking square is undead
-        attacker_undead = IS_UNDEAD(arena[3][attackerIndex]) 
-          or (arena[0][attackerIndex] >= SPELL_VAMPIRE  and arena[0][attackerIndex] <= SPELL_ZOMBIE );
+        
+        attacker_undead = Arena::instance().isUndead(attackerIndex);
       }
       
       u8 defender_undead = 0;
       
-      int tmp_prio_index = 1;
+      int tmp_prio_index(1);
+      Arena & arena(Arena::instance());
       while (enemy_creature != 0xFF) {
         enemy_creature = s_priorityTable[tmp_prio_index];
-        if (arena[0][enemy_creature] != SPELL_MAGIC_FIRE) {
+        if (arena.at(0,enemy_creature) != SPELL_MAGIC_FIRE) {
           // not magic fire so check undeadness
           // remember that we are still scared of magic fire and undead creatures
           // just that we are not worried about attacking it
-          defender_undead = (arena[0][enemy_creature] >= SPELL_VAMPIRE  and
-                            arena[0][enemy_creature] <= SPELL_ZOMBIE ) or 
-                            IS_UNDEAD(arena[3][enemy_creature]);
+          defender_undead = arena.isUndead(enemy_creature);
           if ( not defender_undead or attacker_undead) { 
-            
             break;
           } 
         }
-        
         
         tmp_prio_index += 2;
       }
@@ -212,7 +214,7 @@ int WizardCPU::getStrongestWizard(int attackerIndex) {
     
   } else {
     // create the priority table based on "strongest wizard" - one with most/best creatures
-    create_table_wizards();
+    createTableWizards();
     Arena::instance().setTargetIndex(s_priorityTable[1]);
     
     // in the actual game it does a pointless thing here...
@@ -245,10 +247,10 @@ int WizardCPU::createRangeTable(int target, int range)
   int pi(0);
   int range_count(1);
   for (int i = 0; i < 0x9f; i++) {
-    int tmprange = Arena::getDistance(i, Arena::instance().startIndex());
+    int tmprange = Arena::distance(i, Arena::instance().startIndex());
     if (range >= tmprange) {
       // square is in range
-      tmprange = Arena::getDistance(i, target);
+      tmprange = Arena::distance(i, target);
       s_priorityTable[pi] = tmprange;
       pi++;
       s_priorityTable[pi] = i;
@@ -262,25 +264,28 @@ int WizardCPU::createRangeTable(int target, int range)
 }
 
 // c9dc
-void WizardCPU::getFurthestInrange() 
+void WizardCPU::setFurthestInrange() 
 {
   // get the furthest square away still in range...
+  Arena & arena(Arena::instance());
   do {
-    Arena::instance().setTargetIndex(s_priorityTable[m_tableIndex]);
+    arena.setTargetIndex(s_priorityTable[m_tableIndex]);
     
     Misc::delay(5);
     // check xpos < 10  - code at c63d
     int x,y;
-    Arena::getXY(Arena::instance().targetIndex(), x, y);
+    Arena::getXY(arena.targetIndex(), x, y);
     if (x < 0x10) {
       // in range
       // isBlockedLOS()
-      if (!Arena::instance().isBlockedLOS()) {
+      if (!arena.isBlockedLOS()) {
         
-        if (arena[0][Arena::instance().targetIndex()] == 0) {
+        if (arena.at(0,arena.targetIndex()) == 0) {
           // nothing here
           m_targetSquareFound = true;
-        } else if (arena[2][Arena::instance().targetIndex()] == 4){
+        } 
+        else if (arena.at(2,arena.targetIndex()) == 4)
+        {
           // is the thing here dead?
           m_targetSquareFound = true;
         }
@@ -306,10 +311,10 @@ void WizardCPU::createTableEnemies()
   
   u16 index = 0; // index to prio table
   for (int i = 0; i < 0x9f; i++) {
-    int valid = contains_enemy(Arena::instance().targetIndex());
+    int valid = Arena::instance().containsEnemy(Arena::instance().targetIndex());
     if (valid > 0) {
       m_targetCount++;
-      int range = Arena::getDistance(Arena::instance().targetIndex(), 
+      int range = Arena::distance(Arena::instance().targetIndex(), 
           Arena::instance().startIndex());
       range = range >> 1;
       valid += 0x14;
@@ -324,57 +329,56 @@ void WizardCPU::createTableEnemies()
   }
 }
 
-void create_table_wizards(void) {
+void WizardCPU::createTableWizards() 
+{
   // code is from c825 
-  reset_priority_table();
-//  char str[20];
+  resetPriorityTable();
+  //  char str[20];
   
-  prio_table_index = 0;
-  u8 i;
-  target_index = 0;
-  for (i = 0; i < 0x9f; i++) {
-    if (arena[0][target_index] >= WIZARD_INDEX) {
-      create_enemy_table_entry(arena[0][i]-WIZARD_INDEX);
+  m_tableIndex = 0;
+  Arena & arena(Arena::instance());
+  for (int i = 0; i < 0x9f; i++) {
+    arena.setTargetIndex(i);
+    int wizardId = arena.wizardId(i);
+    if (wizardId != -1) {
+      createEnemyTableEntry(wizardId);
     }
-    if (arena[4][target_index] >= WIZARD_INDEX) {
-      create_enemy_table_entry(arena[4][i]-WIZARD_INDEX);
-    }
-    target_index++;
-
   }
   
-  order_table(7, prio_table);
-  
+  Misc::orderTable(7, s_priorityTable);
   
 }
 
 // create an enemy table entry for this wizard
 // code at c859
-void create_enemy_table_entry(u8 wizardid) {
-  if (wizardid == current_player) 
+void WizardCPU::createEnemyTableEntry(int wizardid) 
+{
+  if (wizardid == m_wizard.id()) 
     return;
   
-  prio_table[prio_table_index+1] = target_index;
-  u8 i;
-  for (i = 0; i < 0x9f; i++) {
-    if (arena[0][i] > 1 && arena[0][i] < 0x26) {
-      if (GET_OWNER(arena[3][i]) != wizardid) {
-        prio_table[prio_table_index] = (attack_pref[arena[0][i]]>>2) + prio_table[prio_table_index] 
-                                      + priority_offset;
-        
+  s_priorityTable[m_tableIndex+1] = Arena::instance().targetIndex();
+  Arena & arena(Arena::instance());
+  for (int i = 0; i < 0x9f; i++) {
+    // Check that this is right..
+    int creature(arena.at(0,i));
+    if (creature > SPELL_DISBELIEVE and creature < SPELL_MAGIC_CASTLE) 
+    {
+      if (arena.owner(i) != wizardid) {
+        s_priorityTable[m_tableIndex] += (arena.attackPref(creature) / 4) + m_wizard.priorityOffset();
       }
     }
     
   }
-  prio_table_index +=2;
+  m_tableIndex +=2;
     
 }
 
 // code based on c8c7
 // get the priorities of squares surrounding "index" based on distance from "strongest"
-void get_surrounding_square_prios(u8 index, u8 strongest) {
+#if 0
+void WizardCPU::getSurroundingSquarePrios(u8 index, u8 strongest) {
   
-  reset_priority_table();
+  resetPriorityTable();
   u8 i;
   u8 surround_index = 0;
   u16 range;
@@ -406,4 +410,5 @@ void get_surrounding_square_prios(u8 index, u8 strongest) {
   LUT_index = 0xF;
   
 }
+#endif
 

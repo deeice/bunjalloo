@@ -8,7 +8,7 @@ namespace Misc
    * @param maximum the range of the random number is 0-maximum
    * @returns a random number 0-@arg maximum
    */
-  unsigned int getRand(unsigned int maximum);
+  unsigned int rand(unsigned int maximum);
   /*! @brief set the random number seed
    * @param s the seed to use
    */
@@ -29,7 +29,7 @@ namespace Misc
    */
   void orderTable(int count, unsigned char * table);
 
-  bool getKeypressWait();
+  bool keypressWait();
 
   void delay(int time);
 }

@@ -26,7 +26,7 @@ void ExamineBoard::show()
 }
 void ExamineBoard::animate()
 {}
-CurrentScreen_t ExamineBoard::getId() const
+CurrentScreen_t ExamineBoard::screenId() const
 {
   return SCR_EXAMINE_BOARD;
 }
@@ -56,18 +56,18 @@ void ExamineBoard::handleKeys()
 
 void ExamineBoard::a() 
 {
-  int theCreature = Arena::instance().getCursorContents();
+  int theCreature = Arena::instance().cursorContents();
   // return instantly if we examine an empty square
   if (theCreature == 0) {
     return;
   }
   Video::instance().fade();
-  GameState::instance().nextScreen(new ExamineSquare(new ExamineBoard()));
+  GameState::instance().setNextScreen(new ExamineSquare(new ExamineBoard()));
   Arena::instance().enableCursor(false);
 }
 
 void ExamineBoard::b() {
   Video::instance().fade();
-  GameState::instance().nextScreen(new GameMenu());
+  GameState::instance().setNextScreen(new GameMenu());
   Arena::instance().enableCursor(false);
 }

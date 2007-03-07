@@ -18,11 +18,14 @@ class WizardCPU : public Computer
     Wizard & m_wizard;
     int m_targetCount;
 
-    int getStrongestWizard(int attackerIndex);
+    int strongestWizard(int attackerIndex);
     void resetPriorityTable();
     int createRangeTable(int target, int range);
-    void getFurthestInrange();
+    // set the target index to the furthest square in range
+    void setFurthestInrange();
     void createTableEnemies();
+    void createEnemyTableEntry(int wizardid);
+    void createTableWizards(); 
 
 };
 #endif

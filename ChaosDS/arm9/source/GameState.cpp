@@ -15,7 +15,7 @@ GameState::GameState():
 }
 
 void GameState::checkVblankAnimation() {
-  CurrentScreen_t currentScreen = m_currentScreen->getId();
+  CurrentScreen_t currentScreen = m_currentScreen->screenId();
   if (currentScreen == SCR_EXAMINE_BOARD 
       or currentScreen == SCR_CASTING 
       or currentScreen == SCR_MOVEMENT) 
@@ -28,7 +28,6 @@ void GameState::mainLoopExecute()
 {
   if (m_nextScreen != 0) {
     this->currentScreen(m_nextScreen);
-    m_nextScreen = 0;
   }
   m_currentScreen->handleKeys();
   if (m_gameFrames&1)

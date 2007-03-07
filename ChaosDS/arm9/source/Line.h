@@ -45,7 +45,7 @@ class Line
 
 
     void drawPixel4bpp(unsigned short x, unsigned short y);
-    void getXYUpper(int index, int & x, int & y) const;
+    void xyUpper(int index, int & x, int & y) const;
     bool isPixelSet(unsigned int x, unsigned int y) const;
     void drawLineSegment(int x, int y);
     void innerDrawSegment(int x, int y);

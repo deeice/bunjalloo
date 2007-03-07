@@ -9,7 +9,7 @@ class SpellSelect: public ScreenI
     SpellSelect();
     virtual void show();
     virtual void animate();
-    virtual CurrentScreen_t getId() const;
+    virtual CurrentScreen_t screenId() const;
     virtual void handleKeys();
   private:
     int m_hilightItem;

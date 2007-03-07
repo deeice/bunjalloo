@@ -51,7 +51,7 @@ ExamineSquare::ExamineSquare(ScreenI * returnScreen):
   m_showCastChance(false),
   m_returnScreen(returnScreen)
 {
-  Arena::instance().getCursorContents(m_creature, m_underneath, m_flags);
+  Arena::instance().cursorContents(m_creature, m_underneath, m_flags);
   iprintf("Creat %d under %d flags %d\n", m_creature, m_underneath, m_flags);
 }
 ExamineSquare::~ExamineSquare()
@@ -91,7 +91,7 @@ void ExamineSquare::show()
 }
 void ExamineSquare::animate()
 {}
-CurrentScreen_t ExamineSquare::getId() const
+CurrentScreen_t ExamineSquare::screenId() const
 {
   return SCR_EXAMINE_BOARD;
 }
@@ -104,7 +104,7 @@ void ExamineSquare::handleKeys()
       this->show();
     } else {
       Video::instance().fade();
-      GameState::instance().nextScreen(m_returnScreen);
+      GameState::instance().setNextScreen(m_returnScreen);
     }
   }
 }
@@ -199,8 +199,8 @@ void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
       if (underneath >= Arena::WIZARD_INDEX) {
         text16.print("(", x,3, 5);
         x++;
-        Wizard & player(Wizard::getPlayers()[underneath-Arena::WIZARD_INDEX]);
-        player.nameAt(x,3,5);
+        Wizard & player(Wizard::player(underneath-Arena::WIZARD_INDEX));
+        player.printNameAt(x,3,5);
         int namelength = strlen(player.name());
         if ( (creature >= SPELL_PEGASUS and creature <= SPELL_GHOST) 
             and (flags & 0x40) 
@@ -249,13 +249,13 @@ void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
 
       // draw casting chance too if needed...
       if (m_showCastChance) {
-        printStat(spellData.getCastChance()*10, 7, 2, 2, true);
+        printStat(spellData.realCastChance()*10, 7, 2, 2, true);
       }
 
     } else {
       // wizard
       // c419
-      Wizard & player(Wizard::getPlayers()[creature-Arena::WIZARD_INDEX]);
+      Wizard & player(Wizard::player(creature-Arena::WIZARD_INDEX));
       player.displayData();
     }
   }
@@ -308,7 +308,7 @@ void ExamineSquare::displaySpellData(int spellId)
   // casting chance...
   text16.print(s_statStrings[7], start_x,start_y, 5);
   char statval[10];
-  Text16::int2a(spellData.getCastChance()*10, statval);
+  Text16::int2a(spellData.realCastChance()*10, statval);
   strcat(statval, "/");
   
   text16.print(statval, start_x+15, start_y, 1);

@@ -7,7 +7,7 @@ class Casting: public ScreenI
 {
   public:
     //! get the current global chaos value
-    static int getWorldChaos();
+    static int worldChaos();
     static bool setSpellSuccess();
     static bool spellSuccess();
     static void spellAnimation();
@@ -15,7 +15,7 @@ class Casting: public ScreenI
     
     virtual void show();
     virtual void animate();
-    virtual CurrentScreen_t getId() const;
+    virtual CurrentScreen_t screenId() const;
     virtual void handleKeys();
   private:
     static int s_worldChaos;

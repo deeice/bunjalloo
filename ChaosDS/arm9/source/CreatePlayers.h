@@ -7,7 +7,7 @@ class CreatePlayers: public ScreenI
   public:
     virtual void show();
     virtual void animate();
-    virtual CurrentScreen_t getId() const;
+    virtual CurrentScreen_t screenId() const;
     virtual void handleKeys();
     
   private:

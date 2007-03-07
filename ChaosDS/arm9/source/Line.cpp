@@ -54,7 +54,7 @@ Line::~Line()
 }
 
 
-void Line::getXYUpper(int index, int & x, int & y) const
+void Line::xyUpper(int index, int & x, int & y) const
 {
   Arena::getXY(index, x, y);
   x *= 16;
@@ -111,10 +111,10 @@ bool Line::execute()
   
   int startx, starty, targetx, targety;
   
-  getXYUpper(m_theArena.m_startIndex, startx, starty);
+  xyUpper(m_theArena.m_startIndex, startx, starty);
   startx-=8; starty-=8;
   
-  getXYUpper(m_theArena.m_targetIndex, targetx, targety);
+  xyUpper(m_theArena.m_targetIndex, targetx, targety);
   targetx-=8; targety-=8;
   
   u16 deltax = abs(startx - targetx);

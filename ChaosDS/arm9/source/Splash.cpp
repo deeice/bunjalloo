@@ -42,7 +42,7 @@ void Splash::animate()
   Graphics::instance().animateSelection(m_animationPalette, c);
 }
 
-CurrentScreen_t Splash::getId() const
+CurrentScreen_t Splash::screenId() const
 {
   return SCR_SPLASH;
 }
@@ -86,7 +86,7 @@ void Splash::start(void) {
     Video::instance().fade();
     selectItem(0);
     //show_create_players();
-    GameState::instance().nextScreen(new CreatePlayers());
+    GameState::instance().setNextScreen(new CreatePlayers());
   }
 }
 
@@ -122,6 +122,6 @@ void Splash::a(void) {
     //GameState::instance().nextScreen(new OptionScreen());
   } else {
     Video::instance().fade();
-    GameState::instance().nextScreen(new CreatePlayers());
+    GameState::instance().setNextScreen(new CreatePlayers());
   }
 }

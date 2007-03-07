@@ -14,7 +14,7 @@ void Misc::churnRand(void) {
   s_random *= 663608941;
 }
 
-unsigned int Misc::getRand(unsigned int maximum) {
+unsigned int Misc::rand(unsigned int maximum) {
   unsigned long long result = maximum;
   result *= s_random;
   churnRand();
@@ -82,7 +82,7 @@ void Misc::orderTable(int count, unsigned char * table) {
   }
 }
 
-bool Misc::getKeypressWait()
+bool Misc::keypressWait()
 {
     scanKeys();
     swiWaitForVBlank();

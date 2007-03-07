@@ -14,7 +14,7 @@ class GameState
      */
     void checkVblankAnimation();
     //! increase the frame counter
-    inline void incrFrames();
+    inline void incrFrame();
     //! fetch the current game frame
     inline int gameFrame() const;
     //! set the current game frame to 0
@@ -23,7 +23,7 @@ class GameState
     inline CurrentScreen_t currentScreen() const;
 
     //! set the next screen to show - safe to call in a handleKey callback
-    inline void nextScreen(ScreenI * c);
+    inline void setNextScreen(ScreenI * c);
     //! execute a frame - calls handle keys and animate on current screen
     void mainLoopExecute();
 

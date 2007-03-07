@@ -24,7 +24,7 @@ class Text16
      * @param palette the index of the palette to get (0-15)
      * @returns colour used in the palette, in RGB format.
      */
-    unsigned short getColour(int palette) const;
+    unsigned short colour(int palette) const;
 
     /*! @brief print the 16 point text. 
      * Each letter is 2 tiles big. the first tile goes on row y, the second on row y+1

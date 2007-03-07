@@ -92,24 +92,24 @@ void Wizard::createDefaultWizards()
   unsigned char images[PLAYER_COUNT] = {0};
   
   for (int i = 0; i < PLAYER_COUNT; i++) {
-    unsigned char tmp = 1+getRand(22);
+    unsigned char tmp = 1+rand(22);
     while (array_contains(names, tmp)) {
-      tmp = 1+getRand(22);
+      tmp = 1+rand(22);
     }
     names[i] = tmp;
     strcpy(s_players[i].m_name , namesData[names[i]-1]);
     trim(s_players[i].m_name);
 
-    tmp = 1+getRand(PLAYER_COUNT);
+    tmp = 1+rand(PLAYER_COUNT);
     while (array_contains(images, tmp) ) {
-      tmp = 1+getRand(PLAYER_COUNT);
+      tmp = 1+rand(PLAYER_COUNT);
     }
     images[i] = tmp;
     s_players[i].m_image = images[i]-1;
     
-    tmp = 1+getRand(9);
+    tmp = 1+rand(9);
     while (array_contains(colours, tmp) ) {
-      tmp = 1+getRand(9);
+      tmp = 1+rand(9);
     }
     colours[i] = tmp;
     s_players[i].m_colour = colours[i]-1; //chaos_cols[colours[i]-1];
@@ -143,20 +143,20 @@ void Wizard::initialisePlayers()
     int cpuLevel = player.level();
     
     // generate the player stats
-    player.m_combat = (getRand(10)/2) + 1 + (cpuLevel/2);
+    player.m_combat = (rand(10)/2) + 1 + (cpuLevel/2);
     player.m_rangedCombat = 0;
     player.m_range = 0;
-    player.m_defence = (cpuLevel/2) + (getRand(10)/2) + 1;
+    player.m_defence = (cpuLevel/2) + (rand(10)/2) + 1;
     player.m_movementAllowance = 1;
-    player.m_manoeuvreRating = (cpuLevel/4) + (getRand(10)/2) + 3;
-    player.m_magicResistance = (getRand(10)/2) + 6;
-    player.m_spellCount = cpuLevel + (getRand(10)/2) + 0xB;   
+    player.m_manoeuvreRating = (cpuLevel/4) + (rand(10)/2) + 3;
+    player.m_magicResistance = (rand(10)/2) + 6;
+    player.m_spellCount = cpuLevel + (rand(10)/2) + 0xB;   
     if (player.m_spellCount > 20)
       player.m_spellCount = 20;
     
     player.m_ability = 0;
-    if ( (5 - (cpuLevel/2)) <= (int)getRand(10))
-      player.m_ability = getRand(10)/4;     
+    if ( (5 - (cpuLevel/2)) <= (int)rand(10))
+      player.m_ability = rand(10)/4;     
     
     // change from index representation to the actual 15 bit colour value
     // player.m_colour = s_chaosColours[player.m_colour];
@@ -166,7 +166,7 @@ void Wizard::initialisePlayers()
     int spellid = 0x01;
     if (player.isCpu()) {
       // disbelieve has random priority
-      player.m_spells[spellindex] = getRand(10)+0x0c;
+      player.m_spells[spellindex] = rand(10)+0x0c;
     } else {
       player.m_spells[spellindex] = 0; // set to 0 for "no spell selected"
       player.m_selectedSpell = 0; // set to 0 for "no spell selected"
@@ -178,11 +178,11 @@ void Wizard::initialisePlayers()
 
     for (int spell = 1; spell < player.m_spellCount; spell++) 
     {
-      spellid = getRand(255) & 0x3F;
+      spellid = rand(255) & 0x3F;
       // TODO : change this
       while (spellid < SPELL_KING_COBRA or spellid > SPELL_RAISE_DEAD) 
       {
-        spellid = getRand(255) & 0x3F;
+        spellid = rand(255) & 0x3F;
       }
        
       player.m_spells[spellindex] = s_spellData[spellid].castPriority;
@@ -220,7 +220,7 @@ void Wizard::initialisePlayers()
   // FIXME: dead_wizards = 0;
 }
 
-int Wizard::getNextHuman(int startIndex) 
+int Wizard::nextHuman(int startIndex) 
 {
   for (int i = startIndex+1; i < Arena::instance().players(); ++i) 
   {
@@ -288,23 +288,28 @@ void Wizard::updateColour()
   // 9th palette
   nds::Palette p(0, 9);
   // 8+id is the colour index
-  p[m_id+8] = getColour();
+  p[m_id+8] = colourRGB();
 }
 
-unsigned short Wizard::getColour()
+unsigned short Wizard::colourRGB() const
 {
   return s_chaosColours[m_colour];
 }
 
-Wizard * Wizard::getPlayers() {
+Wizard & Wizard::player(int index)
+{
+  return s_players[index];
+}
+
+Wizard * Wizard::players() {
   return s_players;
 }
 
-Wizard & Wizard::getCurrentPlayer() {
+Wizard & Wizard::currentPlayer() {
   return s_players[Arena::instance().currentPlayer()];
 }
 
-void Wizard::nameAt(int x, int y, int pal) const
+void Wizard::printNameAt(int x, int y, int pal) const
 {
   if (pal == -1)
     pal = m_id;
@@ -332,7 +337,7 @@ int Wizard::level() const
   return m_playerType>>4;
 }
 
-void Wizard::level(int newLevel)
+void Wizard::setLevel(int newLevel)
 {
   if (not newLevel) {
     m_playerType = PLYR_HUMAN;
@@ -355,7 +360,7 @@ int Wizard::colour() const
 {
   return m_colour;
 }
-void Wizard::colour(int c) 
+void Wizard::setColour(int c) 
 {
   m_colour = c;
 }
@@ -364,7 +369,7 @@ int Wizard::image() const
 {
   return m_image;
 }
-void Wizard::image(int i) 
+void Wizard::setImage(int i) 
 {
   m_image = i;
 }
@@ -395,23 +400,23 @@ void Wizard::removeNullSpells()
   
 }
 
-const char * const Wizard::name()
+const char * const Wizard::name() const
 {
   return m_name;
 }
 
 
-const int Wizard::getSpellId(int index) const
+const int Wizard::spellId(int index) const
 {
   if (index > m_spellCount)
     return 0;
   return m_spells[1+index*2];
 }
-const SpellData * Wizard::getSpell(int index) const
+const SpellData * Wizard::spell(int index) const
 {
   if (index > m_spellCount)
     return 0;
-  return &s_spellData[getSpellId(index)];
+  return &s_spellData[spellId(index)];
 }
 
 int Wizard::spellCount() const
@@ -419,7 +424,7 @@ int Wizard::spellCount() const
   return m_spellCount;
 }
 
-int Wizard::getAbility() const
+int Wizard::ability() const
 {
   return m_ability;
 }
@@ -430,7 +435,7 @@ void Wizard::displayData() const
   Text16 & text16(Text16::instance());
 
   // print name in yellow
-  nameAt(2,1,1);
+  printNameAt(2,1,1);
   bool need_comma(false);
   int x = 2;
   if (m_modifierFlag & 0x2) {
@@ -539,7 +544,7 @@ void Wizard::setSelectedSpell(int index)
   m_illusionCast = false;
 }
 
-int Wizard::getSelectedSpellId() const
+int Wizard::selectedSpellId() const
 {
   if (m_selectedSpell)
     return m_spells[m_selectedSpell];
@@ -547,7 +552,7 @@ int Wizard::getSelectedSpellId() const
     return 0;
 }
 
-void Wizard::setIllusion(bool isIllusion)
+void Wizard::setIllusionCast(bool isIllusion)
 {
   m_illusionCast = isIllusion;
 }
@@ -562,15 +567,14 @@ void Wizard::updateCreatureCount()
   
   Arena & arena(Arena::instance());
   for (int i = 0; i < 0x9f; i++) {
-    int creature = arena.get(0,i);
+    int creature = arena.at(0,i);
     if (creature >= SPELL_KING_COBRA and creature < SPELL_GOOEY_BLOB) 
     {
       // is a creature
-      int underneath = arena.get(4,i);
+      int underneath = arena.at(4,i);
       if (underneath != Arena::WIZARD_INDEX+m_id) {
         // is not a ridden creature
-        int flags = arena.get(3,i);
-        int owner = flags&0x7;
+        int owner = arena.owner(i);
         if (owner == m_id) {
           m_timid = 0;
           return;
@@ -584,13 +588,13 @@ void Wizard::updateCreatureCount()
   m_timid = 0x14;
 }
 
-void Wizard::printNameSpell() 
+void Wizard::printNameSpell() const
 {
   // print player name, the spell and the range - code from 967a
   Arena & arena(Arena::instance());
   if (not isCpu()) {
     int x,y;
-    arena.getCurrentPlayerXY(x,y);
+    arena.currentPlayerXY(x,y);
     arena.setCursor(x, y);
   }
   arena.setBorderColour(m_id);
@@ -603,7 +607,7 @@ void Wizard::printNameSpell()
   text16.setColour(13, Color(0,30,0));
 
   int x = 0;
-  nameAt(x, Text16::MESSAGE_Y, 12);
+  printNameAt(x, Text16::MESSAGE_Y, 12);
   // do a sound effect...
 #if 0
   PlaySoundFX(SND_SPELLSTEP);
@@ -644,7 +648,7 @@ void Wizard::waitForKeypress()
   bool pressed(false);
   while (!pressed) 
   {
-    pressed = Misc::getKeypressWait();
+    pressed = Misc::keypressWait();
   }
   
 }
@@ -674,11 +678,11 @@ void Wizard::setupHumanPlayerCast()
 
 
 
-bool Wizard::castAllowed() const
+bool Wizard::isCastAllowed() const
 {
   Text16 & text16(Text16::instance());
   Arena & arena(Arena::instance());
-  int spellId = getSelectedSpellId();
+  int spellId = selectedSpellId();
   // check spell is in range .... call 9786
   if (not arena.isSpellInRange(spellId)) {
     text16.clearMessage();
@@ -687,7 +691,7 @@ bool Wizard::castAllowed() const
     return false;
   }
   int creature, underneath, flags, frame;
-  arena.getCursorContents(creature, underneath, flags, frame);
+  arena.cursorContents(creature, underneath, flags, frame);
   // in range, so do some more checks 
   // 9877...
   if (creature != 0) {

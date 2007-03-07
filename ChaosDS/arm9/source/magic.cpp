@@ -12,14 +12,14 @@ void cast_creature()
   // if human just do the check on target_index, if CPU find the optimum square to cast to
   // if CPU and no square, set a target_square_found = 0 and return withough doing anything.
   // temp_cast_amount = 1;  // set this in Wiz
-  Wizard & player(Wizard::getCurrentPlayer());
+  Wizard & player(Wizard::currentPlayer());
   player.setCastAmount(1);
   if (player.isCpu()) {
     // do the cpu creature cast ai routine 
-    player.aiCastCreature(); // ai_cast_creature();
+    player.aiCastCreature();
   } else {
     // call code at 9856 - validates player's spell cast
-    if (not player.castAllowed()) {
+    if (not player.isCastAllowed()) {
       return;
     }
     Casting::spellAnimation();

@@ -21,7 +21,7 @@ void Graphics::loadAllPalettes()
   {
     Graphics::loadPalette(i,i);
   }
-  Wizard * wizards(Wizard::getPlayers());
+  Wizard * wizards(Wizard::players());
   std::for_each(wizards, wizards+8, std::mem_fun_ref(&Wizard::updateColour));
 }
 

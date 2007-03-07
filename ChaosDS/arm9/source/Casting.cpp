@@ -1,6 +1,8 @@
 #include <nds.h>
 #include "ndspp.h"
 #include "Casting.h"
+#include "Movement.h"
+#include "GameState.h"
 #include "SpellData.h"
 #include "Arena.h"
 #include "Wizard.h"
@@ -14,7 +16,7 @@ using Misc::delay;
 int Casting::s_worldChaos(0);
 bool Casting::s_castSuccess(false);
 
-int Casting::getWorldChaos() {
+int Casting::worldChaos() {
   return s_worldChaos;
 }
 void Casting::show()
@@ -22,7 +24,7 @@ void Casting::show()
   Arena & arena(Arena::instance());
   arena.resetAnimFrames();
   arena.display();
-  arena.currentPlayer(0);
+  arena.setCurrentPlayer(0);
   arena.setBorderColour(0);
   arena.initialiseCursor(0,0,Arena::CURSOR_NORMAL_GFX);
   Video::instance().fade(false);
@@ -33,7 +35,7 @@ void Casting::animate()
   Arena::instance().drawCreatures();
 }
 
-CurrentScreen_t Casting::getId() const
+CurrentScreen_t Casting::screenId() const
 {
   return SCR_CASTING;
 }
@@ -72,12 +74,12 @@ void Casting::startCastRound()
   int playerCount(arena.players());
   if (currentPlayer < playerCount) 
   {
-    Wizard & player(Wizard::getCurrentPlayer());
+    Wizard & player(Wizard::currentPlayer());
     // temp_cast_amount = 0; // moved to Wizard - the amount of goes this spell has
     if (player.isDead()) {
       // player is dead...
       player.updateCreatureCount();
-      arena.currentPlayer(currentPlayer+1);
+      arena.setCurrentPlayer(currentPlayer+1);
       startCastRound();
     } else {
       // this moves to the player, even if they don't have a spell to cast
@@ -89,13 +91,13 @@ void Casting::startCastRound()
         player.doAISpell();
         delay(10);
         player.updateCreatureCount();
-        arena.currentPlayer(currentPlayer+1);
+        arena.setCurrentPlayer(currentPlayer+1);
         startCastRound();
       } else {
-        int currentSpellId(player.getSelectedSpellId());
+        int currentSpellId(player.selectedSpellId());
         if (currentSpellId == 0) {
           player.updateCreatureCount();
-          arena.currentPlayer(currentPlayer+1);
+          arena.setCurrentPlayer(currentPlayer+1);
           startCastRound();
         } else {
           // sets the success flag, etc
@@ -133,24 +135,19 @@ void Casting::startCastRound()
   } 
   else 
   {
-#if 0
     // start movement round..
-    unset_moved_flags();
-    round_count++;
-    clear_message();
-    current_player = 0;
-    spread_fire_blob();
-    destroy_castles();
-    random_new_spell();
+    Arena::instance().nextRound();
     // here, check that there are enough wizards left to carry on
     
-    if (dead_wizards == (playercount-1)) {
+#if 0
+    FIXME
+    if (dead_wizards == (Arena::instance().players()-1)) {
       // uh oh -  no wizards left, do winner screen
       win_contest();
       return;
     }
-    start_movement_round();
-#endif  
+#endif
+    GameState::instance().setNextScreen(new Movement());
   }
 }
 
@@ -160,8 +157,8 @@ void Casting::cancel() {
 void Casting::execute() 
 {
   Arena & arena(Arena::instance());
-  Wizard & player(Wizard::getCurrentPlayer());
-  int currentSpellId(player.getSelectedSpellId());
+  Wizard & player(Wizard::currentPlayer());
+  int currentSpellId(player.selectedSpellId());
   const SpellData & spellData(s_spellData[currentSpellId]);
   
   arena.enableCursor(false);
@@ -181,13 +178,13 @@ void Casting::nextPlayerCast()
   int currentPlayer(Arena::instance().currentPlayer());
   int playerCount(Arena::instance().players());
   if (currentPlayer < playerCount) {
-    Wizard & player(Wizard::getCurrentPlayer());
+    Wizard & player(Wizard::currentPlayer());
 
     player.updateCreatureCount();
     // set the current spell to 0 if it isn't disblv.
     player.removeSelectedSpell();
 
-    arena.currentPlayer(currentPlayer+1);
+    arena.setCurrentPlayer(currentPlayer+1);
     arena.drawCursor(Arena::CURSOR_NORMAL_GFX);
     startCastRound();
   } 
@@ -218,14 +215,14 @@ bool Casting::spellSuccess()
 bool Casting::setSpellSuccess() 
 {
   s_castSuccess = false;
-  Wizard & player(Wizard::getCurrentPlayer());
+  Wizard & player(Wizard::currentPlayer());
   if (player.illusionCast()) {
     s_castSuccess = true;
   } else {
-    int r = Misc::getRand(10);
-    int currentSpellId(player.getSelectedSpellId());
+    int r = Misc::rand(10);
+    int currentSpellId(player.selectedSpellId());
     const SpellData & spellData(s_spellData[currentSpellId]);
-    int currentSpellChance(spellData.getCastChance()+1);
+    int currentSpellChance(spellData.realCastChance()+1);
     if (r < currentSpellChance) {
       s_castSuccess = true;
       s_worldChaos += spellData.chaosRating;
@@ -248,8 +245,8 @@ static const u8 s_spellframetable[0x12] = {
 void Casting::spellAnimation() 
 {
   
-  Wizard & player(Wizard::getCurrentPlayer());
-  int currentSpellId(player.getSelectedSpellId());
+  Wizard & player(Wizard::currentPlayer());
+  int currentSpellId(player.selectedSpellId());
   int castRange(s_spellData[currentSpellId].castRange);
 
   delay(4);

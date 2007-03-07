@@ -1,5 +1,5 @@
 
-inline void GameState::incrFrames()
+inline void GameState::incrFrame()
 {
   m_gameFrames++;
 }
@@ -14,17 +14,18 @@ inline void GameState::resetGameFrame()
 
 inline CurrentScreen_t GameState::currentScreen() const
 {
-  return m_currentScreen->getId();
+  return m_currentScreen->screenId();
 }
 inline void GameState::currentScreen(ScreenI * c)
 {
   if (m_currentScreen)
     delete m_currentScreen;
   m_currentScreen = c;
+  m_nextScreen = 0;
   m_currentScreen->show();
 }
 
-inline void GameState::nextScreen(ScreenI * c)
+inline void GameState::setNextScreen(ScreenI * c)
 {
   if (m_nextScreen) {
     delete m_nextScreen;
