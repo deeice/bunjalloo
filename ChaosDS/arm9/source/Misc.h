@@ -6,7 +6,7 @@ namespace Misc
 {
   /*! @brief get a random number
    * @param maximum the range of the random number is 0-maximum
-   * @returns a random number 0-@arg maximum
+   * @return a random number 0-@arg maximum
    */
   unsigned int rand(unsigned int maximum);
   /*! @brief set the random number seed
@@ -18,7 +18,7 @@ namespace Misc
 
   /*! @brief trim white space from a string in place.
    * @param str the string to trim
-   * @returns pointer to the passed in character array
+   * @return pointer to the passed in character array
    */
   char * trim(char * str);
   /*! @brief Order a table of values by the priority in place.  Based on code

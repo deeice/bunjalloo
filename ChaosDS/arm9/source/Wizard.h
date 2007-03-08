@@ -22,7 +22,7 @@ class Wizard : public Computer
     static Wizard & player(int index);
 
     /*! @breif get the current player wizard.
-     * @returns a reference to the current player
+     * @return a reference to the current player
      */
     static Wizard & currentPlayer();
     /*! @brief initialise the player wizards to the default values. */
@@ -67,53 +67,53 @@ class Wizard : public Computer
       return m_modifierFlag & 0x8;
     }
 
-    //! @returns the current level. 0 is human.
+    //! @return the current level. 0 is human.
     int level() const;
     //! set the current level. 0 is human.
     void setLevel(int);
 
-    //! @returns the "real" colour of this wizard in RGB format.
+    //! @return the "real" colour of this wizard in RGB format.
     unsigned short colourRGB() const;
     
-    //! @returns the colour index of this wizard.
+    //! @return the colour index of this wizard.
     int colour() const;
 
     //! set the colour index of this wizard.
     void setColour(int );
 
-    //! @returns the image index of this wizard.
+    //! @return the image index of this wizard.
     int image() const;
     //! set the image index of this wizard.
     void setImage(int);
 
-    //! @returns true if this wizard is CPU controlled.
+    //! @return true if this wizard is CPU controlled.
     bool isCpu() const;
-    //! @returns true if this wizard is dead.
+    //! @return true if this wizard is dead.
     bool isDead() const;
 
     //! removes used spells from spell list and resorts
     //! human wizards only
     void removeNullSpells();
 
-    //! @returns the name of this wizard.
+    //! @return the name of this wizard.
     const char * const name() const;
 
-    //! @returns pointer to the spell at the given index
+    //! @return pointer to the spell at the given index
     //! @param index the index of the spell, 0-19
     const SpellData * spell(int index) const;
 
-    //! @returns the spell id at the given index
+    //! @return the spell id at the given index
     //! @param index the index of the spell, 0-19
     const int spellId(int index) const;
 
-    //! @returns the total number of spells available.
+    //! @return the total number of spells available.
     int spellCount() const;
     inline unsigned char * spellArray()
     {
       return m_spells;
     }
 
-    //! @returns the ability flag.
+    //! @return the ability flag.
     int ability() const;
 
     //! helper function for the examine screen

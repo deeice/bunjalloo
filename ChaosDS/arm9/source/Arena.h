@@ -21,7 +21,7 @@ class Arena
     static int distance(int square1, int square2);
     
     /*! @brief Get the arena.
-     * @returns singleton instance of an Arena.
+     * @return singleton instance of an Arena.
      */
     static Arena & instance();
 
@@ -52,7 +52,7 @@ class Arena
     void setPalette8(int x, int y, int pal);
 
     /*! @brief fetch the number of active players 
-     * @returns the number of active players
+     * @return the number of active players
      */
     int players() const;
     /*! @brief set the number of players
@@ -61,7 +61,7 @@ class Arena
     void setPlayers(int p);
 
     /*! @brief fetch the index of the current player.
-     * @returns the index of the current player
+     * @return the index of the current player
      */
     int currentPlayer() const;
     /*! @brief Set the current player index.
@@ -156,13 +156,13 @@ class Arena
 
     /*! @brief check if the currently selected spell can be cast to where the target square.
      * @param spellId the spell id to check the range of
-     * @returns true if the spell is in range, false otherwise.
+     * @return true if the spell is in range, false otherwise.
      */
     bool isSpellInRange(int spellId) const;
 
     /*! @brief check if there is a tree next to where the current spell is being cast.
      * @param spellId the spell being cast.
-     * @returns true if there is a tree next to the current target, false otherwise.
+     * @return true if there is a tree next to the current target, false otherwise.
      */
     bool isTreeAdjacent(int spellId) const;
     bool isWallAdjacent(int spellId, int wizardId) const;

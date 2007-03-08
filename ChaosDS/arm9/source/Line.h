@@ -26,7 +26,7 @@ class Line
     ~Line();
 
     /*! @brief execute the line animation
-     * @returns if the line of sight was blocked (SIGHT type only)
+     * @return if the line of sight was blocked (SIGHT type only)
      */
     bool execute();
 

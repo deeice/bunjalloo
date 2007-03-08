@@ -22,7 +22,7 @@ class Text16
     
     /*! @brief get the colour value for the text from the given palette.
      * @param palette the index of the palette to get (0-15)
-     * @returns colour used in the palette, in RGB format.
+     * @return colour used in the palette, in RGB format.
      */
     unsigned short colour(int palette) const;
 

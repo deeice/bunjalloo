@@ -9,13 +9,13 @@ public:
    */
   void printName(int x, int y, int pal=-1) const;
   /*! @brief get the adjusted casting chance.
-   * @returns the casting chance taking world chaos and player ability into account
+   * @return the casting chance taking world chaos and player ability into account
    */
   int realCastChance() const;
 
   /*! @brief Work out the main colour for this spell/creature.
    * @param frame The frame to use
-   * @returns the index of the colour that is most used by this creature.
+   * @return the index of the colour that is most used by this creature.
    */
   int mainColour(int frame) const;
 
