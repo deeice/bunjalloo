@@ -7,6 +7,7 @@
 #include "Graphics.h"
 #include "Wizard.h"
 #include "SpellSelect.h"
+#include "SoundEffect.h"
 #include "GameState.h"
 #include "ExamineBoard.h"
 
@@ -82,11 +83,6 @@ void GameMenu::animate()
 {
 }
 
-CurrentScreen_t GameMenu::screenId() const
-{
-  return SCR_GAME_MENU;
-}
-
 void GameMenu::handleKeys()
 {
   u16 keysSlow = keysDownRepeat();
@@ -114,7 +110,7 @@ void GameMenu::up() {
   deselectItem();
   if (m_hilightItem > 0) {
     m_hilightItem--;
-    // PlaySoundFX(SND_MENU);
+    SoundEffect::play(SND_MENU);
   }
   selectItem();
 }
@@ -123,7 +119,7 @@ void GameMenu::down() {
   deselectItem();
   if (m_hilightItem < MAX_GAME_MENU) {
     m_hilightItem++;
-    // PlaySoundFX(SND_MENU);
+    SoundEffect::play(SND_MENU);
   }
   selectItem();
 }
@@ -143,7 +139,7 @@ void GameMenu::continueGame()
 
 void GameMenu::a() {
   // get the hilited item...
-  //PlaySoundFX(SND_CHOSEN);
+  SoundEffect::play(SND_CHOSEN);
   switch (m_hilightItem) 
   {
     case 0: 

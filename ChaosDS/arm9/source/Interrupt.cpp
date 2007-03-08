@@ -5,9 +5,7 @@
 void Interrupt::processVblank()
 {
   GameState::instance().incrFrame();
-  /*
   GameState::instance().checkVblankAnimation();
-  */
 }
 void Interrupt::enable()
 {

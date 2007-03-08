@@ -17,8 +17,8 @@ struct SpellData {
   u8 manvr;
   u8 magicRes;
   FunctionPtr_t spellFunction;
-  const u16 * gfxData;
-  const u16 * mapData;
+  const u16 * gfx;
+  const u16 * map;
 #include "SpellDataImpl.h"
 };
 extern const SpellData s_spellData[];

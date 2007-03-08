@@ -11,6 +11,7 @@
 #include "GameState.h"
 #include "GameMenu.h"
 #include "IllusionPicker.h"
+#include "SoundEffect.h"
 
 using namespace nds;
 static const int ARROWHEAD_CHAR('+' - Text16::FIRST_CHAR_INDEX);
@@ -71,11 +72,6 @@ void SpellSelect::animate()
   
   Color c(s_castingChancePalette[chance/2]);
   Graphics::instance().animateSelection(10, c);
-}
-
-CurrentScreen_t SpellSelect::screenId() const
-{
-  return SCR_SELECT_SPELL;
 }
 
 void SpellSelect::handleKeys()
@@ -264,7 +260,7 @@ void SpellSelect::a(void) {
   // check for illusion...
   if (spellId < SPELL_KING_COBRA or spellId >= SPELL_GOOEY_BLOB) 
   {
-    // PlaySoundFX(SND_CHOSEN);
+    SoundEffect::play(SND_CHOSEN);
     b();
     return;
   }

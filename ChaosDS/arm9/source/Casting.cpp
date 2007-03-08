@@ -4,6 +4,7 @@
 #include "Movement.h"
 #include "GameState.h"
 #include "SpellData.h"
+#include "SoundEffect.h"
 #include "Arena.h"
 #include "Wizard.h"
 #include "Misc.h"
@@ -35,10 +36,11 @@ void Casting::animate()
   Arena::instance().drawCreatures();
 }
 
-CurrentScreen_t Casting::screenId() const
+void Casting::vblank()
 {
-  return SCR_CASTING;
+  Arena::instance().countdownAnim();
 }
+
 void Casting::handleKeys()
 {
   u16 keysSlow = keysDownRepeat();
@@ -88,7 +90,7 @@ void Casting::startCastRound()
         // cpu spell casting...
         // jump 96f3
         arena.enableCursor(false);
-        player.doAISpell();
+        player.doAiSpell();
         delay(10);
         player.updateCreatureCount();
         arena.setCurrentPlayer(currentPlayer+1);
@@ -253,7 +255,7 @@ void Casting::spellAnimation()
   // don't do spell line anim for wizard modifier spells...
   if (castRange != 0 or currentSpellId == SPELL_TURMOIL) 
   {
-    // PlaySoundFX(SND_BEAM);
+    SoundEffect::play(SND_BEAM);
     Line::doLine(Line::SPELL);
     // wait for redraw..
     delay(4);
@@ -263,7 +265,7 @@ void Casting::spellAnimation()
   Arena::instance().targetXY(x, y);
   x--;
   y--;
-  /*PlaySoundFX(SND_SPELLSUCCESS);*/
+  SoundEffect::play(SND_SPELLSUCCESS);
   Arena & arena(Arena::instance());
   for (int i = 0; i < 18; i++) {
     swiWaitForVBlank();

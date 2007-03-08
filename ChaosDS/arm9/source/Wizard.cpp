@@ -11,12 +11,13 @@
 #include "WizardData.h"
 #include "WizardCPU.h"
 #include "SpellData.h"
+#include "SoundEffect.h"
 
 using namespace Misc;
 using nds::Color;
 static const int PLAYER_COUNT(8);
 static const int WIZARD_COLOUR(1);
-static const unsigned short s_defaultMap[] = {
+const unsigned short Wizard::DEFAULT_MAP[] = {
   0, 1,
   2, 3
 };
@@ -270,7 +271,7 @@ void Wizard::draw8(int x, int y, int frame)
     }
     maskedGfx[loop] = thisVal;
   }
-  Arena::instance().drawGfx8((unsigned short*)maskedGfx, s_defaultMap, x, y, 0);
+  Arena::instance().drawGfx8((unsigned short*)maskedGfx, DEFAULT_MAP, x, y, 0);
 }
 
 void Wizard::draw(int x, int y, int frame)
@@ -609,20 +610,16 @@ void Wizard::printNameSpell() const
   int x = 0;
   printNameAt(x, Text16::MESSAGE_Y, 12);
   // do a sound effect...
-#if 0
-  PlaySoundFX(SND_SPELLSTEP);
-  delay(8);
-#endif
+  SoundEffect::play(SND_SPELLSTEP);
+  Misc::delay(8);
   x += strlen(m_name) + 1;
   
   const SpellData & spellData(s_spellData[m_spells[m_selectedSpell]]);
   text16.print(spellData.spellName, x, Text16::MESSAGE_Y, 13);
   x += strlen(spellData.spellName) + 1;
   // do a sound effect...
-#if 0
-  PlaySoundFX(SND_SPELLSTEP);
-  delay(8);
-#endif
+  SoundEffect::play(SND_SPELLSTEP);
+  Misc::delay(8);
   // range in white
   int rng = spellData.castRange / 2;
   if (rng >= 10) {
@@ -634,11 +631,9 @@ void Wizard::printNameSpell() const
   
   text16.print(str, x, Text16::MESSAGE_Y, 15);
   text16.setColour(15, Color(31,30,31));
-#if 0
   // do a sound effect...
-  PlaySoundFX(SND_SPELLSTEP);
-  delay(8);
-#endif
+  SoundEffect::play(SND_SPELLSTEP);
+  Misc::delay(8);
 }
 
 void Wizard::waitForKeypress() 
@@ -729,7 +724,13 @@ void Wizard::aiCastCreature()
   m_computer->aiCastCreature(); 
 }
 
-void Wizard::doAISpell()
+void Wizard::doAiSpell()
 {
-  m_computer->doAISpell(); 
+  m_computer->doAiSpell(); 
 }
+
+void Wizard::doAiMovement()
+{
+  m_computer->doAiMovement(); 
+}
+

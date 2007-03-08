@@ -3,6 +3,7 @@
 #include "IllusionPicker.h"
 #include "Text16.h"
 #include "Wizard.h"
+#include "SoundEffect.h"
 #include "GameState.h"
 #include "GameMenu.h"
 
@@ -32,7 +33,7 @@ void IllusionPicker::handleKeys()
   } 
   if (choiceMade)
   {
-    // PlaySoundFX(SND_CHOSEN);
+    SoundEffect::play(SND_CHOSEN);
     b();
   }
 }

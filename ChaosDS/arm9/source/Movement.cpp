@@ -1,9 +1,10 @@
+#include <nds/arm9/input.h>
 #include <string.h>
-#include <stdio.h>
 #include "ndspp.h"
 #include "Movement.h"
 #include "Arena.h"
 #include "Misc.h"
+#include "SoundEffect.h"
 #include "Wizard.h"
 #include "Text16.h"
 
@@ -11,13 +12,11 @@ using nds::Color;
 
 void Movement::show()
 {
-  iprintf("show Movement\n");
   startMovementRound();
 }
 
 void Movement::startMovementRound()
 {
-  iprintf("startMovementRound\n");
   // start the movement round
   // code is very roughly based on speccy chaos...
   // code begins at ac36
@@ -54,14 +53,11 @@ void Movement::startMovementRound()
       arena.setBorderColour(currentPlayer);
       
       Text16::instance().clearMessage();
-#if 0
-      highlight_players_stuff(current_player);
-#endif
+      // highlight the current player's creatures
+      arena.highlightCreatures(currentPlayer);
       
       if (player.isCpu()) {
-#if 0 
-        PlaySoundFX(SND_CPUSTART);
-#endif
+        SoundEffect::play(SND_CPUSTART);
       }
       char str[30];
       strcpy(str, player.name());
@@ -70,29 +66,19 @@ void Movement::startMovementRound()
       Text16::instance().setColour(12, Color(30,31,0));
       Text16::instance().displayMessage(str);
 
-      iprintf("Misc::delay\n");
-      Misc::delay(1); //?
-      iprintf("Misc::after delay\n");
-      /*for (int i = 0; i < 24; i++) {
-        swiWaitForVBlank();
-      }*/
+      Misc::delay(4);
       
-      // highlight the current player's creatures
       if (player.isCpu()) {
         // cpu movement round
         // jump 96f3
         Misc::delay(10);
-#if 0
-        do_ai_movement();
-#endif
+        player.doAiMovement();
         arena.setCurrentPlayer(currentPlayer+1);
         startMovementRound();
       } else {
         arena.enableCursor();
        // human movement selection...
       }
-      iprintf("here\n");
-      
     }
   } else {
     
@@ -152,14 +138,43 @@ void Movement::startMovementRound()
 
 void Movement::animate()
 {
+  Arena::instance().drawCreatures();
 }
 
-CurrentScreen_t Movement::screenId() const
+void Movement::vblank()
 {
-  return SCR_MOVEMENT;
+  Arena::instance().countdownAnim();
 }
 
 void Movement::handleKeys()
 {
+  u16 keysSlow = keysDownRepeat();
+  u16 keys= keysDown();
+  Arena & arena(Arena::instance());
+  if (keysSlow & KEY_UP) {
+    arena.cursorUp();
+  }
+  if (keysSlow & KEY_DOWN) {
+    arena.cursorDown();
+  }
+  if (keysSlow & KEY_LEFT) {
+    arena.cursorLeft();
+  }
+
+  if (keys & KEY_L) {
+    arena.highlightTargetCreations();
+  }
+
+  if (keysSlow & KEY_RIGHT) {
+    arena.cursorRight();
+  }
+#if 0
+  if (keysSlow & KEY_A) {
+    a();
+  }
+  if (keysSlow & KEY_B) {
+    b();
+  }
+#endif
 }
 

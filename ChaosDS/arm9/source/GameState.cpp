@@ -1,5 +1,4 @@
 #include "GameState.h"
-#include "Arena.h"
 
 GameState & GameState::instance()
 {
@@ -15,13 +14,9 @@ GameState::GameState():
 }
 
 void GameState::checkVblankAnimation() {
-  CurrentScreen_t currentScreen = m_currentScreen->screenId();
-  if (currentScreen == SCR_EXAMINE_BOARD 
-      or currentScreen == SCR_CASTING 
-      or currentScreen == SCR_MOVEMENT) 
-  {
-    Arena::instance().countdownAnim();
-  }
+  if (not m_currentScreen) 
+    return;
+  m_currentScreen->vblank();
 }
 
 void GameState::mainLoopExecute()

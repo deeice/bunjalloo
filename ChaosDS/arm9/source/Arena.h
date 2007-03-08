@@ -191,6 +191,9 @@ class Arena
 
     // start the next round (what is it doing in arena?)
     void nextRound();
+
+    void highlightCreatures(int playerId);
+    void highlightTargetCreations(); 
     
   private:
     nds::Background * m_bg;
@@ -206,6 +209,8 @@ class Arena
     int m_wizardIndex;  // index into arena of current player
     int m_startIndex;   // index into arena for start square of current spell
     int m_targetIndex;  // index into arena for target square of current spell
+    short m_highlightCreations;  // hack for showing highlighted creations
+    short m_highlightCreationsCounter;  // hack for showing highlighted creations
     
     
     // the 6 arena tables... 960 bytes
@@ -251,6 +256,15 @@ class Arena
     void spreadFireBlob();
     void destroyCastles();
     void randomNewSpell();
+
+    void displayCursorContents();
+    void drawSilhouetteGfx(
+        int arenaIndex, 
+        const unsigned short * gfx, 
+        const unsigned short * map,
+        unsigned short col, 
+        int palette,
+        bool negative); 
 };
 
 #endif

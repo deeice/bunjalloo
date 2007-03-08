@@ -40,13 +40,15 @@ LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -mno-fpu -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=  -lndspp9 -lnds9 -ldswifi9 $(foreach dir,$(PALETTES),-l$(shell basename $(dir)))
+LIBS	:=  -lndspp9 -lnds9 -ldswifi9 \
+            $(foreach dir,$(PALETTES),-l$(shell basename $(dir))) \
+	    -lsnd
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBNDS) $(TOPDIR)/../libndspp
+LIBDIRS	:=	$(LIBNDS) $(TOPDIR)/../libndspp $(TOPDIR)/common/snd
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

@@ -9,6 +9,7 @@ class Wizard : public Computer
 {
 
   public:
+    static const unsigned short DEFAULT_MAP[];
   
     /*! @brief set the player instances to their initial state */
     static void resetPlayers();
@@ -164,7 +165,9 @@ class Wizard : public Computer
 
     // Computer routines
     virtual void aiCastCreature();
-    virtual void doAISpell();
+    virtual void doAiSpell();
+    virtual void doAiMovement();
+
 
   private:
     char m_name[12];

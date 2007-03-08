@@ -11,7 +11,8 @@ class WizardCPU : public Computer
     WizardCPU(Wizard & theWizard);
 
     void aiCastCreature();
-    void doAISpell();
+    void doAiSpell();
+    void doAiMovement();
   private:
     bool m_targetSquareFound;
     int m_tableIndex;

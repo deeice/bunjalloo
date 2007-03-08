@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "WizardCPU.h"
 #include "Wizard.h"
 #include "Arena.h"
@@ -14,7 +13,7 @@ WizardCPU::WizardCPU(Wizard & theWizard) :
   m_tableIndex(0), m_wizard(theWizard), m_targetCount(0)
 {}
 
-void WizardCPU::doAISpell()
+void WizardCPU::doAiSpell()
 {
   /*
     set spell 0 priorty = 0x0c + GetRand(10) (I imagine this is in case Disbelieve was top priority?)
@@ -59,7 +58,6 @@ void WizardCPU::doAISpell()
     if (currentSpellId > SPELL_DISBELIEVE and currentSpellId < SPELL_MAGIC_CASTLE)
     {
       m_targetSquareFound = true;
-      iprintf("Try to cast %d\n", currentSpellId);
       s_spellData[currentSpellId].spellFunction();
     }
     if (m_targetSquareFound) {
@@ -412,3 +410,80 @@ void WizardCPU::getSurroundingSquarePrios(u8 index, u8 strongest) {
 }
 #endif
 
+void WizardCPU::doAiMovement()
+{
+  /*
+   if wiz has creatures to do his bidding...
+
+     get current position, set up relative
+     movement advantages for squares we can go to
+
+     if we are in a wood or castle, stay there  
+     else ...
+     select the wizard
+     do the movement
+   
+   end if
+   
+   for all squares on the board...
+    if we have a creature here
+    then try selecting it
+      if we selected it successfully (it hadn't moved already)
+        then do the movement for this creature
+   end for
+
+   so if the wizard is creatureless, he himself acts like a normal creature
+   */
+  
+  // the computer movement stuff...
+  if (not m_wizard.timid()) 
+  {
+    //  ca92...
+    // setup_wizard_move();
+    // if we are in a safe place, don't move
+    int arena0 = Arena::instance().at(0, Arena::instance().startIndex());
+    if (   arena0 == SPELL_MAGIC_WOOD 
+        or arena0 == SPELL_MAGIC_CASTLE 
+        or arena0 == SPELL_DARK_CITADEL)
+    { 
+#if 0
+      // set has moved...
+      has_wizard_moved = 1;
+      arena[3][start_index] = arena[3][start_index] | 0x80;
+#endif
+    } else {
+#if 0
+      // move wizard...
+      // select the wizard...
+      has_wizard_moved = 0;
+      // and we have the move table in memory..
+      move_table_created = 1;
+      
+      movement_a(); // select the wizard...
+      delay(30);
+      // now try moving it to the target square...
+      do_this_movement();
+      
+      delay(10);
+#endif
+    }
+  }
+  // here? move creatures
+  // we have already dealt with the wizard...
+#if 0
+  has_wizard_moved = 1;
+  
+  u8 i;
+  for (i = 0; i < 0x9f; i++) {
+    target_index = i;
+    start_index = i;
+    movement_a(); // select the creature...
+    if (selected_creature != 0) {
+      delay(30);
+      do_this_movement();
+    }
+    
+  }
+  delay(20);
+#endif
+}

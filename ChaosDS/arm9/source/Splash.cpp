@@ -1,5 +1,4 @@
 #include <nds.h>
-#include <stdio.h>
 #include "ndspp.h"
 #include "Splash.h"
 #include "Graphics.h"
@@ -8,6 +7,7 @@
 #include "Misc.h"
 #include "GameState.h"
 #include "CreatePlayers.h"
+#include "Options.h"
 
 using namespace nds;
 
@@ -40,11 +40,6 @@ void Splash::animate()
   Misc::churnRand();
   Color c(31,31,0);
   Graphics::instance().animateSelection(m_animationPalette, c);
-}
-
-CurrentScreen_t Splash::screenId() const
-{
-  return SCR_SPLASH;
 }
 
 void Splash::selectItem(int item) {
@@ -119,7 +114,7 @@ void Splash::a(void) {
   if (m_hilightItem == 1) {
     Video::instance().fade();
     //show_options();
-    //GameState::instance().nextScreen(new OptionScreen());
+    GameState::instance().setNextScreen(new OptionScreen());
   } else {
     Video::instance().fade();
     GameState::instance().setNextScreen(new CreatePlayers());

@@ -3,6 +3,7 @@
 #include <functional>
 #include "ndspp.h"
 
+#include "SoundEffect.h"
 #include "CreatePlayers.h"
 #include "GameMenu.h"
 #include "GameState.h"
@@ -37,7 +38,6 @@ void CreatePlayers::show()
   Arena::instance().reset();
   Arena::instance().decorativeBorder(15, Color(0,0,31),Color(0,31,31)); 
 
-  iprintf("Show\n");
   updatePlayers();
   
   selectItem(0);
@@ -52,12 +52,6 @@ void CreatePlayers::animate()
     Graphics::instance().animateSelection(10, c);
   else 
     Graphics::instance().animateSelection(m_hilightItem-1, c);
-}
-
-// from IF ScreenI
-CurrentScreen_t CreatePlayers::screenId() const
-{
-  return SCR_CREATE_PLAYERS;
 }
 
 // from IF ScreenI
@@ -186,7 +180,7 @@ void CreatePlayers::left(void) {
     if (playerCount > 2) {
       playerCount--;
       Arena::instance().setPlayers(playerCount);
-      //PlaySoundFX(SND_MENU);
+      SoundEffect::play(SND_MENU);
     }
   } else {
     Wizard & player = Wizard::player(m_hilightItem-1);
@@ -195,7 +189,7 @@ void CreatePlayers::left(void) {
       int level = player.level();
       level--;
       player.setLevel(level);
-      // PlaySoundFX(SND_MENU);
+      SoundEffect::play(SND_MENU);
     }
   }
   updatePlayers();
@@ -207,7 +201,7 @@ void CreatePlayers::right(void) {
     if (playerCount < 8) {
       playerCount++;
       Arena::instance().setPlayers(playerCount);
-      // PlaySoundFX(SND_MENU);
+      SoundEffect::play(SND_MENU);
     }
   } 
   else {
@@ -216,7 +210,7 @@ void CreatePlayers::right(void) {
     if (level < 8) {
       level++;
       player.setLevel(level);
-      // PlaySoundFX(SND_MENU);
+      SoundEffect::play(SND_MENU);
     }
   }
   updatePlayers();
@@ -276,7 +270,7 @@ void CreatePlayers::a() {
 }
 
 void CreatePlayers::start(void) {
-  //PlaySoundFX(SND_CHOSEN);
+  SoundEffect::play(SND_CHOSEN);
   // was init_players 
   Wizard::initialisePlayers();
   Arena::instance().setCurrentPlayer(0);

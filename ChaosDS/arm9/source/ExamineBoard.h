@@ -7,7 +7,7 @@ class ExamineBoard: public ScreenI
   public:
     virtual void show();
     virtual void animate();
-    virtual CurrentScreen_t screenId() const;
+    virtual void vblank();
     virtual void handleKeys();
 
     ~ExamineBoard();

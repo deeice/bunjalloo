@@ -15,7 +15,7 @@ class Casting: public ScreenI
     
     virtual void show();
     virtual void animate();
-    virtual CurrentScreen_t screenId() const;
+    virtual void vblank();
     virtual void handleKeys();
   private:
     static int s_worldChaos;

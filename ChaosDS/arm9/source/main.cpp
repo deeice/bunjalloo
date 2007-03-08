@@ -6,6 +6,7 @@
 #include "GameState.h"
 #include "Splash.h"
 #include "Text16.h"
+#include "Options.h"
 
 int main(void) {
   irqInit();
@@ -21,7 +22,7 @@ int main(void) {
   consoleInitDefault(bg.mapData(), bg.tileData(),16);
 
   GameState::instance().setNextScreen(new Splash());
-  while(1) {
+  while(not Options::instance().option(Options::QUIT)) {
     scanKeys();
     swiWaitForVBlank();
     GameState::instance().mainLoopExecute();

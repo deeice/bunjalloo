@@ -8,7 +8,8 @@ class Computer
     virtual ~Computer() {}
 
     virtual void aiCastCreature() = 0;
-    virtual void doAISpell() = 0;
+    virtual void doAiSpell() = 0;
+    virtual void doAiMovement() = 0;
 
 };
 

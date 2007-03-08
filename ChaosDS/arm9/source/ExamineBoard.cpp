@@ -1,5 +1,4 @@
 #include <nds.h>
-#include <stdio.h>
 #include "ndspp.h"
 #include "Interrupt.h"
 #include "ExamineBoard.h"
@@ -25,14 +24,18 @@ void ExamineBoard::show()
   Video::instance().fade(false);
 }
 void ExamineBoard::animate()
-{}
-CurrentScreen_t ExamineBoard::screenId() const
 {
-  return SCR_EXAMINE_BOARD;
+  Arena::instance().drawCreatures();
+}
+
+void ExamineBoard::vblank()
+{
+  Arena::instance().countdownAnim();
 }
 void ExamineBoard::handleKeys()
 {
   u16 keysSlow = keysDownRepeat();
+  u16 keys= keysDown();
   Arena & arena(Arena::instance());
   if (keysSlow & KEY_UP) {
     arena.cursorUp();
@@ -43,6 +46,11 @@ void ExamineBoard::handleKeys()
   if (keysSlow & KEY_LEFT) {
     arena.cursorLeft();
   }
+
+  if (keys & KEY_L) {
+    arena.highlightTargetCreations();
+  }
+
   if (keysSlow & KEY_RIGHT) {
     arena.cursorRight();
   }

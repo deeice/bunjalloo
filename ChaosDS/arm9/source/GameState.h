@@ -19,9 +19,6 @@ class GameState
     inline int gameFrame() const;
     //! set the current game frame to 0
     inline void resetGameFrame();
-    //! fetch the current screen id
-    inline CurrentScreen_t currentScreen() const;
-
     //! set the next screen to show - safe to call in a handleKey callback
     inline void setNextScreen(ScreenI * c);
     //! execute a frame - calls handle keys and animate on current screen
@@ -36,6 +33,36 @@ class GameState
     GameState(const GameState&);
     inline void currentScreen(ScreenI * c);
 };
-#include "GameState.inl"
+
+inline void GameState::incrFrame()
+{
+  m_gameFrames++;
+}
+inline int GameState::gameFrame() const
+{
+  return m_gameFrames;
+}
+inline void GameState::resetGameFrame()
+{
+  m_gameFrames = 0;
+}
+
+inline void GameState::currentScreen(ScreenI * c)
+{
+  if (m_currentScreen)
+    delete m_currentScreen;
+  m_currentScreen = c;
+  m_nextScreen = 0;
+  m_currentScreen->show();
+}
+
+inline void GameState::setNextScreen(ScreenI * c)
+{
+  if (m_nextScreen) {
+    delete m_nextScreen;
+    m_nextScreen = 0;
+  }
+  m_nextScreen = c;
+}
 
 #endif

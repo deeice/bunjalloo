@@ -17,7 +17,6 @@ class ExamineSquare: public ScreenI
     ~ExamineSquare();
     virtual void show();
     virtual void animate();
-    virtual CurrentScreen_t screenId() const;
     virtual void handleKeys();
     
     //! Set whether the cast chance should be shown or not.

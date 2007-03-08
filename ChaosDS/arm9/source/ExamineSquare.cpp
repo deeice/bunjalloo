@@ -1,5 +1,4 @@
 #include <nds.h>
-#include <stdio.h>
 #include <string.h>
 #include "ndspp.h"
 #include "ExamineSquare.h"
@@ -52,7 +51,6 @@ ExamineSquare::ExamineSquare(ScreenI * returnScreen):
   m_returnScreen(returnScreen)
 {
   Arena::instance().cursorContents(m_creature, m_underneath, m_flags);
-  iprintf("Creat %d under %d flags %d\n", m_creature, m_underneath, m_flags);
 }
 ExamineSquare::~ExamineSquare()
 {
@@ -91,10 +89,7 @@ void ExamineSquare::show()
 }
 void ExamineSquare::animate()
 {}
-CurrentScreen_t ExamineSquare::screenId() const
-{
-  return SCR_EXAMINE_BOARD;
-}
+
 void ExamineSquare::handleKeys()
 {
   u16 keysSlow = keysDownRepeat();

@@ -1,5 +1,4 @@
 #include <nds.h>
-#include <stdio.h>
 #include <algorithm>
 #include <functional>
 #include "ndspp.h"
@@ -10,8 +9,11 @@
 #include "SpellData.h"
 #include "Graphics.h"
 #include "Wizard.h"
+#include "WizardData.h"
 #include "Interrupt.h"
 #include "Line.h"
+#include "Misc.h"
+#include "Options.h"
 
 
 // external data
@@ -30,6 +32,7 @@ static const int BG_VERT_EDGE_TILE(602);
 static const int BG_HORZ_EDGE_TILE(603);
 static const int BG_SOLID_TILE(604);
 static const int BORDER_PALETTE(11<<12);
+static const int HIGHLIGHT_INIT(9);
 // the second bank of 256*256 start at tile 32*32...
 static const int SECOND_TILEBANK_0(32*32);
 
@@ -72,7 +75,7 @@ using namespace nds;
 
 Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28)),
   m_cursor(new Sprite(0, 16, 16, 0, 256)),
-  m_playerCount(0), m_roundNumber(0)
+  m_playerCount(0), m_roundNumber(0),m_highlightCreations(HIGHLIGHT_INIT)
 {
   reset();
   m_bg->enable();
@@ -165,9 +168,8 @@ void Arena::drawGfx8(
 void Arena::countdownAnim()
 {
   // counts down the arena[1] values and updates the arena 2 val if needed
-  int i;   
   // FIXME - hardcoded...
-  for (i = 0; i < ARENA_SIZE; i++) {
+  for (int i = 0; i < ARENA_SIZE; i++) {
     if (m_arena[0][i] >= 2) {
       if ( (--m_arena[1][i]) == 0) {
         m_arena[2][i]++;
@@ -177,7 +179,6 @@ void Arena::countdownAnim()
         if (m_arena[2][i] == 5) {
           m_arena[2][i]--;
         } 
-
         // each spell has a "speed" count
         m_arena[1][i] = anim_speed_data[m_arena[0][i]-2];
       }
@@ -366,10 +367,21 @@ void Arena::drawCreature(int x, int y, int creature, int frame)
 {
   const SpellData & spell(s_spellData[creature]);
   setPalette8(x*2,y*2,spell.palette);
-  drawGfx8(spell.gfxData, spell.mapData, x*2, y*2, frame);
+  drawGfx8(spell.gfx, spell.map, x*2, y*2, frame);
 }
 
-void Arena::drawCreatures(void) {
+void Arena::drawCreatures(void)
+{
+  if (m_highlightCreations < HIGHLIGHT_INIT) {
+    m_highlightCreationsCounter--;
+    if (m_highlightCreationsCounter > 0) {
+      highlightCreatures(m_highlightCreations);
+      return;
+    }
+    else {
+      m_highlightCreationsCounter = HIGHLIGHT_INIT;
+    }
+  }
   for (int i = 0; i < ARENA_SIZE; i++) {
     int x,y;
     getXY(i, x, y);
@@ -441,6 +453,72 @@ void Arena::setCursor(int x, int y)
   m_targetIndex = x+y*16;
   m_cursor->setXY(8+m_cursorPosition.x*16, 8+m_cursorPosition.y*16);
   m_cursor->update();
+  displayCursorContents();
+}
+
+void Arena::displayCursorContents()
+{
+  // dispay the creature name, etc in the right colours...
+  // taken from bd18 onwards
+  Text16 & text16(Text16::instance());
+  text16.clearMessage();
+  int creature (m_arena[0][m_targetIndex]);
+  
+  if (creature == 0) 
+    return;
+  
+  // light blue
+  text16.setColour(12, Color(0,28,31)); 
+
+  int x(Text16::MESSAGE_X);
+  if (creature >= WIZARD_INDEX) {
+    // wizard... write wiz name
+    Wizard & player(Wizard::player(creature - WIZARD_INDEX));
+    player.printNameAt(x, Text16::MESSAGE_Y, 12);
+    x += strlen(player.name());
+
+  } else {
+    // creature... print name and owner
+    const SpellData & spellData(s_spellData[creature]);
+    text16.print(spellData.spellName, x, Text16::MESSAGE_Y, 12);
+    x += strlen(spellData.spellName);
+  }
+  
+  // check underneath
+  Color c(0,0,0);
+  if (m_arena[4][m_targetIndex] != 0) {
+    // underneath colour 47 (white)
+    c = Color(30,30,30);
+  } else if (m_arena[5][m_targetIndex] != 0) {
+    // purple
+    c = Color(27,4,28);
+  }
+  text16.setColour(14, c);
+
+  char str[30];
+  // the character # is actually a \ in my character array as I don't have many entries.
+  str[0] = '\\';
+  str[1] = 0;
+  text16.print(str, x, Text16::MESSAGE_Y, 14);
+  x++;
+  
+  if (creature < WIZARD_INDEX) {
+    // print the creature owner or status...
+    // yellow text by default
+    Color c(30,30,0);
+    if (m_arena[2][m_targetIndex] == 4) {
+      // dead - green
+      c = Color(0,30,0);
+      strcpy(str, "(DEAD)");
+    } else {
+      str[0] = '(';
+      str[1] = 0;
+      strcat(str, Wizard::player(owner(m_targetIndex)).name() );
+      strcat(str, ")");
+    }
+    text16.setColour(13, c);
+    text16.print(str, x, Text16::MESSAGE_Y, 13);
+  }
 }
 
 void Arena::drawCursor(Cursor_t type)
@@ -594,11 +672,13 @@ int Arena::applyPositionModifier(int square, int index) {
   
   int tmp = x + y*16;
   
-  /*
   // Add the "3 trees in top corner" bug...
-  if (Options[OPT_OLD_BUGS] && tmp == 2 && current_spell == SPELL_MAGIC_WOOD)
+  if (int(Options::instance().option(Options::OLD_BUGS)) != 0
+      and tmp == 2
+      and Wizard::currentPlayer().selectedSpellId() == SPELL_MAGIC_WOOD)
+  {
     tmp = 0;
-  */
+  } 
   return tmp;
   
 }
@@ -784,3 +864,167 @@ void Arena::destroyCastles()
 void Arena::randomNewSpell()
 {}
 
+void Arena::highlightCreatures(int playerId)
+{
+  for (int i = 0; i < ARENA_SIZE; i++) {
+    if (m_arena[0][i] == 0) 
+      continue;
+    
+    if (m_arena[0][i] >= WIZARD_INDEX) {
+      // wizard
+      if ( (m_arena[0][i] - WIZARD_INDEX) == playerId) {
+        // highlight the player
+        Wizard & player(Wizard::player(playerId));
+        drawSilhouetteGfx(i, 
+          s_wizardData[player.image()].gfx,
+          s_wizardData[player.image()].map,
+          player.colourRGB(), 11, 1); 
+      }
+      
+    }
+    else if (m_arena[2][i] != 4) {
+      // creature, not dead
+      if (owner(i) == playerId)
+      {
+        const SpellData & spell(s_spellData[m_arena[0][i]]);
+        int col = spell.mainColour(m_arena[2][i]);
+
+        drawSilhouetteGfx(
+          i, 
+          spell.gfx, 
+          spell.map, 
+      	  col, -1,
+      	  1);
+      }
+      
+    }
+  }
+  
+}
+
+// draw a silhoutte style gfx thing at the given location
+// used for the justice cast
+// passing in 1 for negative draws in the reversed "hilighted" style
+void Arena::drawSilhouetteGfx(
+    int arenaIndex, 
+    const unsigned short * gfx, 
+    const unsigned short * map,
+    unsigned short col, 
+    int palette,
+    bool negative)
+{
+  int x,y;
+  getXY(arenaIndex, x, y);
+  x--;
+  y--;
+  
+  u8 newGfx[128];
+  
+  int id;
+  // set the frame...
+  if (palette == -1) {
+    palette = s_spellData[m_arena[0][arenaIndex]].palette;
+  }
+  
+  setPalette8(x*2,y*2,palette);
+  if (palette == 11) {
+    Palette p(0,11);
+    p[15] = col;
+    col = 15;
+  }
+  // need to load it in blocks of 16 for 4bpp gfx
+  // copy the actual graphics into the temp array
+  int index = m_arena[2][arenaIndex]*4;
+  for (int loop = 0; loop < 4; loop++) {
+    // id = <the tile id in the map file at this position>
+    id = map[index+loop];
+    swiCopy(&(gfx[id*16]), &newGfx[loop*32], 16);
+  }
+  
+  // In newGfx, replace non zero pixel values with the silhoutte value 15
+  // Use palette 11 - the border palette - 15th entry was not used there
+  
+  int lowMask =  col&0xf;
+  int hiMask =  (col&0xf)<<4;
+  
+  // loop over all pixels (16*16)/2 since 2 pixels per byte
+  for (int loop = 0; loop < 128; loop++) {
+    u8 thisVal = newGfx[loop];
+    // 4 bits per pixel...
+    // mask the lower 4 bits
+    if (not negative) {
+      // draw solid withno pixel detail
+      if ((thisVal & 0x0f) != 0) {
+        thisVal |= lowMask;
+      }
+    } else {
+      // draw inversed
+      if ((thisVal & 0x0f) == 0) {
+        thisVal |= lowMask;
+      }else if ((thisVal & 0x0f) != 0) {
+        thisVal &= 0xf0;
+      }
+    }
+    
+    
+    // mask the higher 4 bits
+    if (not negative) {
+      // draw solid withno pixel detail
+      if ((thisVal & 0xf0) != 0) {
+        thisVal |= hiMask;
+      }
+    } else {
+      // draw inversed
+      if ((thisVal & 0xf0) == 0) {
+        thisVal |= hiMask;
+      } else if ((thisVal & 0xf0) != 0) {
+        thisVal &= 0x0f;
+      }
+    }
+    
+    newGfx[loop] = thisVal;
+  }
+  
+  drawGfx8((u16*)newGfx, Wizard::DEFAULT_MAP, x*2, y*2, 0);
+
+}
+
+
+void Arena::highlightTargetCreations() 
+{
+  // get the owner of the creature
+  // make sure dead ones don't count...
+  int arena0 = m_arena[0][m_targetIndex];
+  int arena2 = m_arena[2][m_targetIndex];
+  if (arena0 != 0 and arena2 != 4)
+  {
+    enableCursor(false);
+    m_highlightCreations = HIGHLIGHT_INIT;
+    int playerid(HIGHLIGHT_INIT);
+    if (arena0 >= WIZARD_INDEX) {
+      playerid = arena0 - WIZARD_INDEX;
+    }
+    else if (arena2 != 4) {
+      playerid = owner(m_targetIndex);
+    }
+    if (playerid == HIGHLIGHT_INIT)
+      return;
+    
+    highlightCreatures(playerid);
+    m_highlightCreations = playerid;
+    m_highlightCreationsCounter = HIGHLIGHT_INIT;
+    char str[30];
+    strcpy(str, Wizard::player(playerid).name());
+    strcat(str, "'S CREATIONS");
+    
+    Text16::instance().clearMessage();
+    // cyan
+    Text16::instance().setColour(12, Color(30,31,0));
+    Text16::instance().displayMessage(str);
+    
+    Misc::waitForLetgo();
+    m_highlightCreations = HIGHLIGHT_INIT;
+    Text16::instance().clearMessage();
+    enableCursor();
+  }
+}

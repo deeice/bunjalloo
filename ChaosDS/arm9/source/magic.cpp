@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "Wizard.h"
 #include "Arena.h"
 #include "Misc.h"

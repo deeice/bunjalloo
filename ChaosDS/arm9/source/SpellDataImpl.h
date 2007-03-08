@@ -13,6 +13,12 @@ public:
    */
   int realCastChance() const;
 
+  /*! @brief Work out the main colour for this spell/creature.
+   * @param frame The frame to use
+   * @returns the index of the colour that is most used by this creature.
+   */
+  int mainColour(int frame) const;
+
 private:
   void fullText(char * str) const;
 // }

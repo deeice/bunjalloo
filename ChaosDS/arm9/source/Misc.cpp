@@ -2,6 +2,7 @@
 #include <nds.h>
 #include "Misc.h"
 #include "GameState.h"
+#include "Wizard.h"
 
 // default seed
 static unsigned int s_random(14071977);
@@ -102,5 +103,36 @@ void Misc::delay(int time)
   {
     swiWaitForVBlank();
     state.mainLoopExecute();
+  }
+}
+
+void Misc::waitForLetgo()
+{
+  if (Wizard::currentPlayer().isCpu())
+    return;
+  bool prsd(true);
+  while (prsd) {
+    swiWaitForVBlank();
+    scanKeys();
+    u16 keys = keysHeld();
+    if (   (keys & KEY_A)
+        or (keys & KEY_B)
+        or (keys & KEY_L)
+        or (keys & KEY_R)
+        or (keys & KEY_UP)
+        or (keys & KEY_DOWN)
+        or (keys & KEY_LEFT)
+        or (keys & KEY_RIGHT)
+        or (keys & KEY_START)
+        or (keys & KEY_SELECT)
+       )
+    {
+        prsd = true;
+        GameState::instance().mainLoopExecute();
+    }
+    else
+    {
+        prsd = false;
+    }
   }
 }
