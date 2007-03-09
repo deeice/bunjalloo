@@ -18,7 +18,7 @@ export TOPDIR		:=	$(CURDIR)
 #---------------------------------------------------------------------------------
 export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 
-.PHONY: $(TARGET).arm7 $(TARGET).arm9 docs
+.PHONY: $(TARGET).arm7 $(TARGET).arm9 docs cscope.out
 
 #---------------------------------------------------------------------------------
 # main targets
@@ -59,6 +59,12 @@ wmb:
 
 tags: $(shell ls arm[7-9]/source/*.{cpp,h}) 
 	ctags -R .
+
+cscope.out :
+	rm -f cscope.*
+	find .. $(DEVKITPRO)/libnds/ -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl' > cscope.files
+	cscope -b -k -q
+
 
 docs:
 	doxygen chaos.doxy.cfg
