@@ -28,7 +28,6 @@ class WizardCPU : public Computer
     bool m_targetSquareFound;
     int m_tableIndex;
     Wizard & m_wizard;
-    Arena & m_arena;
     int m_targetCount;
     bool m_hasMoved;
     bool m_moveTableCreated;

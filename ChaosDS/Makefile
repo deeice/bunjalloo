@@ -45,7 +45,7 @@ export PALETTES := $(shell ls -d $(TOPDIR)/common/img/palette*)
 
 arm9/$(TARGET).elf:
 	$(MAKE) -C common
-	$(MAKE) -C arm9 -j 2
+	$(MAKE) -C arm9
 
 #---------------------------------------------------------------------------------
 clean:

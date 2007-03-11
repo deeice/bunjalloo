@@ -221,7 +221,6 @@ void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2,
   // bottom edge
   for (int x=1; x < X_LIMIT; x++) {
     mapData[x+height*32] = ARENA_HORZ_EDGE_TILE|TILE_FLIP_VERT|(pal<<12);
-    
   }
   
   // left edge
@@ -284,50 +283,6 @@ void Arena::setWizardSquare(int square, int id)
 
 void Arena::gameBorder() {
   decorativeBorder(11, Color(31,0,0), Color(21,0,0), HEIGHT-2);
-#if 0
-  u16 * mapData = m_bg->mapData();
-  u16 * tileData = m_bg->tileData();
-  // draws the game border, which is tiles in bg
-  // place the tiles at the end of the creature data, i.e. 150 creatures, 4 tiles each = 600
-  // use tile 600 to 607 = 0x4b00 19200 to 19392 (= 32 bytes per tile
-  dmaCopy(_binary_bg_raw_start, &tileData[16 + (19200/2)], 128);
-  
-  // top left corner
-  mapData[0] = BG_CORNER_TILE|BORDER_PALETTE;
-  // top right corner
-  mapData[SECOND_TILEBANK_0+1] = BG_CORNER_TILE|TILE_FLIP_HORZ|BORDER_PALETTE;
-  // bottom left corner
-  mapData[23*32] = BG_CORNER_TILE|TILE_FLIP_VERT|BORDER_PALETTE;
-  // bottom right corner
-  mapData[SECOND_TILEBANK_0+1+23*32] = BG_CORNER_TILE|TILE_FLIP_HORZ|TILE_FLIP_VERT|BORDER_PALETTE;
-  
-  // now fill in the sides
-  // top / bottom edges
-  for (int x=1; x < 32; x++) {
-    // top
-    mapData[x] = BG_HORZ_EDGE_TILE|BORDER_PALETTE;
-    mapData[x+32] = BG_SOLID_TILE|BORDER_PALETTE;
-    // bottom edge
-    mapData[x+23*32] = BG_HORZ_EDGE_TILE|TILE_FLIP_VERT|BORDER_PALETTE;
-    mapData[x+22*32] = BG_SOLID_TILE|BORDER_PALETTE;
-  }
-  // left over top edge tile...
-  mapData[SECOND_TILEBANK_0+0] = BG_HORZ_EDGE_TILE|BORDER_PALETTE;
-  // left over bottom edge tile...
-  mapData[SECOND_TILEBANK_0+23*32] = BG_HORZ_EDGE_TILE|TILE_FLIP_VERT|BORDER_PALETTE;
-  
-  // left and right edges
-  for (int y=1; y < 23; y++) {
-    // left
-    mapData[y*32] = BG_VERT_EDGE_TILE|BORDER_PALETTE;
-    mapData[1+y*32] = BG_SOLID_TILE|BORDER_PALETTE;
-    
-    // right edge
-    mapData[SECOND_TILEBANK_0+1+y*32] = BG_VERT_EDGE_TILE|TILE_FLIP_HORZ|BORDER_PALETTE;
-    mapData[SECOND_TILEBANK_0+y*32] = BG_SOLID_TILE|BORDER_PALETTE;
-    
-  }
-#endif
 }
 
 void Arena::setBorderColour(unsigned char playerid) {
