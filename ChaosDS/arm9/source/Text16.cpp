@@ -121,8 +121,8 @@ void Text16::clear()  {
 void Text16::clearMessage() {
   print(EMPTY_MESSAGE, MESSAGE_X,MESSAGE_Y, 12);
 }
-void Text16::displayMessage(const char * message) {
+void Text16::displayMessage(const char * message, unsigned short color) {
   print(EMPTY_MESSAGE, MESSAGE_X,MESSAGE_Y, 12);
-  setColour(12, Color(0,30,30));
+  setColour(12, color);
   print(message, MESSAGE_X,MESSAGE_Y, 12);
 }

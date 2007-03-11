@@ -25,7 +25,7 @@ class GameState
     void mainLoopExecute();
 
     //! @return the curent screen.
-    ScreenI * currentScreen() const;
+    inline ScreenI * currentScreen() const;
 
   private:
     unsigned char m_gameFrames;
@@ -66,6 +66,10 @@ inline void GameState::setNextScreen(ScreenI * c)
     m_nextScreen = 0;
   }
   m_nextScreen = c;
+}
+inline ScreenI * GameState::currentScreen() const
+{
+  return m_currentScreen;
 }
 
 #endif

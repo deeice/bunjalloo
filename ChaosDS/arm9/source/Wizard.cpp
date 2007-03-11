@@ -681,8 +681,7 @@ bool Wizard::isCastAllowed() const
   // check spell is in range .... call 9786
   if (not arena.isSpellInRange(spellId)) {
     text16.clearMessage();
-    text16.setColour(12, Color(30,31,0));
-    text16.displayMessage("OUT OF RANGE");
+    text16.displayMessage("OUT OF RANGE", Color(30,31,0));
     return false;
   }
   int creature, underneath, flags, frame;
@@ -711,8 +710,7 @@ bool Wizard::isCastAllowed() const
   // do LOS check...
   if (arena.isBlockedLOS()) {
     text16.clearMessage();
-    text16.displayMessage("NO LINE OF SIGHT");
-    text16.setColour(12, Color(0,30,31)); // lblue
+    text16.displayMessage("NO LINE OF SIGHT", Color(0,30,31)); // lblue
     return false;
   }
   // call spell anim, etc...
@@ -737,4 +735,123 @@ void Wizard::doAiMovement()
 bool Wizard::hasTargetSquare() const
 {
   return m_computer->hasTargetSquare();
+}
+
+
+void Wizard::kill()
+{
+#if 0
+  // code from b3c9
+  remove_cursor();
+  delay(4);
+  dead_wizards++;
+  // do a sound fx..
+  u8 deadid = arena[0][target_index]-WIZARD_INDEX;
+  move_screen_to(target_index);
+  // convert the x, y target location to y, x tile locations
+  u8 x, y, i, j;
+  u8 pal = 9;
+  // load the wizard pal into 10 too...
+  load_bg_palette(10, 9);
+  s8 y2_1, y2_2, x2_1, x2_2;
+  get_yx(target_index, &y, &x);
+  clear_square(x-1, y-1);
+  
+  PlayLoopedSoundFX(SND_SCREAM, 8);
+  // FIXME: Looped sounds are not too good...
+  
+  for (j = 0; j < 0x8; j++) {
+    
+    get_yx2(target_index, &y, &x);
+    y2_1 = y;
+    y2_2 = y;
+    x2_1 = x;
+    x2_2 = x;
+    // loop over 29 frames and draw the wizard "breaking"
+    
+    // set the player colour...
+    if (j == 7) {
+      // clear palette 10 to make the end of run gfx effect
+      // palette 10 is the final one
+      clear_palette(10);
+    } else {
+      BGPaletteMem[16*pal+WIZARD_COLOUR] = chaos_cols[j];
+    }
+    for (i = 0; i < 0x1D; i++) {
+      
+      if (y2_1-1 != 0) {
+        // draw the wiz line upwards...
+        y2_1--;
+        set_palette8(x-1, y2_1-1, pal);
+        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
+            WizardGFX[players[deadid].image].pWizardData->pMap, x-1, y2_1-1, 0);
+      }
+      if (y2_2+1 != 0x14) {
+        // draw the wiz line downwards...
+        y2_2++;
+        set_palette8(x-1, y2_2-1, pal);
+        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
+            WizardGFX[players[deadid].image].pWizardData->pMap, x-1, y2_2-1, 0);
+      }
+      if (x2_1-1 != 0) {
+        // draw the wiz line left
+        x2_1--;
+        set_palette8(x2_1-1, y-1, pal);
+        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
+            WizardGFX[players[deadid].image].pWizardData->pMap, x2_1-1, y-1, 0);
+      }
+      if (x2_2+1 != 0x1E) {
+        // draw the wiz line right
+        x2_2++;
+        set_palette8(x2_2-1, y-1, pal);
+        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
+            WizardGFX[players[deadid].image].pWizardData->pMap, x2_2-1, y-1, 0);
+      }
+      if (x2_1 != 1 && y2_1 != 1) {
+        set_palette8(x2_1-1, y2_1-1, pal);
+        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
+            WizardGFX[players[deadid].image].pWizardData->pMap, x2_1-1, y2_1-1, 0);
+      }
+      if (x2_2 != 0x1D && y2_1 != 1) {
+        set_palette8(x2_2-1, y2_1-1, pal);
+        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
+            WizardGFX[players[deadid].image].pWizardData->pMap, x2_2-1, y2_1-1, 0);
+      }
+      
+      if (x2_1 != 1 && y2_2 != 0x13) {
+        set_palette8(x2_1-1, y2_2-1, pal);
+        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
+            WizardGFX[players[deadid].image].pWizardData->pMap, x2_1-1, y2_2-1, 0);
+      }
+      
+      if (x2_2 != 0x1D && y2_2 != 0x13) {
+        set_palette8(x2_2-1, y2_2-1, pal);
+        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
+            WizardGFX[players[deadid].image].pWizardData->pMap, x2_2-1, y2_2-1, 0);
+      }
+      if (i & 1)
+        wait_vsync_int();
+    }
+    
+    if (pal == 9)
+      pal = 10;
+    else
+      pal = 9;
+  }
+  PlaySoundFX(SND_URGH);
+  clear_palettes();
+  load_all_palettes();
+  set_border_col(current_player);
+  
+  players[arena[0][target_index] - WIZARD_INDEX].modifier_flag |= 0x10;
+  
+  arena[0][target_index] = arena[5][target_index];
+  arena[5][target_index] = 0;
+  
+  delay(10);
+  
+  destroy_all_creatures(deadid);
+  if (!IS_CPU(current_player))
+    redraw_cursor();
+#endif
 }

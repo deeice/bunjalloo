@@ -38,5 +38,11 @@ namespace Misc
    * Use this to keep animating the screen during the delay.
    */
   void delay(int time, bool callMainLoop=true);
+  
+  
+  /** Confirm an action. This call blocks until A or B is pressed.
+   * @return true if A is pressed, false if B is pressed.
+   */
+  bool confirm();
 }
 #endif

@@ -13,6 +13,7 @@ class Arena
     //! number that represents a wizard-type creature
     static const int WIZARD_INDEX;
     static const int HEIGHT;
+    static const int ARENA_SIZE;
 
     /** Get the distance between 2 squares.
      * @param square1 the start index, equal to x + y * 16
@@ -190,6 +191,9 @@ class Arena
     /** has the cpu cast disbelieve on the gicen index.*/
     bool hasDisbelieveCast(int index) const;
 
+    void setMoved(int index);
+    bool hasMoved(int index) const;
+
     /** is the indexed square an illusion.  */
     bool isIllusion(int index);
     /** Set the flag that indicates the thing in this square has had disbelieve cast on it. */
@@ -213,7 +217,25 @@ class Arena
 
     void highlightCreatures(int playerId);
     void highlightTargetCreations(); 
-    
+
+    //! checks the frame - if it is 4 then the creature here is dead.
+    //! @return true if there is a dead creature in this square.
+    bool isDead(int index) const;
+
+    /** Move selected creature from start index to target index.
+     * @return true if the move caused a wizard to end its turn.
+     */
+    bool doSuccessfulMove(int selectedCreature);
+
+    /** Helper for movement checks. */
+    void ownerAt(int x, int y, int &surround_creature) const;
+
+    /** helper function for movement. Removes the creature at targetindex*/
+    void killCreature();
+
+    void leaveCorpse();
+    void killUndead();
+
   private:
     nds::Background * m_bg;
     nds::Sprite * m_cursor;

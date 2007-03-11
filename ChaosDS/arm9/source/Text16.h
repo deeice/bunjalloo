@@ -1,6 +1,7 @@
 #ifndef Text16_h_seen
 #define Text16_h_seen
 #include "Background.h"
+#include "Palette.h"
 
 class Text16
 {
@@ -51,7 +52,8 @@ class Text16
     /*! @brief Show an in-game message.
      * @param message The message to display
      */ 
-    void displayMessage(const char * message);
+    void displayMessage(const char * message, 
+        unsigned short color=nds::Color(0,30,30));
 
     /*! @brief convert an integer to a character string using decimal format.
      * @param n the integer value

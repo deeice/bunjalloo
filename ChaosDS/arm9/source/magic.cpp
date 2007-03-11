@@ -61,6 +61,7 @@ void cast_creature()
 
 void cast_chaos_law()
 {}
+
 void cast_trees_castles()
 {}
 void cast_fire_goo()

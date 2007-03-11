@@ -21,7 +21,6 @@
 extern const unsigned short _binary_bg_raw_start[];
 
 // static defines
-static const int ARENA_SIZE(0x9f);
 static const int ARENA_SCREEN(0);
 static const int ARENA_BORDER_1(2);
 static const int ARENA_BORDER_2(1);
@@ -70,6 +69,7 @@ static const char s_attackPref[48] = {
 static const int X_LIMIT(31);
 const int Arena::HEIGHT(23);
 const int Arena::WIZARD_INDEX(0x2A);
+const int Arena::ARENA_SIZE(0x9f);
 
 // namespace usage
 using namespace nds;
@@ -1031,8 +1031,7 @@ void Arena::highlightTargetCreations()
     
     Text16::instance().clearMessage();
     // cyan
-    Text16::instance().setColour(12, Color(30,31,0));
-    Text16::instance().displayMessage(str);
+    Text16::instance().displayMessage(str, Color(30,31,0));
     
     Misc::waitForLetgo();
     m_highlightCreations = HIGHLIGHT_INIT;
@@ -1083,3 +1082,159 @@ void Arena::popAnimation()
     drawPopFrame(x, y, i);
   }
 }
+
+void Arena::setMoved(int index)
+{
+  m_arena[3][index] |= 0x80;
+}
+bool Arena::hasMoved(int index) const
+{
+  return m_arena[3][index]&0x80;
+}
+bool Arena::isDead(int index) const
+{
+  return m_arena[2][index] == 4;
+}
+
+bool Arena::doSuccessfulMove(int selectedCreature)
+{
+  u8 start_a3 = m_arena[3][m_startIndex];
+  u8 start_a4 = m_arena[4][m_startIndex];
+  
+  if (selectedCreature >= WIZARD_INDEX 
+      and selectedCreature != m_arena[0][m_startIndex])
+  {
+    // the start creature is a wizard, but the visible thing is not
+    // i.e. wizard moving out of something
+    start_a4 = 0;
+  } 
+  else 
+  {
+    // af88
+    if (m_arena[5][m_startIndex] != 0) {
+      // af93  
+      m_arena[0][m_startIndex] = m_arena[5][m_startIndex]; //creature in arena 5??
+      m_arena[2][m_startIndex] = 4; // dead
+      m_arena[5][m_startIndex] = 0; //clear creature in arena 5 (not sure about this)
+    } else {
+      m_arena[0][m_startIndex] = 0; // 1 in the game...
+    }
+  }
+  // afa3..
+  m_arena[1][m_startIndex] = 1; //update anim
+  m_arena[4][m_startIndex] = 0; // nothing here
+  
+  // sort out the target square
+  
+  bool wizardEnd(false);
+  // continue at afc7....
+  if (m_arena[0][m_targetIndex] == 0 || isDead(m_targetIndex)) {
+    // afdf
+    u8 old_target = m_arena[0][m_targetIndex];
+    m_arena[0][m_targetIndex] = selectedCreature;
+    m_arena[5][m_targetIndex] = old_target;
+    m_arena[1][m_targetIndex] = 1;
+    m_arena[2][m_targetIndex] = 0;
+    m_arena[3][m_targetIndex] = start_a3;
+    m_arena[4][m_targetIndex] = start_a4;
+  } else {
+    // afd7
+    // something in target square and thing there is not dead
+    // mustbe a wiz moving to a mount or castle
+    m_arena[4][m_targetIndex] = selectedCreature;
+    // jump b007...
+    wizardEnd = true;
+  }
+  m_startIndex = m_targetIndex;
+  return wizardEnd;
+}
+
+
+// based on be52 - get the owner of creature at x,y
+void Arena::ownerAt(int x, int y, int &surround_creature) const
+{
+  if (y == 0 || y > 10)
+    return;
+  if (x == 0 || x > 15) 
+    return;
+  
+  // based on code at bdd1
+  int index = (x-1) + ( (y-1) * 16);
+  
+  if (m_arena[0][index] == 0) 
+    return;
+  if (isDead(index))
+    return;
+  
+  int owner = 0;
+  if (m_arena[0][index] >= SPELL_GOOEY_BLOB) {
+    // a blob or more
+    if ((m_arena[0][index] - WIZARD_INDEX) < 0)   //if it is a creature/spell from 22-28
+      return;
+    owner = m_arena[0][index] - WIZARD_INDEX + 1;
+    if (owner == (m_currentPlayer + 1))
+      return;
+  } else {
+    // an actual alive creature, get the owner
+    owner = this->owner(index) + 1;
+    if (owner == (m_currentPlayer + 1))
+      return;
+  }
+  
+  if (owner != 0) {
+    surround_creature = owner;
+  }
+}
+
+//! kill the creature in target_index
+void Arena::killCreature()
+{
+  u8 arena0 = m_arena[0][m_targetIndex]; 
+  u8 arena4 = m_arena[4][m_targetIndex];
+  m_arena[4][m_targetIndex] = 0;
+  if (arena0 == SPELL_GOOEY_BLOB) {
+    // uncover whatever was underneath
+    m_arena[3][m_targetIndex] = m_arena[5][m_targetIndex];
+  }
+  else if (Options::instance().option(Options::OLD_BUGS) == 0)
+  {
+    // the famous "undead wizard" bug is caused by not updating the
+    // m_arena[3] flag properly
+    if (arena4 >= Arena::WIZARD_INDEX) {
+      m_arena[3][m_targetIndex] = arena4-Arena::WIZARD_INDEX;
+    }
+  }
+
+  /* Another mini-bug here - if we kill a ridden mount, the wizard appears
+   * in the square (that's correct), but the mount leaves no corpse. Needs
+   * a fix?  m_arena[5] holds corpse info... */ 
+  m_arena[0][m_targetIndex] = arena4;
+  if ((arena0 > SPELL_MANTICORE) or isUndead(m_targetIndex) or isIllusion(m_targetIndex))
+    m_arena[5][m_targetIndex] = 0;
+  else
+    m_arena[5][m_targetIndex] = arena0;
+}
+
+void Arena::leaveCorpse()
+{
+  m_arena[1][m_targetIndex] = 1;
+  m_arena[2][m_targetIndex] = 4;
+  Misc::delay(12);
+  // do sound fx
+}
+
+void Arena::killUndead()
+{
+  // creature doesn't leave a corpse
+  // check arena 5 val
+  if (m_arena[5][m_targetIndex] == 0) {
+    m_arena[0][m_targetIndex] = 0;
+    m_arena[1][m_targetIndex] = 1;
+  } else {
+    m_arena[0][m_targetIndex] = m_arena[5][m_targetIndex];
+    m_arena[1][m_targetIndex] = 1;
+    m_arena[2][m_targetIndex] = 4;
+    m_arena[5][m_targetIndex] = 0;
+  }
+  Misc::delay(6);
+} 

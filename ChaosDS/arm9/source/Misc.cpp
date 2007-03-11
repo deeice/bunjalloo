@@ -137,3 +137,21 @@ void Misc::waitForLetgo()
     }
   }
 }
+
+bool Misc::confirm()
+{
+  waitForLetgo();
+  int yes_pressed = 0;
+  while (yes_pressed == 0) {
+    swiWaitForVBlank();
+    scanKeys();
+    u16 keysSlow = keysDownRepeat();
+    if (keysSlow & KEY_A)
+      yes_pressed = 2;
+    if (keysSlow & KEY_B)
+      yes_pressed = 1;
+  }
+  waitForLetgo();
+  yes_pressed--;
+  return yes_pressed;
+}

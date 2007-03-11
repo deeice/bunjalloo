@@ -66,6 +66,24 @@ class Wizard : public Computer
     {
       return m_modifierFlag & 0x8;
     }
+    inline void setHasShadowForm(bool has)
+    {
+      if (has) {
+        m_modifierFlag |= 0x8;
+      } else {
+        m_modifierFlag &= ~0x8;
+      }
+    }
+    inline int attackModifier() const
+    {
+      return m_modifierFlag & 7;
+    }
+    inline int defenceModifier() const
+    {
+      return (m_modifierFlag & 0xc0)>>6;
+    }
+    inline int combat() const { return m_combat; }
+    inline int defence() const { return m_defence; }
 
     //! @return the current level. 0 is human.
     int level() const;
@@ -171,6 +189,21 @@ class Wizard : public Computer
 
     bool hasTargetSquare() const;
 
+    inline Computer * computer() const
+    {
+      return m_computer;
+    }
+
+    inline int rangedCombat() const
+    {
+      return m_rangedCombat;
+    }
+    inline int range() const
+    {
+      return m_range;
+    }
+
+    void kill();
 
   private:
     char m_name[12];

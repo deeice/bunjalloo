@@ -200,11 +200,10 @@ void Casting::printSuccessStatus()
   text16.clearMessage();
   if (not s_castSuccess) {
     // print spell fails in purple
-    text16.setColour(12, Color(31,0,30)); // purple
-    text16.displayMessage("SPELL FAILS");
+    text16.displayMessage("SPELL FAILS", Color(31,0,30));
   } else {
-    text16.setColour(12, Color(31,31,31)); // white
-    text16.displayMessage("SPELL SUCCEEDS");
+    // white
+    text16.displayMessage("SPELL SUCCEEDS", Color(31,31,31));
   }
   delay(30);
 }

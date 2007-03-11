@@ -45,7 +45,7 @@ export PALETTES := $(shell ls -d $(TOPDIR)/common/img/palette*)
 
 arm9/$(TARGET).elf:
 	$(MAKE) -C common
-	$(MAKE) -C arm9
+	$(MAKE) -C arm9 -j 2
 
 #---------------------------------------------------------------------------------
 clean:
@@ -60,7 +60,7 @@ wmb:
 #tags: $(shell ls arm[7-9]/source/*.{cpp,h}) 
 #	ctags -R .
 
-cscope.out : $(shell find .. $(DEVKITPRO)/libnds/ -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl')
+cscope.out : $(shell find .. $(DEVKITPRO)/libnds/  -type f -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl')
 	@rm -f cscope.files
 	@find .. $(DEVKITPRO)/libnds/ -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl' > cscope.files
 	@-cscope -b -k -q
