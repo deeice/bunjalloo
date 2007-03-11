@@ -1,7 +1,11 @@
+#include "SpellData.h"
 #include "Wizard.h"
+#include "WizardCPU.h"
 #include "Arena.h"
 #include "Misc.h"
 #include "Casting.h"
+
+static void doDisbelieveCast(void);
 
 void cast_disbelieve()
 {
@@ -9,20 +13,21 @@ void cast_disbelieve()
   player.setCastAmount(1);
   
   if (player.isCpu()) {
-#if 0 
-    ai_cast_disbelieve();
+    player.aiCast(WizardCPU::DISBELIEVE);
     
-    if (target_square_found)
+    if (player.hasTargetSquare())
       doDisbelieveCast();
-#endif
   } else {
     Misc::waitForLetgo();
-#if 0
-    if (arena[0][target_index] == 0 || arena[0][target_index] >= SPELL_GOOEY_BLOB)
+    Arena & arena(Arena::instance());
+    int targetIndex(arena.targetIndex());
+    if (arena.at(0,targetIndex) == 0 
+        or arena.at(0,targetIndex) >= SPELL_GOOEY_BLOB)
+    {
       return;
-    
+    }
+
     doDisbelieveCast();
-#endif
     player.setCastAmount(0);
   }
   
@@ -37,7 +42,7 @@ void cast_creature()
   player.setCastAmount(1);
   if (player.isCpu()) {
     // do the cpu creature cast ai routine 
-    player.aiCastCreature();
+    player.aiCast(WizardCPU::CREATURE);
   } else {
     // call code at 9856 - validates player's spell cast
     if (not player.isCastAllowed()) {
@@ -94,39 +99,23 @@ void cast_turmoil()
 
 // implements the casting of disb... 
 // code from 9a21 and used by AI and humans
-void doDisbelieveCast(void) {
+static void doDisbelieveCast(void) 
+{
   
   Casting::spellAnimation();
-#if 0
-  temp_success_flag = 0;
-  for (int i = 0; i < 4; ++i)
-    swiWaitForVBlank();
-  // check arena 3 value, bit 4
-  if (IS_ILLUSION(arena[3][target_index])) {
-    // place the arena 4 riding wizard, or 0, in arena 0
-    arena[0][target_index] = arena[4][target_index];
-    arena[4][target_index] = 0;
-    if (not Options::instance().option(OLD_BUGS)
-        and arena[5][target_index] != 0
-        and arena[0][target_index] == 0) 
-    {
-      // what about dead bodies?
-      // but only if arena 4 was empty
-      // bug fix v0.7a (disbelieve failed with old bugs turned off)
-      arena[0][target_index] = arena[5][target_index]; //creature in arena 5
-      arena[2][target_index] = 4; // dead
-      arena[5][target_index] = 0; //clear creature in arena 5 
-    }
-    
-    pop_animation();
-    temp_success_flag = 1;
+  Casting::setSpellSuccess(false);
+  Misc::delay(4, false);
+  Arena & arena(Arena::instance());
+  int targetIndex(arena.targetIndex());
+  if (arena.isIllusion(targetIndex)) {
+    arena.doDisbelieve();
+    Casting::setSpellSuccess(true);
   }
   Misc::delay(10);
   Casting::printSuccessStatus();
   // set bit 5 for this creature (won't matter if disbelieved already...)
   // bit 5 is "has been disbelieved" and is used for the AI to know which creatures
   // are known to be real and which are not known... 
-  arena[3][target_index] |= 0x20;
-#endif
+  arena.setDisbelieved(targetIndex);
 }
 

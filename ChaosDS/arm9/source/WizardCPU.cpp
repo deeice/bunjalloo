@@ -4,6 +4,8 @@
 #include "SpellData.h"
 #include "Misc.h"
 #include "Casting.h"
+#include "Movement.h"
+#include "GameState.h"
 
 // create the priority table - stored at d3f2
 // will contain {priority, index} for all living enemy creatures
@@ -70,6 +72,20 @@ void WizardCPU::doAiSpell()
     }
   }
 }
+void WizardCPU::aiCast(int castType) 
+{
+  switch (castType)
+  {
+    case CREATURE:
+      aiCastCreature();
+      break;
+    case DISBELIEVE:
+      aiCastDisbelieve();
+      break;
+    default:
+      break;
+  }
+}
 
 void WizardCPU::aiCastCreature() 
 {
@@ -90,10 +106,7 @@ void WizardCPU::aiCastCreature()
   
   int inRange = createRangeTable(strongestIndex, range);
   
-  // how to do this?
   // have a table, and an index. uses m_targetSquareFound to do stuff
-  // also needs access to other Wizard and Arena innards :(
-  // Maybe create a class (AIHandler?) that is inside the Wizard?
   m_tableIndex = inRange*2+1;
   setFurthestInrange();
   
@@ -113,7 +126,7 @@ void WizardCPU::aiCastCreature()
       }
     }
     
-    if (Casting::setSpellSuccess())
+    if (Casting::calculateSpellSuccess())
       Arena::instance().creatureSpellSucceeds();
     Casting::printSuccessStatus();
     
@@ -362,7 +375,8 @@ void WizardCPU::createEnemyTableEntry(int wizardid)
     if (creature > SPELL_DISBELIEVE and creature < SPELL_MAGIC_CASTLE) 
     {
       if (arena.owner(i) != wizardid) {
-        s_priorityTable[m_tableIndex] += (arena.attackPref(creature) / 4) + m_wizard.priorityOffset();
+        s_priorityTable[m_tableIndex] += (arena.attackPref(creature) / 4) + 
+          m_wizard.priorityOffset();
       }
     }
     
@@ -378,13 +392,13 @@ void WizardCPU::getSurroundingSquarePrios(u8 index, u8 strongest) {
   
   resetPriorityTable();
   u8 i;
-  u8 surround_index = 0;
+  u8 surroundIndex = 0;
   u16 range;
   u8 lookat_i;
   LUT_index = 0;
   for (i = 0; i < 8; i++) {
-    lookat_i = apply_position_modifier(index, surround_index);
-    surround_index++;
+    lookat_i = applyPositionModifier(index, surroundIndex);
+    surroundIndex++;
     if (lookat_i == 0) {
       // out of bounds
       continue;
@@ -439,25 +453,26 @@ void WizardCPU::doAiMovement()
   if (not m_wizard.timid()) 
   {
     //  ca92...
-    // setup_wizard_move();
+    setupMove();
     // if we are in a safe place, don't move
     int arena0 = Arena::instance().at(0, Arena::instance().startIndex());
     if (   arena0 == SPELL_MAGIC_WOOD 
         or arena0 == SPELL_MAGIC_CASTLE 
         or arena0 == SPELL_DARK_CITADEL)
     { 
-#if 0
       // set has moved...
-      has_wizard_moved = 1;
+      m_hasMoved = true;
+#if 0
       arena[3][start_index] = arena[3][start_index] | 0x80;
 #endif
-    } else {
+    }
+    else {
 #if 0
       // move wizard...
       // select the wizard...
-      has_wizard_moved = 0;
+      m_hasMoved = false;
       // and we have the move table in memory..
-      move_table_created = 1;
+      m_moveTableCreated = true;
       
       movement_a(); // select the wizard...
       delay(30);
@@ -486,4 +501,231 @@ void WizardCPU::doAiMovement()
   }
   delay(20);
 #endif
+}
+
+// called at the start of lightning casting amongst other stuff...
+// creates the priority table based on all enemy creatures and wizards
+// wizards are rated higher than creatures and table is ordered and 
+// the first value in the table is pointed to by value in cd86
+void WizardCPU::createAllEnemiesTable()
+{
+  // based on cc56
+  m_wizard.setPriorityOffset(0x3c);
+  // create the priority table based on "strongest wizard"
+  createTableWizards();
+  m_wizard.setPriorityOffset(0x20);
+  m_tableIndex = 14;
+  int tableSize = 9;
+  Arena & arena(Arena::instance());
+  // now create the rest of the table, for the enemy creatures
+  for (int i = 0; i < 0x9e; i++) {
+    // call c67a
+    int tmp(arena.containsEnemy(i));
+    
+    if (tmp != 0) {
+      tableSize++;
+      s_priorityTable[m_tableIndex++] = tmp;
+      s_priorityTable[m_tableIndex++] = i;
+    }
+  }
+  Misc::orderTable(tableSize,s_priorityTable);
+  m_tableIndex = 1;
+  
+  m_wizard.setPriorityOffset(0);
+}
+
+void WizardCPU::aiCastDisbelieve() {
+  Arena & arena(Arena::instance());
+  int currentIndex = arena.startIndex();
+  createAllEnemiesTable();
+  arena.setStartIndex(currentIndex);
+
+  while (s_priorityTable[m_tableIndex] != 0xFF) {
+    int target_index = s_priorityTable[m_tableIndex];
+    
+
+    if (arena.at(0,target_index) < SPELL_GOOEY_BLOB and not arena.hasDisbelieveCast(target_index)  ) {
+      // is a creature and has not had disbeleive cast on it yet...
+      m_targetSquareFound = true;
+      m_wizard.printNameSpell();
+      arena.setTargetIndex(target_index);
+      Misc::delay(80);
+      return;
+    }
+    
+    m_tableIndex += 2;
+  }
+  // got to here? must have run out of decent targets
+  arena.setTargetIndex(currentIndex);
+  m_targetSquareFound = false;
+  
+}
+
+bool WizardCPU::hasTargetSquare() const
+{
+  return m_targetSquareFound;
+}
+
+
+// defines for the special moves the wizard can make, with wings or on a mount
+#define SPECIAL_MOVE_MOUNT 1
+#define SPECIAL_MOVE_WINGS 2
+
+// ca92.
+void WizardCPU::setupMove() {
+  resetPriorityTable();
+  // get the arena square with the wizard in it...
+  Arena & arena(Arena::instance());
+  int currentPlayer(arena.currentPlayer());
+  int tmpWiz(arena.wizardIndex(currentPlayer));
+  arena.setTargetIndex(tmpWiz);
+  int targetIndex(tmpWiz);
+  int targetCreature(arena.at(0,targetIndex));
+  // check the value in arena 0 at the wizard's location
+  if ( targetCreature >= SPELL_PEGASUS 
+      and targetCreature <= SPELL_MANTICORE) 
+  {
+    // wizard on a flying mount...
+    // cade...
+    // call cbb9
+    flyingMove(SPECIAL_MOVE_MOUNT);
+    m_hasMoved = true;
+    return;
+  } else {
+    Movement * movement(dynamic_cast<Movement*>(GameState::instance().currentScreen()));
+    bool tmp_is_flying(false);
+    if (movement)
+    {
+      tmp_is_flying = movement->isFlying();
+    }
+
+    // not on a flying mount (may be on a regular one though)
+    if (targetCreature >= Arena::WIZARD_INDEX 
+	and Wizard::player(currentPlayer).hasMagicWings() 
+      /* bug fix 26/12/04 
+       * If wiz is flying and engaged to undead, causes problems
+       */
+      && tmp_is_flying)
+    {
+      // has magic wings and is in the open
+      // cafb....
+      // call cbc7
+      flyingMove(SPECIAL_MOVE_WINGS);
+      m_hasMoved = true;
+      return;
+    } else {
+      // cb06...
+      int surroundIndex = 0;
+      m_tableIndex = 0;
+      int targetIndex(arena.targetIndex());
+      for (int i = 0; i < 8; i++) {
+        int lookat_i = Arena::applyPositionModifier(targetIndex, surroundIndex);
+        surroundIndex++;
+        if (lookat_i == 0) {
+          // out of bounds
+          continue;
+        }
+        lookat_i--;
+        int creatureLookedAt(arena.at(0, lookat_i));
+        if (creatureLookedAt >= SPELL_MAGIC_CASTLE 
+	    and creatureLookedAt <= SPELL_DARK_CITADEL) 
+	{
+          s_priorityTable[m_tableIndex++] = 0;
+          s_priorityTable[m_tableIndex++] = i;
+          m_targetSquareFound = true;
+        } else
+        if (creatureLookedAt == SPELL_MAGIC_WOOD) {
+          s_priorityTable[m_tableIndex++] = 1;
+          s_priorityTable[m_tableIndex++] = i;
+          m_targetSquareFound = true;
+        } else 
+        if (creatureLookedAt >= SPELL_HORSE 
+            and creatureLookedAt <= SPELL_MANTICORE
+            and arena.owner(lookat_i) == currentPlayer 
+            and arena.at(4,lookat_i) == 0) // is not mounted...
+        {
+          // is a mount and is ours and no one is on it 
+          s_priorityTable[m_tableIndex++] = 2;
+          s_priorityTable[m_tableIndex++] = i;
+          m_targetSquareFound = true;
+        } else {
+          // is none of the above
+          s_priorityTable[m_tableIndex++] = get_priority_val(lookat_i)+3;
+          s_priorityTable[m_tableIndex++] = i;
+        }
+          
+      }
+      // cb8b
+      Misc::orderTable(7, s_priorityTable);
+      arena.setStartIndex(tmpWiz);
+      arena.setTargetIndex(tmpWiz);
+      m_tableIndex = 0xF;
+    } // end if has magic wings/out in open
+  
+  } // end if wizard on mount
+  // cba2
+  m_moveTableCreated = true;
+}
+
+
+// used for wizards on flying mounts or with wings
+void WizardCPU::flyingMove(int type)
+{
+  Arena & arena(Arena::instance());
+  // based on code at cbb9/cbc7
+  if (type == SPECIAL_MOVE_MOUNT) {
+    tmp_movement_allowance = 1 +
+      (s_spellData[arena.at(0,target_index)].movement*2); 
+  } else {
+    // wings
+    tmp_movement_allowance = 0xd;
+  }
+  
+  resetPriorityTable();
+  
+  //cbcf
+  m_targetCount = 1;
+  m_tableIndex = 0;
+#if 0
+  u8 tmp_wiz = target_index;
+  u8 i, x, y;
+  u16 tmp_dist;
+  u8 tmp_prio_val;
+  // loop over arena to get priority of all squares in range
+  for (i = 0; i < 0x9e; i++) {
+    get_yx(i, &y, &x);
+    if (x < 0x10) {
+      // in bounds
+      // get the distance from wizard start square to this square (i)
+      get_distance(tmp_wiz, i, &tmp_dist);
+      if (tmp_movement_allowance >= tmp_dist) {
+        // is in range of the wiz start square...
+        // find the distance/danger of all enemies relative to this square  (call cd92)
+        // store as priority // code to here is at cc0d
+        tmp_prio_val = get_priority_val(i);
+        prio_table[LUT_index++] = tmp_prio_val;
+        prio_table[LUT_index++] = i;
+        m_targetCount++;
+      }
+    }  
+  }
+  // cc31
+  order_table(m_targetCount, prio_table);
+  start_index = tmp_wiz;
+  LUT_index--;
+#endif
+}
+
+
+
+// taken from cd92 - gets the "danger" of the square at i
+// this is calculated based on enemy creature distance and how dangerous that creature is
+u8 get_priority_val(u8 index) {
+  u8 i;
+  u8 total = 0;
+  start_index = index;
+  for (i = 0; i < 0x9e; i++) {
+    total += contains_enemy(i); // gets the priority val for this square from start_index
+  }
+  return total;
 }

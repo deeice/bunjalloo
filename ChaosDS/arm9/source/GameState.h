@@ -24,6 +24,9 @@ class GameState
     //! execute a frame - calls handle keys and animate on current screen
     void mainLoopExecute();
 
+    //! @return the curent screen.
+    ScreenI * currentScreen() const;
+
   private:
     unsigned char m_gameFrames;
     ScreenI * m_currentScreen;

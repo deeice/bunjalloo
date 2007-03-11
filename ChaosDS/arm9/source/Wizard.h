@@ -159,14 +159,17 @@ class Wizard : public Computer
     void printNameSpell() const;
     inline int timid() const { return m_timid; }
 
-    inline int priorityOffset() const { return 0; }
+    inline int priorityOffset() const { return m_priorityOffset; }
+    inline void setPriorityOffset(int offset) { m_priorityOffset = offset; }
 
     inline int id() const { return m_id; }
 
     // Computer routines
-    virtual void aiCastCreature();
+    virtual void aiCast(int);
     virtual void doAiSpell();
     virtual void doAiMovement();
+
+    bool hasTargetSquare() const;
 
 
   private:
@@ -193,6 +196,7 @@ class Wizard : public Computer
     unsigned char m_id;
     unsigned char m_castAmount; // temp_cast_amount in original code.
     Computer * m_computer;
+    unsigned char m_priorityOffset;
 
     Wizard();
     ~Wizard();

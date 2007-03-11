@@ -26,6 +26,11 @@ class Arena
     static Arena & instance();
 
     static void getXY(int index, int & x, int & y);
+    
+    /** Convert index from a square to one of its surroundings.
+     * @return index+1, index 0 means out of bounds.
+     */
+    static int applyPositionModifier(int square, int index);
 
     /*! @brief Reset the arena map values.  */
     void reset();
@@ -173,14 +178,28 @@ class Arena
     void drawSpellcastFrame(int x, int y, int frame);
     void creatureSpellSucceeds();
 
-    bool containsEnemy(int index);
+    int containsEnemy(int index);
     int owner(int index) const;
     //! fixme; nothing to do with the m_wizardIndex below!
     int wizardIndex(int id) const;
     int wizardId(int index) const;
     int attackPref(int c) const;
+    /** Does the square contain an undead. Undead may be from the flags or
+     * "natural" behaviour of a creature (vampire, zombie, etc). */
     bool isUndead(int index) const;
+    /** has the cpu cast disbelieve on the gicen index.*/
+    bool hasDisbelieveCast(int index) const;
 
+    /** is the indexed square an illusion.  */
+    bool isIllusion(int index);
+    /** Set the flag that indicates the thing in this square has had disbelieve cast on it. */
+    void setDisbelieved(int index);
+    /**
+     * Shuffles the things about in the arena table for when disbelieve 
+     * is cast successfully. Checks for old bugs option for when disbelieve 
+     * is cast and a dead body is underneath. Casts on current targetIndex
+     */
+    void doDisbelieve();
 
     inline int startIndex() const { return m_startIndex; }
     inline int wizardIndex() const { return m_wizardIndex; }
@@ -245,9 +264,6 @@ class Arena
 
     // set the current index for all targets
     void setCurrentIndex(int i);
-    // from a square to one of its surroundings
-    // returns index+1, if index is 0 it is out of bounds
-    static int applyPositionModifier(int square, int index);
 
     /** called at the end of the moves round
      * resets the movement flags so that the creatures can move next time
@@ -265,6 +281,8 @@ class Arena
         unsigned short col, 
         int palette,
         bool negative); 
+    void popAnimation();
+    void drawPopFrame(int x, int y, int frame);
 };
 
 #endif

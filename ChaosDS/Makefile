@@ -23,7 +23,7 @@ export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-all: tags $(TARGET).ds.gba
+all: cscope.out $(TARGET).ds.gba
 
 $(TARGET).ds.gba	: $(TARGET).nds
 
@@ -57,13 +57,13 @@ clean:
 wmb:
 	wmb $(TARGET).nds
 
-tags: $(shell ls arm[7-9]/source/*.{cpp,h}) 
-	ctags -R .
+#tags: $(shell ls arm[7-9]/source/*.{cpp,h}) 
+#	ctags -R .
 
-cscope.out :
-	rm -f cscope.*
-	find .. $(DEVKITPRO)/libnds/ -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl' > cscope.files
-	cscope -b -k -q
+cscope.out : $(shell find .. $(DEVKITPRO)/libnds/ -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl')
+	@rm -f cscope.files
+	@find .. $(DEVKITPRO)/libnds/ -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl' > cscope.files
+	@-cscope -b -k -q
 
 
 docs:

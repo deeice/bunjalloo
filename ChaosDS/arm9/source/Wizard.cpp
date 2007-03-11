@@ -667,7 +667,7 @@ void Wizard::setupHumanPlayerCast()
   // not sure if that is a bug or not
   // e.g. for creatures, this code is called once -> here
   // Magic Wood, it is called here and again just before the cast
-  Casting::setSpellSuccess();
+  Casting::calculateSpellSuccess();
   
 }
 
@@ -719,9 +719,9 @@ bool Wizard::isCastAllowed() const
   return true;
 }
 
-void Wizard::aiCastCreature()
+void Wizard::aiCast(int cast)
 { 
-  m_computer->aiCastCreature(); 
+  m_computer->aiCast(cast); 
 }
 
 void Wizard::doAiSpell()
@@ -734,3 +734,7 @@ void Wizard::doAiMovement()
   m_computer->doAiMovement(); 
 }
 
+bool Wizard::hasTargetSquare() const
+{
+  return m_computer->hasTargetSquare();
+}

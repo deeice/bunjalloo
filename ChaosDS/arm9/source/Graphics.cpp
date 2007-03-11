@@ -81,7 +81,7 @@ void Graphics::setAnimationColour(signed char c)
   m_colour = c;
 }
 
-void Graphics::animateSelection(int pal, Color & c)
+void Graphics::animateSelection(int pal, nds::Color & c)
 {
   s8 r = c.red();
   s8 g = c.green();

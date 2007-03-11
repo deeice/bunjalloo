@@ -10,14 +10,23 @@ class WizardCPU : public Computer
   public:
     WizardCPU(Wizard & theWizard);
 
-    void aiCastCreature();
+    enum Cast_t{
+      DISBELIEVE,
+      CREATURE
+    };
+    void aiCast(int spellType);
     void doAiSpell();
     void doAiMovement();
+    bool hasTargetSquare() const;
+    void endMove();
+
   private:
     bool m_targetSquareFound;
     int m_tableIndex;
     Wizard & m_wizard;
     int m_targetCount;
+    bool m_hasMoved;
+    bool m_moveTableCreated;
 
     int strongestWizard(int attackerIndex);
     void resetPriorityTable();
@@ -27,6 +36,13 @@ class WizardCPU : public Computer
     void createTableEnemies();
     void createEnemyTableEntry(int wizardid);
     void createTableWizards(); 
+
+    void aiCastCreature();
+    void aiCastDisbelieve();
+    void createAllEnemiesTable();
+
+    void setupMove();
+    void flyingMove(int type);
 
 };
 #endif

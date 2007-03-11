@@ -7,7 +7,8 @@ class Computer
   public:
     virtual ~Computer() {}
 
-    virtual void aiCastCreature() = 0;
+    virtual bool hasTargetSquare() const = 0;
+    virtual void aiCast(int spellType) = 0;
     virtual void doAiSpell() = 0;
     virtual void doAiMovement() = 0;
 

@@ -118,7 +118,7 @@ void Casting::startCastRound()
           else if (currentSpellId >= SPELL_VENGEANCE and currentSpellId <= SPELL_JUSTICE) 
           {
             // set up the casting chance first... if fails go to the next player
-            setSpellSuccess();
+            calculateSpellSuccess();
             if (not s_castSuccess) {
               // print spell success/fail message...
               printSuccessStatus();
@@ -214,7 +214,12 @@ bool Casting::spellSuccess()
   return s_castSuccess;
 }
 
-bool Casting::setSpellSuccess() 
+void Casting::setSpellSuccess(bool success)
+{
+  s_castSuccess = success;
+}
+
+bool Casting::calculateSpellSuccess() 
 {
   s_castSuccess = false;
   Wizard & player(Wizard::currentPlayer());
@@ -230,9 +235,6 @@ bool Casting::setSpellSuccess()
       s_worldChaos += spellData.chaosRating;
     } 
   } 
-#ifdef DEBUG
-  s_castSuccess = true;
-#endif
   return s_castSuccess;
 }
 
@@ -272,3 +274,4 @@ void Casting::spellAnimation()
     arena.drawSpellcastFrame(x, y, s_spellframetable[i]);
   }
 }
+

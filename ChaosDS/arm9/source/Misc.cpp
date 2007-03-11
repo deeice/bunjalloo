@@ -95,14 +95,15 @@ bool Misc::keypressWait()
     return false;
 }
 
-void Misc::delay(int time) 
+void Misc::delay(int time, bool callMainLoop) 
 {
   GameState & state(GameState::instance());
   state.resetGameFrame();
   while(state.gameFrame() < time) 
   {
     swiWaitForVBlank();
-    state.mainLoopExecute();
+    if (callMainLoop)
+      state.mainLoopExecute();
   }
 }
 

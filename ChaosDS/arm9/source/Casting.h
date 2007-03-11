@@ -8,7 +8,8 @@ class Casting: public ScreenI
   public:
     //! get the current global chaos value
     static int worldChaos();
-    static bool setSpellSuccess();
+    static void setSpellSuccess(bool success);
+    static bool calculateSpellSuccess();
     static bool spellSuccess();
     static void spellAnimation();
     static void printSuccessStatus();

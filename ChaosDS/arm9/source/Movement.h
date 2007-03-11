@@ -11,6 +11,9 @@ class Movement : public ScreenI
     virtual void vblank();
     virtual void handleKeys();
 
+    //! Is the current movement of a flying creature.
+    bool isFlying() const;
+
   private:
     unsigned char m_selectedCreature;
     unsigned char m_rangeAttack;

@@ -92,7 +92,7 @@ void Text16::print(const char* text, int x, int y , int pal)
 
 // place a single character from the alphabet at position x, y
 // this is used to draw, eg. the ^/v arrow thing
-void Text16::putChar(int ch, int x, int y, int pal, u32 extraFlags) {
+void Text16::putChar(int ch, int x, int y, int pal, unsigned int extraFlags) {
   // put the character in spot x, y with palette pal
   unsigned short * mapData = m_bg->mapData();
   if (ch != 0) {

@@ -7,6 +7,7 @@
 #include "Text16.h"
 #include "ChaosData.h"
 #include "SpellData.h"
+#include "SoundEffect.h"
 #include "Graphics.h"
 #include "Wizard.h"
 #include "WizardData.h"
@@ -739,6 +740,12 @@ bool Arena::isBlockedLOS() const
   return Line::doLine(Line::SIGHT);
 }
 
+void Arena::drawPopFrame(int x, int y, int frame)
+{
+  setPalette8(x*2, y*2, 8);
+  drawGfx8(_binary_disappear_raw_start, _binary_disappear_map_start, x*2, y*2, frame);
+}
+
 void Arena::drawSpellcastFrame(int x, int y, int frame)
 {
   setPalette8(x*2, y*2, 0);
@@ -776,6 +783,7 @@ int Arena::wizardId(int index) const
   }
   return -1;
 }
+
 int Arena::wizardIndex(int id) const
 {
   int wizardId(id+WIZARD_INDEX);
@@ -796,7 +804,7 @@ int Arena::owner(int index) const
 
 // check the square in index to see if it contains a live enemy creature
 // based on code at c67a
-bool Arena::containsEnemy(int index)
+int Arena::containsEnemy(int index)
 {
   int creature = m_arena[0][index];
   if (creature < 2) {
@@ -835,6 +843,10 @@ bool Arena::isUndead(int index) const
 {
   return ( (m_arena[3][index]&(1<<6)) or 
       (m_arena[0][index] >= SPELL_VAMPIRE and m_arena[0][index] <= SPELL_ZOMBIE ) )   ;
+}
+bool Arena::hasDisbelieveCast(int index) const
+{
+  return m_arena[3][index] & 0x20;
 }
 
 void Arena::nextRound()
@@ -1026,5 +1038,48 @@ void Arena::highlightTargetCreations()
     m_highlightCreations = HIGHLIGHT_INIT;
     Text16::instance().clearMessage();
     enableCursor();
+  }
+}
+
+bool Arena::isIllusion(int index)
+{
+ return m_arena[3][index]&(1<<4);
+}
+void Arena::setDisbelieved(int index)
+{
+ m_arena[3][index] |= 0x20;
+}
+
+// the nitty gritty of disbelieve
+void Arena::doDisbelieve()
+{
+  // place the arena 4 riding wizard, or 0, in arena 0
+  m_arena[0][m_targetIndex] = m_arena[4][m_targetIndex];
+  m_arena[4][m_targetIndex] = 0;
+  // This fixes the bug where disbelieve raises a dead creature
+  if (not Options::instance().option(Options::OLD_BUGS)
+      and m_arena[5][m_targetIndex] != 0
+      and m_arena[0][m_targetIndex] == 0) 
+  {
+    // what about dead bodies?
+    // but only if arena 4 was empty
+    // bug fix v0.7a (disbelieve failed with old bugs turned off)
+    m_arena[0][m_targetIndex] = m_arena[5][m_targetIndex]; //creature in arena 5
+    m_arena[2][m_targetIndex] = 4; // dead
+    m_arena[5][m_targetIndex] = 0; //clear creature in arena 5 
+  }
+  popAnimation();
+}
+
+void Arena::popAnimation()
+{
+  int x, y;
+  Arena::getXY(m_targetIndex, x, y);
+  SoundEffect::play(SND_SPELLSUCCESS);
+  x--;
+  y--;
+  for (int i = 0; i < 7; i++) {
+    Misc::delay(2,false);
+    drawPopFrame(x, y, i);
   }
 }

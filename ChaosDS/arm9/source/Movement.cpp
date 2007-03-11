@@ -178,3 +178,8 @@ void Movement::handleKeys()
 #endif
 }
 
+bool Movement::isFlying() const
+{
+  return (m_isFlying != 0);
+}
+
