@@ -1,5 +1,6 @@
 #include <nds/arm9/input.h>
 #include <string.h>
+#include <stdio.h>
 #include "ndspp.h"
 #include "images.h"
 #include "Movement.h"
@@ -260,7 +261,7 @@ void Movement::b(void)
 void Movement::end()
 {
   
-  WizardCPU * cpu  = dynamic_cast<WizardCPU*>(Wizard::currentPlayer().computer());
+  WizardCPU * cpu  = static_cast<WizardCPU*>(Wizard::currentPlayer().computer());
   cpu->endMove();
   m_attacker = 0;
   // set has moved flag...
@@ -324,7 +325,7 @@ void Movement::end()
     // in here...
     if (Wizard::currentPlayer().isCpu())
     {
-      WizardCPU * cpu = dynamic_cast<WizardCPU*>(Wizard::currentPlayer().computer());
+      WizardCPU * cpu = static_cast<WizardCPU*>(Wizard::currentPlayer().computer());
       cpu->createAllEnemiesTable();
       Misc::delay(20);
     }
@@ -421,7 +422,7 @@ void Movement::selectCreature()
 	  } else 
 	  {*/
 	    // "improved"
-          WizardCPU * cpu  = dynamic_cast<WizardCPU*>(Wizard::currentPlayer().computer());
+          WizardCPU * cpu  = static_cast<WizardCPU*>(Wizard::currentPlayer().computer());
           yes_pressed = cpu->dismount();
 	  //}
 	}
@@ -635,7 +636,6 @@ void Movement::moveCreature(int distanceMoved)
   // af50...
   doSuccessfulMove(distanceMoved);
   
-  
 }
 
 // based on af50...
@@ -654,7 +654,7 @@ void Movement::doSuccessfulMove(int distanceMoved)
   SoundEffect::play(SND_WALK);
   // flag that we need to remake the CPU movement table
 
-  WizardCPU * cpu  = dynamic_cast<WizardCPU*>(Wizard::currentPlayer().computer());
+  WizardCPU * cpu  = static_cast<WizardCPU*>(Wizard::currentPlayer().computer());
   cpu->setMoveTableCreated(0);
   
   // tidy up the start square

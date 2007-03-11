@@ -2,16 +2,19 @@
 #include "Interrupt.h"
 #include "GameState.h"
 
+static bool s_processFrames(true);
 void Interrupt::processVblank()
 {
-  GameState::instance().incrFrame();
-  GameState::instance().checkVblankAnimation();
+  if (s_processFrames) {
+    GameState::instance().incrFrame();
+    GameState::instance().checkVblankAnimation();
+  }
 }
 void Interrupt::enable()
 {
-  irqEnable(IRQ_VBLANK);
+  s_processFrames = true;
 }
 void Interrupt::disable()
 {
-  irqDisable(IRQ_VBLANK);
+  s_processFrames = false;
 }
