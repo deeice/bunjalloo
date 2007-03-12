@@ -60,41 +60,99 @@ void cast_creature()
 }
 
 void cast_chaos_law()
-{}
+{
+  // no need for AI on this one... the spell is really scraping the barrel!
+  Wizard & player(Wizard::currentPlayer());
+  // if cpu, print player name and spell
+  if (player.isCpu()) {
+    player.printNameSpell();
+    Misc::delay(80);
+  }
+  
+  // do cast chance and update world chaos
+  Casting::calculateSpellSuccess();
+  
+  // print spell success/fail message...
+  Casting::printSuccessStatus();
+  
+  player.setHasTargetSquare(true);
+  player.setCastAmount(0);
+  
+}
+
+void cast_fire_goo(void){
+  // these are treated the same as normal creatures
+  cast_creature();
+}
 
 void cast_trees_castles()
-{}
-void cast_fire_goo()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_wall()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
 void cast_magic_missile()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_justice()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
 
 void cast_raise_dead()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_subversion()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_magic_shield()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_magic_armour()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_magic_sword()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_magic_knife()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_magic_bow()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_magic_wings()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
+
 void cast_shadow_form()
-{}
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
 
 void cast_turmoil()
-{}
-
+{
+  Wizard::currentPlayer().setHasTargetSquare(false);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 

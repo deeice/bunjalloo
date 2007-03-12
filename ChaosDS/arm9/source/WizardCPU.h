@@ -20,9 +20,14 @@ class WizardCPU : public Computer
     void doAiSpell();
     void doAiMovement();
     bool hasTargetSquare() const;
+    void setHasTargetSquare(bool);
     void endMove();
     bool dismount() const;
     void setMoveTableCreated(bool created);
+
+    inline void setFlyingTargetFound(bool found) {
+      m_flyingTargetFound = found;
+    }
 
   private:
     bool m_targetSquareFound;
@@ -31,6 +36,7 @@ class WizardCPU : public Computer
     int m_targetCount;
     bool m_hasMoved;
     bool m_moveTableCreated;
+    bool m_flyingTargetFound;
 
     int strongestWizard(int attackerIndex);
     void resetPriorityTable();
@@ -45,10 +51,15 @@ class WizardCPU : public Computer
     void aiCastDisbelieve();
     void createAllEnemiesTable();
 
+    void doThisMovement();
     void setupMove();
     void flyingMove(int type);
     int getPriorityVal(int index);
     void getSurroundingSquarePrios(int index, int strongest);
+    int getBestRangeattack();
+    void doFlyingMove();
+    void setupCreatureMove();
+    int getBestIndex();
 
 };
 #endif

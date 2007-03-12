@@ -29,6 +29,10 @@ class Wizard : public Computer
     static void initialisePlayers();
     /*! @brief get the next wizard that is not CPU controlled. */
     static int nextHuman(int startIndex=0);
+    /** Get the current dead wizard count. */
+    static int deadWizards();
+    static void resetDeadWizards();
+    static void incrDeadWizards();
 
     /*! @brief draw a wizard glyph at the given tile position.
      * @param x the x tile position.
@@ -188,6 +192,7 @@ class Wizard : public Computer
     virtual void doAiMovement();
 
     bool hasTargetSquare() const;
+    void setHasTargetSquare(bool);
 
     inline Computer * computer() const
     {
@@ -236,6 +241,7 @@ class Wizard : public Computer
     void reset();
     
     static Wizard s_players[8];
+    static int s_deadWizards;
 	
 };
 #endif

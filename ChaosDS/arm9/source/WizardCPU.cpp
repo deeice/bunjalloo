@@ -1,8 +1,10 @@
+#include <stdio.h>
 #include "WizardCPU.h"
 #include "Wizard.h"
 #include "Arena.h"
 #include "SpellData.h"
 #include "Misc.h"
+#include "Text16.h"
 #include "Casting.h"
 #include "Movement.h"
 #include "GameState.h"
@@ -56,10 +58,7 @@ void WizardCPU::doAiSpell()
     // if no good square was found, then go to the next spell
     m_targetSquareFound = false;
     int currentSpellId(m_wizard.selectedSpellId());
-#if 0
-    if (currentSpellId != 0)   // Correct way to do it
-#endif
-    if (currentSpellId > SPELL_DISBELIEVE and currentSpellId < SPELL_MAGIC_CASTLE)
+    if (currentSpellId != 0)
     {
       m_targetSquareFound = true;
       s_spellData[currentSpellId].spellFunction();
@@ -403,7 +402,7 @@ void WizardCPU::getSurroundingSquarePrios(int index, int strongest)
     // add a check in here to make sure we don't
     // tread on a magic wood. This table is ordered largest
     // first. But the potential squares are read starting 
-    // at the end (LUT_index, then LUT_index-2, etc)
+    // at the end (m_tableIndex, then m_tableIndex-2, etc)
     if (Arena::instance().at(0,lookat_i) == SPELL_MAGIC_WOOD) {
       range += 1;  // "increase" the distance so it isn't as appealing
                    // careful not to increase too much, may go backwards!
@@ -455,45 +454,259 @@ void WizardCPU::doAiMovement()
     { 
       // set has moved...
       m_hasMoved = true;
-#if 0
-      arena[3][start_index] = arena[3][start_index] | 0x80;
-#endif
+      Arena::instance().setHasMoved(Arena::instance().startIndex());
     }
     else {
-#if 0
       // move wizard...
       // select the wizard...
       m_hasMoved = false;
       // and we have the move table in memory..
       m_moveTableCreated = true;
       
-      movement_a(); // select the wizard...
-      delay(30);
+      Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
+      movement->a(); // select the wizard...
+      Misc::delay(30);
       // now try moving it to the target square...
-      do_this_movement();
+      doThisMovement();
       
-      delay(10);
-#endif
+      Misc::delay(10);
     }
   }
   // here? move creatures
   // we have already dealt with the wizard...
-#if 0
-  has_wizard_moved = 1;
-  
-  u8 i;
-  for (i = 0; i < 0x9f; i++) {
-    target_index = i;
-    start_index = i;
-    movement_a(); // select the creature...
-    if (selected_creature != 0) {
-      delay(30);
-      do_this_movement();
+  m_hasMoved = true;
+  Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
+  for (int i = 0; i < Arena::ARENA_SIZE; i++) {
+    Arena::instance().setTargetIndex(i);
+    Arena::instance().setStartIndex(i);
+    // select the creature...
+    movement->a();
+    if (movement->selectedCreature() != 0) {
+      Misc::delay(30);
+      doThisMovement();
     }
     
   }
-  delay(20);
-#endif
+  Misc::delay(20);
+  iprintf("End of doAiMovement\n");
+}
+
+void WizardCPU::doThisMovement()
+{
+  // this is effectively the first half of the movement polling
+  // the code in Chaos starts at ae50 and is only called if a 
+  // creature is successfully selected...
+  Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
+  
+  while (movement->selectedCreature() != 0) {
+    
+    if (movement->isFlying()) {
+      // jump b0a8
+      
+      doFlyingMove();
+      // what if it becomes engaged?
+      // in chaos code, jumps to ae7a
+      if (movement->rangeAttack()!= 0) {
+        goto range_attacking;
+      }
+      
+    }
+    else {
+      // walking creature...
+      if (!m_hasMoved) {
+        // ae67 - wizard has not moved yet...
+        if (not m_moveTableCreated) {
+          // need to create the wizard movement table
+          setupMove();
+        }
+      } else {
+        // wizard has moved already.. 
+        // ae70
+        if (not m_moveTableCreated) {
+          // need to create the creature movement table
+          setupCreatureMove();
+        }
+      }  
+      
+      // get the first best square to move to...
+      while(s_priorityTable[m_tableIndex] == 0xFF) {
+        if (m_tableIndex > 2) {
+          m_tableIndex -= 2;
+        } else {
+          movement->b();
+          // if we have range attack after our movement, make sure it is handled properly
+          // best solution is a goto here... otherwise I'd have a load of confusing ifs
+          if (movement->rangeAttack() != 0) {
+            goto range_attacking;
+          }
+          return;
+        }
+      }
+      
+      int target_index = Arena::applyPositionModifier(Arena::instance().startIndex(),
+          s_priorityTable[m_tableIndex]);
+      target_index--;
+      Arena::instance().setTargetIndex(target_index);
+
+      Text16::instance().clearMessage();
+      movement->a(); 
+      
+      Misc::delay(4);
+      
+      if (movement->rangeAttack() != 0) {
+        // could have used break instead of goto
+        // but goto makes the intention clearer
+        goto range_attacking;
+      }
+      
+      // get the next square to move to
+      // note that movement_a() sets "move_table_created" to 0, 
+      // so after a move, we need to remake the table.
+      if (m_tableIndex > 2) {
+        m_tableIndex -= 2;
+      } else {
+	// no good square to go to..
+        movement->b();
+        
+        if (movement->rangeAttack() != 0) {
+          // again, could have used break instead of goto
+          // but goto makes the intention clearer
+          goto range_attacking;
+        }
+        return;
+      }
+
+    }
+    
+  }
+  
+// GOTO label - for range attacks jump here
+range_attacking:
+  while (movement->rangeAttack() != 0)
+  {  
+    // range attack... this is identical for flying or not, wiz or not...
+    // get the best value (call cccb)
+    int ra = getBestRangeattack();
+    if (ra == 0x4b) {
+      // the best square is crap
+      movement->b();
+      return;
+    } else {
+      // the target square is good
+      movement->a();
+    }
+    
+  }
+  Misc::delay(20);
+}
+
+
+// taken from b0a8
+void WizardCPU::doFlyingMove()
+{
+  //char str[30];
+  int currentIndex = Arena::instance().startIndex(); // save the current square, just in case
+  int strongestIndex;
+  Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
+  /* bug fix 26/12/04 
+   * If wiz is flying and engaged to undead, causes problems
+   */
+  if (movement->isEngaged()) {
+    movement->setMovementAllowance(3);
+  }
+  if (not m_flyingTargetFound) {
+    
+    if (not m_hasMoved) {
+      // ae67 - wizard has not moved yet...
+      if (not m_moveTableCreated) {
+        // need to create the wizard movement table
+        setupMove();
+      }
+      // code here really follows after cc31
+      // gets the "worst" square for the wizard (i.e. least dangerous)
+      while(s_priorityTable[m_tableIndex] == 0xFF) {
+        if (m_tableIndex > 2) {
+          m_tableIndex -= 2;
+        } else {
+          movement->b();
+          return;
+        }
+        
+      }
+      strongestIndex = s_priorityTable[m_tableIndex];
+    } else {
+      // wizard has moved already.. 
+      // need to create the creature movement table
+      resetPriorityTable();
+      strongestIndex = strongestWizard(currentIndex);
+      
+    }
+    Arena::instance().setStartIndex(currentIndex);
+    // for creatures, si will be the one closest to the "best" enemy
+    // for wizards, will be the safest square in range
+    int inRange = createRangeTable( strongestIndex, movement->movementAllowance());
+    m_tableIndex = inRange*2 + 1;
+    m_flyingTargetFound = true;
+    
+  }
+  
+  int bi = getBestIndex();
+  
+  if (bi == 0x53) {
+    Arena::instance().setStartIndex(currentIndex);
+    // found one! target_index contains the target square...
+    
+    m_flyingTargetFound = true;
+    Text16::instance().clearMessage();
+    movement->a();
+    Misc::delay(30);
+  } else {
+    // ran out...
+    movement->b();
+    return;
+  }
+ 
+}
+
+// get the best square for range attack
+int WizardCPU::getBestRangeattack()
+{
+  Arena & arena(Arena::instance());
+  // cccb
+  while (s_priorityTable[m_tableIndex] != 0xFF) {
+    
+    // check the value at this index...
+    int creature = arena.at(0,s_priorityTable[m_tableIndex]);
+    if (creature >= Arena::WIZARD_INDEX 
+        or (creature == SPELL_MAGIC_WOOD and arena.at(4,s_priorityTable[m_tableIndex]) != 0)
+        or creature < SPELL_MAGIC_FIRE 
+        or creature == SPELL_SHADOW_WOOD )
+    {
+      // wizard, or wizard in wood, shadow wood or an actual creature
+      // anything >= magic fire will be ignored
+      
+      // ccfd
+      // check if we are trying to attack an undead creature...
+      // original chaos didn't check the arena[3] value for raise deaded creatures
+      // wizards can always attack undead with their magic bow range attacks
+      Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
+      bool attacker_undead = arena.isUndead(arena.startIndex()) or (movement->selectedCreature() >= Arena::WIZARD_INDEX);
+      bool defender_undead = arena.isUndead(s_priorityTable[m_tableIndex]);
+      if ( (not defender_undead) or attacker_undead)
+      {
+        arena.setTargetIndex(s_priorityTable[m_tableIndex]);
+        m_tableIndex++;
+        m_tableIndex++;
+        return 0x53;
+      } // else, trying to range attack undead with a living creature, so get next value... 
+        
+    } 
+    m_tableIndex++;
+    m_tableIndex++;
+  }
+   
+  return 0x4b;
+  
 }
 
 // called at the start of lightning casting amongst other stuff...
@@ -510,7 +723,7 @@ void WizardCPU::createAllEnemiesTable()
   m_tableIndex = 14;
   int tableSize = 9;
   // now create the rest of the table, for the enemy creatures
-  for (int i = 0; i < 0x9e; i++) {
+  for (int i = 0; i < Arena::ARENA_SIZE ; i++) {
     // call c67a
     int tmp(Arena::instance().containsEnemy(i));
     
@@ -522,7 +735,6 @@ void WizardCPU::createAllEnemiesTable()
   }
   Misc::orderTable(tableSize,s_priorityTable);
   m_tableIndex = 1;
-  
   m_wizard.setPriorityOffset(0);
 }
 
@@ -557,6 +769,10 @@ bool WizardCPU::hasTargetSquare() const
 {
   return m_targetSquareFound;
 }
+void WizardCPU::setHasTargetSquare(bool has)
+{
+  m_targetSquareFound = has;
+}
 
 
 // defines for the special moves the wizard can make, with wings or on a mount
@@ -583,7 +799,7 @@ void WizardCPU::setupMove() {
     m_hasMoved = true;
     return;
   } else {
-    Movement * movement(dynamic_cast<Movement*>(GameState::instance().currentScreen()));
+    Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
     bool tmp_is_flying(false);
     if (movement)
     {
@@ -662,7 +878,7 @@ void WizardCPU::setupMove() {
 // used for wizards on flying mounts or with wings
 void WizardCPU::flyingMove(int type)
 {
-  Movement * movement(dynamic_cast<Movement*>(GameState::instance().currentScreen()));
+  Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
   // based on code at cbb9/cbc7
   // default to wings
   int movementAllowance = 13;
@@ -793,4 +1009,45 @@ bool WizardCPU::dismount() const
 void WizardCPU::setMoveTableCreated(bool created)
 {
   m_moveTableCreated = created;
+}
+
+// code based on that at c8c7...
+void WizardCPU::setupCreatureMove()
+{
+  resetPriorityTable();
+  u8 currentIndex = Arena::instance().targetIndex(); // save the current square, just in case
+  u16 strongestIndex;
+  strongestIndex = strongestWizard(currentIndex);
+  getSurroundingSquarePrios(currentIndex, strongestIndex);
+  
+  Arena::instance().setStartIndex(currentIndex);
+  Arena::instance().setTargetIndex(currentIndex);
+  
+  m_moveTableCreated = 1;
+}
+
+// based on code around c9dc
+int WizardCPU::getBestIndex()
+{
+  // get the best index of the prio table.. will be the one 
+  // get the furthest square away still in range...
+  do {
+    if (m_tableIndex - 1 <= 0) 
+      return 0x4b;
+    if (s_priorityTable[m_tableIndex] == 0xFF) {
+      m_tableIndex -= 2;
+    } else {
+      Arena::instance().setTargetIndex(s_priorityTable[m_tableIndex]);
+      // check xpos < 10
+      
+      int x,y;
+      Arena::getXY(s_priorityTable[m_tableIndex], x, y);
+      m_tableIndex -= 2;
+      if (x < 16) {
+        // in range
+        return 0x53;
+      }
+    }
+  } while (m_tableIndex > 0);
+  return 0x4b;
 }

@@ -6,6 +6,7 @@
 class GameMenu: public ScreenI
 {
   public:
+    static void continueGame();
     virtual void show();
     virtual void animate();
     virtual void handleKeys();
@@ -18,6 +19,5 @@ class GameMenu: public ScreenI
     void up(); 
     void down();
     void a();
-    void continueGame();
 };
 #endif

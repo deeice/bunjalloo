@@ -34,6 +34,21 @@ const unsigned short int  s_chaosColours[] = {
   RGB5(20,20,20), //grey
   RGB5(20,20,0), // mustard
 };
+int Wizard::s_deadWizards(0);
+
+int Wizard::deadWizards()
+{
+  return s_deadWizards;
+}
+
+void Wizard::resetDeadWizards()
+{
+  s_deadWizards = 0;
+}
+void Wizard::incrDeadWizards()
+{
+  s_deadWizards++;
+}
 
 Wizard::Wizard():m_computer(new WizardCPU(*this))
 {
@@ -737,6 +752,10 @@ bool Wizard::hasTargetSquare() const
   return m_computer->hasTargetSquare();
 }
 
+void Wizard::setHasTargetSquare(bool has)
+{
+  m_computer->setHasTargetSquare(has);
+}
 
 void Wizard::kill()
 {

@@ -1038,7 +1038,7 @@ void Arena::popAnimation()
   }
 }
 
-void Arena::setMoved(int index)
+void Arena::setHasMoved(int index)
 {
   m_arena[3][index] |= 0x80;
 }

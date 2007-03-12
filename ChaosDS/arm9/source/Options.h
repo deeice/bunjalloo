@@ -98,6 +98,7 @@ class OptionScreen : public ScreenI
 class Options
 {
   public:
+    static const int DEFAULT_ROUNDS;
     static const int OPTION_COUNT;
     enum OptionPosition_t
     {

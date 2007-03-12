@@ -17,6 +17,28 @@ class Movement : public ScreenI
     //! Set the amount the selected thing can move.
     void setMovementAllowance(int ma);
 
+    inline int movementAllowance() const
+    {
+      return m_movementAllowance;
+    }
+
+    //! Press A to select the creature.
+    void a();
+    void b();
+
+    inline int selectedCreature() const
+    {
+      return m_selectedCreature;
+    }
+    inline int rangeAttack() const
+    {
+      return m_rangeAttack;
+    }
+    inline bool isEngaged() const
+    {
+      return m_engagedFlag;
+    }
+
   private:
     unsigned char m_selectedCreature;
     unsigned char m_rangeAttack;
@@ -29,8 +51,7 @@ class Movement : public ScreenI
     unsigned char m_attacker;
     unsigned char m_highlightItem;
     void startMovementRound();
-    void a();
-    void b();
+    void start();
     void end();
     void selectCreature();
     void moveFlyingCreature();

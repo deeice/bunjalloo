@@ -191,7 +191,7 @@ class Arena
     /** has the cpu cast disbelieve on the gicen index.*/
     bool hasDisbelieveCast(int index) const;
 
-    void setMoved(int index);
+    void setHasMoved(int index);
     bool hasMoved(int index) const;
 
     /** is the indexed square an illusion.  */

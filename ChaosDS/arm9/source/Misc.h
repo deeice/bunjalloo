@@ -44,5 +44,7 @@ namespace Misc
    * @return true if A is pressed, false if B is pressed.
    */
   bool confirm();
+
+  void debug();
 }
 #endif

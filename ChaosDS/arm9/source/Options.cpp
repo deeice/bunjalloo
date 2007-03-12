@@ -14,7 +14,7 @@ using namespace std;
 using namespace nds;
 
 
-static const int DEFAULT_ROUNDS = 1;
+const int Options::DEFAULT_ROUNDS = 1;
 const int Options::OPTION_COUNT(BACK+1);
 
 Option Options::s_option[] = {

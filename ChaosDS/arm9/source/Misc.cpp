@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <stdio.h>
 #include <nds.h>
 #include "Misc.h"
 #include "GameState.h"
