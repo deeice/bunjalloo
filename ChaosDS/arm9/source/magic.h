@@ -22,4 +22,6 @@ void cast_shadow_form();
 
 void cast_turmoil();
 
+void doWallCast();
+void doMagicMissile();
 #endif

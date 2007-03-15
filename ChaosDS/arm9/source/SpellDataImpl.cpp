@@ -3,6 +3,7 @@
 #include "Casting.h"
 #include "Text16.h"
 #include "Wizard.h"
+#include "Arena.h"
 
 void SpellData::printName(int x, int y, int pal) const
 {
@@ -90,4 +91,13 @@ int SpellData::mainColour(int frame) const
     }
   }
   return maxIndex;
+}
+
+bool SpellData::isSpellInRange() const
+{
+  int distance = Arena::distance(Arena::instance().wizardIndex(), Arena::instance().targetIndex());
+  if (this->castRange >= distance) {
+    return true;
+  }
+  return false;
 }

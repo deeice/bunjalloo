@@ -14,7 +14,11 @@ class WizardCPU : public Computer
 
     enum Cast_t{
       DISBELIEVE,
-      CREATURE
+      CREATURE,
+      TREES,
+      WALL,
+      MAGIC_MISSILE,
+      JUSTICE,
     };
     void aiCast(int spellType);
     void doAiSpell();
@@ -49,6 +53,9 @@ class WizardCPU : public Computer
 
     void aiCastCreature();
     void aiCastDisbelieve();
+    void aiCastTreesCastles();
+    void aiCastWall();
+
     void createAllEnemiesTable();
 
     void doThisMovement();
@@ -60,6 +67,7 @@ class WizardCPU : public Computer
     void doFlyingMove();
     void setupCreatureMove();
     int getBestIndex();
+
 
 };
 #endif

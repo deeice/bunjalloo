@@ -86,6 +86,23 @@ class Wizard : public Computer
     {
       return (m_modifierFlag & 0xc0)>>6;
     }
+
+    inline bool hasMagicShield() const
+    {
+      return m_modifierFlag & 0x40;
+    }
+    inline bool hasMagicArmour() const
+    {
+      return m_modifierFlag & 0x40;
+    }
+    inline bool hasMagicSword() const
+    {
+      return m_modifierFlag & 0x04;
+    }
+    inline bool hasMagicKnife() const
+    {
+      return m_modifierFlag & 0x07;
+    }
     inline int combat() const { return m_combat; }
     inline int defence() const { return m_defence; }
 

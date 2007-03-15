@@ -8,6 +8,8 @@
 #include "Casting.h"
 #include "Movement.h"
 #include "GameState.h"
+#include "Casting.h"
+#include "magic.h"
 
 // create the priority table - stored at d3f2
 // will contain {priority, index} for all living enemy creatures
@@ -82,6 +84,18 @@ void WizardCPU::aiCast(int castType)
       break;
     case DISBELIEVE:
       aiCastDisbelieve();
+      break;
+    case TREES:
+      aiCastTreesCastles();
+      break;
+    case WALL:
+      aiCastWall();
+      break;
+    case MAGIC_MISSILE:
+      aiCastMagicMissile();
+      break;
+    case JUSTICE:
+      aiCastJustice();
       break;
     default:
       break;
@@ -1050,4 +1064,222 @@ int WizardCPU::getBestIndex()
     }
   } while (m_tableIndex > 0);
   return 0x4b;
+}
+
+void WizardCPU::aiCastTreesCastles()
+{
+  Arena & arena(Arena::instance());
+  int currentLocation = arena.wizardIndex();
+  int tmpCastRange(0xD);
+  
+  Casting::calculateSpellSuccess();
+  m_tableIndex = createRangeTable(currentLocation, tmpCastRange);
+  m_tableIndex = m_tableIndex*2+1;
+  // loop over all spells...
+  for (int i = 0; i < m_wizard.castAmount(); i++) {
+    // FIXME: no need for the flag, all can be done with breaks
+    bool got_square(false);
+    while (!got_square) {
+      int flag = getBestIndex();
+      if (flag == 0x4b) {
+        // no more squares to cast to
+        i = m_wizard.castAmount();
+        break;
+      }
+      int x, y;
+      Arena::getXY(arena.targetIndex(), x, y);
+      if (x == 0x10) {
+        continue;
+      }
+      if (arena.at(0, arena.targetIndex()) != 0) {
+        continue;
+      }
+      
+      
+      if (arena.isTreeAdjacent(m_wizard.selectedSpellId())) {
+        continue;
+      }
+      
+      if (arena.isWallAdjacent(m_wizard.selectedSpellId(), m_wizard.id())) {
+        continue;
+      }
+      
+      if (arena.isBlockedLOS()) {
+        continue;
+      }
+      
+      // do spell cast anim, etc
+      Casting::spellAnimation();
+      // check success...
+      if (Casting::spellSuccess()) {
+        arena.creatureSpellSucceeds();
+        Misc::delay(10);
+      } else {
+        i = m_wizard.castAmount();
+      }
+      got_square = true;
+    }
+    
+  }
+  // assume for cpu that the spell was worth casting 
+  // so cpu doesn't semi check for "line of sight" stuff when seeing if spell is worth casting
+  m_targetSquareFound = true;
+  m_wizard.setCastAmount(0);
+  Casting::printSuccessStatus();
+}
+
+void WizardCPU::aiCastWall()
+{
+  // 9b85
+  // CALL c7bc
+  m_wizard.setCastAmount(4);
+  Arena & arena(Arena::instance());
+
+  int current_index = arena.startIndex();
+  createTableEnemies();
+  arena.setStartIndex(current_index);
+  Misc::orderTable(m_targetCount, s_priorityTable);
+  
+  m_tableIndex = 1;
+  
+  while (s_priorityTable[m_tableIndex] != 0xFF) {
+    if (arena.at(0,s_priorityTable[m_tableIndex]) >= SPELL_SPECTRE )
+      break;
+    if (arena.at(0,s_priorityTable[m_tableIndex]) < SPELL_PEGASUS )
+      break;
+    m_tableIndex += 2;
+  }
+  
+  if (s_priorityTable[m_tableIndex] == 0xFF) {
+    // no decent square
+    m_targetSquareFound = false;
+    m_wizard.setCastAmount(0);
+    return;
+  }
+  
+  // got to here? OK, a "good" square was found for wall.
+  // calculate spell success and update world chaos ...
+  Casting::calculateSpellSuccess();
+  m_wizard.printNameSpell();
+  Misc::delay(80);
+  int inRange = createRangeTable(s_priorityTable[m_tableIndex], 0x9);
+  Text16::instance().clearMessage();
+  
+  m_tableIndex = 2*inRange+1;
+  u8 tmpSquareFound = 0;
+  m_targetSquareFound = false;
+  
+  // the global target_square_found is used as a temporary flag here
+  // tmp_square_found indicates if we find any castable-to squares for this spell at all
+  while (m_wizard.castAmount()) {
+    
+    m_targetSquareFound = 0;
+    setFurthestInrange();
+    // if a suitable square was found, target_sq_found will be 1
+    if (not m_targetSquareFound) {
+      // we have run out of chackable squares!
+      break;
+    }
+    
+    // check that this is a valid square for walls...
+    int x, y;
+    Arena::getXY(arena.targetIndex(), x, y);
+    if (x >= 16) {
+      continue;
+    }
+    if (arena.at(0, arena.targetIndex()) != 0){
+      continue;
+    }
+    if (arena.isWallAdjacent(m_wizard.selectedSpellId(), m_wizard.id())) {
+      continue;
+    }
+    if (arena.isBlockedLOS()){
+      continue;
+    }
+    
+    // we have found a suitable square...
+    tmpSquareFound = 1;
+    doWallCast();
+    
+  }
+  m_wizard.setCastAmount(0);
+  m_targetSquareFound = tmpSquareFound;
+}
+
+// from 9ef9
+void WizardCPU::aiCastJustice()
+{
+  // print name and spell
+  target_square_found = 1;
+  print_name_spell();
+  delay(80);
+  set_spell_success();
+  if (!temp_success_flag) {
+    temp_cast_amount =0;
+    print_success_status();
+    return;
+  }
+  u8 tmp_start = wizard_index;
+  u8 creature;
+  while (temp_cast_amount != 0) {
+    start_index = tmp_start;
+    target_index = start_index;
+    create_all_enemies_table();
+    LUT_index = 1;
+    
+    // get the best index for each cast...
+    while (prio_table[LUT_index] != 0xFF) {
+      // check the creature at this index...
+      creature = arena[0][prio_table[LUT_index]];
+      if (creature >= WIZARD_INDEX || (creature < SPELL_GOOEY_BLOB && creature != 0) ) {
+        // wizard or proper creature
+        target_index = prio_table[LUT_index];
+        LUT_index++;
+        LUT_index++;
+        break;
+      } 
+      LUT_index++;
+      LUT_index++;
+    }
+    if (prio_table[LUT_index] == 0xFF) {
+      return;
+    }
+    delay(60);
+    do_justice_cast();
+    temp_cast_amount--;
+  }
+  
+}
+
+// used for lightning and magic bolt
+// code from 9d8a
+void WizardCPU::aiCastMagicMissile()
+{
+  create_all_enemies_table();
+  
+  target_index = prio_table[LUT_index];
+  while (target_index != 0xFF) {
+    target_index = prio_table[LUT_index];
+    if (arena[0][target_index] == SPELL_SHADOW_WOOD || arena[0][target_index] >= WIZARD_INDEX
+    || arena[0][target_index] < SPELL_MAGIC_FIRE ) {
+      // see if in range...
+      if (is_spell_in_range(wizard_index, target_index, CHAOS_SPELLS.pSpellDataTable[current_spell]->castRange)) {
+        if (!los_blocked(target_index, 0)) {
+          // spell is good!
+          target_square_found = 1;
+          temp_cast_amount = 0;
+          // cas tthe actual spell...
+          print_name_spell();
+          delay(80);
+          do_magic_missile();
+          return;
+        } 
+      }
+    }
+    // got to here? then the spell is not valid... look at the next index
+    LUT_index += 2;
+  }
+  
+  target_square_found = 0;
+  temp_cast_amount = 0;
 }
