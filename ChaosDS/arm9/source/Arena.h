@@ -33,6 +33,8 @@ class Arena
      */
     static int applyPositionModifier(int square, int index);
 
+    static int attackPref(int c);
+
     /*! @brief Reset the arena map values.  */
     void reset();
 
@@ -194,7 +196,6 @@ class Arena
     //! fixme; nothing to do with the m_wizardIndex below!
     int wizardIndex(int id) const;
     int wizardId(int index) const;
-    int attackPref(int c) const;
     /** Does the square contain an undead. Undead may be from the flags or
      * "natural" behaviour of a creature (vampire, zombie, etc). */
     bool isUndead(int index) const;

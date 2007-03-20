@@ -791,7 +791,7 @@ int Arena::containsEnemy(int index)
   
   return (pref - range);
 }
-int Arena::attackPref(int c) const
+int Arena::attackPref(int c)
 {
   return s_attackPref[c];
 }
