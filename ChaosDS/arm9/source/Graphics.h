@@ -7,6 +7,7 @@ class Color;
 class Graphics
 {
   public:
+    static const unsigned short int  s_chaosColours[];
     // static helper functions
     //! initialise the screen setup
     static void initialiseScreen();

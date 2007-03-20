@@ -246,9 +246,27 @@ class Arena
 
     void leaveCorpse();
     void killUndead();
+    void turmoil();
     void popAnimation();
     void splatAnimation();
-    void turmoil();
+    void magicMissileEnd();
+    void justice();
+
+    inline void drawSilhouetteGfx(
+        const unsigned short * gfx, 
+        const unsigned short * map,
+        unsigned short col)
+    {
+      drawSilhouetteGfx(m_targetIndex, gfx, map, col, 11, false);
+    }; 
+    void destroyAllCreatures();
+
+    //! raise the creature at target index and set to current player
+    void raiseDead();
+    //! subvert the creature at target index and set to current player
+    void subvert();
+
+    void wizardDeath(int image);
 
   private:
     nds::Background * m_bg;
@@ -318,6 +336,8 @@ class Arena
         int palette,
         bool negative); 
     void drawPopFrame(int x, int y, int frame);
+    void uncoverSquare(int start, int target);
+    void doSpread(int start, int target);
 };
 
 #endif

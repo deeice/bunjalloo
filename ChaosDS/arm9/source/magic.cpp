@@ -610,56 +610,7 @@ void doMagicMissile()
   
   Misc::delay(2);
   
-  // do the pop animation...
-  arena.popAnimation();
-  
-  // new code...
-  if (arena.underTarget() == 0) {
-    // nothing in arena 4...
-    if (arena.atTarget() >= Arena::WIZARD_INDEX) {
-      // was a wizard, do wizard death anim...
-      Wizard::player(arena.atTarget() - Arena::WIZARD_INDEX).kill();
-    }  else {
-      // remove the creature
-#if 0
-      arena[0][target_index] = 0;
-      if (!Options[OPT_OLD_BUGS] and arena[5][target_index] != 0) {
-        // what about dead bodies?
-        // but only if arena 4 was empty
-        // bug fix v0.7a (disbelieve failed with old bugs turned off, fixed here too)
-        arena[0][target_index] = arena[5][target_index]; //creature in arena 5
-        arena[2][target_index] = 4; // dead
-        arena[5][target_index] = 0; //clear creature in arena 5 
-      }
-#endif
-    }
-    
-  } else {
-#if 0
-    // arena 4 had something in it
-    u8 arena4 = arena[4][target_index];
-    arena[4][target_index] = 0;
-    if (!Options[OPT_OLD_BUGS]) {
-      // an old bug was destroying gooey blob results in creature under blob 
-      // taking the same owner as the blob... 
-      // e.g. wizard 1 blob covers wizard 2 creature
-      // someone kills the blob, wizard 2's creature now belongs to wizard 1!
-      if (arena[0][target_index] == SPELL_GOOEY_BLOB) {
-        arena[3][target_index] = arena[5][target_index];
-      }
-      else {
-        // the famous "undead wizard" bug is caused by not updating the arena[3] flag properly
-        if (arena4 >= Arena::WIZARD_INDEX) {
-          arena[3][target_index] = arena4-Arena::WIZARD_INDEX;
-        }
-      }
-    }
-    
-    arena[0][target_index] = arena4;
-    arena[5][target_index] = 0;
-    
-#endif
-  }
+  arena.magicMissileEnd();
 }
 
 void doJusticeCast()
@@ -674,20 +625,11 @@ void doJusticeCast()
         // do the flashing gfx...
         Misc::delay(2, false);
         if (arena.atTarget() >= Arena::WIZARD_INDEX) {
-#if 0
-          draw_silhouette_gfx(target_index, 
-          WizardGFX[players[arena[0][target_index] - WIZARD_INDEX].image].pWizardData->pGFX, 
-          WizardGFX[players[arena[0][target_index] - WIZARD_INDEX].image].pWizardData->pMap,
-          chaos_cols[j], 11, 0); //  final 0 is to draw the gfx "positive"
-#endif
+          int id(arena.atTarget()-Arena::WIZARD_INDEX);
+          Wizard::player(id).drawJusticeGfx(j);
         }
         else {
-#if 0
-          draw_silhouette_gfx(target_index, 
-          CHAOS_SPELLS.pSpellDataTable[arena[0][target_index]]->pGFX, 
-          CHAOS_SPELLS.pSpellDataTable[arena[0][target_index]]->pGFXMap,
-          chaos_cols[j],11, 0); //  final 0 is to draw the gfx "positive"
-#endif
+          s_spellData[arena.atTarget()].drawJusticeGfx(j);
         }
         
       }
@@ -724,27 +666,10 @@ void doJusticeCast()
     if (arena.atTarget() >= Arena::WIZARD_INDEX) {
       // wizard - destroy all his creations!
       Misc::delay(4);
-#if 0
-      destroy_all_creatures(arena.atTarget() - Arena::WIZARD_INDEX);
-#endif 
+      arena.destroyAllCreatures();
     }
     else {
-      // single creature only...
-      // there's the famous "rise from the dead" bug here...
-#if 0
-      arena[0][target_index] = 0;
-      if (arena.underTarget() != 0) {
-        arena[0][target_index] = arena.underTarget();
-        arena[4][target_index] = 0;
-      } else if (arena[5][target_index] != 0) {
-        arena.atTarget() = arena[5][target_index];
-        arena[5][target_index] = 0;
-        if (!Options[OPT_OLD_BUGS]) {
-          // make sure this creature is dead, as arena 5 creatures are dead bodies
-          arena[2][target_index] = 4;
-        } 
-      }
-#endif
+      arena.justice();
     }
     Misc::delay(4);
   }
@@ -764,15 +689,7 @@ void doRaisedeadCast()
     player.setCastAmount(0);
     return;
   }
-#if 0
-  // set target frame to 0
-  arena[2][target_index] = 0;
-  u8 flag = 0x60; // bits 5 & 6 - is real, is known to the ai to be real and is undead
-  flag |= current_player;
-  // update this creature's flag val so it is undead and this player's
-  arena[3][target_index] = flag;
-  arena[5][target_index] = 0; // just in case
-#endif
+  Arena::instance().raiseDead();
   player.setCastAmount(0);
   // temp_cast_amount--;
 }
@@ -803,13 +720,8 @@ void doSubversion()
     if (r < magic_res ) {
       // subvert SUCCEEDED!!!??! but the random value was less than magic resistance!
       // this is how it was done in the original though...
-#if 0
-      u8 creature_val = arena[3][target_index];
-      creature_val &= 0xF8; // mask lower 3 bits
-      creature_val |= current_player;
-      arena[3][target_index] = creature_val;
-      temp_success_flag = 1;
-#endif
+      arena.subvert();
+      Casting::setSpellSuccess(true);
     } 
   }
   Casting::printSuccessStatus();

@@ -10,6 +10,7 @@ class Wizard : public Computer
 
   public:
     static const unsigned short DEFAULT_MAP[];
+    static const int WIZARD_COLOUR;
   
     /*! @brief set the player instances to their initial state */
     static void resetPlayers();
@@ -33,6 +34,8 @@ class Wizard : public Computer
     static int deadWizards();
     static void resetDeadWizards();
     static void incrDeadWizards();
+
+    void drawJusticeGfx(int frame) const;
 
     /*! @brief draw a wizard glyph at the given tile position.
      * @param x the x tile position.
@@ -154,10 +157,13 @@ class Wizard : public Computer
 
     //! @return the total number of spells available.
     int spellCount() const;
-    inline unsigned char * spellArray()
+    inline unsigned char * spells()
     {
       return m_spells;
     }
+
+    /** Add a spell to the list. Places it in an empty slot.*/
+    void addSpell(int spellId);
 
     //! @return the ability flag.
     int ability() const;

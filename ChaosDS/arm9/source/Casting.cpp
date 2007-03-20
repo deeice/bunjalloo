@@ -10,6 +10,7 @@
 #include "Misc.h"
 #include "Text16.h"
 #include "Line.h"
+#include "VictoryScreen.h"
 
 using namespace nds;
 using Misc::delay;
@@ -141,14 +142,11 @@ void Casting::startCastRound()
     Arena::instance().nextRound();
     // here, check that there are enough wizards left to carry on
     
-#if 0
-    FIXME
-    if (dead_wizards == (Arena::instance().players()-1)) {
+    if (Wizard::deadWizards() == (Arena::instance().players()-1)) {
       // uh oh -  no wizards left, do winner screen
-      win_contest();
+      GameState::instance().setNextScreen(new VictoryScreen(VictoryScreen::WIN));
       return;
     }
-#endif
     GameState::instance().setNextScreen(new Movement());
   }
 }

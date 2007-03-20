@@ -899,7 +899,7 @@ void Movement::makeAttack()
   int targetIndex(arena.targetIndex());
 
   m_attacker = arena.at(0, startIndex);
-  u8 defender = arena.at(0, targetIndex);
+  u8 defender = arena.atTarget();
   s8 attacking_val = 0;
   s8 defending_val = 0;
   u8 attacker_undead = 0;

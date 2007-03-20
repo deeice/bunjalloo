@@ -24,6 +24,8 @@ public:
    */
   bool isSpellInRange() const;
 
+  void drawJusticeGfx(int frame) const;
+
 private:
   void fullText(char * str) const;
 // }

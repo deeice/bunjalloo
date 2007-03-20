@@ -10,6 +10,17 @@
 #include "Wizard.h"
 
 using namespace nds;
+const unsigned short int  Graphics::s_chaosColours[] = {
+  RGB5(31,31,31), // white
+  RGB5(31,31,0), // yellow
+  RGB5(0,31,31), //lightblue
+  RGB5(0,31,0), //green
+  RGB5(31,0,31), //purple
+  RGB5(31,0,0), //red
+  RGB5(0,0,31), //blue
+  RGB5(20,20,20), //grey
+  RGB5(20,20,0), // mustard
+};
 void Graphics::loadPalette(int from, int to)
 {
   Palette p(0,to);

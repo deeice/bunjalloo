@@ -3,6 +3,7 @@
 #include <nds.h>
 #include "ndspp.h"
 #include "Wizard.h"
+#include "Graphics.h"
 #include "Arena.h"
 #include "Misc.h"
 #include "Casting.h"
@@ -16,24 +17,13 @@
 using namespace Misc;
 using nds::Color;
 static const int PLAYER_COUNT(8);
-static const int WIZARD_COLOUR(1);
+const int Wizard::WIZARD_COLOUR(1);
 const unsigned short Wizard::DEFAULT_MAP[] = {
   0, 1,
   2, 3
 };
 
 Wizard Wizard::s_players[PLAYER_COUNT];
-const unsigned short int  s_chaosColours[] = {
-  RGB5(31,31,31), // white
-  RGB5(31,31,0), // yellow
-  RGB5(0,31,31), //lightblue
-  RGB5(0,31,0), //green
-  RGB5(31,0,31), //purple
-  RGB5(31,0,0), //red
-  RGB5(0,0,31), //blue
-  RGB5(20,20,20), //grey
-  RGB5(20,20,0), // mustard
-};
 int Wizard::s_deadWizards(0);
 
 int Wizard::deadWizards()
@@ -175,7 +165,7 @@ void Wizard::initialisePlayers()
       player.m_ability = rand(10)/4;     
     
     // change from index representation to the actual 15 bit colour value
-    // player.m_colour = s_chaosColours[player.m_colour];
+    // player.m_colour = Graphics::s_chaosColours[player.m_colour];
      
     // generate the spells...
     int spellindex = 0;
@@ -207,7 +197,7 @@ void Wizard::initialisePlayers()
       player.m_spells[spellindex] = spellid;
       spellindex++;
     }
-#if 0
+#ifdef CHEATING_DEBUG
     spellindex++; 
     spellid = SPELL_MAGIC_WINGS;
     player.m_spells[spellindex] = spellid;
@@ -309,7 +299,7 @@ void Wizard::updateColour()
 
 unsigned short Wizard::colourRGB() const
 {
-  return s_chaosColours[m_colour];
+  return Graphics::s_chaosColours[m_colour];
 }
 
 Wizard & Wizard::player(int index)
@@ -759,120 +749,37 @@ void Wizard::setHasTargetSquare(bool has)
 
 void Wizard::kill()
 {
-#if 0
+  Arena & arena(Arena::instance());
   // code from b3c9
-  remove_cursor();
-  delay(4);
-  dead_wizards++;
+  arena.enableCursor(false);
+  Misc::delay(4);
+  incrDeadWizards();
   // do a sound fx..
-  u8 deadid = arena[0][target_index]-WIZARD_INDEX;
-  move_screen_to(target_index);
+  //int deadid = arena.atTarget() - Arena::WIZARD_INDEX;
   // convert the x, y target location to y, x tile locations
-  u8 x, y, i, j;
-  u8 pal = 9;
   // load the wizard pal into 10 too...
-  load_bg_palette(10, 9);
-  s8 y2_1, y2_2, x2_1, x2_2;
-  get_yx(target_index, &y, &x);
-  clear_square(x-1, y-1);
+  Graphics::loadPalette(10,9);
+  int x, y;
+  Arena::getXY(arena.targetIndex(), x, y);
+  arena.clearSquare(x-1, y-1);
   
-  PlayLoopedSoundFX(SND_SCREAM, 8);
-  // FIXME: Looped sounds are not too good...
+  // FIXME: Looped sound
+  SoundEffect::play(SND_SCREAM);
   
-  for (j = 0; j < 0x8; j++) {
-    
-    get_yx2(target_index, &y, &x);
-    y2_1 = y;
-    y2_2 = y;
-    x2_1 = x;
-    x2_2 = x;
-    // loop over 29 frames and draw the wizard "breaking"
-    
-    // set the player colour...
-    if (j == 7) {
-      // clear palette 10 to make the end of run gfx effect
-      // palette 10 is the final one
-      clear_palette(10);
-    } else {
-      BGPaletteMem[16*pal+WIZARD_COLOUR] = chaos_cols[j];
-    }
-    for (i = 0; i < 0x1D; i++) {
-      
-      if (y2_1-1 != 0) {
-        // draw the wiz line upwards...
-        y2_1--;
-        set_palette8(x-1, y2_1-1, pal);
-        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
-            WizardGFX[players[deadid].image].pWizardData->pMap, x-1, y2_1-1, 0);
-      }
-      if (y2_2+1 != 0x14) {
-        // draw the wiz line downwards...
-        y2_2++;
-        set_palette8(x-1, y2_2-1, pal);
-        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
-            WizardGFX[players[deadid].image].pWizardData->pMap, x-1, y2_2-1, 0);
-      }
-      if (x2_1-1 != 0) {
-        // draw the wiz line left
-        x2_1--;
-        set_palette8(x2_1-1, y-1, pal);
-        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
-            WizardGFX[players[deadid].image].pWizardData->pMap, x2_1-1, y-1, 0);
-      }
-      if (x2_2+1 != 0x1E) {
-        // draw the wiz line right
-        x2_2++;
-        set_palette8(x2_2-1, y-1, pal);
-        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
-            WizardGFX[players[deadid].image].pWizardData->pMap, x2_2-1, y-1, 0);
-      }
-      if (x2_1 != 1 && y2_1 != 1) {
-        set_palette8(x2_1-1, y2_1-1, pal);
-        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
-            WizardGFX[players[deadid].image].pWizardData->pMap, x2_1-1, y2_1-1, 0);
-      }
-      if (x2_2 != 0x1D && y2_1 != 1) {
-        set_palette8(x2_2-1, y2_1-1, pal);
-        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
-            WizardGFX[players[deadid].image].pWizardData->pMap, x2_2-1, y2_1-1, 0);
-      }
-      
-      if (x2_1 != 1 && y2_2 != 0x13) {
-        set_palette8(x2_1-1, y2_2-1, pal);
-        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
-            WizardGFX[players[deadid].image].pWizardData->pMap, x2_1-1, y2_2-1, 0);
-      }
-      
-      if (x2_2 != 0x1D && y2_2 != 0x13) {
-        set_palette8(x2_2-1, y2_2-1, pal);
-        draw_gfx8(WizardGFX[players[deadid].image].pWizardData->pGFX,
-            WizardGFX[players[deadid].image].pWizardData->pMap, x2_2-1, y2_2-1, 0);
-      }
-      if (i & 1)
-        wait_vsync_int();
-    }
-    
-    if (pal == 9)
-      pal = 10;
-    else
-      pal = 9;
-  }
-  PlaySoundFX(SND_URGH);
-  clear_palettes();
-  load_all_palettes();
-  set_border_col(current_player);
+  arena.wizardDeath(m_image);
+
+  SoundEffect::play(SND_URGH);
+  Graphics::clearPalettes();
+  Graphics::loadAllPalettes();
+  arena.setBorderColour(arena.currentPlayer());
   
-  players[arena[0][target_index] - WIZARD_INDEX].modifier_flag |= 0x10;
+  m_modifierFlag |= 0x10;
   
-  arena[0][target_index] = arena[5][target_index];
-  arena[5][target_index] = 0;
+  Misc::delay(10);
   
-  delay(10);
-  
-  destroy_all_creatures(deadid);
-  if (!IS_CPU(current_player))
-    redraw_cursor();
-#endif
+  arena.destroyAllCreatures();
+  if (currentPlayer().isCpu())
+    arena.enableCursor();
 }
 
 // set up the spell, do the cast the effect
@@ -925,3 +832,24 @@ void Wizard::setHasMagicWings()
     m_modifierFlag |= 0x20;
 }
 
+void Wizard::drawJusticeGfx(int frame) const
+{
+  Arena::instance().drawSilhouetteGfx(
+      s_wizardData[m_image].gfx,
+      s_wizardData[m_image].map,
+      Graphics::s_chaosColours[frame] );
+}
+
+void Wizard::addSpell(int spellId)
+{
+  // find an empty slot for the spell
+  int k = 3;
+  for (int j = 0; j < 0x13; j++) {
+    if (m_spells[k] == 0) {
+      m_spells[k] = spellId;
+      m_spellCount++;
+      break;
+    }
+    k+=2;
+  }
+}

@@ -48,7 +48,7 @@ void WizardCPU::doAiSpell()
   }
   
   m_wizard.setCastAmount(0);
-  unsigned char * spells(m_wizard.spellArray());
+  unsigned char * spells(m_wizard.spells());
   int spellCount(m_wizard.spellCount());
   spells[0] = 12 + Misc::rand(10);
   Misc::orderTable(spellCount, spells);
@@ -1277,21 +1277,21 @@ void WizardCPU::aiCastMagicMissile()
         or arena.atTarget() >= Arena::WIZARD_INDEX
         or arena.atTarget() < SPELL_MAGIC_FIRE )
     {
-#if 0
       // see if in range...
-      if (is_spell_in_range(wizard_index, target_index, CHAOS_SPELLS.pSpellDataTable[current_spell]->castRange)) {
-        if (!los_blocked(target_index, 0)) {
+      
+      if (s_spellData[m_wizard.selectedSpellId()].isSpellInRange())
+      {
+        if (not arena.isBlockedLOS()) {
           // spell is good!
           m_targetSquareFound = 1;
           m_wizard.setCastAmount(0);
           // cas tthe actual spell...
-          print_name_spell();
-          delay(80);
-          do_magic_missile();
+          m_wizard.printNameSpell();
+          Misc::delay(80);
+          doMagicMissile();
           return;
         } 
       }
-#endif
     }
     // got to here? then the spell is not valid... look at the next index
     m_tableIndex += 2;

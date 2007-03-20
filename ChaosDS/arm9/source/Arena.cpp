@@ -825,13 +825,278 @@ void Arena::unsetMovedFlags()
   }
 }
 
+// called at the end of the casting round
+// based on code at 9f50.. 
 void Arena::spreadFireBlob()
-{}
-void Arena::destroyCastles()
-{}
-void Arena::randomNewSpell()
-{}
+{
+  unsetMovedFlags();
+  for (int i = 0; i < ARENA_SIZE; i++)
+  {
+    m_targetIndex = i;
+    
+    if (hasMoved(i)) {
+      continue;
+    }
+    int spreadCreature = atTarget();
+    if (spreadCreature < SPELL_GOOEY_BLOB) {
+      continue;
+    }
+    if (spreadCreature >= SPELL_MAGIC_WOOD) {
+      continue;
+    }
+    int this_owner = owner(m_targetIndex);
+    int r = Misc::rand(10);
+    
+    if (r < 0x9) {
+      if (spreadCreature != SPELL_MAGIC_FIRE) {
+        r = Misc::rand(10);
+        if (r > 0x8) {
+          // jump to a0c6...
+          // do uncover creature routine
+          uncoverSquare(i, m_targetIndex);
+          continue;
+        }
+      }
 
+      r = Misc::rand(10);
+      while (r >= 0x8) {
+        r = Misc::rand(10);
+      }
+      m_targetIndex = applyPositionModifier(m_targetIndex, r);
+      r++;
+      if (m_targetIndex == 0) {
+        continue;
+      } else 
+        m_targetIndex--;
+      
+      // do in range check... 
+      int dist = distance(i, m_targetIndex);
+      if (dist > 4) {
+        continue;
+      }
+      
+      // target_creature is the thing that we will cover
+      int target_creature = atTarget();
+      if (target_creature != 0) {
+        if (target_creature < WIZARD_INDEX) {
+          // is NOT a wizard...
+          if (target_creature >= SPELL_MAGIC_CASTLE 
+              or target_creature == SPELL_MAGIC_WOOD ) {
+            // a magic wood or castle, etc
+            // jump to a0c6...
+            // do uncover creature routine
+            uncoverSquare(i, m_targetIndex);
+            continue;
+          }
+          
+          if (m_arena[2][m_targetIndex] != 4) {
+            // if not dead
+            int target_owner = owner(m_targetIndex);
+            if (target_owner == this_owner) {
+              continue;  
+            }
+            if (target_creature <= SPELL_MANTICORE && target_creature >= SPELL_HORSE
+                && m_arena[4][m_targetIndex] >= WIZARD_INDEX) {
+              // if the creature is a mount and has a wizard on it
+              // a011...
+              if ((m_arena[4][m_targetIndex] - WIZARD_INDEX) == this_owner) { 
+                // do nothing - own blob can't kill
+                continue;
+              }
+              // clear arena 4 (wizard) and place wizard in arena 0...
+              m_arena[0][m_targetIndex] = m_arena[4][m_targetIndex];
+              m_arena[4][m_targetIndex] = 0x00;
+              
+              // a033... kill wizard
+              Wizard::player(atTarget() - WIZARD_INDEX).kill();
+              // jump to a09b 
+              doSpread(i, m_targetIndex);
+              continue;
+              
+            } 
+            // a03d
+            if (spreadCreature == SPELL_MAGIC_FIRE) {
+              // jump a075 - for fire
+              // get defence of target creature
+              unsigned char defence = s_spellData[target_creature].defence + Misc::rand(10);
+              unsigned char attack  = Misc::rand(10) + 5;
+              
+              if (attack > defence ) {
+                // jump a0c6
+                uncoverSquare(i, m_targetIndex);
+                continue;
+              } 
+              // jump a09b...
+            } else { //if (spreadCreature == SPELL_GOOEY_BLOB)
+              // gooey blob
+              if (target_creature >= SPELL_MAGIC_FIRE) {
+                // jump a0c6 - uncover creature routine
+                uncoverSquare(i, m_targetIndex);
+                continue;
+              } 
+              if (not isDead(m_targetIndex)) {
+                // creature alive.. set arena 4 with the current creature and cover it
+                m_arena[4][m_targetIndex] = m_arena[0][m_targetIndex];
+                if (Options::instance().option(Options::OLD_BUGS) != 0) {
+                  // old bugs on...
+                  // a066
+                  // I think the plan here was to set the creature's owner, the first 3 bits
+                  m_arena[5][m_targetIndex] = owner(m_targetIndex); // bug here
+                }
+                else {
+                  // old bug removed here...
+                  // what about undead and illusionary flags?
+                  m_arena[5][m_targetIndex] = m_arena[3][m_targetIndex];
+                }
+                
+              } // else jump to a09b - target dead
+            }
+            
+          } // else target is dead
+          // jump to a09b
+        } else {
+          // "jump a011" - target creature is a wizard
+          
+          if ( (target_creature - WIZARD_INDEX) == this_owner) { 
+            // do nothing - own blob can't kill
+            continue;
+          }
+          
+          // a033 - kill wizard
+          Wizard::player(atTarget() - WIZARD_INDEX).kill();
+          // jmp a09b
+        }
+      } // else  target creature == 0
+      // jump a09b
+      doSpread(i, m_targetIndex);
+    } else {
+      // jump to a0c6...
+      // do uncover creature routine
+      uncoverSquare(i, m_targetIndex);
+    }
+  }
+  
+  
+}
+
+
+void Arena::uncoverSquare(int start, int target)
+{
+  unsigned char r = Misc::rand(10);
+  if (r > 2) {
+    return;
+  }
+  int targetCreature = m_arena[0][target];
+  
+  if (targetCreature != SPELL_MAGIC_FIRE)
+  {
+    r = Misc::rand(10);
+    if (r > 3) {
+      return;
+    }
+  }
+  // remove the blob and show the creature underneath...
+  if (m_arena[4][start] == 0) {
+    
+    m_arena[0][start] = 0;
+    m_arena[5][start] = 0;
+    
+  } else {
+    m_arena[0][start] = m_arena[4][start];
+    m_arena[4][start] = 0;
+    m_arena[3][start] = m_arena[5][start];
+    m_arena[5][start] = 0;
+  }
+  Misc::delay(24);
+}
+
+// code from a09b
+void Arena::doSpread(int start, int target)
+{
+  unsigned char start_creature = m_arena[0][start];
+  
+  m_arena[0][target] = start_creature;
+  m_arena[2][target] = 0; // frame
+  m_arena[3][target] = m_arena[3][start]; // set owner
+  
+  m_arena[3][target] |= 0x80; // set spread flag
+  m_arena[3][start]  |= 0x80; // set spread flag
+  
+  if (start_creature == SPELL_GOOEY_BLOB) {
+    SoundEffect::play(SND_GOOEY);
+  } else if (start_creature == SPELL_MAGIC_FIRE) {
+    SoundEffect::play(SND_FIRE);
+  }
+  
+  Misc::delay(24);
+
+  // at the end of everything, randomly uncover the "spawn" square
+  uncoverSquare(start,start);
+}
+
+// randomly destroy castles at the end of each casting round
+// code originally followed on from gooey blob, but it's here
+// to make it clearer what's going on 
+// a120
+void Arena::destroyCastles()
+{
+  for (int i = 0; i < ARENA_SIZE; i++) {
+    if (m_arena[0][i] >= SPELL_MAGIC_CASTLE 
+        and m_arena[0][i] <= SPELL_DARK_CITADEL)
+    {
+      // is a castle...
+      if (Misc::rand(10) < 8)
+        continue;
+      
+      // got here? then the castle is to be destroyed
+      m_arena[0][i] = m_arena[4][i];
+      m_arena[4][i] = 0;
+      m_targetIndex = i;
+      popAnimation();
+      Misc::delay(4);
+    }
+    
+  } 
+  Misc::delay(20);
+}
+
+// give a player a spell from the magic wood
+void Arena::randomNewSpell()
+{
+  char str[30];
+  for (int i = 0; i < 0x9f; i++) {
+    if (m_arena[0][i] == SPELL_MAGIC_WOOD && m_arena[4][i] != 0) {
+      // is a wood with someone inside
+      if (Misc::rand(10) <= 6)
+        continue;
+      
+      // got here? then the wood has given us a spell!
+      strcpy(str,"NEW SPELL FOR ");
+      int luckyPlayerId(m_arena[4][i] - WIZARD_INDEX);
+      Wizard & luckyPlayer(Wizard::player(luckyPlayerId));
+
+      strcat(str,luckyPlayer.name());
+      Text16::instance().displayMessage(str, Color(30,30,0)); // yellow
+      Misc::delay(100);
+      
+      // generate new spell...
+      Text16::instance().clearMessage();
+      u8 randspell = Misc::rand(127);
+      while (randspell < SPELL_KING_COBRA or randspell > SPELL_TURMOIL)
+      {
+        randspell = Misc::rand(127);
+      }
+      
+      luckyPlayer.addSpell(randspell);
+
+      m_arena[0][i] = m_arena[4][i];
+      m_arena[4][i] = 0;
+      m_arena[3][i] = luckyPlayerId;   // bug here, what if the wizard was undead? ;)
+      Misc::delay(20);
+    }
+    
+  }
+}
 void Arena::highlightCreatures(int playerId)
 {
   for (int i = 0; i < ARENA_SIZE; i++) {
@@ -1271,3 +1536,252 @@ void Arena::splatAnimation()
   }
 }
 
+void Arena::magicMissileEnd()
+{
+  bool hasOldBugs(Options::instance().option(Options::OLD_BUGS) != 0);
+  // do the pop animation...
+  popAnimation();
+  // new code...
+  if (underTarget() == 0) {
+    // nothing in arena 4...
+    if (atTarget() >= Arena::WIZARD_INDEX) {
+      // was a wizard, do wizard death anim...
+      Wizard::player(atTarget() - Arena::WIZARD_INDEX).kill();
+    }  else {
+      // remove the creature
+      m_arena[0][m_targetIndex] = 0;
+
+      if (not hasOldBugs and m_arena[5][m_targetIndex] != 0) {
+        // what about dead bodies?
+        // but only if arena 4 was empty
+        // bug fix v0.7a (disbelieve failed with old bugs turned off, fixed here too)
+        m_arena[0][m_targetIndex] = m_arena[5][m_targetIndex]; //creature in arena 5
+        m_arena[2][m_targetIndex] = 4; // dead
+        m_arena[5][m_targetIndex] = 0; //clear creature in arena 5 
+      }
+    }
+  } else {
+    // arena 4 had something in it
+    int arena4 = m_arena[4][m_targetIndex];
+    m_arena[4][m_targetIndex] = 0;
+    if (not hasOldBugs) {
+      // an old bug was destroying gooey blob results in creature under blob 
+      // taking the same owner as the blob... 
+      // e.g. wizard 1 blob covers wizard 2 creature
+      // someone kills the blob, wizard 2's creature now belongs to wizard 1!
+      if (m_arena[0][m_targetIndex] == SPELL_GOOEY_BLOB) {
+        m_arena[3][m_targetIndex] = m_arena[5][m_targetIndex];
+      }
+      else {
+        // the famous "undead wizard" bug is caused by not updating the m_arena[3] flag properly
+        if (arena4 >= Arena::WIZARD_INDEX) {
+          m_arena[3][m_targetIndex] = arena4-Arena::WIZARD_INDEX;
+        }
+      }
+    }
+
+    m_arena[0][m_targetIndex] = arena4;
+    m_arena[5][m_targetIndex] = 0;
+  }
+}
+
+void Arena::justice() 
+{
+  // single creature only...
+  // there's the famous "rise from the dead" bug here...
+  m_arena[0][m_targetIndex] = 0;
+  if (underTarget() != 0) {
+    m_arena[0][m_targetIndex] = underTarget();
+    m_arena[4][m_targetIndex] = 0;
+  } 
+  else if (m_arena[5][m_targetIndex] != 0)
+  {
+    m_arena[0][m_targetIndex] = m_arena[5][m_targetIndex];
+    m_arena[5][m_targetIndex] = 0;
+    bool hasOldBugs(Options::instance().option(Options::OLD_BUGS) != 0);
+    if (not hasOldBugs) {
+      // make sure this creature is dead, as arena 5 creatures are dead bodies
+      m_arena[2][m_targetIndex] = 4;
+    } 
+  }
+}
+
+void Arena::destroyAllCreatures()
+{
+  int playerid(m_targetIndex-WIZARD_INDEX);
+  bool samplePlayed(false);
+  for (int frame = 0; frame < 7; frame++) {
+    Misc::delay(5);
+    for (int i = 0; i < ARENA_SIZE; i++) {
+      if (m_arena[0][i] == 0)
+        continue;   
+      if(m_arena[0][i] >= WIZARD_INDEX)
+        continue;
+      if (isDead(i) /* and not IS_ASLEEP(arena[3][i] & 0x8) */ )
+      {
+        // is dead..
+        continue;
+      }
+      // check the owner
+      if ( owner(i) != playerid) {
+        // chek if it is a blob
+        if (m_arena[0][i] != SPELL_GOOEY_BLOB)
+          continue;
+        
+        // blob... is anything under it?
+        if (m_arena[4][i] == 0)
+          continue;
+        // is the trapped creature the effected player?
+        if ((m_arena[5][i] & 7) != playerid)
+          continue;
+      }
+      // draw the pop frame at this creatures location...
+      int x,y;
+      getXY(i, x, y);
+      Graphics::draw_splat_frame(x-1, y-1, frame);
+      
+      // do a sound effect, once only
+      if (!samplePlayed) {
+        SoundEffect::play(SND_SPELLSUCCESS);
+        samplePlayed = true;
+      }
+      
+      // check if we have finished the anim...
+      if (frame == 6) {
+        // get rid of the creature
+        if ( owner(i) != playerid) {
+          m_arena[4][i] = 0;
+          m_arena[5][i] = 0;
+        } else {
+          // same owner as effected wiz
+          if (m_arena[0][i] == SPELL_GOOEY_BLOB && m_arena[4][i] != 0) {
+            // b5a9
+            m_arena[0][i] = m_arena[4][i];
+            m_arena[4][i] = 0;
+            m_arena[3][i] = m_arena[5][i];
+            m_arena[5][i] = 0;
+            continue;
+          }
+          // b5be
+          u8 arena4 = m_arena[4][i];
+          m_arena[4][i] = 0;
+          if (arena4 != 0) {
+            m_arena[0][i] = arena4;
+            continue;
+          }
+          // b5d1
+          //u8 arena5 = m_arena[5][i];
+          m_arena[0][i] = m_arena[5][i];
+          if (m_arena[5][i] != 0) {
+            m_arena[2][i] = 4;
+            m_arena[5][i] = 0;
+          }
+        }
+      }
+    }
+  }
+  
+}
+
+void Arena::raiseDead()
+{
+  // set target frame to 0
+  m_arena[2][m_targetIndex] = 0;
+  int flag = 0x60; // bits 5 & 6 - is real, is known to the ai to be real and is undead
+  flag |= m_currentPlayer;
+  // update this creature's flag val so it is undead and this player's
+  m_arena[3][m_targetIndex] = flag;
+  m_arena[5][m_targetIndex] = 0; // just in case
+}
+
+
+void Arena::subvert()
+{
+  int creatureVal = m_arena[3][m_targetIndex];
+  creatureVal &= 0xF8; // mask lower 3 bits
+  creatureVal |= m_currentPlayer;
+  m_arena[3][m_targetIndex] = creatureVal;
+}
+
+void Arena::wizardDeath(int image)
+{
+  int pal(9);
+  const unsigned short * gfx = s_wizardData[image].gfx;
+  const unsigned short * map = s_wizardData[image].map;
+  // s_wizardData[m_image].gfx, s_wizardData[m_image].map
+  for (int j = 0; j < 0x8; j++)
+  {
+    // in arena? pass j, gfx, map
+    int x, y;
+    getXY2(m_targetIndex,x,y);
+    int y2_1 = y;
+    int y2_2 = y;
+    int x2_1 = x;
+    int x2_2 = x;
+    // loop over 29 frames and draw the wizard "breaking"
+
+    // set the player colour...
+    if (j == 7) {
+      // clear palette 10 to make the end of run gfx effect
+      // palette 10 is the final one
+      Palette p(0,10);
+      p.clear();
+    } else {
+      Palette p(0,pal);
+      p[Wizard::WIZARD_COLOUR] = Graphics::s_chaosColours[j];
+    }
+    for (int i = 0; i < 0x1D; i++) {
+      if (y2_1-1 != 0) {
+        // draw the wiz line upwards...
+        y2_1--;
+        setPalette8(x-1, y2_1-1, pal);
+        drawGfx8(gfx, map, x-1, y2_1-1, 0);
+      }
+      if (y2_2+1 != 0x14) {
+        // draw the wiz line downwards...
+        y2_2++;
+        setPalette8(x-1, y2_2-1, pal);
+        drawGfx8(gfx, map, x-1, y2_2-1, 0);
+      }
+      if (x2_1-1 != 0) {
+        // draw the wiz line left
+        x2_1--;
+        setPalette8(x2_1-1, y-1, pal);
+        drawGfx8(gfx, map, x2_1-1, y-1, 0);
+      }
+      if (x2_2+1 != 0x1E) {
+        // draw the wiz line right
+        x2_2++;
+        setPalette8(x2_2-1, y-1, pal);
+        drawGfx8(gfx, map, x2_2-1, y-1, 0);
+      }
+      if (x2_1 != 1 && y2_1 != 1) {
+        setPalette8(x2_1-1, y2_1-1, pal);
+        drawGfx8(gfx, map, x2_1-1, y2_1-1, 0);
+      }
+      if (x2_2 != 0x1D && y2_1 != 1) {
+        setPalette8(x2_2-1, y2_1-1, pal);
+        drawGfx8(gfx, map, x2_2-1, y2_1-1, 0);
+      }
+
+      if (x2_1 != 1 && y2_2 != 0x13) {
+        setPalette8(x2_1-1, y2_2-1, pal);
+        drawGfx8(gfx, map, x2_1-1, y2_2-1, 0);
+      }
+
+      if (x2_2 != 0x1D && y2_2 != 0x13) {
+        setPalette8(x2_2-1, y2_2-1, pal);
+        drawGfx8(gfx, map, x2_2-1, y2_2-1, 0);
+      }
+      if (i & 1)
+        Misc::delay(1);
+    }
+
+    if (pal == 9)
+      pal = 10;
+    else
+      pal = 9;
+  }
+  m_arena[0][m_targetIndex] = m_arena[5][m_targetIndex];
+  m_arena[5][m_targetIndex] = 0;
+} 

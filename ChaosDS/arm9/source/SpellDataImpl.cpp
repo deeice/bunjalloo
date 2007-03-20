@@ -2,6 +2,7 @@
 #include "SpellData.h"
 #include "Casting.h"
 #include "Text16.h"
+#include "Graphics.h"
 #include "Wizard.h"
 #include "Arena.h"
 
@@ -100,4 +101,11 @@ bool SpellData::isSpellInRange() const
     return true;
   }
   return false;
+}
+
+
+void SpellData::drawJusticeGfx(int frame) const
+{
+  Arena::instance().drawSilhouetteGfx(
+      gfx, map, Graphics::s_chaosColours[frame] );
 }
