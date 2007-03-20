@@ -24,4 +24,15 @@ void cast_turmoil();
 
 void doWallCast();
 void doMagicMissile();
+void doJusticeCast();
+void doRaisedeadCast();
+void doSubversion();
+void doShieldCast();
+void doArmourCast();
+void doSwordCast();
+void doKnifeCast();
+void doBowCast();
+void doWingsCast();
+void doShadowformCast();
+void doTurmoilCast();
 #endif

@@ -17,6 +17,7 @@
 #include "GameState.h"
 #include "VictoryScreen.h"
 #include "Line.h"
+#include "Graphics.h"
 
 using namespace nds;
 
@@ -720,13 +721,6 @@ void Movement::doSuccessfulMove(int distanceMoved)
   
 }
 
-static void draw_splat_frame(int x, int y, int frame) {
-  Arena::instance().setPalette8(x*2,y*2,8);
-  Arena::instance().drawGfx8(_binary_bolt_anim_raw_start, 
-      _binary_bolt_anim_map_start, 
-      x*2, y*2, frame);
-}
-
 static void draw_breath_frame(int x, int y, int frame) {
     
   Arena::instance().setPalette8(x*2,y*2,8);
@@ -789,7 +783,7 @@ void Movement::doRangeAttack()
   }
   else {
     // bloop attack thing
-    animFunc = draw_splat_frame;
+    animFunc = Graphics::draw_splat_frame;
     SoundEffect::play(SND_SPELLSUCCESS);
   }
   int x, y;

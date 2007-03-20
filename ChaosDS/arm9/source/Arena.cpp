@@ -15,6 +15,7 @@
 #include "Line.h"
 #include "Misc.h"
 #include "Options.h"
+#include "Casting.h"
 
 
 // external data
@@ -1193,3 +1194,80 @@ void Arena::killUndead()
   }
   Misc::delay(6);
 } 
+
+
+void Arena::turmoil()
+{
+  unsetMovedFlags();
+  for (int i = 0; i < ARENA_SIZE; i++) {
+    // loop over the whole arena
+    if (m_arena[0][i] == 0)
+      continue;
+    if (hasMoved(i)) // moved and turmoil effect the same BIT
+      continue;
+    // store the start square data
+    int arena0 = m_arena[0][i];
+    int arena2 = m_arena[2][i];
+    int arena3 = m_arena[3][i];
+    int arena4 = m_arena[4][i];
+    int arena5 = m_arena[5][i];
+    /*
+       All these squares are full:
+
+       1  2  3 
+       4  5  6
+       7  8  9
+
+       Start at 0
+       get random, eg "3"
+       Aha! can't go there, get new random square...
+       Whatever square we get is full
+       and so on for ever...
+       */
+    // get a new square to send this baby to
+    int x, y;
+    int r = ARENA_SIZE;
+    while (r >= ARENA_SIZE or x >= 0x10 or m_arena[0][r] != 0)
+    {
+      r = Misc::rand(10) + Misc::rand(255);
+      if (r < 0x9f) {
+        getXY(r, x, y);
+      } else {
+        x = 0x10;
+      }
+    }
+
+    // got a new square to cast to
+    m_targetIndex = r;
+    m_startIndex = i;
+    Casting::spellAnimation();
+
+    m_arena[0][m_targetIndex] = arena0;
+    m_arena[2][m_targetIndex] = arena2;
+    m_arena[3][m_targetIndex] = arena3 | 0x80;   // moved/turmoiled
+    m_arena[4][m_targetIndex] = arena4;
+    m_arena[5][m_targetIndex] = arena5;
+
+    m_arena[0][i] = 0;
+    m_arena[1][i] = 1;
+    m_arena[4][i] = 0;
+    m_arena[5][i] = 0;
+
+    Interrupt::enable();
+    Misc::delay(4);
+    Interrupt::disable();
+  }
+}
+
+void Arena::splatAnimation()
+{
+  int x, y;
+  getXY(m_targetIndex, x, y);
+  x--;
+  y--;
+  for (int i = 0; i < 8; i++) {
+    Misc::delay(2);
+    Graphics::draw_splat_frame(x, y, i);
+  }
+}
+

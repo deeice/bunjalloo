@@ -874,3 +874,54 @@ void Wizard::kill()
     redraw_cursor();
 #endif
 }
+
+// set up the spell, do the cast the effect
+void Wizard::setupRange0Spell()
+{
+  // code from 8357
+  if (isCpu()) {
+    printNameSpell();
+    Misc::delay(80);
+  }
+  Casting::calculateSpellSuccess();
+  Arena::instance().setCurrentPlayerIndex();
+  Arena::instance().enableCursor(false);
+  Casting::spellAnimation();
+}
+
+
+void Wizard::setHasMagicShield()
+{
+  m_image = GFX_MAGIC_SHIELD;
+  m_modifierFlag &= 0x7f;
+  m_modifierFlag |= 0x40;
+}
+void Wizard::setHasMagicArmour()
+{
+    m_image = GFX_MAGIC_ARMOUR;
+    m_modifierFlag |= 0xC0;
+}
+void Wizard::setHasMagicSword()
+{
+    m_image = GFX_MAGIC_SWORD;
+    m_modifierFlag &= 0xfc;      // 11111100  - low 2 bits set to 0
+    m_modifierFlag |= 0x04;
+}
+void Wizard::setHasMagicKnife()
+{
+    m_image = GFX_MAGIC_KNIFE;
+    m_modifierFlag &= 0xf8;      // 11111000  - low 3 bits set to 0
+    m_modifierFlag |= 0x02;
+}
+void Wizard::setHasMagicBow()
+{
+    m_image = GFX_MAGIC_BOW;
+    m_rangedCombat = 3;
+    m_range = 6;
+}
+void Wizard::setHasMagicWings()
+{
+    m_image = GFX_MAGIC_WINGS;
+    m_modifierFlag |= 0x20;
+}
+

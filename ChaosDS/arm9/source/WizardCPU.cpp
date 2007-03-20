@@ -97,6 +97,15 @@ void WizardCPU::aiCast(int castType)
     case JUSTICE:
       aiCastJustice();
       break;
+    case RAISEDEAD:
+      aiCastRaiseDead();
+      break;
+    case SUBVERSION:
+      aiCastSubversion();
+      break;
+    case TURMOIL:
+      aiCastTurmoil();
+      break;
     default:
       break;
   }
@@ -1210,24 +1219,155 @@ void WizardCPU::aiCastWall()
 void WizardCPU::aiCastJustice()
 {
   // print name and spell
-  target_square_found = 1;
-  print_name_spell();
-  delay(80);
-  set_spell_success();
-  if (!temp_success_flag) {
-    temp_cast_amount =0;
-    print_success_status();
+  m_targetSquareFound = true;
+  m_wizard.printNameSpell();
+  Misc::delay(80);
+  
+  if (not Casting::calculateSpellSuccess()) {
+    m_wizard.setCastAmount(0);
+    Casting::printSuccessStatus();
     return;
   }
-  u8 tmp_start = wizard_index;
+  Arena & arena(Arena::instance());
+  u8 tmpStart = arena.wizardIndex();
   u8 creature;
-  while (temp_cast_amount != 0) {
-    start_index = tmp_start;
-    target_index = start_index;
-    create_all_enemies_table();
-    LUT_index = 1;
+  while (m_wizard.castAmount() != 0) {
+    arena.setStartIndex(tmpStart);
+    arena.setTargetIndex(arena.startIndex());
+    createAllEnemiesTable();
+    m_tableIndex = 1;
     
     // get the best index for each cast...
+    while (s_priorityTable[m_tableIndex] != 0xFF) {
+      // check the creature at this index...
+      creature = arena.at(0,s_priorityTable[m_tableIndex]);
+      if (creature >= Arena::WIZARD_INDEX 
+          or (creature < SPELL_GOOEY_BLOB and creature != 0) )
+      {
+        // wizard or proper creature
+        arena.setTargetIndex(s_priorityTable[m_tableIndex]);
+        m_tableIndex++;
+        m_tableIndex++;
+        break;
+      } 
+      m_tableIndex++;
+      m_tableIndex++;
+    }
+    if (s_priorityTable[m_tableIndex] == 0xFF) {
+      return;
+    }
+    Misc::delay(60);
+    doJusticeCast();
+    m_wizard.setCastAmount(m_wizard.castAmount()-1);
+  }
+  
+}
+
+// used for lightning and magic bolt
+// code from 9d8a
+void WizardCPU::aiCastMagicMissile()
+{
+  createAllEnemiesTable();
+  Arena & arena(Arena::instance());
+  
+  arena.setTargetIndex(s_priorityTable[m_tableIndex]);
+  while (arena.targetIndex() != 0xFF) {
+    arena.setTargetIndex(s_priorityTable[m_tableIndex]);
+    if (arena.atTarget() == SPELL_SHADOW_WOOD 
+        or arena.atTarget() >= Arena::WIZARD_INDEX
+        or arena.atTarget() < SPELL_MAGIC_FIRE )
+    {
+#if 0
+      // see if in range...
+      if (is_spell_in_range(wizard_index, target_index, CHAOS_SPELLS.pSpellDataTable[current_spell]->castRange)) {
+        if (!los_blocked(target_index, 0)) {
+          // spell is good!
+          target_square_found = 1;
+          temp_cast_amount = 0;
+          // cas tthe actual spell...
+          print_name_spell();
+          delay(80);
+          do_magic_missile();
+          return;
+        } 
+      }
+#endif
+    }
+    // got to here? then the spell is not valid... look at the next index
+    m_tableIndex += 2;
+  }
+  
+  m_targetSquareFound = false;
+  m_wizard.setCastAmount(0);
+}
+
+// code based on 853b
+void WizardCPU::aiCastSubversion() {
+  // ths usual, store start pos, create table of all enemies, retrieve start pos and order table
+  u8 current_index = start_index;
+  create_table_enemies();
+  start_index = current_index;
+  order_table(target_count, prio_table);
+  
+  // get the best target square
+  LUT_index = 1;
+  u8 creature;
+  u16 tmp_dist;
+  u8 tmp_cast_range = CHAOS_SPELLS.pSpellDataTable[current_spell]->castRange;
+  temp_cast_amount = 1;
+  while (prio_table[LUT_index] != 0xFF) {
+    creature = arena[0][prio_table[LUT_index]];
+    if (arena[4][prio_table[LUT_index]] == 0 && creature < SPELL_GOOEY_BLOB && creature != 0) {
+      // a valid creature for subversion...
+      // compare the start and end locations to see if in spell range
+      get_distance(start_index, prio_table[LUT_index], &tmp_dist);
+      if (tmp_cast_range >= tmp_dist && !los_blocked(prio_table[LUT_index], 0) && 
+      (arena[3][prio_table[LUT_index]] & 0x20) == 0 ) {
+        // in rangem, have los and is not an illusion (because some one has cast disbeilve on it)
+        target_index = prio_table[LUT_index];
+        target_square_found = 1;
+        return;
+      }
+      
+    }
+    LUT_index += 2;
+  }
+  
+  if (prio_table[LUT_index] == 0xFF) {
+    // no decent square
+    target_square_found = 0;
+    temp_cast_amount =0;
+    return;
+  }
+  
+  target_square_found = 0;
+  temp_cast_amount =0;
+}
+
+void WizardCPU::aiCastRaiseDead() {
+  int i;
+  u8 id;
+  target_square_found = 0;
+  // make the byte pair table...
+  reset_priority_table();
+  target_count = 0;
+  LUT_index = 0;
+  for (i = 0; i < 0x9f; i++) {
+    id = arena[0][i];
+    if (arena[2][i] == 4) {
+      // is dead, store the priority for this creature
+      prio_table[LUT_index++] = attack_pref[id];
+      prio_table[LUT_index++] = i;
+      target_count++;
+    }
+  }
+  order_table(target_count, prio_table);
+  
+  // get the best value and try and cast it...
+  // get the best index for each cast...
+  LUT_index = 1;
+  u8 creature;
+  while (temp_cast_amount != 0) {
     while (prio_table[LUT_index] != 0xFF) {
       // check the creature at this index...
       creature = arena[0][prio_table[LUT_index]];
@@ -1244,42 +1384,57 @@ void WizardCPU::aiCastJustice()
     if (prio_table[LUT_index] == 0xFF) {
       return;
     }
-    delay(60);
-    do_justice_cast();
-    temp_cast_amount--;
+    // ok, got a square to cast to... is it in range, los, etc?
+    if (arena[0][target_index] == 0 || arena[2][target_index] != 4) 
+      continue;
+    if (!is_spell_in_range(wizard_index, target_index, CHAOS_SPELLS.pSpellDataTable[current_spell]->castRange)) 
+      continue;
+    if (los_blocked(target_index, 0))
+      continue;
+    
+    // got to here? good, print name and spell and do cast
+    print_name_spell();
+    delay(80);
+    do_raisedead_cast();
+    temp_cast_amount = 0;
   }
-  
+  target_square_found = 1;
 }
 
-// used for lightning and magic bolt
-// code from 9d8a
-void WizardCPU::aiCastMagicMissile()
+// code at 86f9
+void WizardCPU::aiCastTurmoil()
 {
-  create_all_enemies_table();
   
-  target_index = prio_table[LUT_index];
-  while (target_index != 0xFF) {
-    target_index = prio_table[LUT_index];
-    if (arena[0][target_index] == SPELL_SHADOW_WOOD || arena[0][target_index] >= WIZARD_INDEX
-    || arena[0][target_index] < SPELL_MAGIC_FIRE ) {
-      // see if in range...
-      if (is_spell_in_range(wizard_index, target_index, CHAOS_SPELLS.pSpellDataTable[current_spell]->castRange)) {
-        if (!los_blocked(target_index, 0)) {
-          // spell is good!
-          target_square_found = 1;
-          temp_cast_amount = 0;
-          // cas tthe actual spell...
-          print_name_spell();
-          delay(80);
-          do_magic_missile();
-          return;
-        } 
-      }
-    }
-    // got to here? then the spell is not valid... look at the next index
+  // CALL c7bc
+  u8 current_index = start_index;
+  create_table_enemies();
+  start_index = current_index;
+  order_table(target_count, prio_table);
+  
+  // this first part depends not on the index values, like most other spells.
+  // it instead depends on the priority value... the thinking behind this is: 
+  // if there aren't enough enemy creatures really close, it isn't worth casting turmoil
+  LUT_index = 0;
+  u8 total_danger = 0;
+  while (prio_table[LUT_index] != 0) {
+    
+    total_danger += prio_table[LUT_index];
     LUT_index += 2;
+    if (total_danger >= 0x1E) {
+      break;
+    }
   }
   
-  target_square_found = 0;
-  temp_cast_amount = 0;
+  if (prio_table[LUT_index] == 0) {
+    // no decent square
+    target_square_found = 0;
+    temp_cast_amount =0;
+    return;
+  }
+  
+  // the spell is worth casting
+  target_square_found = 1;
+  temp_cast_amount = 1;
+  do_turmoil_cast();
 }
+

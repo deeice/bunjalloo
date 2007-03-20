@@ -149,6 +149,16 @@ class Arena
       return m_arena[i][j];
     }
 
+    inline int atTarget()
+    {
+      return m_arena[0][m_targetIndex];
+    }
+
+    inline int underTarget()
+    {
+      return m_arena[4][m_targetIndex];
+    }
+
     //! get the current round number
     int roundNumber() const;
 
@@ -235,6 +245,9 @@ class Arena
 
     void leaveCorpse();
     void killUndead();
+    void popAnimation();
+    void splatAnimation();
+    void turmoil();
 
   private:
     nds::Background * m_bg;
@@ -303,7 +316,6 @@ class Arena
         unsigned short col, 
         int palette,
         bool negative); 
-    void popAnimation();
     void drawPopFrame(int x, int y, int frame);
 };
 

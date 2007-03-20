@@ -93,7 +93,7 @@ class Wizard : public Computer
     }
     inline bool hasMagicArmour() const
     {
-      return m_modifierFlag & 0x40;
+      return m_modifierFlag & 0x80;
     }
     inline bool hasMagicSword() const
     {
@@ -105,6 +105,13 @@ class Wizard : public Computer
     }
     inline int combat() const { return m_combat; }
     inline int defence() const { return m_defence; }
+
+    void setHasMagicShield();
+    void setHasMagicArmour();
+    void setHasMagicSword();
+    void setHasMagicKnife();
+    void setHasMagicBow();
+    void setHasMagicWings();
 
     //! @return the current level. 0 is human.
     int level() const;
@@ -179,6 +186,8 @@ class Wizard : public Computer
     void waitForKeypress();
     void updateCreatureCount();
 
+    void setupRange0Spell();
+
 
     inline int castAmount() const
     {
@@ -226,6 +235,11 @@ class Wizard : public Computer
     }
 
     void kill();
+
+    inline int magicResistance() const
+    {
+      return m_magicResistance;
+    }
 
   private:
     char m_name[12];

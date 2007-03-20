@@ -8,6 +8,9 @@
 #include "Graphics.h"
 #include "magic.h"
 #include "Text16.h"
+#include "SoundEffect.h"
+#include "Line.h"
+#include "Interrupt.h"
 
 using nds::Color;
 static void doDisbelieveCast(void);
@@ -25,9 +28,8 @@ void cast_disbelieve()
   } else {
     Misc::waitForLetgo();
     Arena & arena(Arena::instance());
-    int targetIndex(arena.targetIndex());
-    if (arena.at(0,targetIndex) == 0 
-        or arena.at(0,targetIndex) >= SPELL_GOOEY_BLOB)
+    if (arena.atTarget() == 0 
+        or arena.atTarget() >= SPELL_GOOEY_BLOB)
     {
       return;
     }
@@ -194,7 +196,7 @@ void cast_magic_missile()
   }
   else {
     // check this is a vlid square for human casting
-    if (arena.at(0, arena.targetIndex()) == 0 or arena.targetIndex() == arena.wizardIndex() ) {
+    if (arena.atTarget() == 0 or arena.targetIndex() == arena.wizardIndex() ) {
       // if no creature, or attacking self, return
       return;
     }
@@ -236,7 +238,7 @@ void cast_justice()
   
   if (player.isCpu()) {
     // this will always be chosen, but might not actually be any good
-    ai_cast_justice();
+    player.aiCast(WizardCPU::JUSTICE);
     
   }
   else {
@@ -250,7 +252,7 @@ void cast_justice()
     }
     
     // ok, got here then check spell is OK to cast here...
-    int target(arena.at(0, arena.targetIndex()));
+    int target(arena.atTarget());
     if (target == 0)
       return;
     
@@ -258,7 +260,7 @@ void cast_justice()
     if (target < Arena::WIZARD_INDEX and target >= SPELL_GOOEY_BLOB)
       return;
     
-    do_justice_cast();
+    doJusticeCast();
     player.setCastAmount(player.castAmount()-1);
     
   }
@@ -277,13 +279,13 @@ void cast_raise_dead()
     
     // checks if it is worht casting, and casts if so
     // otherwise sets relevent flags to ignore this spell
-    ai_cast_raisedead();
+    player.aiCast(WizardCPU::RAISEDEAD);
     
   }
   else {
     // check that can be cast on this square
     // code from 861a
-    if (arena.at(0, arena.targetIndex()) == 0) 
+    if (arena.atTarget() == 0) 
       return;
     if (not arena.isDead(arena.targetIndex())) 
       return;
@@ -303,7 +305,7 @@ void cast_raise_dead()
       text16.displayMessage("NO LINE OF SIGHT", Color(31,30,0)); // lblue
       return;
     }
-    do_raisedead_cast();
+    doRaisedeadCast();
     
     Casting::printSuccessStatus();
     
@@ -317,15 +319,15 @@ void cast_subversion()
   Wizard & player(Wizard::currentPlayer());
   player.setCastAmount(1);
   if (player.isCpu()) {
-    ai_cast_subversion();
+    player.aiCast(WizardCPU::SUBVERSION);
     if (player.hasTargetSquare()) {
-      do_subversion();
+      doSubversion();
       player.setCastAmount(0);
     }
   }
   else {
     // human...
-    int target(arena.at(0, arena.targetIndex()));
+    int target(arena.atTarget());
     if (target >= SPELL_GOOEY_BLOB or target == 0
         or arena.at(4, arena.targetIndex()) != 0 ) 
     {
@@ -352,7 +354,7 @@ void cast_subversion()
     
     // got to here then spell is valid
     player.setCastAmount(0);
-    do_subversion();
+    doSubversion();
   }
   
 }
@@ -367,10 +369,10 @@ void cast_magic_shield()
       return;
     }
     player.setHasTargetSquare(true);
-    do_shield_cast();
+    doShieldCast();
   }
   else {
-    do_shield_cast();
+    doShieldCast();
     player.setCastAmount(0);
   }
   
@@ -386,10 +388,10 @@ void cast_magic_armour()
       return;
     }
     player.setHasTargetSquare(true);
-    do_armour_cast();
+    doArmourCast();
   }
   else {
-    do_armour_cast();
+    doArmourCast();
     player.setCastAmount(0);
   }
 }
@@ -404,10 +406,10 @@ void cast_magic_sword()
       return;
     }
     player.setHasTargetSquare(true);
-    do_sword_cast();
+    doSwordCast();
   }
   else {
-    do_sword_cast();
+    doSwordCast();
     player.setCastAmount(0);
   }
 }
@@ -422,10 +424,10 @@ void cast_magic_knife()
       return;
     }
     player.setHasTargetSquare(true);
-    do_knife_cast();
+    doKnifeCast();
   }
   else {
-    do_knife_cast();
+    doKnifeCast();
     player.setCastAmount(0);
   }
 }
@@ -440,10 +442,10 @@ void cast_magic_bow()
       return;
     }
     player.setHasTargetSquare(true);
-    do_bow_cast();
+    doBowCast();
   }
   else {
-    do_bow_cast();
+    doBowCast();
     player.setCastAmount(0);
   }
 }
@@ -458,10 +460,10 @@ void cast_magic_wings()
       return;
     }
     player.setHasTargetSquare(true);
-    do_wings_cast();
+    doWingsCast();
   }
   else {
-    do_wings_cast();
+    doWingsCast();
     player.setCastAmount(0);
   }
 }
@@ -476,10 +478,10 @@ void cast_shadow_form()
       return;
     }
     player.setHasTargetSquare(true);
-    do_shadowform_cast();
+    doShadowformCast();
   }
   else {
-    do_shadowform_cast();
+    doShadowformCast();
     player.setCastAmount(0);
   }
 }
@@ -489,7 +491,7 @@ void cast_turmoil()
   Wizard & player(Wizard::currentPlayer());
   if (player.isCpu()) {
     
-    ai_cast_turmoil();
+    player.aiCast(WizardCPU::TURMOIL);
     
     // // computer should never cast turmoil!
     // player.setHasTargetSquare(false);
@@ -497,7 +499,7 @@ void cast_turmoil()
   } else {
     // humans can cast turmoil at their own risk!
     player.setCastAmount(1);
-    do_turmoil_cast();
+    doTurmoilCast();
   }
 }
 
@@ -549,14 +551,17 @@ void doMagicMissile()
   // wait for redraw
   Misc::delay(4); 
   
+  Arena & arena(Arena::instance());
+  Wizard & player(Wizard::currentPlayer());
   // spell anim
-  u8 anim_type = 5;
-  if (current_spell == SPELL_LIGHTNING)
-    anim_type = 6;
+  Line::Line_t anim_type = Line::BOLT;
+  int currentSpell(player.selectedSpellId());
+  if (currentSpell == SPELL_LIGHTNING)
+    anim_type = Line::LIGHTNING;
   SoundEffect::play(SND_BEAM);
-  los_blocked(target_index, anim_type);
+  Line::doLine(anim_type);
   
-  if (current_spell == SPELL_LIGHTNING) {
+  if (currentSpell == SPELL_LIGHTNING) {
     SoundEffect::play(SND_ELECTRO);
   } else {
     // a splat sound?
@@ -564,60 +569,59 @@ void doMagicMissile()
   }
   
   // do "splat" animation
-  splat_animation();
-  
-  if (arena.at(0, target_index) == SPELL_MAGIC_FIRE or
-    ( arena.at(0, target_index) >= SPELL_MAGIC_CASTLE and arena.at(0, target_index) <= SPELL_WALL)) {
+  arena.splatAnimation();
+
+  if (arena.atTarget() == SPELL_MAGIC_FIRE or
+    ( arena.atTarget() >= SPELL_MAGIC_CASTLE 
+      and arena.atTarget() <= SPELL_WALL)) {
     // no effect
     return;
   }
   
+  int defence;
   // get the defence of the creature here
-  u8 defence;
-  if (arena.at(0, target_index) >= WIZARD_INDEX) {
+  if (arena.atTarget() >= Arena::WIZARD_INDEX) {
     // wiz
-    u8 plyr = arena.at(0, target_index) -WIZARD_INDEX;
-    defence = players[plyr].defence;
-    if ((players[plyr].modifier_flag & 0xc0) == 0x40) {
+    int plyr = arena.atTarget() - Arena::WIZARD_INDEX;
+    Wizard & targetPlayer(Wizard::player(plyr));
+    defence = targetPlayer.defence();
+    if (targetPlayer.hasMagicShield()) {
       // has magic shield
       defence += 2;
     } else
-    if ((players[plyr].modifier_flag & 0xc0) == 0x80) {
+    if ( targetPlayer.hasMagicArmour()) {
       // has magic armour
       defence += 4;
     }
-    
   } else {
     // creature
-    defence = CHAOS_SPELLS.pSpellDataTable[arena.at(0, target_index)]->defence;
+    defence = s_spellData[arena.atTarget()].defence;
   }
   
-  defence += GetRand(10);
-  u8 attack = 3 + GetRand(10);
+  defence += Misc::rand(10);
+  int attack = 3 + Misc::rand(10);
   
-  if (current_spell == SPELL_LIGHTNING) {
+  if (currentSpell == SPELL_LIGHTNING) {
     attack += 3;
-   
   }
-  
   
   if (attack < defence)
     return;
   
-  wait_vsync_int();
-  wait_vsync_int();
+  Misc::delay(2);
   
   // do the pop animation...
-  pop_animation();
+  arena.popAnimation();
   
   // new code...
-  if (arena[4][target_index] == 0) {
+  if (arena.underTarget() == 0) {
     // nothing in arena 4...
-    if (arena[0][target_index] >= WIZARD_INDEX) {
+    if (arena.atTarget() >= Arena::WIZARD_INDEX) {
       // was a wizard, do wizard death anim...
-      kill_wizard();
+      Wizard::player(arena.atTarget() - Arena::WIZARD_INDEX).kill();
     }  else {
       // remove the creature
+#if 0
       arena[0][target_index] = 0;
       if (!Options[OPT_OLD_BUGS] and arena[5][target_index] != 0) {
         // what about dead bodies?
@@ -627,9 +631,11 @@ void doMagicMissile()
         arena[2][target_index] = 4; // dead
         arena[5][target_index] = 0; //clear creature in arena 5 
       }
+#endif
     }
     
   } else {
+#if 0
     // arena 4 had something in it
     u8 arena4 = arena[4][target_index];
     arena[4][target_index] = 0;
@@ -643,8 +649,8 @@ void doMagicMissile()
       }
       else {
         // the famous "undead wizard" bug is caused by not updating the arena[3] flag properly
-        if (arena4 >= WIZARD_INDEX) {
-          arena[3][target_index] = arena4-WIZARD_INDEX;
+        if (arena4 >= Arena::WIZARD_INDEX) {
+          arena[3][target_index] = arena4-Arena::WIZARD_INDEX;
         }
       }
     }
@@ -652,26 +658,259 @@ void doMagicMissile()
     arena[0][target_index] = arena4;
     arena[5][target_index] = 0;
     
+#endif
   }
-  
-  /* old code
-  if (arena[0][target_index] >= WIZARD_INDEX) {
-      // jump to wizard death stuff..
-    kill_wizard();
-  }
-  else {
-    arena[0][target_index] = arena[4][target_index];
-    arena[4][target_index] = 0;
-    if (!Options[OPT_OLD_BUGS] and arena[5][target_index] != 0
-    and arena[0][target_index] == 0) {
-      // what about dead bodies?
-      // but only if arena 4 was empty
-      // bug fix v0.7a (disbelieve failed with old bugs turned off, fixed here too)
-      arena[0][target_index] = arena[5][target_index]; //creature in arena 5
-      arena[2][target_index] = 4; // dead
-      arena[5][target_index] = 0; //clear creature in arena 5 
+}
+
+void doJusticeCast()
+{
+  // code from 9e38 onwards
+  // do sound fx, flashing graphics
+  Arena & arena(Arena::instance());
+  SoundEffect::play(SND_JUSTICE);
+  for (int i = 0; i < 3; i++) {
+    for (int k = 0; k < 3; k++) {
+      for (int j = 0; j < 8; j++) {
+        // do the flashing gfx...
+        Misc::delay(2, false);
+        if (arena.atTarget() >= Arena::WIZARD_INDEX) {
+#if 0
+          draw_silhouette_gfx(target_index, 
+          WizardGFX[players[arena[0][target_index] - WIZARD_INDEX].image].pWizardData->pGFX, 
+          WizardGFX[players[arena[0][target_index] - WIZARD_INDEX].image].pWizardData->pMap,
+          chaos_cols[j], 11, 0); //  final 0 is to draw the gfx "positive"
+#endif
+        }
+        else {
+#if 0
+          draw_silhouette_gfx(target_index, 
+          CHAOS_SPELLS.pSpellDataTable[arena[0][target_index]]->pGFX, 
+          CHAOS_SPELLS.pSpellDataTable[arena[0][target_index]]->pGFXMap,
+          chaos_cols[j],11, 0); //  final 0 is to draw the gfx "positive"
+#endif
+        }
+        
+      }
+      
     }
     
+    
   }
-  */
+  
+  
+  // 9e96
+  // refresh arena
+  // set the has cast spell flag
+  
+  // get magic resistance of creature...
+  u8 magres;
+  if (arena.atTarget() >= Arena::WIZARD_INDEX) {
+    // wizard res
+    magres = Wizard::player(arena.atTarget() - Arena::WIZARD_INDEX).magicResistance();
+  } else {
+    // creature res
+    magres = s_spellData[arena.atTarget()].magicRes;
+  }
+  magres++;
+  
+  u8 r = Misc::rand(10);
+  
+  if (r >= magres) {
+    // spell succeeded...
+    // do pop anim
+    
+    arena.popAnimation();
+    
+    if (arena.atTarget() >= Arena::WIZARD_INDEX) {
+      // wizard - destroy all his creations!
+      Misc::delay(4);
+#if 0
+      destroy_all_creatures(arena.atTarget() - Arena::WIZARD_INDEX);
+#endif 
+    }
+    else {
+      // single creature only...
+      // there's the famous "rise from the dead" bug here...
+#if 0
+      arena[0][target_index] = 0;
+      if (arena.underTarget() != 0) {
+        arena[0][target_index] = arena.underTarget();
+        arena[4][target_index] = 0;
+      } else if (arena[5][target_index] != 0) {
+        arena.atTarget() = arena[5][target_index];
+        arena[5][target_index] = 0;
+        if (!Options[OPT_OLD_BUGS]) {
+          // make sure this creature is dead, as arena 5 creatures are dead bodies
+          arena[2][target_index] = 4;
+        } 
+      }
+#endif
+    }
+    Misc::delay(4);
+  }
+  
+}
+
+// code from 86c3
+void doRaisedeadCast()
+{
+  // implementation of the raise dead spell
+  // used by human and cpu players
+  
+  // spell animation to target square
+  Casting::spellAnimation();
+  Wizard & player(Wizard::currentPlayer());  
+  if (not Casting::calculateSpellSuccess()) {
+    player.setCastAmount(0);
+    return;
+  }
+#if 0
+  // set target frame to 0
+  arena[2][target_index] = 0;
+  u8 flag = 0x60; // bits 5 & 6 - is real, is known to the ai to be real and is undead
+  flag |= current_player;
+  // update this creature's flag val so it is undead and this player's
+  arena[3][target_index] = flag;
+  arena[5][target_index] = 0; // just in case
+#endif
+  player.setCastAmount(0);
+  // temp_cast_amount--;
+}
+
+
+void doSubversion()
+{
+  Wizard & player(Wizard::currentPlayer());  
+  Arena & arena(Arena::instance());
+  // do the actual casting of subvert - target_index is valid 859c
+  if (player.isCpu()) {
+    player.printNameSpell();
+    Misc::delay(80);    
+  }
+ 
+  Casting::spellAnimation();
+   
+  Casting::setSpellSuccess(false);
+  if ( not arena.isIllusion(arena.targetIndex())) {
+    // if BIT 4 is set, the spell would fail 
+    // i.e. we are in (if !illusion)...
+    
+    u8 magic_res = s_spellData[arena.atTarget()].magicRes;
+    magic_res++;
+    
+    u8 r = Misc::rand(10);
+    
+    if (r < magic_res ) {
+      // subvert SUCCEEDED!!!??! but the random value was less than magic resistance!
+      // this is how it was done in the original though...
+#if 0
+      u8 creature_val = arena[3][target_index];
+      creature_val &= 0xF8; // mask lower 3 bits
+      creature_val |= current_player;
+      arena[3][target_index] = creature_val;
+      temp_success_flag = 1;
+#endif
+    } 
+  }
+  Casting::printSuccessStatus();
+  
+}
+
+void doShieldCast()
+{
+  
+  Wizard::currentPlayer().setupRange0Spell();
+  if (Casting::spellSuccess()) {
+    Wizard::currentPlayer().setHasMagicShield();
+    Misc::delay(4);
+  }
+  Casting::printSuccessStatus();
+  
+}
+
+void doArmourCast()
+{
+  
+  Wizard::currentPlayer().setupRange0Spell();
+  if (Casting::spellSuccess()) {
+    Wizard::currentPlayer().setHasMagicArmour();
+    Misc::delay(4);
+  }
+  Casting::printSuccessStatus();
+  
+}
+
+
+void doSwordCast()
+{
+  
+  Wizard::currentPlayer().setupRange0Spell();
+  if (Casting::spellSuccess()) {
+    Wizard::currentPlayer().setHasMagicSword();
+    Misc::delay(4);
+  }
+  Casting::printSuccessStatus();
+  
+}
+
+void doKnifeCast()
+{
+  
+  Wizard::currentPlayer().setupRange0Spell();
+  if (Casting::spellSuccess()) {
+    Wizard::currentPlayer().setHasMagicKnife();
+    Misc::delay(4);
+  }
+  Casting::printSuccessStatus();
+  
+}
+
+// 8486
+void doBowCast()
+{
+  Wizard::currentPlayer().setupRange0Spell();
+  if (Casting::spellSuccess()) {
+    Wizard::currentPlayer().setHasMagicBow();
+    Misc::delay(4);
+  }
+  Casting::printSuccessStatus();
+}
+
+// 
+void doWingsCast()
+{
+  Wizard::currentPlayer().setupRange0Spell();
+  if (Casting::spellSuccess()) {
+    Wizard::currentPlayer().setHasMagicWings();
+    Misc::delay(4);
+  }
+  Casting::printSuccessStatus();
+  
+}
+
+void doShadowformCast()
+{
+  Wizard::currentPlayer().setupRange0Spell();
+  if (Casting::spellSuccess()) {
+    Wizard::currentPlayer().setHasShadowForm(true);
+    Misc::delay(4);
+  }
+  Casting::printSuccessStatus();
+}
+
+
+void doTurmoilCast()
+{
+  int tsi = Arena::instance().startIndex();
+  Casting::calculateSpellSuccess();
+  Interrupt::disable();
+  Casting::setSpellSuccess(true);
+  if (Casting::spellSuccess()) {
+    // unset bit 7 of all things
+    Arena::instance().turmoil();
+  }
+  Interrupt::enable();
+  Arena::instance().setStartIndex(tsi);
+  Casting::printSuccessStatus();
+  Wizard::currentPlayer().setCastAmount(0);
 }

@@ -19,6 +19,9 @@ class WizardCPU : public Computer
       WALL,
       MAGIC_MISSILE,
       JUSTICE,
+      RAISEDEAD,
+      SUBVERSION,
+      TURMOIL,
     };
     void aiCast(int spellType);
     void doAiSpell();
@@ -55,6 +58,11 @@ class WizardCPU : public Computer
     void aiCastDisbelieve();
     void aiCastTreesCastles();
     void aiCastWall();
+    void aiCastMagicMissile();
+    void aiCastJustice();
+    void aiCastSubversion();
+    void aiCastRaiseDead();
+    void aiCastTurmoil();
 
     void createAllEnemiesTable();
 
