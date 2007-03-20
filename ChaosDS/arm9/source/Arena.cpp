@@ -798,7 +798,7 @@ int Arena::attackPref(int c)
 bool Arena::isUndead(int index) const
 {
   return ( (m_arena[3][index]&(1<<6)) or 
-      (m_arena[0][index] >= SPELL_VAMPIRE and m_arena[0][index] <= SPELL_ZOMBIE ) )   ;
+      (m_arena[0][index] >= SPELL_VAMPIRE and m_arena[0][index] <= SPELL_ZOMBIE ) );
 }
 bool Arena::hasDisbelieveCast(int index) const
 {

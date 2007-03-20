@@ -752,11 +752,11 @@ void Movement::doRangeAttack()
   if (arena.isBlockedLOS()) {
     Text16::instance().clearMessage();
     Text16::instance().displayMessage("NO LINE OF SIGHT", Color(31,30,0)); // lblue
-    Misc::delay(4);
+    Misc::delay(4,false);
     return;
   }
   arena.enableCursor(false);
-  Misc::delay(4);
+  Misc::delay(4,false);
   
   // if got to here, do the range attack animation...
   Line::Line_t rangeAttackType = Line::ARROW; // range attack type
@@ -772,7 +772,7 @@ void Movement::doRangeAttack()
   SoundEffect::play(SND_BEAM);
   Line::doLine(rangeAttackType);
   // redraw the creatures now
-  Misc::delay(4);
+  Misc::delay(4,false);
   
   // do the attack animation 
   void (*animFunc)(int x, int y, int frame);
@@ -793,7 +793,7 @@ void Movement::doRangeAttack()
     Misc::delay(4,false);
     animFunc(x-1, y-1, i);
   }
-  Misc::delay(4);
+  Misc::delay(4,false);
   
   int creature(arena.at(0, targetIndex));
   if (not (creature == 0 or arena.isDead(targetIndex))) 

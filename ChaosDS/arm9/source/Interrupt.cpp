@@ -5,8 +5,8 @@
 static bool s_processFrames(true);
 void Interrupt::processVblank()
 {
+  GameState::instance().incrFrame();
   if (s_processFrames) {
-    GameState::instance().incrFrame();
     GameState::instance().checkVblankAnimation();
   }
 }

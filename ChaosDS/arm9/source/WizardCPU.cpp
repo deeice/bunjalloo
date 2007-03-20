@@ -697,7 +697,6 @@ int WizardCPU::getBestRangeattack()
   Arena & arena(Arena::instance());
   // cccb
   while (s_priorityTable[m_tableIndex] != 0xFF) {
-    
     // check the value at this index...
     int creature = arena.at(0,s_priorityTable[m_tableIndex]);
     if (creature >= Arena::WIZARD_INDEX 
@@ -713,7 +712,8 @@ int WizardCPU::getBestRangeattack()
       // original chaos didn't check the arena[3] value for raise deaded creatures
       // wizards can always attack undead with their magic bow range attacks
       Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
-      bool attacker_undead = arena.isUndead(arena.startIndex()) or (movement->selectedCreature() >= Arena::WIZARD_INDEX);
+      bool attacker_undead = arena.isUndead(arena.startIndex()) 
+        or (movement->selectedCreature() >= Arena::WIZARD_INDEX);
       bool defender_undead = arena.isUndead(s_priorityTable[m_tableIndex]);
       if ( (not defender_undead) or attacker_undead)
       {
@@ -722,14 +722,12 @@ int WizardCPU::getBestRangeattack()
         m_tableIndex++;
         return 0x53;
       } // else, trying to range attack undead with a living creature, so get next value... 
-        
     } 
     m_tableIndex++;
     m_tableIndex++;
   }
    
   return 0x4b;
-  
 }
 
 // called at the start of lightning casting amongst other stuff...
