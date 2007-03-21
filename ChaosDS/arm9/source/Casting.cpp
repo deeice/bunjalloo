@@ -11,6 +11,7 @@
 #include "Text16.h"
 #include "Line.h"
 #include "VictoryScreen.h"
+#include "ExamineSquare.h"
 
 using namespace nds;
 using Misc::delay;
@@ -21,16 +22,24 @@ bool Casting::s_castSuccess(false);
 int Casting::worldChaos() {
   return s_worldChaos;
 }
+Casting::Casting(bool start) : m_start(start) {}
 void Casting::show()
 {
   Arena & arena(Arena::instance());
   arena.resetAnimFrames();
   arena.display();
-  arena.setCurrentPlayer(0);
-  arena.setBorderColour(0);
-  arena.initialiseCursor(0,0,Arena::CURSOR_NORMAL_GFX);
+  if (m_start) {
+    arena.setCurrentPlayer(0);
+    arena.initialiseCursor(0,0,Arena::CURSOR_NORMAL_GFX);
+  } else {
+    arena.enableCursor();
+  }
+  arena.setBorderColour(arena.currentPlayer());
   Video::instance().fade(false);
-  startCastRound();
+
+  if (m_start) {
+    startCastRound();
+  }
 }
 void Casting::animate()
 {
@@ -66,6 +75,22 @@ void Casting::handleKeys()
   if (keysSlow & KEY_B) {
     cancel();
   }
+  if (keysSlow & KEY_R) {
+    examineSquare();
+  }
+}
+
+void Casting::examineSquare() 
+{
+  int theCreature = Arena::instance().cursorContents();
+  // return instantly if we examine an empty square
+  if (theCreature == 0) {
+    return;
+  }
+  Video::instance().fade();
+  Casting * casting = new Casting(false);
+  GameState::instance().setNextScreen(new ExamineSquare(casting));
+  Arena::instance().enableCursor(false);
 }
 
 
@@ -272,3 +297,7 @@ void Casting::spellAnimation()
   }
 }
 
+void Casting::resetWorldChaos()
+{
+  s_worldChaos = 0;
+}

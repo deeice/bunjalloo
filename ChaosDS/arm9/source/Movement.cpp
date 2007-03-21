@@ -16,14 +16,28 @@
 #include "GameMenu.h"
 #include "GameState.h"
 #include "VictoryScreen.h"
+#include "ExamineSquare.h"
 #include "Line.h"
 #include "Graphics.h"
 
 using namespace nds;
 
+Movement::Movement(bool start):m_start(start)
+{}
+
 void Movement::show()
 {
-  startMovementRound();
+  if (m_start)
+    startMovementRound();
+  else {
+    Arena & arena(Arena::instance());
+    arena.resetAnimFrames();
+    arena.display();
+    arena.enableCursor();
+    arena.cursorSet();
+    arena.setBorderColour(arena.currentPlayer());
+    Video::instance().fade(false);
+  }
 }
 
 void Movement::startMovementRound()
@@ -60,7 +74,7 @@ void Movement::startMovementRound()
       arena.enableCursor(false);
       int x,y;
       arena.currentPlayerXY(x,y);
-      arena.setCursor(x-1,y-1);
+      arena.setCursor(x,y);
       arena.setBorderColour(currentPlayer);
       
       Text16::instance().clearMessage();
@@ -162,14 +176,17 @@ void Movement::handleKeys()
   if (keysSlow & KEY_LEFT) {
     arena.cursorLeft();
   }
+  if (keysSlow & KEY_RIGHT) {
+    arena.cursorRight();
+  }
 
   if (keys & KEY_L) {
     arena.highlightTargetCreations();
   }
-
-  if (keysSlow & KEY_RIGHT) {
-    arena.cursorRight();
+  if (keys & KEY_R) {
+    examineSquare();
   }
+
   if (keysSlow & KEY_A) {
     a();
   }
@@ -179,6 +196,32 @@ void Movement::handleKeys()
   if (keysSlow & KEY_START) {
     start();
   }
+}
+
+void Movement::examineSquare() 
+{
+  int theCreature = Arena::instance().cursorContents();
+  // return instantly if we examine an empty square
+  if (theCreature == 0) {
+    return;
+  }
+  Video::instance().fade();
+  Movement * movement = new Movement(false);
+  // copy to the "new" one...
+  movement->m_selectedCreature  = this->m_selectedCreature;
+  movement->m_rangeAttack       = this->m_rangeAttack;
+  movement->m_movementAllowance = this->m_movementAllowance;
+  movement->m_isFlying          = this->m_isFlying;
+  movement->m_engagedFlag       = this->m_engagedFlag;
+  movement->m_creatureId        = this->m_creatureId;
+  movement->m_rangeAttackVal    = this->m_rangeAttackVal;
+  movement->m_wizardMovementAllowance
+                                = this->m_wizardMovementAllowance;
+  movement->m_attacker          = this->m_attacker;
+  movement->m_highlightItem     = this->m_highlightItem;
+
+  GameState::instance().setNextScreen(new ExamineSquare(movement));
+  Arena::instance().enableCursor(false);
 }
 
 bool Movement::isFlying() const
@@ -205,7 +248,7 @@ void Movement::a()
   // A pressed in movement round
   // check in the actual arena...
   int x,y;
-  Arena::getXY(Arena::instance().targetIndex(), x, y);
+  Arena::instance().targetXY(x, y);
   if (x >= 16) {
     return;
   }
@@ -343,7 +386,6 @@ void Movement::end()
     m_rangeAttack = 0;
     m_selectedCreature = 0;  
   }
-  iprintf("end Movement::end()\n");
 }
 
 // taken from aced 
@@ -354,7 +396,7 @@ void Movement::selectCreature()
   Arena & arena(Arena::instance());
   int startIndex(arena.targetIndex());
   arena.setStartIndex(startIndex);
-  m_selectedCreature = arena.at(0,startIndex);
+  m_selectedCreature = arena.atTarget();
   m_rangeAttack = 0;
   m_engagedFlag = 0;
   m_creatureId = 0;
@@ -462,7 +504,7 @@ void Movement::selectCreature()
       }
       
     } // else inside creature < WIZARD_INDEX
-    if (!yes_pressed) {
+    if (not yes_pressed) {
       // if not dismounting...
       // adb3 
       if (m_selectedCreature != SPELL_SHADOW_WOOD) {
@@ -523,7 +565,6 @@ void Movement::moveFlyingCreature()
   Arena & arena(Arena::instance());
   if (arena.startIndex() == arena.targetIndex())
     return;
-  iprintf("Move flycrea %d -> %d\n", arena.startIndex(), arena.targetIndex());
   // check in range...
   int dist = Arena::distance(arena.startIndex(), arena.targetIndex());
   
@@ -566,14 +607,14 @@ void Movement::moveCreature(int distanceMoved)
   Arena & arena(Arena::instance());
   int targetIndex(arena.targetIndex());
   // something here and is it not dead?
-  if (arena.at(0, targetIndex) != 0 and not arena.isDead(targetIndex))
+  if (arena.atTarget() != 0 and not arena.isDead(targetIndex))
   {
     int owner = arena.owner(targetIndex);
-    int creature(arena.at(0, targetIndex));
+    int creature(arena.atTarget());
     if (creature == SPELL_MAGIC_WOOD) {
       // if magic wood...aec0
       if ((m_selectedCreature >= Arena::WIZARD_INDEX 
-            and arena.at(4, targetIndex) != 0)
+            and arena.underTarget() != 0)
           or m_selectedCreature < Arena::WIZARD_INDEX)
       {
         // we are a wizard and the tree is occupied
@@ -600,7 +641,7 @@ void Movement::moveCreature(int distanceMoved)
           // creature we are moving to belongs to current player
           // check if we have a wizard selected for movement...
           // we are a wizard... check the target creature
-          if (creature < SPELL_HORSE || creature >= SPELL_BAT) {
+          if (creature < SPELL_HORSE or creature >= SPELL_BAT) {
             // not a mount, return
             return;
           }
@@ -787,16 +828,15 @@ void Movement::doRangeAttack()
     SoundEffect::play(SND_SPELLSUCCESS);
   }
   int x, y;
-  int targetIndex(arena.targetIndex());
-  Arena::getXY(targetIndex, x, y);
+  arena.targetXY(x, y);
   for (int i = 0; i < 8; i++) {
     Misc::delay(4,false);
     animFunc(x-1, y-1, i);
   }
   Misc::delay(4,false);
   
-  int creature(arena.at(0, targetIndex));
-  if (not (creature == 0 or arena.isDead(targetIndex))) 
+  int creature(arena.atTarget());
+  if (not (creature == 0 or arena.isDead(arena.targetIndex()))) 
   {
     if (creature < SPELL_MAGIC_FIRE 
         or creature >= Arena::WIZARD_INDEX
@@ -983,7 +1023,7 @@ void Movement::makeAttack()
   
   Misc::waitForLetgo();
   
-  if (!m_rangeAttack) {
+  if (not m_rangeAttack) {
     // do attack anim...
     // CALL b375
     
@@ -992,7 +1032,7 @@ void Movement::makeAttack()
   
   if (defending_val < attacking_val) {
     // attack was a success...
-    if (arena.at(4, targetIndex) == 0) {
+    if (arena.underTarget() == 0) {
       // nothing in arena 4...
       if (defender >= Arena::WIZARD_INDEX) {
         // was a wizard, do wizard death anim...
