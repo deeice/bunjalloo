@@ -11,9 +11,14 @@
 #include "Graphics.h"
 #include "Text16.h"
 #include "Wizard.h"
+#include "EditName.h"
 
 using namespace nds;
 static const int PLAYER_WIZ_Y(2);
+
+CreatePlayers::CreatePlayers(bool start)
+  : m_start(start)
+{}
 
 // from IF ScreenI
 void CreatePlayers::show()
@@ -21,26 +26,32 @@ void CreatePlayers::show()
   Text16::instance().clear();
   Graphics::clearPalettes();
   Graphics::loadPalette(9,9);
-  Arena::instance().setPlayers(2);
-  
+  if (m_start) {
+    Arena::instance().setPlayers(2);
+  }
   m_hilightItem = 0;
   Graphics::instance().setAnimationParams(30,-8);
-  
+
   m_hilightWizard = 0;
-  
+
   Text16 & text16 = Text16::instance();
   text16.setColour(10, Color(31,30,30));
   text16.print("How many players?", 4, 1, 10);
-  
-  // create the default start wizards
-  Wizard::createDefaultWizards();
-  
+
+  if (m_start) {
+    // create the default start wizards
+    Wizard::createDefaultWizards();
+    selectItem(0);
+  } else {
+    m_hilightItem = Arena::instance().currentPlayer()+1;
+    selectItem(m_hilightItem);
+  }
+
   Arena::instance().reset();
   Arena::instance().decorativeBorder(15, Color(0,0,31),Color(0,31,31)); 
 
   updatePlayers();
-  
-  selectItem(0);
+
   Video::instance().fade(false);
 }
 
@@ -111,12 +122,14 @@ class DrawWizard: public std::unary_function<Wizard,bool> {
     Text16 & m_text16;
 
   public:
+    //! Draw a wizard on the choices screen.
     DrawWizard(int highlightItem):m_index(0), 
                                   m_hilightItem(highlightItem), 
                                   m_text16(Text16::instance()) 
     { }
     
     // for each element in the player array...
+    //! Draws the wizard.
     result_type operator() (argument_type & element) {
       element.updateColour();
       element.draw8(1, m_index*2 + PLAYER_WIZ_Y, 0);
@@ -259,12 +272,9 @@ void CreatePlayers::a() {
     //}
   } else {
     // go to the edit name screen
-    /*
-    current_player = m_hilightItem -1;
-    fade_down();
-    show_editname();
-    fade_up();
-    */
+    Arena::instance().setCurrentPlayer(m_hilightItem-1);
+    Video::instance().fade();
+    GameState::instance().setNextScreen(new EditName());
   }
     
 }
@@ -274,7 +284,7 @@ void CreatePlayers::start(void) {
   // was init_players 
   Wizard::initialisePlayers();
   Arena::instance().setCurrentPlayer(0);
-  // round_count = 0; //FIXME - part of casting and movement
+  Arena::instance().resetRoundCount();
   // check if we need to show game menu...
   Wizard & player0 = Wizard::player(0);
   if (player0.isCpu()) 
@@ -282,8 +292,7 @@ void CreatePlayers::start(void) {
   if (Arena::instance().currentPlayer() == 9) 
   {
     // there is no human player!
-    // continue_game(); // FIXME
-    // Arena::instance().continue();
+    GameMenu::continueGame();
   } else {
     Video::instance().fade();
     GameState::instance().setNextScreen(new GameMenu());
