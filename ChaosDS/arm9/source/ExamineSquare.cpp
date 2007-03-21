@@ -10,7 +10,7 @@
 #include "SpellData.h"
 
 
-// define the positions of the stats
+//! define the positions of the stats
 typedef struct {
   u8 startx;
   u8 starty; 
@@ -80,9 +80,12 @@ void ExamineSquare::show()
   Text16::instance().clear();
   // which creature is here?
   if ((creature > SPELL_DISBELIEVE and creature < SPELL_GOOEY_BLOB)
-      or creature >= Arena::WIZARD_INDEX) {
+      or (creature >= Arena::WIZARD_INDEX and not m_showCastChance))
+  {
+    // it is a creature or a wizard (and we want to see wizards)
     displayCreatureData(creature, underneath, m_flags);
   } else {
+    // it is another type of spell
     displaySpellData(creature);
   }
   Video::instance().fade(false);
@@ -96,6 +99,7 @@ void ExamineSquare::handleKeys()
   if (keysSlow & KEY_B) {
     if (m_first and m_underneath) {
       Video::instance().fade();
+      m_first = false;
       this->show();
     } else {
       Video::instance().fade();
