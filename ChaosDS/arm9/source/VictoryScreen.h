@@ -6,10 +6,12 @@
 class VictoryScreen: public ScreenI
 {
   public:
+    //!Types of possible end game.
     enum Victory_t {
-      WIN,
-      DRAW
+      WIN,       //!< There was a winner.
+      DRAW       //!< No winner, game drawn.
     };
+    //! Start the end game screen.
     VictoryScreen(Victory_t type);
     virtual void show();
     virtual void animate();
@@ -21,6 +23,12 @@ class VictoryScreen: public ScreenI
   private:
     Victory_t m_winOrDraw;
     int m_highlightItem;
+    int m_cycleColour1;
+    int m_cycleColour2;
+    int m_cycleColour3;
+    int m_cycleFrame;
+
+
     void win();
     void draw();
 };
