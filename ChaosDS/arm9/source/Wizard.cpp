@@ -185,7 +185,6 @@ void Wizard::initialisePlayers()
     for (int spell = 1; spell < player.m_spellCount; spell++) 
     {
       spellid = rand(255) & 0x3F;
-      // TODO : change this
       while (spellid < SPELL_KING_COBRA or spellid > SPELL_RAISE_DEAD) 
       {
         spellid = rand(255) & 0x3F;
@@ -411,6 +410,11 @@ const char * const Wizard::name() const
   return m_name;
 }
 
+void Wizard::setName(const char * name)
+{
+  strncpy(m_name, name, 12);
+}
+
 
 const int Wizard::spellId(int index) const
 {
@@ -444,7 +448,7 @@ void Wizard::displayData() const
   printNameAt(2,1,1);
   bool need_comma(false);
   int x = 2;
-  if (m_modifierFlag & 0x2) {
+  if (hasMagicKnife()) {
     // bit 1 set, "KNIFE"
     const char * const str = "KNIFE";
     if (need_comma) {
@@ -457,7 +461,7 @@ void Wizard::displayData() const
     x+=strlen(str);
     need_comma = true;
   }
-  if (m_modifierFlag & 0x4) {
+  if (hasMagicSword()) {
     // bit 2 set,
     const char * const str = "SWORD";
     if (need_comma) {
@@ -471,7 +475,7 @@ void Wizard::displayData() const
     need_comma = true;
   }
 
-  if ((m_modifierFlag & 0xC0) == 0xC0) {
+  if (hasMagicArmour()) {
     // "ARMOUR"
     const char * str = "ARMOUR";
     if (need_comma) {
@@ -484,7 +488,7 @@ void Wizard::displayData() const
     x+=strlen(str);
     need_comma = true;
   }
-  if ((m_modifierFlag & 0xC0) == 0x40) {
+  if (hasMagicShield()) {
     // "SHIELD"
     const char * str = "SHIELD";
     if (need_comma) {
@@ -572,7 +576,7 @@ void Wizard::updateCreatureCount()
   }
   
   Arena & arena(Arena::instance());
-  for (int i = 0; i < 0x9f; i++) {
+  for (int i = 0; i < Arena::ARENA_SIZE; i++) {
     int creature = arena.at(0,i);
     if (creature >= SPELL_KING_COBRA and creature < SPELL_GOOEY_BLOB) 
     {
@@ -646,7 +650,7 @@ void Wizard::waitForKeypress()
   if (isCpu())
     return;
   bool pressed(false);
-  while (!pressed) 
+  while (not pressed) 
   {
     pressed = Misc::keypressWait();
   }
@@ -760,12 +764,13 @@ void Wizard::kill()
   // load the wizard pal into 10 too...
   Graphics::loadPalette(10,9);
   int x, y;
-  Arena::getXY(arena.targetIndex(), x, y);
+  arena.targetXY(x, y);
   arena.clearSquare(x-1, y-1);
   
   // FIXME: Looped sound
   SoundEffect::play(SND_SCREAM);
   
+  int deadid = arena.atTarget()-Arena::WIZARD_INDEX;
   arena.wizardDeath(m_image);
 
   SoundEffect::play(SND_URGH);
@@ -777,8 +782,8 @@ void Wizard::kill()
   
   Misc::delay(10);
   
-  arena.destroyAllCreatures();
-  if (currentPlayer().isCpu())
+  arena.destroyAllCreatures(deadid);
+  if (not currentPlayer().isCpu())
     arena.enableCursor();
 }
 
@@ -852,4 +857,10 @@ void Wizard::addSpell(int spellId)
     }
     k+=2;
   }
+}
+
+void Wizard::orderSpells()
+{
+  m_spells[0] = 12 + Misc::rand(10);
+  Misc::orderTable(m_spellCount, m_spells);
 }

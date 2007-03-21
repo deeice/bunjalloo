@@ -170,7 +170,6 @@ void Arena::drawGfx8(
 void Arena::countdownAnim()
 {
   // counts down the arena[1] values and updates the arena 2 val if needed
-  // FIXME - hardcoded...
   for (int i = 0; i < ARENA_SIZE; i++) {
     if (m_arena[0][i] >= 2) {
       if ( (--m_arena[1][i]) == 0) {
@@ -413,6 +412,11 @@ void Arena::setCursor(int x, int y)
   displayCursorContents();
 }
 
+void Arena::cursorSet()
+{
+  setCursor(m_cursorPosition.x,m_cursorPosition.y);
+}
+
 void Arena::displayCursorContents()
 {
   // dispay the creature name, etc in the right colours...
@@ -562,6 +566,10 @@ int Arena::roundNumber() const
   return m_roundNumber;
 }
 
+void Arena::resetRoundCount()
+{
+  m_roundNumber = 0;
+}
 
 // code from 97d1 - sets the index of the current player for spell casting
 void Arena::setCurrentPlayerIndex() {
@@ -712,7 +720,7 @@ void Arena::creatureSpellSucceeds()
 {
   Wizard & player(Wizard::currentPlayer());
   int currentSpellId(player.selectedSpellId());
-  if (!(currentSpellId == SPELL_GOOEY_BLOB 
+  if (not (currentSpellId == SPELL_GOOEY_BLOB 
         or currentSpellId == SPELL_MAGIC_FIRE)) 
   {
     // whatever is in this square, place in arena 5...
@@ -895,8 +903,9 @@ void Arena::spreadFireBlob()
             if (target_owner == this_owner) {
               continue;  
             }
-            if (target_creature <= SPELL_MANTICORE && target_creature >= SPELL_HORSE
-                && m_arena[4][m_targetIndex] >= WIZARD_INDEX) {
+            if (target_creature <= SPELL_MANTICORE 
+                and target_creature >= SPELL_HORSE
+                and m_arena[4][m_targetIndex] >= WIZARD_INDEX) {
               // if the creature is a mount and has a wizard on it
               // a011...
               if ((m_arena[4][m_targetIndex] - WIZARD_INDEX) == this_owner) { 
@@ -1064,8 +1073,8 @@ void Arena::destroyCastles()
 void Arena::randomNewSpell()
 {
   char str[30];
-  for (int i = 0; i < 0x9f; i++) {
-    if (m_arena[0][i] == SPELL_MAGIC_WOOD && m_arena[4][i] != 0) {
+  for (int i = 0; i < ARENA_SIZE; i++) {
+    if (m_arena[0][i] == SPELL_MAGIC_WOOD and m_arena[4][i] != 0) {
       // is a wood with someone inside
       if (Misc::rand(10) <= 6)
         continue;
@@ -1294,7 +1303,7 @@ void Arena::doDisbelieve()
 void Arena::popAnimation()
 {
   int x, y;
-  Arena::getXY(m_targetIndex, x, y);
+  targetXY(x,y);
   SoundEffect::play(SND_SPELLSUCCESS);
   x--;
   y--;
@@ -1349,7 +1358,7 @@ bool Arena::doSuccessfulMove(int selectedCreature)
   
   bool wizardEnd(false);
   // continue at afc7....
-  if (m_arena[0][m_targetIndex] == 0 || isDead(m_targetIndex)) {
+  if (atTarget() == 0 or isDead(m_targetIndex)) {
     // afdf
     u8 old_target = m_arena[0][m_targetIndex];
     m_arena[0][m_targetIndex] = selectedCreature;
@@ -1374,9 +1383,9 @@ bool Arena::doSuccessfulMove(int selectedCreature)
 // based on be52 - get the owner of creature at x,y
 void Arena::ownerAt(int x, int y, int &surround_creature) const
 {
-  if (y == 0 || y > 10)
+  if (y == 0 or y > 10)
     return;
-  if (x == 0 || x > 15) 
+  if (x == 0 or x > 15) 
     return;
   
   // based on code at bdd1
@@ -1527,7 +1536,7 @@ void Arena::turmoil()
 void Arena::splatAnimation()
 {
   int x, y;
-  getXY(m_targetIndex, x, y);
+  targetXY(x, y);
   x--;
   y--;
   for (int i = 0; i < 8; i++) {
@@ -1606,9 +1615,8 @@ void Arena::justice()
   }
 }
 
-void Arena::destroyAllCreatures()
+void Arena::destroyAllCreatures(int playerid)
 {
-  int playerid(m_targetIndex-WIZARD_INDEX);
   bool samplePlayed(false);
   for (int frame = 0; frame < 7; frame++) {
     Misc::delay(5);
@@ -1641,7 +1649,7 @@ void Arena::destroyAllCreatures()
       Graphics::draw_splat_frame(x-1, y-1, frame);
       
       // do a sound effect, once only
-      if (!samplePlayed) {
+      if (not samplePlayed) {
         SoundEffect::play(SND_SPELLSUCCESS);
         samplePlayed = true;
       }
@@ -1654,7 +1662,7 @@ void Arena::destroyAllCreatures()
           m_arena[5][i] = 0;
         } else {
           // same owner as effected wiz
-          if (m_arena[0][i] == SPELL_GOOEY_BLOB && m_arena[4][i] != 0) {
+          if (m_arena[0][i] == SPELL_GOOEY_BLOB and m_arena[4][i] != 0) {
             // b5a9
             m_arena[0][i] = m_arena[4][i];
             m_arena[4][i] = 0;
@@ -1705,6 +1713,7 @@ void Arena::subvert()
 
 void Arena::wizardDeath(int image)
 {
+  m_arena[0][m_targetIndex] = 0;
   int pal(9);
   const unsigned short * gfx = s_wizardData[image].gfx;
   const unsigned short * map = s_wizardData[image].map;
@@ -1755,21 +1764,21 @@ void Arena::wizardDeath(int image)
         setPalette8(x2_2-1, y-1, pal);
         drawGfx8(gfx, map, x2_2-1, y-1, 0);
       }
-      if (x2_1 != 1 && y2_1 != 1) {
+      if (x2_1 != 1 and y2_1 != 1) {
         setPalette8(x2_1-1, y2_1-1, pal);
         drawGfx8(gfx, map, x2_1-1, y2_1-1, 0);
       }
-      if (x2_2 != 0x1D && y2_1 != 1) {
+      if (x2_2 != 0x1D and y2_1 != 1) {
         setPalette8(x2_2-1, y2_1-1, pal);
         drawGfx8(gfx, map, x2_2-1, y2_1-1, 0);
       }
 
-      if (x2_1 != 1 && y2_2 != 0x13) {
+      if (x2_1 != 1 and y2_2 != 0x13) {
         setPalette8(x2_1-1, y2_2-1, pal);
         drawGfx8(gfx, map, x2_1-1, y2_2-1, 0);
       }
 
-      if (x2_2 != 0x1D && y2_2 != 0x13) {
+      if (x2_2 != 0x1D and y2_2 != 0x13) {
         setPalette8(x2_2-1, y2_2-1, pal);
         drawGfx8(gfx, map, x2_2-1, y2_2-1, 0);
       }
@@ -1785,3 +1794,44 @@ void Arena::wizardDeath(int image)
   m_arena[0][m_targetIndex] = m_arena[5][m_targetIndex];
   m_arena[5][m_targetIndex] = 0;
 } 
+
+
+void Arena::clearGameBorder()
+{
+  
+  u16 * mapData = m_bg->mapData();
+  // top left corner
+  mapData[0] = 0;
+  // top right corner
+  mapData[SECOND_TILEBANK_0+1] = 0;
+  // bottom left corner
+  mapData[23*32] = 0;
+  // bottom right corner
+  mapData[SECOND_TILEBANK_0+1+23*32] = 0;
+  
+  // now fill in the sides
+  // top/bottom edge
+  for (int x=1; x < 32; x++) {
+    //top
+    mapData[x] = 0;
+    mapData[x+32] = 0;
+    //bottom
+    mapData[x+23*32] = 0;
+    mapData[x+22*32] = 0;
+  }
+  // left over top edge tile...
+  mapData[SECOND_TILEBANK_0+0] = 0;
+  // left over bottom edge tile...
+  mapData[SECOND_TILEBANK_0+23*32] = 0;
+  
+  // left and right edge
+  for (int y=1; y < 23; y++) {
+    //l
+    mapData[y*32] = 0;
+    mapData[1+y*32] = 0;
+    //r
+    mapData[SECOND_TILEBANK_0+1+y*32] = 0;
+    mapData[SECOND_TILEBANK_0+y*32] = 0;
+  }
+}
+
