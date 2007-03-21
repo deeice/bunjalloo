@@ -5,14 +5,14 @@
 class ExamineBoard: public ScreenI
 {
   public:
+    ExamineBoard(bool start=true);
     virtual void show();
     virtual void animate();
     virtual void vblank();
     virtual void handleKeys();
 
-    ~ExamineBoard();
-
   private:
+    bool m_start;
 
     void a();
     void b();

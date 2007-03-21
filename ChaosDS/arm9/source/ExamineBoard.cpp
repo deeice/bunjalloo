@@ -8,18 +8,23 @@
 #include "Arena.h"
 
 using namespace nds;
-ExamineBoard::~ExamineBoard()
-{
-  // iprintf("~ExamineBoard;\n");
-}
+
+ExamineBoard::ExamineBoard(bool start):
+  m_start(start)
+{ }
 
 void ExamineBoard::show()
 {
   Interrupt::disable();
-  Arena & theArena(Arena::instance());
-  theArena.display();
-  theArena.setBorderColour(0);
-  theArena.initialiseCursor(7,4);
+  Arena & arena(Arena::instance());
+  arena.display();
+  arena.setBorderColour(arena.currentPlayer());
+  if (m_start) {
+    arena.initialiseCursor(7,4);
+  } else {
+    arena.enableCursor();
+    arena.cursorSet();
+  }
   Interrupt::enable();
   Video::instance().fade(false);
 }
@@ -70,7 +75,7 @@ void ExamineBoard::a()
     return;
   }
   Video::instance().fade();
-  GameState::instance().setNextScreen(new ExamineSquare(new ExamineBoard()));
+  GameState::instance().setNextScreen(new ExamineSquare(new ExamineBoard(false)));
   Arena::instance().enableCursor(false);
 }
 
