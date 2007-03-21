@@ -79,14 +79,7 @@ bool Line::isPixelSet(unsigned int x, unsigned int y) const
     return false;
   }
   
-  int tile = 1 + (x/8) + ((y/8)*30);
-  // then from here it's easy (ish) just work out the remainder from /8
-  int xrem = x&0x7;
-  int yrem = y&0x7;
-  
-  int address = tile*16 /*16 16-bit vals per tile*/ + (xrem/4) + (yrem*2);
-  
-  u16 pixel = m_tileData[address];
+  unsigned short & pixel(this->pixel(x,y));
   if ((x & 3) == 0) {
     return  ((pixel & 0x000F) != 0);
   } else if ((x & 3) == 1) {
@@ -276,45 +269,7 @@ void Line::drawPixel4bpp(unsigned short x, unsigned short y)
 {
   // draw a pixel to the non rot bg, assume the tiles are set up already
   // use "1" as the colour
-  
-  // convert the x position to the x,y position to the 8*8 tile
-  // each tile is 8 pixels wide, but these are stored in quadruples 
-  // (pairs of 8 bit values, each 8 bit value holds 2 pixels)
-  // therefore each 8*8 block is just 16 "reads" big.
-  // 16 * 16 = 256 bits. We have 4 bits per pixel, so 256 bits = 64 pixels
-  
-  // the pixel could be either one of the 4 4bit blocks 
-  //       1111 0000 0000 0000    F000 -> 0FFF
-  //       0000 1111 0000 0000    0F00 -> F0FF
-  //       0000 0000 1111 0000    00F0 -> FF0F
-  //       0000 0000 0000 1111    000F -> FFF0
-  // to determine the 4 bit block, need to think about the pixel.
-  // pixel 0 4 is in lower 4 bits   00  100     &3 == 0
-  // pixel 1 5 is in next 4 bits    01  101     &3 == 1
-  // pixel 2 6 is in next 4 bits    10  110     &3 == 2
-  // pixel 3 7 is in next 4 bits    11  111     &3 == 3
-  
-  /* tile     add           x at top left corner      y
-      1         20          0                         0
-      2         40          8                         0
-      3         60...       16                        0 
-      31        3E0         0                         8
-      32        400         8                         8....
-      
-      so to get tile from x,y... need to 1 + (y/8 * 30 + x/8)
-  */
-  
-  int tile = 1 + (x/8) + ((y/8)*30);
-  // then from here it's easy (ish) just work out the remainder from /8
-  //u8 xrem = x - ((x>>3)<<3); //&7!
-  //u8 yrem = y - ((y>>3)<<3); //&7!
-
-  int xrem = x&7;
-  int yrem = y&7;
-  
-  int address = tile*16 /*16 16-bit vals per tile*/ + (xrem/4) + (yrem*2);
-  
-  u16 pixel = m_tileData[address];
+  unsigned short & pixel(this->pixel(x, y));
   if ((x & 3) == 0) {
     // lower bits are removed...
     pixel |= 0x000F;
@@ -326,7 +281,7 @@ void Line::drawPixel4bpp(unsigned short x, unsigned short y)
     pixel |= 0xF000;
   }
   
-  m_tileData[address] = pixel;
+  // m_tileData[address] = pixel;
 }
 
 // sets or unsets pixel depending on line segment and other things
@@ -352,21 +307,49 @@ void Line::setPixel(unsigned short x, unsigned short y)
   p[15] = m_colour;
 }
 
-
-
-void Line::removePixel(unsigned short x, unsigned short y) 
+unsigned short & Line::pixel(int x, int y) const
 {
-  // FIXME: factorise this code
+
+  // convert the x position to the x,y position to the 8*8 tile
+  // each tile is 8 pixels wide, but these are stored in quadruples 
+  // (pairs of 8 bit values, each 8 bit value holds 2 pixels)
+  // therefore each 8*8 block is just 16 "reads" big.
+  // 16 * 16 = 256 bits. We have 4 bits per pixel, so 256 bits = 64 pixels
+
+  // the pixel could be either one of the 4 4bit blocks 
+  //       1111 0000 0000 0000    F000 -> 0FFF
+  //       0000 1111 0000 0000    0F00 -> F0FF
+  //       0000 0000 1111 0000    00F0 -> FF0F
+  //       0000 0000 0000 1111    000F -> FFF0
+  // to determine the 4 bit block, need to think about the pixel.
+  // pixel 0 4 is in lower 4 bits   00  100     &3 == 0
+  // pixel 1 5 is in next 4 bits    01  101     &3 == 1
+  // pixel 2 6 is in next 4 bits    10  110     &3 == 2
+  // pixel 3 7 is in next 4 bits    11  111     &3 == 3
+
+  /* tile     add          x at top left corner      y
+     1         20          0                         0
+     2         40          8                         0
+     3         60...       16                        0 
+     31        3E0         0                         8
+     32        400         8                         8....
+
+     so to get tile from x,y... need to 1 + (y/8 * 30 + x/8)
+     */
   // remove the pixel at x, y
   int tile = 1 + (x/8) + ((y/8)*30);
   // then from here it's easy (ish) just work out the remainder from /8
   int xrem = x&0x7;
   int yrem = y&0x7;
-  
+
   int address = tile*16 /*16 16-bit vals per tile*/ + (xrem / 4) + (yrem * 2);
-  
-  u16 pixel = m_tileData[address];
-  
+
+  return m_tileData[address];
+}
+
+void Line::removePixel(unsigned short x, unsigned short y) 
+{
+  unsigned short & pixel(this->pixel(x, y));
   if ((x & 3) == 0) {
     pixel &= 0xFFF0;
   } else if ((x & 3) == 1) {
@@ -376,6 +359,5 @@ void Line::removePixel(unsigned short x, unsigned short y)
   } else if ((x & 3) == 3) {    
     pixel &= 0x0FFF;
   }
-  m_tileData[address] = pixel;
 }
 

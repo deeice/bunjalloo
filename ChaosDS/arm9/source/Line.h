@@ -8,14 +8,15 @@ class Line
   public:
 
 
+    //!Types of lines available.
     enum Line_t {
-      SIGHT=0,
-      ARROW,
-      SHORT_ARROW,
-      SPELL,
-      DRAGON,
-      BOLT,
-      LIGHTNING
+      SIGHT=0,     //!< No line is drawn.
+      ARROW,       //!< A normal size arrow.
+      SHORT_ARROW, //!< A short size arrow.
+      SPELL,       //!< The spell cast line.
+      DRAGON,      //!< Dragon breath type.
+      BOLT,        //!< A single blob .
+      LIGHTNING    //!< Multiple blob, looks like dragon breath type.
     };
     //! helper fn for drawing the line animation
     static bool doLine(Line_t);
@@ -51,6 +52,9 @@ class Line
     void innerDrawSegment(int x, int y);
     void setPixel(unsigned short x, unsigned short y);
     void removePixel(unsigned short x, unsigned short y);
+
+
+    unsigned short & pixel(int x, int y) const;
 
 };
 #endif
