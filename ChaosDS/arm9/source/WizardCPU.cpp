@@ -48,11 +48,8 @@ void WizardCPU::doAiSpell()
   }
   
   m_wizard.setCastAmount(0);
-  unsigned char * spells(m_wizard.spells());
+  m_wizard.orderSpells();
   int spellCount(m_wizard.spellCount());
-  spells[0] = 12 + Misc::rand(10);
-  Misc::orderTable(spellCount, spells);
-
   int bestSpell(0);
   while (bestSpell < spellCount) {
     m_wizard.setSelectedSpell(bestSpell);
@@ -307,17 +304,17 @@ void WizardCPU::setFurthestInrange()
     Misc::delay(5);
     // check xpos < 10  - code at c63d
     int x,y;
-    Arena::getXY(Arena::instance().targetIndex(), x, y);
+    Arena::instance().targetXY(x, y);
     if (x < 0x10) {
       // in range
       // isBlockedLOS()
-      if (!Arena::instance().isBlockedLOS()) {
+      if (not Arena::instance().isBlockedLOS()) {
         
-        if (Arena::instance().at(0,Arena::instance().targetIndex()) == 0) {
+        if (Arena::instance().atTarget() == 0) {
           // nothing here
           m_targetSquareFound = true;
         } 
-        else if (Arena::instance().at(2,Arena::instance().targetIndex()) == 4)
+        else if (Arena::instance().isDead(Arena::instance().targetIndex()))
         {
           // is the thing here dead?
           m_targetSquareFound = true;
@@ -511,7 +508,6 @@ void WizardCPU::doAiMovement()
     
   }
   Misc::delay(20);
-  iprintf("End of doAiMovement\n");
 }
 
 void WizardCPU::doThisMovement()
@@ -536,7 +532,7 @@ void WizardCPU::doThisMovement()
     }
     else {
       // walking creature...
-      if (!m_hasMoved) {
+      if (not m_hasMoved) {
         // ae67 - wizard has not moved yet...
         if (not m_moveTableCreated) {
           // need to create the wizard movement table
@@ -833,7 +829,7 @@ void WizardCPU::setupMove() {
       /* bug fix 26/12/04 
        * If wiz is flying and engaged to undead, causes problems
        */
-      && tmp_is_flying)
+      and tmp_is_flying)
     {
       // has magic wings and is in the open
       // cafb....
@@ -905,7 +901,7 @@ void WizardCPU::flyingMove(int type)
   int movementAllowance = 13;
   if (type == SPECIAL_MOVE_MOUNT) {
     movementAllowance = 1 + 
-      (s_spellData[Arena::instance().at(0,Arena::instance().targetIndex())].movement*2); 
+      (s_spellData[Arena::instance().atTarget()].movement*2); 
   }
   movement->setMovementAllowance(movementAllowance);
   
@@ -971,7 +967,7 @@ bool WizardCPU::dismount() const
 {
   Arena & arena(Arena::instance());
   int targetIndex(arena.targetIndex());
-  int creature(arena.at(0,targetIndex));
+  int creature(arena.atTarget());
   // which type of mount are we on?
   if (creature >= SPELL_PEGASUS 
       and creature <= SPELL_MANTICORE )
@@ -1086,7 +1082,8 @@ void WizardCPU::aiCastTreesCastles()
   for (int i = 0; i < m_wizard.castAmount(); i++) {
     // FIXME: no need for the flag, all can be done with breaks
     bool got_square(false);
-    while (!got_square) {
+    while (not got_square)
+    {
       int flag = getBestIndex();
       if (flag == 0x4b) {
         // no more squares to cast to
@@ -1094,11 +1091,11 @@ void WizardCPU::aiCastTreesCastles()
         break;
       }
       int x, y;
-      Arena::getXY(arena.targetIndex(), x, y);
-      if (x == 0x10) {
+      arena.targetXY(x, y);
+      if (x == 16) {
         continue;
       }
-      if (arena.at(0, arena.targetIndex()) != 0) {
+      if (arena.atTarget() != 0) {
         continue;
       }
       
@@ -1190,11 +1187,11 @@ void WizardCPU::aiCastWall()
     
     // check that this is a valid square for walls...
     int x, y;
-    Arena::getXY(arena.targetIndex(), x, y);
+    arena.targetXY(x, y);
     if (x >= 16) {
       continue;
     }
-    if (arena.at(0, arena.targetIndex()) != 0){
+    if (arena.atTarget() != 0){
       continue;
     }
     if (arena.isWallAdjacent(m_wizard.selectedSpellId(), m_wizard.id())) {
@@ -1314,7 +1311,9 @@ void WizardCPU::aiCastSubversion() {
   m_wizard.setCastAmount(1);
   while (s_priorityTable[m_tableIndex] != 0xFF) {
     int creature = arena.at(0,s_priorityTable[m_tableIndex]);
-    if (arena.at(4,s_priorityTable[m_tableIndex]) == 0 && creature < SPELL_GOOEY_BLOB && creature != 0) {
+    if (arena.at(4,s_priorityTable[m_tableIndex]) == 0 
+       and creature < SPELL_GOOEY_BLOB 
+       and creature != 0) {
       // a valid creature for subversion...
       // compare the start and end locations to see if in spell range
       int si = arena.startIndex();
