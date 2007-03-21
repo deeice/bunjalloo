@@ -7,6 +7,7 @@ class Color;
 class Graphics
 {
   public:
+    //! The traditional Chaos colour scheme, based on the speccy's bright palette.
     static const unsigned short int  s_chaosColours[];
     // static helper functions
     //! initialise the screen setup
@@ -14,6 +15,11 @@ class Graphics
     //! clear all palettes
     static void clearPalettes();
 
+    /** Draw a frame of the splat animation.
+     * @param x position.
+     * @param y position.
+     * @param frame frame to draw.
+     */
     static void draw_splat_frame(int x, int y, int frame);
 
     /*! @brief load a pre-defined palette to the given palette index.
@@ -29,8 +35,14 @@ class Graphics
     //! fetch the gfx instance
     static Graphics & instance();
 
+    /** Load a sprite from the given graphics and map data. This is similar to
+     * background map idea and "emulates" the bg hardware for loading data to
+     * sprites.
+     * @param gfx the graphics data.
+     * @param map the map data.
+     */
     static void loadSprite(const unsigned short * gfx, 
-        const unsigned short * map);
+                           const unsigned short * map);
     
     // member functions
     /*! @brief set the parameters used to animate text

@@ -68,7 +68,7 @@ void Splash::handleKeys()
 
 // start key pressed, for now start the game
 void Splash::start(void) {
-  if (!m_menuOn) {
+  if (not m_menuOn) {
     m_menuOn = true;
     m_hilightItem = 0;
     Text16 & textBg = Text16::instance();

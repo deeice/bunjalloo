@@ -111,7 +111,10 @@ void OptionScreen::a()
 {
   Option & opt(Options::instance().option(Options::OptionPosition_t(m_hilightItem)));
   if (m_hilightItem == Options::QUIT)  {
+#if 0
     // opt++; /* Doesn't work? Cart dependent... */
+    // swi 00? FIXME
+#endif
   }
   
   if (m_hilightItem == Options::BACK)
@@ -213,6 +216,11 @@ unsigned short Option::operator--(int )
 Option::operator int() const
 {
   return m_value;
+}
+
+Option::operator bool() const
+{
+  return m_value != 0;
 }
 
 void Option::asText(char * buffer) const

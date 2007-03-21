@@ -329,7 +329,7 @@ void cast_subversion()
     // human...
     int target(arena.atTarget());
     if (target >= SPELL_GOOEY_BLOB or target == 0
-        or arena.at(4, arena.targetIndex()) != 0 ) 
+        or arena.underTarget() != 0 ) 
     {
       // can't cast here, as the creature is ridden by a wizard, 
       // is not a proper creature or there's nothing here
@@ -666,7 +666,7 @@ void doJusticeCast()
     if (arena.atTarget() >= Arena::WIZARD_INDEX) {
       // wizard - destroy all his creations!
       Misc::delay(4);
-      arena.destroyAllCreatures();
+      arena.destroyAllCreatures(arena.atTarget() - Arena::WIZARD_INDEX);
     }
     else {
       arena.justice();

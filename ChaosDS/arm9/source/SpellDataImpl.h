@@ -24,6 +24,9 @@ public:
    */
   bool isSpellInRange() const;
 
+  /** Draw the justice graphic frame for the spell. Draws a multicoloured silhoutte.
+   * @param frame the frame number to use.
+   */
   void drawJusticeGfx(int frame) const;
 
 private:

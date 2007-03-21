@@ -12,12 +12,14 @@ class Arena
   public:
     //! number that represents a wizard-type creature
     static const int WIZARD_INDEX;
+    //! The height of the arena.
     static const int HEIGHT;
+    //! The size (width*height) of the arena
     static const int ARENA_SIZE;
 
     /** Get the distance between 2 squares.
      * @param square1 the start index, equal to x + y * 16
-     * @param square1 the start index.
+     * @param square2 the start index.
      */
     static int distance(int square1, int square2);
     
@@ -26,6 +28,11 @@ class Arena
      */
     static Arena & instance();
 
+    /** Get the x and y coordinates that correspond to the given index.
+     * @param index the index to convert to x, y coordinates.
+     * @param x is filled with the x coord value.
+     * @param y is filled with the y coord value.
+     */
     static void getXY(int index, int & x, int & y);
     
     /** Convert index from a square to one of its surroundings.
@@ -33,6 +40,7 @@ class Arena
      */
     static int applyPositionModifier(int square, int index);
 
+    /** Get the attack preference value fot the given spell. */
     static int attackPref(int c);
 
     /*! @brief Reset the arena map values.  */
@@ -99,6 +107,7 @@ class Arena
      */
     void display();
 
+    /** The types of cursor graphics to display.*/
     typedef enum {
       CURSOR_SPELL_GFX,
       CURSOR_ENGAGED_GFX,
@@ -108,6 +117,7 @@ class Arena
       CURSOR_NORMAL_GFX,
       CURSOR_NOT_DRAWN
     } Cursor_t;
+
     //! set the border colour to match the given player
     void setBorderColour(unsigned char playerid);
 
@@ -124,52 +134,101 @@ class Arena
      */
     void setCursor(int x, int y);
 
+    /** Draws the cursor by setting the data in the sprite RAM.
+     * @param type The type of cursor to draw.
+     */
     void drawCursor(Cursor_t type=CURSOR_NORMAL_GFX);
 
+    //! Moves the cursor up one square.
     void cursorUp();
+    //! Moves the cursor down one square.
     void cursorDown();
+    //! Moves the cursor left one square.
     void cursorLeft();
+    //! Moves the cursor right one square.
     void cursorRight();
+
+    //! do not move the cursor, just set it as is.
+    void cursorSet();
+
+    /** Enable or disable the cursor. Turns the sprite that represents the cursor on (or off).
+     * @param enable Enable the cursor or not. True to enable, false to disable.
+     */
     void enableCursor(bool enable=true);
 
     //! clear a square here
     void clearSquare(int x, int y);
 
+    //! Clear the game border from the map data.
+    void clearGameBorder();
+
     //! return the creature here
     int cursorContents() const;
+    /** Fetch the contents of the arena under the current cursor position.
+     * @param theCreature is filled with the creature here.
+     * @param theOneUnderneath is filled with the details of the creature underneath.
+     * @param theFlags is filled with the flags for the creature.
+     */
     void cursorContents(int & theCreature, int & theOneUnderneath, int & theFlags) const;
+    /** Fetch the contents of the arena under the current cursor position.
+     * @param theCreature is filled with the creature here.
+     * @param theOneUnderneath is filled with the details of the creature underneath.
+     * @param theFlags is filled with the flags for the creature.
+     * @param theFrame is filled with the frame for theCreature.
+     */
     void cursorContents(int & theCreature, int & theOneUnderneath, 
         int & theFlags, int & theFrame) const;
 
     //! Reset the animation details in arena 1 and 2 based upon the info in arena 0
     void resetAnimFrames();
 
+    /** Set the spell (creature) at the given position.
+     * @param x the arena x coordinate.
+     * @param y the arena y coordinate.
+     * @param spellID the spell number.
+     */
     void setSpellAt(int x, int y, int spellID);
 
+    /** Fetch the contents of a given table at the given index.
+     * @param i The table to use.
+     * @param j the index into the table.
+     */
     inline int at(int i, int j)
     {
       return m_arena[i][j];
     }
 
+    /** Fetch the contents of table 0 at the current target square.
+     * @return the contents of table 0 at the current target square.
+     */
     inline int atTarget()
     {
       return m_arena[0][m_targetIndex];
     }
 
+    /** Fetch the contents of table 4 at the current target square.
+     * @return the contents of table 4 at the current target square.
+     */
     inline int underTarget()
     {
       return m_arena[4][m_targetIndex];
     }
 
-    //! get the current round number
+    /** get the current round number.
+     * @return the current round number.
+     */
     int roundNumber() const;
 
-    // set the target information for the current player
+    /** Set the round counter to 0. */
+    void resetRoundCount();
+
+    //! set the target, wizard and start index information for the current player.
     void setCurrentPlayerIndex();
 
+    //! get the x and y coordinates for the current player. (where is this used?)
     void currentPlayerXY(int & x, int &y);
     
-    //! Needs to be public to animate arena
+    /** Redraws all creatures. Needs to be public to animate arena. */
     void drawCreatures();
 
     /*! @brief check if the currently selected spell can be cast to where the target square.
@@ -183,26 +242,66 @@ class Arena
      * @return true if there is a tree next to the current target, false otherwise.
      */
     bool isTreeAdjacent(int spellId) const;
+    /** Check if a wall is adjacent to the casting wizard.
+     * @param spellId The spell that is being cast.
+     * @param wizardId The wizard who is casting the spell
+     * @return true if there is a wall-like spell next to the casting wizard, false otherwise.
+     */
     bool isWallAdjacent(int spellId, int wizardId) const;
+    /** @return true if the line of sight between the start index and the
+     * target index is blocked. returns false if it is not 
+     */
     bool isBlockedLOS() const;
 
+    //! Fetch the X and Y positions of the current target index. (where is this used?)
     void targetXY(int & x, int & y);
 
+    /** Draws a frame of the spell cast animation.
+     * @param x the x position of where to draw,
+     * @param y the y position of where to draw.
+     * @param frame the frame of the animation to draw.
+     */
     void drawSpellcastFrame(int x, int y, int frame);
+    /** Finish the creation of a creature when a creature spell succeeds.
+     * Places the creature in the arena and sets the flags for the current player. 
+     */
     void creatureSpellSucceeds();
 
+    /** @return the id of the enemy at the given index
+     * @param index the arena index to check.
+     */
     int containsEnemy(int index);
+    /** @return the owner id of the creature in the given square.
+     * @param index the arena index to check.
+     */
     int owner(int index) const;
-    //! fixme; nothing to do with the m_wizardIndex below!
+
+    /** Get the index of the arena that holds the player given by id. 
+     * Note that it is not the same as the m_wizardIndex version below!
+     * @param id the number of the player to get.
+     * @return the index in the arena that holds the player with id @a id
+     */
     int wizardIndex(int id) const;
+
+    /** Get the id of the wizard at the given index.
+     * @param index the arena index to check.
+     * @return the identifier of the wizard at the @a index
+     */
     int wizardId(int index) const;
+    
     /** Does the square contain an undead. Undead may be from the flags or
-     * "natural" behaviour of a creature (vampire, zombie, etc). */
+     * "natural" behaviour of a creature (vampire, zombie, etc).
+     * @param index the index square to check.
+     * @return true if the square contains an undead creature/thing.
+     */
     bool isUndead(int index) const;
-    /** has the cpu cast disbelieve on the gicen index.*/
+    
+    /** has the cpu cast disbelieve on the given index.*/
     bool hasDisbelieveCast(int index) const;
 
+    //! Set the "has moved" flag on the given index.
     void setHasMoved(int index);
+    //! @return true if the given index contains a creature that has already moved.
     bool hasMoved(int index) const;
 
     /** is the indexed square an illusion.  */
@@ -216,21 +315,33 @@ class Arena
      */
     void doDisbelieve();
 
+    /** @return the the index of the starting square */
     inline int startIndex() const { return m_startIndex; }
+    /** @return the the index of the wizard square */
     inline int wizardIndex() const { return m_wizardIndex; }
+    /** @return the the index of the target square */
     inline int targetIndex() const { return m_targetIndex; }
+    /** @param i the the index of the start square */
     inline void setStartIndex(int i) { m_startIndex = i; }
+    /** @param i the the index of the wizard square */
     inline void setWizardIndex(int i) { m_wizardIndex = i; }
+    /** @param i the the index of the target square */
     inline void setTargetIndex(int i) { m_targetIndex = i; }
 
-    // start the next round (what is it doing in arena?)
+    //! start the next round (what is it doing in arena?)
     void nextRound();
 
+    /** highlight all the creatures belonging to the given player.
+     * @param playerId the player whose creatures are highlighted.
+     */
     void highlightCreatures(int playerId);
+    /** Highlight the creatures that belong to the current target. */
     void highlightTargetCreations(); 
 
-    //! checks the frame - if it is 4 then the creature here is dead.
-    //! @return true if there is a dead creature in this square.
+    /** Checks the frame - if it is 4 then the creature here is dead.
+     * @return true if there is a dead creature in this square.
+     * @param index the square to check.
+     */
     bool isDead(int index) const;
 
     /** Move selected creature from start index to target index.
@@ -244,14 +355,24 @@ class Arena
     /** helper function for movement. Removes the creature at targetindex*/
     void killCreature();
 
+    //! Cause the current target square to turn into a corpse.
     void leaveCorpse();
+    //! Remove an undead creature at the target square and clean up underneath it.
     void killUndead();
+    //! Implement the turmoil random motion.
     void turmoil();
+    //! Show a "pop" animation at the target square.
     void popAnimation();
+    //! Show a "splat" animation at the target square.
     void splatAnimation();
+    /** Does the last part of the magic missile type spells. Removes the
+     * creature, cleans up underneath.
+     */
     void magicMissileEnd();
+    //! Perform justice on the current target square.
     void justice();
 
+    //! Draws the silhoutte justice animation at the target square.
     inline void drawSilhouetteGfx(
         const unsigned short * gfx, 
         const unsigned short * map,
@@ -259,13 +380,17 @@ class Arena
     {
       drawSilhouetteGfx(m_targetIndex, gfx, map, col, 11, false);
     }; 
-    void destroyAllCreatures();
+    /** Destroys all the creatures belonging to the given wizard.
+     * @param playerid the unlucky player.
+     */
+    void destroyAllCreatures(int playerid);
 
     //! raise the creature at target index and set to current player
     void raiseDead();
     //! subvert the creature at target index and set to current player
     void subvert();
 
+    //! Draw the wizard death animation using the given image index.
     void wizardDeath(int image);
 
   private:

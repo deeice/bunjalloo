@@ -6,6 +6,7 @@
 class SpellSelect: public ScreenI
 {
   public:
+    //!Spell selection starts.
     SpellSelect();
     virtual void show();
     virtual void animate();
@@ -28,6 +29,7 @@ class SpellSelect: public ScreenI
     void r();
     void a();
   protected:
+    //! Cancel spell selection.
     void b();
 };
 #endif

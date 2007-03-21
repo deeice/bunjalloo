@@ -10,9 +10,11 @@ class WizardCPU : public Computer
   friend class Movement;
 
   public:
+    //! Create a WizardCPU for a given wizard.
     WizardCPU(Wizard & theWizard);
 
-    enum Cast_t{
+    //! Cast types used for aiCast().
+    enum Cast_t {
       DISBELIEVE,
       CREATURE,
       TREES,
@@ -28,10 +30,14 @@ class WizardCPU : public Computer
     void doAiMovement();
     bool hasTargetSquare() const;
     void setHasTargetSquare(bool);
+    //! End the movement round for the computer.
     void endMove();
+    //! Make the computer dismount, if it wants to.
     bool dismount() const;
+    //! Set if the move table needs recreating or not.
     void setMoveTableCreated(bool created);
 
+    //! Set if the computer has found a flying target.
     inline void setFlyingTargetFound(bool found) {
       m_flyingTargetFound = found;
     }

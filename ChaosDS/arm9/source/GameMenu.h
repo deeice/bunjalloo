@@ -6,6 +6,7 @@
 class GameMenu: public ScreenI
 {
   public:
+    //! Continue the game, corresponds to option 3 on the menu.
     static void continueGame();
     virtual void show();
     virtual void animate();

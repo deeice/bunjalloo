@@ -3,8 +3,8 @@
 
 typedef struct 
 {
-  const unsigned short * const gfx;
-  const unsigned short * const map;
+  const unsigned short * const gfx; //!< gfx data (tile data)
+  const unsigned short * const map; //!< map data
 } WizardData_t;
 
 enum {

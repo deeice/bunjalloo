@@ -157,11 +157,12 @@ void GameMenu::a() {
       // continue game
       continueGame();
       break;
-      /*
+#if 0
+      TODO
          case 3: // sleep mode
          Sleep_Mode(1);
          break;
-       */
+#endif
     default: break;    
   }
 }

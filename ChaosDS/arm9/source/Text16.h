@@ -9,7 +9,9 @@ class Text16
   public:
     //! Index of the first character.
     static const int FIRST_CHAR_INDEX;
+    //! X position of the message bar.
     static const int MESSAGE_X;
+    //! Y position of the message bar.
     static const int MESSAGE_Y;
     //! Singleton instance.
     static Text16 & instance();
@@ -50,7 +52,8 @@ class Text16
     void clearMessage();
 
     /*! @brief Show an in-game message.
-     * @param message The message to display
+     * @param message The message to display.
+     * @param color The colour of the message text.
      */ 
     void displayMessage(const char * message, 
         unsigned short color=nds::Color(0,30,30));

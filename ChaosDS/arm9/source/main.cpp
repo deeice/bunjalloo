@@ -18,7 +18,8 @@ int main(void) {
   // debug...
   nds::Background bg(1,0,0,31);
   BG_PALETTE_SUB[255] = RGB15(31,31,31);
-  consoleInitDefault(bg.mapData(), bg.tileData(),16);
+  if (1)
+    consoleInitDefault(bg.mapData(), bg.tileData(),16);
   bg.enable();
   GameState::instance().setNextScreen(new Splash());
   while(not Options::instance().option(Options::QUIT)) {

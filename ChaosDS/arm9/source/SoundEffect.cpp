@@ -24,6 +24,7 @@ const SoundEffect s_soundData[] = {
 
 class SoundEngine {
   public:
+    //! Returns the global instance of the sound enegine.
     static SoundEngine & instance();
   private:
     SoundEngine();

@@ -49,6 +49,9 @@ class Option
     /** Get the current value */
     operator int() const;
 
+    /** Get the current value as a boolean. */
+    operator bool() const;
+
     //! text value of the option on screen
     const char * m_name;
   private:
@@ -98,8 +101,11 @@ class OptionScreen : public ScreenI
 class Options
 {
   public:
+    //! A value that corresponds to using the default round calculation.
     static const int DEFAULT_ROUNDS;
+    //! Total number of options.
     static const int OPTION_COUNT;
+    //! Position of the options on screen.
     enum OptionPosition_t
     {
       ROUND_LIMIT,
@@ -111,7 +117,7 @@ class Options
     };
     //! Get the options instance
     static Options & instance();
-    // Get a pointer to the options
+    //! Get a pointer to the options
     Option * options() const;
     //! Get a singe option
     Option & option(OptionPosition_t) const;

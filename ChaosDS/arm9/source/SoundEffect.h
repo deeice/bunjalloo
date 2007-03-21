@@ -25,11 +25,16 @@ struct SoundEffect;
 extern const SoundEffect s_soundData[];
 
 struct SoundEffect {
+  //! The converted sample data.
   const unsigned short * const data;
+  //! Size of the sample data.
   unsigned int size;
-  /** Plays the sound effect. For example:
+  /** Plays the sound effect. 
    */
   void play() const;
+  /** Helper function to play a sound effect.
+   * @param sfx the sound effect to play.
+   */
   static inline void play(SoundEffect_t sfx) {
     s_soundData[sfx].play();
   }
