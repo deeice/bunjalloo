@@ -67,17 +67,22 @@ void ExamineBoard::handleKeys()
   if (keysSlow & KEY_B) {
     b();
   }
-#if 0
+#if 1
+  static Line::Line_t type(Line::ARROW);
+  if (keysSlow & KEY_Y) {
+    type = (Line::Line_t)(type + 1);
+  }
   // debug line routine - too fast!
   if (keysSlow & KEY_X) {
     int startIndex(Arena::instance().startIndex());
-
+    Arena::instance().enableCursor(false);
     Arena::instance().setStartIndex(
         Arena::instance().wizardIndex(Arena::instance().currentPlayer()));
-    Line l(Line::SPELL);
+    Line l(type);
     l.execute();
 
     Arena::instance().setStartIndex(startIndex);
+    Arena::instance().enableCursor();
   }
 #endif
 }

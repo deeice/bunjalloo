@@ -18,9 +18,9 @@ int main(void) {
   // debug...
   nds::Background bg(1,0,0,31);
   BG_PALETTE_SUB[255] = RGB15(31,31,31);
-  if (1)
-    consoleInitDefault(bg.mapData(), bg.tileData(),16);
+  consoleInitDefault(bg.mapData(), bg.tileData(),16);
   bg.enable();
+  iprintf("Hi\n");
   GameState::instance().setNextScreen(new Splash());
   while(not Options::instance().option(Options::QUIT)) {
     scanKeys();
