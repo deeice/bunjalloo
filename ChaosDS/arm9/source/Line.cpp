@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <stdio.h>
 #include <nds.h>
 #include "ndspp.h"
 #include "Line.h"
@@ -196,9 +197,6 @@ void Line::drawLineSegment(int x, int y)
   innerDrawSegment(x,y);
   // if reach the end of line, jump...
   if ( (x+(y*16)) != m_end) {
-    if ( ((m_segmentCount & 1) == 0)) { 
-      swiWaitForVBlank();
-    }
     for (int i = 0x64; i >= 0; i--) {
       s_lineTable[i+2] = s_lineTable[i];
     }
@@ -222,14 +220,12 @@ void Line::drawLineSegment(int x, int y)
       int newx(s_lineTable[index]);
       int newy(s_lineTable[index+1]);
       m_pattern |= 0x80;
-      //if ( ((i & 1) == 0) or m_pattern == 3) {
+      if ( ((i & 3) == 0)) {
         swiWaitForVBlank();
-      //}
+      }
       innerDrawSegment(newx,newy);
-      
       index -= 2;
     }
-    
   }
   
   
@@ -263,6 +259,18 @@ void Line::innerDrawSegment(int x, int y)
     setPixel(x,y);
   }
   m_segmentCount++;
+  // bit of a hack this...
+  int mask(15);
+  switch (m_type) {
+    case BOLT:
+    case DRAGON:
+    case LIGHTNING:
+      mask = 7;
+      break;
+  }
+  if ( (m_segmentCount & mask) == 0 ) { 
+    swiWaitForVBlank();
+  }
 }
 
 void Line::drawPixel4bpp(unsigned short x, unsigned short y) 
