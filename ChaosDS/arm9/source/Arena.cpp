@@ -1619,7 +1619,7 @@ void Arena::destroyAllCreatures(int playerid)
 {
   bool samplePlayed(false);
   for (int frame = 0; frame < 7; frame++) {
-    Misc::delay(5);
+    Misc::delay(5,false);
     for (int i = 0; i < ARENA_SIZE; i++) {
       if (m_arena[0][i] == 0)
         continue;   

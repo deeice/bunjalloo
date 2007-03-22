@@ -172,6 +172,9 @@ class Wizard : public Computer
     //! @return the name of this wizard.
     const char * const name() const;
 
+    /** Set the name of the wizard. The @a name is copied into m_name.
+     * @param name the new name of the wizard (12 chars max).
+     */
     void setName(const char * name);
 
     //! @return pointer to the spell at the given index

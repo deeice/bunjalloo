@@ -6,6 +6,7 @@
 class Movement : public ScreenI
 {
   public:
+    //!@param start true if this is the first time called. false if returning from examine screen.
     Movement(bool start=true);
     virtual void show();
     virtual void animate();

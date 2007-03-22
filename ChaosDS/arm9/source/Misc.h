@@ -29,7 +29,12 @@ namespace Misc
    */
   void orderTable(int count, unsigned char * table);
 
+  /** Wait 1 vblank then check for a key press.
+   * @return true if a key is pressed, false otherwise.
+   */
   bool keypressWait();
+  /** Wait for the player to let go of all keys. Spins (low power spin) until no key is pressed.
+   */
   void waitForLetgo();
 
   /** Delay for the given number of frames. Optionally calls the main loo.
@@ -45,6 +50,5 @@ namespace Misc
    */
   bool confirm();
 
-  void debug();
 }
 #endif

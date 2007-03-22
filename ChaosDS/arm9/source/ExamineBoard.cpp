@@ -6,6 +6,8 @@
 #include "GameState.h"
 #include "GameMenu.h"
 #include "Arena.h"
+#include "Line.h"
+#include "Wizard.h"
 
 using namespace nds;
 
@@ -65,6 +67,19 @@ void ExamineBoard::handleKeys()
   if (keysSlow & KEY_B) {
     b();
   }
+#if 0
+  // debug line routine - too fast!
+  if (keysSlow & KEY_X) {
+    int startIndex(Arena::instance().startIndex());
+
+    Arena::instance().setStartIndex(
+        Arena::instance().wizardIndex(Arena::instance().currentPlayer()));
+    Line l(Line::SPELL);
+    l.execute();
+
+    Arena::instance().setStartIndex(startIndex);
+  }
+#endif
 }
 
 void ExamineBoard::a() 

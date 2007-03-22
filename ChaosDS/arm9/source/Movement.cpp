@@ -196,6 +196,15 @@ void Movement::handleKeys()
   if (keysSlow & KEY_START) {
     start();
   }
+
+  if (keysSlow & KEY_X) {
+    iprintf("X pressed\n");
+    int theCreature = Arena::instance().cursorContents();
+    if (theCreature >= Arena::WIZARD_INDEX)
+    {
+      Wizard::player(theCreature-Arena::WIZARD_INDEX).kill();
+    }
+  }
 }
 
 void Movement::examineSquare() 

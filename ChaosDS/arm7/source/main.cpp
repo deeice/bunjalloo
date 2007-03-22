@@ -1,6 +1,6 @@
 #include <nds.h>
 #include <stdlib.h>
-#include <dswifi7.h>
+#include "System.h"
 
 //using namespace nds;
 
@@ -96,19 +96,7 @@ void VblankHandler(void) {
 
 }
 
-void WifiVblankHandler()
-{
-  // default vblank handler
-  VblankHandler();
-  // update wireless in vblank
-  //Wifi_Update();
-}
-
 int main(int argc, char ** argv) {
-
-  // must be the first thing we do...
-  //Wifi7 wifi;
-
   // Reset the clock if needed
   rtcReset();
 
@@ -118,15 +106,15 @@ int main(int argc, char ** argv) {
   IPC->soundData = 0;
 
   irqInit();
-  irqSet(IRQ_VBLANK, WifiVblankHandler);
+  irqSet(IRQ_VBLANK, VblankHandler);
   irqEnable(IRQ_VBLANK);
   SetYtrigger(80);
   vcount = 80;
   irqSet(IRQ_VCOUNT, VcountHandler);
   irqEnable((IRQ_MASK)(IRQ_VBLANK | IRQ_VCOUNT));
-
-  // enter the main loop - handles wifi shutdown and restart
-  //wifi.mainLoop();
-  while (true) swiWaitForVBlank();
+  while (true) {
+    swiWaitForVBlank();
+    nds::System::checkSleep();
+  }
 }
 

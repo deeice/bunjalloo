@@ -12,9 +12,9 @@
 
 //! define the positions of the stats
 typedef struct {
-  u8 startx;
-  u8 starty; 
-  u8 statx;
+  u8 startx; //!< x position of stat description.
+  u8 starty; //!< y position of stat.
+  u8 statx;  //!< x position of stat numeric value.
 } StatPosition_t;
 
 const StatPosition_t s_statPosition[] = {

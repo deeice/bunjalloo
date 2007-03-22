@@ -222,9 +222,9 @@ void Line::drawLineSegment(int x, int y)
       int newx(s_lineTable[index]);
       int newy(s_lineTable[index+1]);
       m_pattern |= 0x80;
-      if ( ((i & 1) == 0) or m_pattern == 3) {
+      //if ( ((i & 1) == 0) or m_pattern == 3) {
         swiWaitForVBlank();
-      }
+      //}
       innerDrawSegment(newx,newy);
       
       index -= 2;
