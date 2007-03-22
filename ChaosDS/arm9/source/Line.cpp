@@ -267,6 +267,8 @@ void Line::innerDrawSegment(int x, int y)
     case LIGHTNING:
       mask = 7;
       break;
+    default:
+      break;
   }
   if ( (m_segmentCount & mask) == 0 ) { 
     swiWaitForVBlank();

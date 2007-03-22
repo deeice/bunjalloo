@@ -762,7 +762,7 @@ void Wizard::kill()
   //int deadid = arena.atTarget() - Arena::WIZARD_INDEX;
   // convert the x, y target location to y, x tile locations
   // load the wizard pal into 10 too...
-  Graphics::loadPalette(10,9);
+  Graphics::loadPalette(9,10);
   int x, y;
   arena.targetXY(x, y);
   arena.clearSquare(x-1, y-1);
