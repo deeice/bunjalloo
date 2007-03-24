@@ -30,7 +30,7 @@ $(TARGET).ds.gba	: $(TARGET).nds
 #---------------------------------------------------------------------------------
 $(TARGET).nds	:	$(TARGET).arm7 $(TARGET).arm9
 	@ndstool	-c $(TARGET).nds -7 $(TARGET).arm7 -9 $(TARGET).arm9 \
-	  -b common/data/icon_palette.bmp "$(TARGET);By Richard Quirk;_" > /dev/null
+	  -b common/data/icon_palette.bmp "$(TARGET);Battle of Wizards;By Richard Quirk" > /dev/null
 
 #---------------------------------------------------------------------------------
 $(TARGET).arm7	: arm7/$(TARGET).elf
