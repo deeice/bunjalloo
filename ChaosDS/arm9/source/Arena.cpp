@@ -1841,4 +1841,6 @@ void Arena::reset() {
       m_arena[j][i] = 0;
     }
   }
+  clear();
+  initialiseMap();
 }
