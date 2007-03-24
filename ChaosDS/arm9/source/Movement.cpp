@@ -1,6 +1,5 @@
 #include <nds/arm9/input.h>
 #include <string.h>
-#include <stdio.h>
 #include "ndspp.h"
 #include "images.h"
 #include "Movement.h"
@@ -90,7 +89,7 @@ void Movement::startMovementRound()
       
       Text16::instance().displayMessage(str, Color(30,31,0));
 
-      Misc::delay(4);
+      Misc::delay(30,false);
       
       if (player.isCpu()) {
         // cpu movement round
@@ -198,7 +197,6 @@ void Movement::handleKeys()
   }
 
   if (keysSlow & KEY_X) {
-    iprintf("X pressed\n");
     int theCreature = Arena::instance().cursorContents();
     if (theCreature >= Arena::WIZARD_INDEX)
     {
