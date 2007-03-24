@@ -22,6 +22,7 @@ int main(void) {
   bg.enable();
   // iprintf("Chaos DS\n");
   GameState::instance().setNextScreen(new Splash());
+  keysSetRepeat(30,10);
   while(not Options::instance().option(Options::QUIT)) {
     scanKeys();
     swiWaitForVBlank();

@@ -1738,6 +1738,7 @@ void Arena::wizardDeath(int image)
     } else {
       Palette p(0,pal);
       p[Wizard::WIZARD_COLOUR] = Graphics::s_chaosColours[j];
+      SoundEffect::play(SND_SCREAM);
     }
     for (int i = 0; i < 0x1D; i++) {
       if (y2_1-1 != 0) {
