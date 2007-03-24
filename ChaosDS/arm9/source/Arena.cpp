@@ -79,7 +79,7 @@ Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28)),
   m_cursor(new Sprite(0, 16, 16, 0, 256)),
   m_playerCount(0), m_roundNumber(0),m_highlightCreations(HIGHLIGHT_INIT)
 {
-  reset();
+  initialiseMap();
   m_bg->enable();
 }
 Arena::~Arena()
@@ -93,7 +93,7 @@ Arena & Arena::instance()
   return s_instance;
 }
 
-void Arena::reset()
+void Arena::initialiseMap()
 {
   unsigned short * mapData = m_bg->mapData();
   for (int x = 0; x < 32; x++) {
@@ -370,7 +370,7 @@ void Arena::display() {
   m_bg->xScroll(0);
   m_bg->yScroll(0);
   m_bg->update();
-  reset();
+  initialiseMap();
   gameBorder();
   // draw all the creatures in the arena array
   drawCreatures();
@@ -1835,3 +1835,10 @@ void Arena::clearGameBorder()
   }
 }
 
+void Arena::reset() {
+  for (int j = 0; j < 6; j++) {
+    for (int i = 0; i < ARENA_SIZE; i++) {
+      m_arena[j][i] = 0;
+    }
+  }
+}

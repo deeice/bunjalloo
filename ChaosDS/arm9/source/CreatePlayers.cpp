@@ -47,7 +47,6 @@ void CreatePlayers::show()
     selectItem(m_hilightItem);
   }
 
-  Arena::instance().reset();
   Arena::instance().decorativeBorder(15, Color(0,0,31),Color(0,31,31)); 
 
   updatePlayers();
@@ -262,14 +261,11 @@ void CreatePlayers::a() {
   if (m_hilightItem == 0) {
     // A pressed on the "How many players?" bit
     // reset the players!  
-    //u16 keys = keysDown();
-    //if ((keys & KEY_L) && (keys & KEY_R)) {
-      Wizard::createDefaultWizards();
-      Text16::instance().clear();
-      Text16::instance().print("How many players?", 4,1, 10);
-      Text16::instance().setColour(10, Color(0,30,30));
-      updatePlayers();
-    //}
+    Wizard::createDefaultWizards();
+    Text16::instance().clear();
+    Text16::instance().print("How many players?", 4,1, 10);
+    Text16::instance().setColour(10, Color(0,30,30));
+    updatePlayers();
   } else {
     // go to the edit name screen
     Arena::instance().setCurrentPlayer(m_hilightItem-1);

@@ -129,7 +129,6 @@ void VictoryScreen::handleKeys()
     Video::instance().fade();
     Arena & arena = Arena::instance();
     arena.clearGameBorder();
-    //Misc::waitForLetgo();
     arena.reset();
     Wizard::resetPlayers();
     Casting::resetWorldChaos();

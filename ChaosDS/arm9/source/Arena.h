@@ -43,11 +43,11 @@ class Arena
     /** Get the attack preference value fot the given spell. */
     static int attackPref(int c);
 
-    /*! @brief Reset the arena map values.  */
-    void reset();
-
     /*! @brief Clear the graphics for all squares. */
     void clear();
+
+    /*! Reset (empty) the arena values. This should be called at the end of a game. */
+    void reset();
 
     /*! @brief Counts down the timer square values and updates the anim frame value if needed. */
     void countdownAnim();
@@ -71,6 +71,7 @@ class Arena
      * @return the number of active players
      */
     int players() const;
+
     /*! @brief set the number of players
      * @param p the number of players (2-8)
      */
@@ -438,6 +439,10 @@ class Arena
     
     Arena();
     ~Arena();
+
+    /*! @brief Initialise the arena background map values.  */
+    void initialiseMap();
+
     void gameBorder();
     void drawCreature(int x, int y, int creature, int frame);
 

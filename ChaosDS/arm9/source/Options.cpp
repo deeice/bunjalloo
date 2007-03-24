@@ -30,7 +30,6 @@ void OptionScreen::show()
 {
   Graphics::clearPalettes();
   Text16::instance().clear();
-  Arena::instance().reset();
   m_hilightItem = 0;
   Graphics::instance().setAnimationParams(-31,-8);
   
