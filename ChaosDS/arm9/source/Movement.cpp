@@ -199,6 +199,7 @@ void Movement::handleKeys()
     y();
   }
 
+#if 0
   if (keysSlow & KEY_X) {
     int theCreature = Arena::instance().cursorContents();
     if (theCreature >= Arena::WIZARD_INDEX)
@@ -206,6 +207,7 @@ void Movement::handleKeys()
       Wizard::player(theCreature-Arena::WIZARD_INDEX).kill();
     }
   }
+#endif
 }
 
 void Movement::examineSquare() 

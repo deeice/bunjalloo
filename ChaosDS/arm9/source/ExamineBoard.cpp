@@ -67,7 +67,7 @@ void ExamineBoard::handleKeys()
   if (keysSlow & KEY_B) {
     b();
   }
-#if 1
+#if 0
   static Line::Line_t type(Line::ARROW);
   if (keysSlow & KEY_Y) {
     type = (Line::Line_t)(type + 1);
