@@ -195,6 +195,9 @@ void Movement::handleKeys()
   if (keysSlow & KEY_START) {
     start();
   }
+  if (keysSlow & KEY_Y) {
+    y();
+  }
 
   if (keysSlow & KEY_X) {
     int theCreature = Arena::instance().cursorContents();
@@ -247,6 +250,77 @@ void Movement::start()
         Arena::instance().currentPlayer() + 1
         );
     startMovementRound();
+  }
+}
+
+// When Y is pressed, move the cursor to the next moveable creature.
+void Movement::y() {
+  if (m_selectedCreature == 0) {
+    int newIndex = -1;
+    Arena & arena(Arena::instance());
+    for (int j = 0; j < 2 && newIndex == -1; j++)
+    {
+      int lowerBounds, upperBounds;
+      if (j == 0) {
+        // first time through, go from current target to the end
+        lowerBounds = arena.targetIndex()+1;
+        upperBounds = Arena::ARENA_SIZE;
+      } else {
+        // second time through, go from start to current target.
+        lowerBounds = 0;
+        upperBounds = arena.targetIndex()+1;
+      }
+      // search the rest of the arena for creatures...
+      for (int i = lowerBounds; i < upperBounds; i++)
+      {
+        // if something here and it is not dead and it is...
+        // (a creature, or a wizard, or a wizard inside a magic wood or castle) and
+        // it hasn't moved yet AND it is our creature or wizard...
+        int creature(arena.at(0,i));
+        int underneath(arena.at(4,i));
+        if ( creature 
+             and not arena.isDead(i)
+             and 
+               ( creature < SPELL_GOOEY_BLOB
+                 or creature >= Arena::WIZARD_INDEX
+                 or creature == SPELL_SHADOW_WOOD
+                 or ( creature >= SPELL_MAGIC_WOOD and underneath >= Arena::WIZARD_INDEX )
+               ) 
+             and not arena.hasMoved(i)
+           )
+        {
+          // get the owner - low 3 bits of arena 3 for creatures, 
+          // (creatureid - WIZARD_INDEX) for wizards
+          int owner = -1;
+          if (creature >= Arena::WIZARD_INDEX) {
+            owner = creature - Arena::WIZARD_INDEX;
+          } else {
+            // a creature - but is it a mount or a wood/castle?
+            if (creature < SPELL_MAGIC_WOOD) {
+              // a mount...
+              owner = arena.owner(i);
+            }
+            else {
+              // a castle/wood - could be anyones, so base the owner on the wizard inside
+              owner = underneath - Arena::WIZARD_INDEX;
+            }
+          }
+          // is it ours?
+          if (owner == arena.currentPlayer()) {
+            newIndex = i;
+            break;
+          }
+        }
+      }
+    }
+    if (newIndex != -1) {
+      int x,y;
+      Arena::getXY(newIndex, x, y);
+      arena.setCursor(x-1,y-1);
+    } else {
+      Text16::instance().clearMessage();
+      Text16::instance().displayMessage("PRESS START TO END TURN",Color(31,30,0));
+    }
   }
 }
 

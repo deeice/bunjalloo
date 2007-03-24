@@ -60,6 +60,7 @@ class Movement : public ScreenI
     bool m_start;
     void startMovementRound();
     void start();
+    void y();
     void end();
     void selectCreature();
     void moveFlyingCreature();
