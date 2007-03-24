@@ -28,8 +28,6 @@ class ExamineSquare: public ScreenI
      * @param returnScreen screen to show when the user exits this one.
      */
     ExamineSquare(ScreenI * returnScreen);
-    //! Ends the examine square screen.
-    ~ExamineSquare();
     virtual void show();
     virtual void animate();
     virtual void handleKeys();

@@ -52,10 +52,6 @@ ExamineSquare::ExamineSquare(ScreenI * returnScreen):
 {
   Arena::instance().cursorContents(m_creature, m_underneath, m_flags);
 }
-ExamineSquare::~ExamineSquare()
-{
-  // iprintf("~ExamineSquare;\n");
-}
 
 void ExamineSquare::show()
 {

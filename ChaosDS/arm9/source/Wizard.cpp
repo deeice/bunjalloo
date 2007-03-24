@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <functional>
 #include <string.h>
 #include <nds.h>
 #include "ndspp.h"
@@ -74,8 +75,9 @@ void Wizard::reset()
 
 void Wizard::resetPlayers()
 {
-  for (int i = 0; i < PLAYER_COUNT; ++i)
-    s_players[i].reset();
+  std::for_each(s_players,
+      s_players+PLAYER_COUNT, 
+      std::mem_fun_ref(&Wizard::reset));
 }
 
 static const char* const namesData[22] = {
