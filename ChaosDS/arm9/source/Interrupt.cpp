@@ -1,4 +1,4 @@
-#include <nds/interrupts.h>
+#include "libnds.h"
 #include "Interrupt.h"
 #include "GameState.h"
 

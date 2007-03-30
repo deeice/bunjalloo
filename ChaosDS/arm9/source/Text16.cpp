@@ -1,4 +1,4 @@
-#include <nds.h>
+#include "libnds.h"
 #include <stdio.h>
 #include "ndspp.h"
 #include "Text16.h"
@@ -106,7 +106,11 @@ void Text16::putChar(int ch, int x, int y, int pal, unsigned int extraFlags) {
 }
 
 void Text16::int2a(int n, char s[]) {
+#ifdef ARM9
   siprintf(s,"%d",n);
+#else
+  sprintf(s,"%d",n);
+#endif
 }
 
 void Text16::clear()  {

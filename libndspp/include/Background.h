@@ -145,6 +145,11 @@ namespace nds {
        */
       unsigned short * tileData() const;
       
+#if !defined(ARM9) && !defined(ARM7)
+      void render();
+      bool operator<(const Background & other) const;
+      bool operator>(const Background & other) const;
+#endif
     private:  
       //! configuration of the background layer
       typedef struct {
@@ -172,6 +177,7 @@ namespace nds {
 
       void setRotateFlags(volatile unsigned short * BG_REG);
       void updateTileMapData(void);
+      void draw8x8Tile(int x, int y, unsigned char * gfx, int flags);
   };
   
 }; //tolua_export

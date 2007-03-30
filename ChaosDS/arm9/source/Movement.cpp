@@ -1,4 +1,4 @@
-#include <nds/arm9/input.h>
+#include "libnds.h"
 #include <string.h>
 #include "ndspp.h"
 #include "images.h"

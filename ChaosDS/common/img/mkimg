@@ -1,9 +1,10 @@
 # this makefile converts the .pcx graphics files to a lib file
 # so that the main makefile just has to include this lib and not all the graphics stuff
 
+ifeq ($(strip $(OBJCOPY)),)
+include $(DEVKITARM)/ds_rules
+endif
 GFX2GBA=@gfx2gba -q 
-OBJCOPY=arm-eabi-objcopy
-OBJCOPYFLAGS := -I binary -O elf32-littlearm -B arm --rename-section .data=.rodata,readonly,contents
 RODATASUFF := all.rodata.o
 CURRENTIMGS :=   $(notdir $(wildcard $(CURDIR)/*.pcx))
 PALETTENAME :=   $(notdir $(CURDIR)).pal

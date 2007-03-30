@@ -1,4 +1,4 @@
-#include <nds.h>
+#include "libnds.h"
 #include "ndspp.h"
 #include "Splash.h"
 #include "Graphics.h"

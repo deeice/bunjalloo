@@ -1,5 +1,5 @@
 #include <string.h>
-#include <nds.h>
+#include "libnds.h"
 #include "ndspp.h"
 #include "EditName.h"
 #include "Text16.h"

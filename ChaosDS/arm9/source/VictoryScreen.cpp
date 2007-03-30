@@ -1,4 +1,4 @@
-#include <nds.h>
+#include "libnds.h"
 #include "ndspp.h"
 #include "VictoryScreen.h"
 #include "Arena.h"

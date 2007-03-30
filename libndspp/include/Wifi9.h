@@ -1,7 +1,7 @@
 #ifndef Wifi9_h_seen
 #define Wifi9_h_seen
 
-#ifndef ARM9
+#ifdef ARM7
 #error Wifi9 is only available on the ARM9
 #endif
 

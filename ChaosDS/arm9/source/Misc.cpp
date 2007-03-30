@@ -1,6 +1,6 @@
 #include <ctype.h>
 #include <stdio.h>
-#include <nds.h>
+#include "libnds.h"
 #include "Misc.h"
 #include "GameState.h"
 #include "Wizard.h"

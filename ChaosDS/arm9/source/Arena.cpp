@@ -1,4 +1,4 @@
-#include <nds.h>
+#include "libnds.h"
 #include <algorithm>
 #include <functional>
 #include "ndspp.h"

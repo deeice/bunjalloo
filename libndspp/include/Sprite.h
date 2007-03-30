@@ -257,6 +257,11 @@ namespace nds {
        */
       void initialise(bool sync=false);
 
+#if !defined(ARM9) && !defined(ARM7)
+      void render();
+      bool operator<(const Sprite & other) const;
+      bool operator>(const Sprite & other) const;
+#endif
 
     private:
       //! screen that the sprite is on

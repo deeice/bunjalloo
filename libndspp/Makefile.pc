@@ -1,0 +1,15 @@
+CFLAGS	:=	$(BASEFLAGS) $(FLAGS) $(INC)
+CXXFLAGS       :=     -g $(CFLAGS) -fno-rtti -fno-exceptions -Wno-strict-aliasing
+ASFLAGS :=	$(FLAGS)
+DEPSDIR	:=	$(DEPENDS)
+
+$(LIBDIR)/libpcnds.a:	$(OBJS)
+	@echo $(notdir $@)
+	@rm -f $@
+	$(AR) -rc $@ $^
+
+-include $(DEPSDIR)/*.d
+
+%.o	:	%.bin
+	@echo $(notdir $<)
+	@$(bin2o)

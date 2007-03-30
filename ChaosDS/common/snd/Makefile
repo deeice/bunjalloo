@@ -8,7 +8,9 @@ PADPROG := $(TOOLS)/padprog
 
 LIBSND := $(OUTDIR)/libsnd.a
 
+ifeq ($(strip $(OBJCOPY)),)
 include $(DEVKITARM)/ds_rules
+endif
 
 all: $(PADPROG) $(OUTDIR) $(LIBSND) sounds.h
 
@@ -25,7 +27,7 @@ clean:
 
 
 $(LIBSND) : $(WAVOFILES) 
-	@$(AR) rcs $@ $^
+	$(AR) rcs $@ $^
 
 %.raw : %.wav
 	@sox $< -r 16000 -s -b -c 1 $@
@@ -34,7 +36,7 @@ $(LIBSND) : $(WAVOFILES)
 	@$(PADPROG) $< -p 4 -u -fo $@
 
 $(OUTDIR)/%.all.rodata.o : %.snd 
-	@$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
+	$(OBJCOPY) $(OBJCOPYFLAGS) $< $@
 
 sounds.h: $(WAVFILES)
 	$(shell \

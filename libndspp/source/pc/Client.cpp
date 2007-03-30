@@ -1,11 +1,9 @@
-#include <nds.h>
+#include "libnds.h"
 #include "Client.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#ifndef ARM9
 #include <arpa/inet.h>
-#endif
 #include <string.h>
 #include <iostream>
 #include <sstream>
@@ -71,7 +69,6 @@ unsigned int Client::write(const void * data, unsigned int length)
 #define SEND_SIZE 2048
   do
   {
-    iprintf(".");
     int sent = ::send(m_tcp_socket, cdata, SEND_SIZE, 0);
     if (sent <= 0)
       break;
@@ -82,7 +79,6 @@ unsigned int Client::write(const void * data, unsigned int length)
     for (int i = 0; i < 20; ++i)
       swiWaitForVBlank();
   } while (length);
-  iprintf("\n");
   return total;
 }
 

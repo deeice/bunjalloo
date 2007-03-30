@@ -1,5 +1,4 @@
-#include <nds/jtypes.h>
-#include <nds/arm9/sound.h>
+#include "libnds.h"
 #include "sounds.h"
 #include "SoundEffect.h"
 #include "Options.h"

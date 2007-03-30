@@ -1,6 +1,6 @@
 #include <cstdlib>
 #include <stdio.h>
-#include <nds.h>
+#include "libnds.h"
 #include "ndspp.h"
 #include "Line.h"
 #include "Arena.h"

@@ -1,6 +1,6 @@
 #ifndef SpellData_h_seen
 #define SpellData_h_seen
-#include <nds/jtypes.h>
+#include "libnds.h"
 typedef void (*FunctionPtr_t)(void);
 struct SpellData {
   const char * spellName;

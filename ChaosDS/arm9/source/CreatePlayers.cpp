@@ -1,4 +1,4 @@
-#include <nds.h>
+#include "libnds.h"
 #include <algorithm>
 #include <functional>
 #include "ndspp.h"
@@ -35,6 +35,8 @@ void CreatePlayers::show()
   m_hilightWizard = 0;
 
   Text16 & text16 = Text16::instance();
+  Palette p(0,10);
+  p[0] = 0;
   text16.setColour(10, Color(31,30,30));
   text16.print("How many players?", 4, 1, 10);
 

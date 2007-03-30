@@ -1,0 +1,78 @@
+#---------------------------------------------------------------------------------
+.SUFFIXES:
+
+#---------------------------------------------------------------------------------
+BUILD		:= build
+
+SOURCES :=	source/pc
+
+DATESTRING	:=	$(shell date +%Y)$(shell date +%m)$(shell date +%d)
+
+export PATH		:=	$(PATH)
+
+export BASEDIR	:=	$(CURDIR)
+export LIBDIR	:=	$(BASEDIR)/lib
+export DEPENDS	:=	$(BASEDIR)/deps
+export INCDIR	:=	$(BASEDIR)/include
+export BUILDDIR	:=	$(BASEDIR)/$(BUILD)
+
+CFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
+CPPFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.cpp)))
+BINFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.bin)))
+
+
+export VPATH	:=	$(foreach dir,$(SOURCES),$(BASEDIR)/$(dir))
+
+export OBJS :=	$(BINFILES:.bin=.o) $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
+export INC	:=	-I$(BUILDDIR)/arm9 -I$(LIBNDS)/include 
+
+export ARCH	:=	
+
+export BASEFLAGS	:=	-g -Wall \
+				-I$(INCDIR)
+
+
+.PHONY:	all libs dist docs
+
+#---------------------------------------------------------------------------------
+all:	$(DEPENDS) lib $(BUILD)/pc
+#---------------------------------------------------------------------------------
+	@make -C $(BUILD)/pc -f $(BASEDIR)/Makefile.pc
+
+#---------------------------------------------------------------------------------
+$(BUILD)/pc:
+#---------------------------------------------------------------------------------
+	mkdir -p $@
+#---------------------------------------------------------------------------------
+$(DEPENDS):
+#---------------------------------------------------------------------------------
+	mkdir -p $@/pc
+#---------------------------------------------------------------------------------
+
+#---------------------------------------------------------------------------------
+lib:
+#---------------------------------------------------------------------------------
+	mkdir -p lib
+
+#---------------------------------------------------------------------------------
+clean:
+#---------------------------------------------------------------------------------
+	rm -fr $(DEPENDS) $(BUILD) *.bz2
+
+#---------------------------------------------------------------------------------
+dist: all
+#---------------------------------------------------------------------------------
+	@tar --exclude=*CVS* -cvjf libndspp-src-$(DATESTRING).tar.bz2 source include license.txt Makefile Makefile.*
+	@tar --exclude=*CVS* -cvjf libndspp-$(DATESTRING).tar.bz2 include lib license.txt
+
+#---------------------------------------------------------------------------------
+#install: dist
+#---------------------------------------------------------------------------------
+#	mkdir -p /libndspp
+#	bzip2 -cd libndspp-$(DATESTRING).tar.bz2 | tar -xv -C $(DEVKITPRO)/libndspp
+
+#---------------------------------------------------------------------------------
+docs:
+#---------------------------------------------------------------------------------
+	doxygen libpcnds.doxy.cfg
+

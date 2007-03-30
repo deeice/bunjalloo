@@ -1,4 +1,4 @@
-#include <nds.h>
+#include "libnds.h"
 #include <stdio.h>
 #include "ndspp.h"
 #include "Graphics.h"
@@ -17,7 +17,8 @@ int main(void) {
   nds::Video::instance(0).setFade(0);
   // debug...
   nds::Background bg(1,0,0,31);
-  BG_PALETTE_SUB[255] = RGB15(31,31,31);
+  nds::Palette p(1);
+  p[255] = nds::Color(31,31,31);
   // consoleInitDefault(bg.mapData(), bg.tileData(),16);
   bg.enable();
   // iprintf("Chaos DS\n");

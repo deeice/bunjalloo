@@ -1,4 +1,4 @@
-#include <nds.h>
+#include "libnds.h"
 #include <string.h>
 #include "ndspp.h"
 #include "SoundEffect.h"

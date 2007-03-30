@@ -1,4 +1,4 @@
-#include <nds/jtypes.h>
+#include "libnds.h"
 #include "images.h"
 #include "GfxData.h"
 
