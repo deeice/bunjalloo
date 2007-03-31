@@ -2,12 +2,13 @@
 #include "Sprite.h"
 #include "HardwareHandler.cpp"
 #include "SpriteHandler.h"
+#include "SDLhandler.h"
 #include <stdio.h>
 
 using namespace nds;
 typedef unsigned short uint16;
-static unsigned short * OAM(new unsigned short[0x2000]);
-static unsigned short * OAM_SUB(new unsigned short[0x2000]);
+static SpriteEntry OAM[128];
+static SpriteEntry OAM_SUB[128];
 
 static SpriteEntry s_sprites[2][128];
 static pSpriteRotation s_affine = (pSpriteRotation)(s_sprites);
@@ -17,17 +18,16 @@ Sprite::Sprite(int screen):
   m_screen(screen),
   m_index(-1),
   m_used(s_used[screen==0?screen:1]),
-  m_OAM(screen==0?OAM:OAM_SUB)
+  m_OAM(screen==0?(unsigned short*)OAM:(unsigned short*)OAM_SUB)
 {
   initialise(); 
-  SpriteHandler::add(this);
 }
 
 Sprite::Sprite(int screen, int w, int h, int tile, int colors):
   m_screen(screen),
   m_index(-1),
   m_used(s_used[screen==0?screen:1]),
-  m_OAM(screen==0?OAM:OAM_SUB)
+  m_OAM(screen==0?(unsigned short*)OAM:(unsigned short*)OAM_SUB)
 {
   initialise(); 
   this->tile(tile);
@@ -42,6 +42,7 @@ Sprite::~Sprite()
   rotateScale(false);
   update();
   m_used[m_index] = false;
+  SpriteHandler::remove(this);
 }
 
 int Sprite::y() const
@@ -501,6 +502,7 @@ void Sprite::initialise(bool sync)
         s_sprites[m_screen][m_index].attribute[2] = 0;
         if (sync)
           update();
+        SpriteHandler::add(this);
         break;
       }
     }
@@ -529,24 +531,22 @@ void Sprite::copyOAM(int screen)
 
 unsigned short * Sprite::oamData() const
 {
-  //unsigned int thisTile = this->tile();
+  unsigned int thisTile = this->tile();
   /*if (this->color() == 256) {
     thisTile /= 2;
   }*/
-  /*uint16 * OAMData = SPRITE_GFX;
+  uint16 * oamRam = SDLhandler::instance().spriteGfx();
   if (m_screen) {
-    OAMData = SPRITE_GFX_SUB;
+    oamRam = SDLhandler::instance().subSpriteGfx();
   }
-  return &OAMData[thisTile*16];
-  */
-  return 0;
+  return &oamRam[thisTile*16];
 }
 
 // real worker funcions
 void Sprite::loadTileData(const void * tileData, unsigned int length)
 {
-  uint16 * OAMData = this->oamData();
-  dmaCopy(tileData, OAMData, length);
+  uint16 * oamRam = this->oamData();
+  dmaCopy(tileData, oamRam, length);
 }
 void Sprite::loadTileMapData(const void * t, const void * m, unsigned int length)
 {
@@ -557,17 +557,20 @@ void Sprite::loadTileMapData(const void * t, const void * m, unsigned int length
   if (this->color() == 256) {
     thisTile /= 2;
   }
+  // ???
   thisTile *= 64;
-  uint16 * OAMData = 0; //SPRITE_GFX;
+  uint16 * oamRam = SDLhandler::instance().spriteGfx();
   if (m_screen) {
-    OAMData = 0;//SPRITE_GFX_SUB;
+    oamRam = SDLhandler::instance().subSpriteGfx();
   }
   
+  int amount = this->color()==256?64:32;
+  int stepSize = this->color()==256?32:16; 
   // get start address in screen
   for (unsigned int loop = 0; loop < length; loop++) {
     // id = <the tile id in the map file at this position>
     int id = map[loop];
-    dmaCopy(&(gfx[id*16]), &OAMData[loop*16+thisTile],32);
+    dmaCopy(&(gfx[id*stepSize]), &oamRam[loop*stepSize+thisTile],amount);
   }
 }
 
@@ -585,9 +588,47 @@ unsigned short Sprite::attribute(int i) const
 {
   return s_sprites[m_screen][m_index].attribute[i&3];
 }
+
+void Sprite::draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char * gfx)
+{
+  for (int j = 0; j < 8; j++) {
+    for (int i = 0; i < 8; i++) {
+      int x = i + xi*8;
+      int y = j + yi*8;
+      unsigned char pixelPair = *gfx++;
+      int pix = pixelPair&0xf;
+
+      if (pix) {
+        SDLhandler::instance().drawPixel(xPos+x, yPos+y, 2+m_screen, pix);
+      }
+    }
+  }
+}
 void Sprite::render()
 {
+  // draw the sprite...
+  if (not valid())
+    return;
+  SpriteEntry & sprite = ((SpriteEntry*)m_OAM)[m_index];
+  if ( (sprite.attribute[0] & ATTR0_DISABLED) )
+    return;
+
+  unsigned int w,h;
+  getSize(w,h);
+  uint16 * oamRam = this->oamData();
+  int xPos = OBJ_X(sprite.attribute[1]);
+  int yPos = OBJ_Y(sprite.attribute[0]);
+  int position =0;
+  for (unsigned int y = 0; y < h/8; ++y)
+  {
+    for (unsigned int x = 0; x < w/8; ++x)
+    {
+      draw8x8Tile(xPos, yPos, x, y, (unsigned char*)&oamRam[position]);
+      position += 32;
+    }
+  }
 }
+
 bool Sprite::operator<(const Sprite & other) const
 {
   return other.m_index > m_index;

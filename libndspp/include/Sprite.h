@@ -49,6 +49,13 @@ namespace nds {
         rotateScale(false);
       }
 
+      inline bool enabled() const 
+      {
+        if ( doubleSize() and not rotateScale())
+          return false;
+        return true;
+      }
+
       /*! @brief Disable all sprites for a given screen
        * @param screen the screen to disable the sprites on. 0 is main screen, 1 is sub screen, 2 is both.
        */
@@ -283,6 +290,8 @@ namespace nds {
        * @param clear mask to clear - if 0 then uses ~@a bits otherwise uses ~@a clear
        */
       void setAttrBit(unsigned int attr, unsigned int bits,bool set,unsigned int clear=0);
+
+      void draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char * gfx);
   };
 };
 #endif

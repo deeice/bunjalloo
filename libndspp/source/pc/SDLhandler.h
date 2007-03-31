@@ -50,6 +50,8 @@ class SDLhandler
 
     unsigned short * vramMain(int offset);
     unsigned short * vramSub(int offset);
+    unsigned short * spriteGfx();
+    unsigned short * subSpriteGfx();
 
     void setFade(int level);
     void setWhite(int level);
@@ -80,6 +82,8 @@ class SDLhandler
     Uint32 m_subSpritePaletteSDL[256];
     unsigned short * m_vramMain;
     unsigned short * m_vramSub;
+    unsigned short * m_spriteGfx;
+    unsigned short * m_subSpriteGfx;
 
     bool m_mainOnTop;
     VoidFunctionPointer m_fn;

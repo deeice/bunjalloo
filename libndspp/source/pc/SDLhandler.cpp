@@ -29,6 +29,8 @@ SDLhandler::SDLhandler():
   init();
   m_vramMain = new unsigned short[0x16000];
   m_vramSub = new unsigned short[0x16000];
+  m_spriteGfx = new unsigned short[0x2000];
+  m_subSpriteGfx = new unsigned short[0x2000];
   for (int i = 0; i < 256; ++i)
   {
     m_backgroundPalette[i] = 
@@ -38,6 +40,8 @@ SDLhandler::SDLhandler():
   }
   ::memset(m_vramMain, sizeof(m_vramMain), 0);
   ::memset(m_vramSub, sizeof(m_vramSub), 0);
+  ::memset(m_spriteGfx, sizeof(m_spriteGfx), 0);
+  ::memset(m_subSpriteGfx, sizeof(m_subSpriteGfx), 0);
   drawGap();
 }
 
@@ -310,20 +314,20 @@ void SDLhandler::clear()
 
 void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palette)
 {
-  if (layer == 0) {
+  if (layer == 0 or layer == 2) {
     if (not m_mainOnTop)
     {
       y += 192;
     }
   } 
-  else if (layer == 1)
+  else if (layer == 1 or layer == 3)
   {
     if (m_mainOnTop)
     {
       y += 192;
     }
   }
-  int origY = y;
+  //int origY = y;
   if (y >= GAP.y)
   {
     y += GAP.h;
@@ -351,8 +355,8 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
       break;
 
   }
-#if 1
-  if (layer == 0 and palette == 160 )
+#if 0
+  if (layer == 2 )
     printf("Fill @%d,%d pal %d col %x lay %d\n", rect.x, origY,palette, colour, layer);
 #endif
   SDL_FillRect (m_screen, &rect, colour);
@@ -463,3 +467,14 @@ void SDLhandler::mainOnBottom()
 {
   m_mainOnTop = false;
 }
+
+unsigned short * SDLhandler::spriteGfx()
+{
+  return m_spriteGfx;
+}
+
+unsigned short * SDLhandler::subSpriteGfx()
+{
+  return m_subSpriteGfx;
+}
+
