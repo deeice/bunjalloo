@@ -34,8 +34,10 @@ SDLhandler::SDLhandler():
     m_backgroundPalette[i] = 
     m_subBackgroundPalette[i] =
     m_spritePalette[i] =
-    m_subSpritePalette[i] = decodeColor(0);
+    m_subSpritePalette[i] = 0;
   }
+  ::memset(m_vramMain, sizeof(m_vramMain), 0);
+  ::memset(m_vramSub, sizeof(m_vramSub), 0);
   drawGap();
 }
 

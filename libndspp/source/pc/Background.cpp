@@ -360,7 +360,9 @@ void Background::render()
 
 bool Background::operator>(const Background & other) const
 {
-  return other.m_bg.number > m_bg.number;
+  if ( (other.m_bg.flags & 3) == (m_bg.flags&3))
+    return other.m_bg.number > m_bg.number;
+  return ( (other.m_bg.flags & 3) > (m_bg.flags&3));
 }
 bool Background::operator<(const Background & other) const
 {

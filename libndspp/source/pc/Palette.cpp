@@ -51,10 +51,7 @@ void Palette::load(const unsigned short * palette, unsigned int length)
 {
   if (!length or length>256)
     length = m_16?16:256;
-  for (unsigned int i = 0; i < length; ++i)
-  {
-    m_p[i] = palette[i];
-  }
+  dmaCopy(palette,m_p,length);
 }
 
 void Palette::clear()
