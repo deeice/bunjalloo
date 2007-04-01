@@ -1,6 +1,7 @@
 #ifndef Client_h_seen
 #define Client_h_seen
 
+struct sockaddr_in;
 namespace nds {
   class Client
   {
@@ -42,6 +43,15 @@ namespace nds {
        * @param c Characters to print (or whatever). */
       virtual void debug(const char * c)=0;
 
+      /*! Called before recv to check if we have all the expected data. The idea
+       * is that the protocol used should specify the amount of data at the
+       * beginning of the recvs, then we should check this against the current
+       * running total.
+       * @return true if we have finished, false if we should try to read more data.
+       *
+       */
+      virtual bool finished()=0;
+
     private:
       //! The IP address
       const char * m_ip;
@@ -51,6 +61,8 @@ namespace nds {
       int m_tcp_socket;
       //! The status of the connection
       bool m_connected;
+
+      bool connect(sockaddr_in & socketAddress);
   };
-};
+}
 #endif

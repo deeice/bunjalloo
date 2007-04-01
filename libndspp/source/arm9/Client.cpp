@@ -1,4 +1,3 @@
-#include <nds.h>
 #include "Client.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -11,12 +10,15 @@
 #include <sstream>
 #include <unistd.h>
 #include <stdio.h>
+#include <algorithm>
+#include <functional>
+#include <string>
 /*
  * Simple TCP/IP client. 
  * */
 using namespace std;
 using namespace nds;
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 256
 
 Client::Client(const char * ip, int port):
   m_ip(ip),
@@ -28,7 +30,28 @@ Client::~Client()
 {
   if (isConnected())
   {
-    ::close(m_tcp_socket);
+    ::closesocket(m_tcp_socket);
+  }
+}
+
+bool Client::connect(sockaddr_in & socketAddress)
+{
+  int addrlen = sizeof(struct sockaddr_in);
+  int result = ::connect(m_tcp_socket, (struct sockaddr*)&socketAddress, addrlen);
+  if (result != -1)
+  {
+    m_connected = true;
+    stringstream dbg;
+    dbg << "Connected to " << m_ip << ":" << m_port;
+    debug(dbg.str().c_str());
+    return m_connected;
+  }
+  else
+  {
+    stringstream dbg;
+    dbg << "Unable to connect to\n" << m_ip << ":" << m_port << "\nError:"<<result;
+    debug(dbg.str().c_str());
+    return false;
   }
 }
 
@@ -44,22 +67,31 @@ Client::connect()
     htons(m_port),    /* port in network byte order */
     {inet_addr(m_ip)} /* internet address - network byte order */
   };
+  // is it an ip address?
+  std::string serverName(m_ip);
+  std::string::const_iterator end = std::find_if(serverName.begin(), serverName.end(), ::isalpha);
+  if (end != serverName.end())
+  {
+    // it is not an IP address, it contains letters
+    struct hostent * host = gethostbyname(m_ip);
+    int i = 0;
+    while (host->h_addr_list[i] != NULL) {
+      memcpy(&socketAddress.sin_addr, host->h_addr_list[i], sizeof(struct in_addr));
+      stringstream dbg;
+      dbg << "Trying: " << host->h_aliases[i] << endl;
+      debug(dbg.str().c_str());
+      if ( this->connect(socketAddress) ) {
+        break;
+      }
+      i++;
+    }
 
-  int result = ::connect(m_tcp_socket, (struct sockaddr*)&socketAddress,sizeof(socketAddress));
-  if (result == 0)
-  {
-    m_connected = true;
-    //cerr << "Connected to " << m_ip << ":"<<m_port<< endl;
-    stringstream dbg;
-    dbg << "Connected to " << m_ip << ":" << m_port;
-    debug(dbg.str().c_str());
+
+  } else {
+    this->connect(socketAddress);
   }
-  else
-  {
-    stringstream dbg;
-    dbg << "Unable to connect to\n" << m_ip << ":" << m_port << "\nError:"<<result;
-    debug(dbg.str().c_str());
-  }
+
+
 }
 
 
@@ -71,37 +103,62 @@ unsigned int Client::write(const void * data, unsigned int length)
 #define SEND_SIZE 2048
   do
   {
-    iprintf(".");
-    int sent = ::send(m_tcp_socket, cdata, SEND_SIZE, 0);
+    {
+      stringstream dbg;
+      dbg << "About to send " << length << " bytes of data" << endl;
+      debug(dbg.str().c_str());
+    }
+    int sent = ::send(m_tcp_socket, cdata, length, 0);
     if (sent <= 0)
       break;
     cdata += sent;
     length -= sent;
     total += sent;
     // wait for the cores to sync
-    for (int i = 0; i < 20; ++i)
-      swiWaitForVBlank();
+    {
+      stringstream dbg;
+      dbg << "Remaining: " << length << " bytes of data" << endl;
+      debug(dbg.str().c_str());
+    }
   } while (length);
-  iprintf("\n");
+  debug("Done write\n");
   return total;
 }
 
 void Client::read()
 {
-  if (!isConnected())
+  if (!isConnected()) {
+    debug("read(), Not connected\n");
     return;
+  }
   const static int bufferSize(BUFFER_SIZE);
   char buffer[bufferSize];
-  int amountRead;
   int total = 0;
-  while ( (amountRead = ::recv(m_tcp_socket, buffer, bufferSize,0)) != 0)
+  while (true)
   {
+    // after the first read, check the end condition
+    // this requires a patch to dswifi :-(
+    if (total) {
+      int potential = ::recv(m_tcp_socket, buffer, bufferSize,MSG_PEEK);
+      if (potential == 0) 
+      {
+        debug("PEEK 0 bytes. Aborting\n");
+        break;
+      }
+    }
+    int amountRead = ::recv(m_tcp_socket, buffer, bufferSize,0);
+    if (amountRead == -1 or amountRead == 0)
+      break;
     handle(buffer, amountRead);
     total += amountRead;
+    stringstream dbg;
+    dbg << "Read " << total << " bytes" << endl;;
+    debug(dbg.str().c_str());
+    if (finished())
+      break;
   }
-  //cerr << "Read " << total << " bytes" << endl;
-  stringstream dbg("Read ");
-  dbg << total << " bytes";
+  stringstream dbg;
+  dbg << "Done: " << total << " bytes";
   debug(dbg.str().c_str());
   finish();
 }

@@ -23,6 +23,7 @@ SDLhandler::SDLhandler():
     m_isFullScreen(false),
     m_hasSound(false),
     m_mainOnTop(true),
+    m_fn(0),
     m_fadeLevel(0),
     m_whiteLevel(0)
 {
@@ -70,6 +71,7 @@ void SDLhandler::enableVblank(VoidFunctionPointer fn)
     m_vblank =  SDL_AddTimer((33/10)*10, vblank, this);
   }
   m_fn = fn;
+  waitVsync();
 }
 
 int SDLhandler::totalHeight()
@@ -396,7 +398,8 @@ void SDLhandler::waitVsync()
     SDL_Delay(1);
   }
 
-  m_fn();
+  if (m_fn)
+    m_fn();
   // pallete conversions:
   for (int i = 0; i < 256; i++)
   {
