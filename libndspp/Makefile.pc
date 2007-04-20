@@ -1,5 +1,5 @@
 CFLAGS	:=	$(BASEFLAGS) $(FLAGS) $(INC)
-CXXFLAGS       :=     -g $(CFLAGS) -fno-rtti -fno-exceptions -Wno-strict-aliasing
+CXXFLAGS       :=     -g $(CFLAGS) -fno-exceptions -Wno-strict-aliasing
 ASFLAGS :=	$(FLAGS)
 DEPSDIR	:=	$(DEPENDS)
 

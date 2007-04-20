@@ -17,7 +17,7 @@ namespace nds
       /*! @brief Set the video mode.
        * @param mode Mode value 0-6. Mode 6 is new on the DS.
        */
-      void mode(unsigned int mode);
+      void setMode(unsigned int mode);
 
       /*! @brief get the video mode.
        * @returns Mode value 0-6

@@ -97,5 +97,6 @@ class SDLhandler
     int init();
     void drawGap();
     void clear();
+    bool inGap(int y) const;
 };
 #endif

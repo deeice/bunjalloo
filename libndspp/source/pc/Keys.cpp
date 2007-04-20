@@ -21,13 +21,37 @@ const SDLKey Keys::s_keyCodes[Keys::KEY_COUNT] =
 Keys::Keys():
     m_repeat(30),
     m_delay(60),
-    m_count(60)
+    m_count(60),
+    m_touchX(0),
+    m_touchY(0)
 {}
 
 Keys & Keys::instance()
 {
   static Keys s_instance;
   return s_instance;
+}
+int Keys::touchX() const
+{
+  return m_touchX;
+}
+int Keys::touchY() const
+{
+  return m_touchY;
+}
+
+void Keys::handleMouseEvent(SDL_MouseButtonEvent & event)
+{
+  if (event.type == SDL_MOUSEBUTTONDOWN)
+  {
+    m_keys[12] = true;
+    m_touchX = event.x;
+    m_touchY = event.y;
+  }
+  else if (event.type == SDL_MOUSEBUTTONUP)
+  {
+    m_keys[12] = false;
+  }
 }
 
 void Keys::handleKeyEvent(SDL_KeyboardEvent & event)
@@ -132,4 +156,13 @@ u32 keysDownRepeat()
 void keysSetRepeat( u8 setDelay, u8 setRepeat )
 {
   Keys::instance().setRepeat(setDelay, setRepeat);
+}
+touchPosition touchReadXY()
+{
+  touchPosition position;
+  position.px = Keys::instance().touchX();
+  position.py = Keys::instance().touchY();
+  position.x = position.px*100;
+  position.y = position.py*100;
+  return position;
 }

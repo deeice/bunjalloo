@@ -9,6 +9,7 @@
 #include "BackgroundHandler.h"
 #include "SpriteHandler.h"
 #include "Keys.h"
+#include "Video.h"
 
 using namespace std;
 const int SDLhandler::WIDTH(32*8);
@@ -21,7 +22,9 @@ SDLhandler::SDLhandler():
     m_scale(1),
     m_frames(0),
     m_isFullScreen(false),
-    m_hasSound(false),
+    m_hasSound(true),
+    m_vramMain(0),
+    m_vramSub(0),
     m_mainOnTop(true),
     m_fn(0),
     m_fadeLevel(0),
@@ -34,15 +37,15 @@ SDLhandler::SDLhandler():
   m_subSpriteGfx = new unsigned short[0x2000];
   for (int i = 0; i < 256; ++i)
   {
-    m_backgroundPalette[i] = 
-    m_subBackgroundPalette[i] =
-    m_spritePalette[i] =
+    m_backgroundPalette[i] = 0;
+    m_subBackgroundPalette[i] = 0;
+    m_spritePalette[i] = 0;
     m_subSpritePalette[i] = 0;
   }
-  ::memset(m_vramMain, sizeof(m_vramMain), 0);
-  ::memset(m_vramSub, sizeof(m_vramSub), 0);
-  ::memset(m_spriteGfx, sizeof(m_spriteGfx), 0);
-  ::memset(m_subSpriteGfx, sizeof(m_subSpriteGfx), 0);
+  ::memset(m_vramMain, 0, 0x16000*2);
+  ::memset(m_vramSub, 0, 0x16000*2);
+  ::memset(m_spriteGfx, 0, sizeof(m_spriteGfx));
+  ::memset(m_subSpriteGfx, 0, sizeof(m_subSpriteGfx));
   drawGap();
 }
 
@@ -299,7 +302,19 @@ void SDLhandler::clear()
   if (not m_mainOnTop) {
     colour = m_subBackgroundPaletteSDL[0];
   }
-  SDL_FillRect (m_screen, &rect, colour);
+  if (Video::instance(0).mode() != 5) {
+    SDL_FillRect (m_screen, &rect, colour);
+  }
+  else
+  {
+    u16 * vram = vramMain(0);
+    for (int x = 0; x < SCREEN_WIDTH; ++x) {
+      for (int y = 0; y < SCREEN_HEIGHT; ++y)
+      {
+        drawPixel(x, y, 0, vram[x+y*SCREEN_WIDTH]);
+      }
+    }
+  }
   if (m_mainOnTop) {
     colour = m_subBackgroundPaletteSDL[0];
   } else {
@@ -309,7 +324,19 @@ void SDLhandler::clear()
   rect.y = GAP.y+GAP.h;
   rect.w = WIDTH;
   rect.h = HEIGHT/2;
-  SDL_FillRect (m_screen, &rect, colour);
+  if (Video::instance(1).mode() != 5) {
+    SDL_FillRect (m_screen, &rect, colour);
+  }
+  else
+  {
+    u16 * vram = vramSub(0);
+    for (int x = 0; x < SCREEN_WIDTH; ++x) {
+      for (int y = 0; y < SCREEN_HEIGHT; ++y)
+      {
+        drawPixel(x, y, 1, vram[x+y*SCREEN_WIDTH]);
+      }
+    }
+  }
 
   drawGap();
 }
@@ -340,22 +367,31 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
   rect.h = 1*m_scale;
   rect.x = x*m_scale;
   rect.y = y*m_scale;
-  Uint32 colour(0);
-  switch (layer) {
-    case 1:
-      colour = m_subBackgroundPaletteSDL[palette];
-      break;
-    case 2:
-      colour = m_spritePaletteSDL[palette];
-      break;
-    case 3:
-      colour = m_subSpritePaletteSDL[palette];
-      break;
+  Uint32 colour = 0;
+  
+  bool usePalette(true);
+  if (layer == 0 or layer == 1) {
+    if (nds::Video::instance(layer).mode() == 5) {
+      colour = decodeColor(palette);
+      usePalette = false;
+    }
+  }
+  if (usePalette) {
+    switch (layer) {
+      case 1:
+        colour = m_subBackgroundPaletteSDL[palette];
+        break;
+      case 2:
+        colour = m_spritePaletteSDL[palette];
+        break;
+      case 3:
+        colour = m_subSpritePaletteSDL[palette];
+        break;
 
-    default:
-      colour = m_backgroundPaletteSDL[palette];
-      break;
-
+      default:
+        colour = m_backgroundPaletteSDL[palette];
+        break;
+    }
   }
 #if 0
   if (layer == 2 )
@@ -388,6 +424,11 @@ unsigned short * SDLhandler::vramMain(int offset)
   return &m_vramMain[offset];
 }
 
+bool SDLhandler::inGap(int y) const
+{
+  return (y >= GAP.y and y < (GAP.y+GAP.h));
+}
+
 unsigned short * SDLhandler::vramSub(int offset) {
   return &m_vramSub[offset];
 }
@@ -395,7 +436,7 @@ void SDLhandler::waitVsync()
 {
   int tmpGF = m_frames;
   while (tmpGF == m_frames) {
-    SDL_Delay(1);
+    SDL_Delay(5);
   }
 
   if (m_fn)
@@ -422,15 +463,28 @@ void SDLhandler::waitVsync()
   }
 
   clear();
-
   BackgroundHandler::render();
   SpriteHandler::render();
+  
   SDL_Flip(m_screen);
   SDL_Event event;
   while( SDL_PollEvent( &event ) ) {
     switch( event.type ) {
       case SDL_QUIT:
         exit(0);
+        break;
+
+      case SDL_MOUSEBUTTONDOWN:
+      case SDL_MOUSEBUTTONUP:
+        // offset the y position
+        if (event.button.y > 191) {
+          if (inGap(event.button.y)) {
+            break;
+          }
+          event.button.y -= GAP.h;
+          event.button.y -= 192;
+          Keys::instance().handleMouseEvent(event.button);
+        }
         break;
 
       case SDL_KEYUP:

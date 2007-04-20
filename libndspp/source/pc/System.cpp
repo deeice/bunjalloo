@@ -17,3 +17,8 @@ void nds::System::checkSleep()
 #endif
   }
 }
+
+const char * nds::System::uname()
+{
+  return "SDL";
+}

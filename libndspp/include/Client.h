@@ -52,6 +52,18 @@ namespace nds {
        */
       virtual bool finished()=0;
 
+      /** called during connection every second while waiting.
+       * @return true if should keep trying, false to give up.
+       */
+      virtual bool connectCallback()=0;
+
+      //! called during write every second while waiting.
+      virtual void writeCallback()=0;
+      //! called during read every second while waiting.
+      virtual void readCallback()=0;
+
+
+
     private:
       //! The IP address
       const char * m_ip;
@@ -61,6 +73,8 @@ namespace nds {
       int m_tcp_socket;
       //! The status of the connection
       bool m_connected;
+      //! The time to wait between selects (in seconds)
+      int m_timeout;
 
       bool connect(sockaddr_in & socketAddress);
   };

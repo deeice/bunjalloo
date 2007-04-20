@@ -98,7 +98,6 @@ void dmaCopy(const void * source, void * destination, unsigned int length);
 #define POWER_ALL_2D
 void powerON(void);
 
-// Setup the Main screen for 3D 
 #define MODE_0_2D      0x10000
 #define MODE_1_2D      0x10001
 #define MODE_2_2D      0x10002
@@ -106,9 +105,11 @@ void powerON(void);
 #define MODE_4_2D      0x10004
 #define MODE_5_2D      0x10005
 
+#define SCREEN_HEIGHT  192
+#define SCREEN_WIDTH   256
+
 #define IRQ_VBLANK 0
 void irqInit();
-void irqSet(int, int);
 
 #define glViewPort glViewport
 #define POLY_ALPHA(x)
@@ -152,6 +153,16 @@ u32 keysDown();
 u32 keysHeld();
 u32 keysDownRepeat();
 void keysSetRepeat( u8 setDelay, u8 setRepeat );
+//!     Obtains the current touchscreen co-ordinates.
+typedef struct {
+  int x;
+  int y;
+  int px;
+  int py;
+} touchPosition;
+
+touchPosition touchReadXY();
+
 void irqSet(int irq, VoidFunctionPointer fp);
 
 void setGenericSound( u32 rate, u8 vol, u8 pan, u8 format);

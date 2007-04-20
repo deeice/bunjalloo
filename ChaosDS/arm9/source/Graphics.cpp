@@ -42,8 +42,8 @@ void Graphics::initialiseScreen()
   powerON(POWER_ALL_2D);
   Video & mainScreen = Video::instance();
   Video & subScreen  = Video::instance(1);
-  subScreen.mode(0);
-  mainScreen.mode(0);
+  subScreen.setMode(0);
+  mainScreen.setMode(0);
   mainScreen.enableObjects();
   mainScreen.setWhite(16);
   subScreen.setToTop();

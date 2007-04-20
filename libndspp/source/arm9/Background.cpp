@@ -1,4 +1,5 @@
 #include "Background.h"
+#include "Video.h"
 #include <nds/arm9/video.h>
 #include <stdio.h>
 
@@ -13,11 +14,19 @@ Background::Background(
     int priority): 
   m_DISPCNT(screen?SUB_DISPLAY_CR:DISPLAY_CR)
 {
+
   m_bg.screen = screen;
   m_bg.number = number;
   m_bg.charBaseBlock = charBlock;
   m_bg.screenBaseBlock = screenBlock;
   m_bg.flags = BG_SIZE(0) | BG_16_COLOR | priority;
+
+  m_bg.PA = 1<<8;
+  m_bg.PB = 0;
+  m_bg.PC = 0;
+  m_bg.PD = 1<<8;
+  m_bg.DX = 0;
+  m_bg.DY = 0;
   updateTileMapData();
 }
 Background::~Background()
@@ -74,16 +83,22 @@ void Background::enable(bool enable)
 {
   if (enable)
   {
-    unsigned short flags =  m_bg.flags;
     // this depends on if the BG is Sub or or regular BG.
-    //REG_DISPCNT |= BG_ON(m_bg.number);
     m_DISPCNT |= BG_ON(m_bg.number);
 
-    int bg_ctrl = BG_MAP_BASE(m_bg.screenBaseBlock) | BG_TILE_BASE(m_bg.charBaseBlock) | flags;
-    if (m_bg.screen) {
-      BGCTRL_SUB[m_bg.number] = bg_ctrl;
+    if (Video::instance(m_bg.screen).mode() != 5) {
+      int bg_ctrl = BG_MAP_BASE(m_bg.screenBaseBlock) | BG_TILE_BASE(m_bg.charBaseBlock) | m_bg.flags;
+      if (m_bg.screen) {
+        BGCTRL_SUB[m_bg.number] = bg_ctrl;
+      } else {
+        BGCTRL[m_bg.number] = bg_ctrl;
+      }
     } else {
-      BGCTRL[m_bg.number] = bg_ctrl;
+      if (m_bg.screen) {
+        BGCTRL_SUB[m_bg.number] = BG_BMP16_256x256;
+      } else {
+        BGCTRL[m_bg.number] = BG_BMP16_256x256;
+      }
     }
   }
   else

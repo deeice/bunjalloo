@@ -19,6 +19,8 @@ namespace nds
        */
       static void checkSleep();
 
+      static const char * uname();
+
   };
 }
 #endif

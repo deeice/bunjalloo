@@ -118,7 +118,7 @@ void Video::setFade(int level)
   //BLEND_Y = level;
 }
 
-void Video::mode(unsigned int mode)
+void Video::setMode(unsigned int mode)
 {
   if (mode > 6)
     mode = 6;

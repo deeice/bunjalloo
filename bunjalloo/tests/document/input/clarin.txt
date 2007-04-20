@@ -1,0 +1,319 @@
+HTTP/1.1 200 OK
+Date: Sat, 14 Apr 2007 16:18:18 GMT
+Server: Apache/2
+Accept-Ranges: bytes
+Vary: Accept-Encoding
+Connection: close
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=ISO-8859-1
+
+724
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="es">
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=ISO-8859-1">
+<title>Detienen al ex ajedrecista Garry Kasparov durante una protesta en Mosc&uacute;</title>
+<meta name="keywords" content=", , Detienen, al, ex, ajedrecista, Garry, Kasparov, durante, una, protesta, en, Mosc&uacute;">
+<meta name="description" content="El ex campe&oacute;n del mundo y l&iacute;der de la oposici&oacute;n fue arrestado en el centro de la capital rusa cuando encabezaba una marcha de protesta contra el gobierno de Putin. Hubo un amplio ">
+<meta HTTP-EQUIV="content-Language" content="ES">
+<meta name="robots" content="INDEX,FOLLOW">
+<link rel="stylesheet" type="text/css" href="/shared/v8.1/css/global.css">
+<link rel="stylesheet" type="text/css" href="/shared/v8.1/css/cabezal.css">
+<script type="text/javascript">
+OAS_sitepage = 'Clarin7/ultimo_momento';
+OAS_Page_Positions='TopRight,Top1,Right,Right1,x04,x05,x07,x31,x32,Bottom';
+OAS_query = '';
+</script>
+<script type="text/javascript" src="http://ip2k.ads.uigc.net/cgi-bin/ip2keyword_js"></script>
+<script type="text/javascript" src="/shared/v8.1/js/global.js"></script>
+<script type="text/javascript" src="/shared/v8.1/js/multimedia.js"></script>
+</head>
+<body>
+
+<script type="text/javascript">
+	var rnd = (new String(Math.random())).substring(2,8) + (((new Date()).getTime()) & 262143);
+	document.write('<scri' + 'pt language="JavaScript1.1" type="text/javascript" src="http://ads.e-planning.net/eb/3/41a4/dc3ecfbf622b85bf?o=j&rnd=' + rnd + '"></scr' + 'ipt>');
+</script>
+
+<div class="Main">
+<div id="Cabezal">
+	<a href="http://www.clarin.com" title="Clarin.com"><h1 class="lgCl"><span>Clar&iacute;n.com</span></h1></a>
+	<div class="Fecha">
+		<p class="Usuarios">
+			
+92
+224.826&nbsp;<a href="javascript:Popup('http://www.clarin.com/shared/v8/usuarios.html','usuarios',501,344,'no','yes');">Usuarios &uacute;nicos</a>
+21d
+
+		</p>
+		<p>
+			<span class="Dia">SABADO</span>
+			<span class="Mes">14 ABR 2007</span>
+			<!--span class="Hora">13:26</span-->
+		</p>
+	</div>
+
+	<div class="Clima">
+			<a href="javascript:Popup('http://www.clarin.com/shared/v8/escribanos.html','Escribanos',510,415,'no','yes');">Escr&iacute;banos</a> | <a href="http://www.servicios.clarin.com/notas/jsp/clarin/v8/edicant/edicantArchivo.jsp?edAntTipo=edanter_diario">Ed. Anteriores</a>
+			<div class="Temp">
+				<span><a href="http://www.clarin.com/shared/v8/clima.html">BUE</a></span>
+				
+11e
+<span class="Clima"><img align="absmiddle" alt="" border="0" height="18" width="29" src="http://img.clarin.com/shared/v8/img/cli/ico/26.gif"></span><span class="icT"><span>Temperatura</span></span><span>21.1&deg;</span><span class="icH"><span>Humedad</span></span><span>&nbsp;79%</span>
+6a7
+
+			</div>
+	</div>
+
+	<div class="Banner">
+		<script type="text/javascript">OAS_AD('TopRight','130','40');</script>
+	</div>
+</div>
+<br clear="all" />
+	<div id="Nav">
+		<ul>
+			<li><a href="/diario/2007/04/14/index_diario.html" class="UMOn"><span>Último Momento</span></a></li>
+			<li><a href="/diario/2007/04/14/index_ei.html" class="EIMid"><span>Edición Impresa</span></a></li>
+			<li><a href="/shared/v8/clasificados.html" class="CLOff"><span>Clasificados</span></a></li>
+		</ul>
+
+		<div class="Buscador">
+			<form action="" name="buscarhead" onsubmit="javascript:Valida(document.buscarhead,document.buscarhead.palabras); return false;" style="margin:0;">		
+			<input type="hidden" name="desde" value="0" />
+			<input type="hidden" name="largo" value="10" />
+			<input type="hidden" name="op" value="buscar" />
+			<input type="hidden" name="como" value="Y" />
+			<input type="hidden" name="donde" value="TIT" />
+			<input type="hidden" name="secId" value="" />
+			<input type="hidden" name="fecha" value="90" />
+			<input type="hidden" name="lr" value="lang_es" />
+			<input type="hidden" name="q" /><p>
+				<input type="text" class="input" name="palabras" />
+
+				<a href="javascript:Valida(document.buscarhead,document.buscarhead.palabras);" class="buscar"><span>Buscar</span></a>
+				<input type="radio" class="radio"  name="pubId" value="CLARIN" id="bclarin" checked="checked" /><a href="http://www.clarin.com" class="clarin"><span>clarin.com</span></a>
+				<input type="radio" class="radio"  name="pubId" value="INTERNET" id="binternet" /><a href="http://www.google.com/" class="google"><span>google.com</span></a>
+			</p></form>
+		</div>
+	</div>
+	<div class="Spacer"></div>
+
+	<div id="Ticker">
+		
+1b94
+<div class="Sep2"></div><div class="Sep"></div><a class="Pause" onClick="javascript:marqueeStop();" href="javascript:void(0);"><span>Pause</span></a><div class="Sep"></div><a class="Play" onClick="javascript:marqueePlay();" href="javascript:void(0);"><span>Play</span></a><div class="Sep"></div><div><marquee name="marq" id="marq" behavior="scroll" direction="left" scrollamount="2" scrolldelay="5" onMouseOver="javascript:marqueeStop();" onMouseOut="javascript:marqueePlay();"><a href="http://www.clarin.com/diario/2007/04/14/um/m-01399926.htm">NBA: gran aporte de Gin&oacute;bili para San Antonio</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399937.htm">El Papa recibir&aacute; a Bush en el Vaticano</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399564.htm">Filmus lanz&oacute; oficialmente su campa&ntilde;a con dardos hacia Macri y Telerman</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399511.htm">Otro derrumbe en una obra en construcci&oacute;n en Capital</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://sms.clarin.com/home.asp"><strong>Reciba las noticias de &Uacute;ltimo Momento en su celular</strong></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399278.htm">Miceli remarc&oacute; la necesidad de los pa&iacute;ses en desarrollo de plantarse mejor en las negociaciones con el G7</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399381.htm">Turistas de todo el mundo presenciar&aacute;n el Boca-River</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399924.htm">Detienen al ex ajedrecista Garry Kasparov durante una protesta en Mosc&uacute;</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399922.htm">Principio de acuerdo en el conflicto salarial de los docentes salte&ntilde;os</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://sms.clarin.com/home.asp"><strong>Reciba las noticias de &Uacute;ltimo Momento en su celular</strong></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399948.htm">Controlan el fuego en el Almirante Ir&iacute;zar y se aprestan a iniciar el remolque</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399949.htm">Dura derrota para el West Ham en la Premier League</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399946.htm">Ma&ntilde;ana comienza el ATP de Montecarlo sin Ca&ntilde;as</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399928.htm">San Lorenzo quiere quedar como &uacute;nico puntero</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://sms.clarin.com/home.asp"><strong>Reciba las noticias de &Uacute;ltimo Momento en su celular</strong></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399945.htm">Amplio despliegue antiterrorista en Marruecos y Argelia, tras la ola de atentados</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399480.htm">D'Alessandro: "Ojal&aacute; pueda quedarme en el Zaragoza"</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399934.htm">F1: Massa se qued&oacute; con la pole en Bahrein</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399927.htm">Tragedia en Turqu&iacute;a: un micro escolar choc&oacute; contra un cami&oacute;n y hay m&aacute;s de 30 muertos</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://sms.clarin.com/home.asp"><strong>Reciba las noticias de &Uacute;ltimo Momento en su celular</strong></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399921.htm">Irak: un sangriento atentado dej&oacute; al menos 40 muertos</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399923.htm">Los candidatos porte&ntilde;os contin&uacute;an con la campa&ntilde;a</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399500.htm">Benefician con prisi&oacute;n atenuada a Fabi&aacute;n Tablado, el joven que mat&oacute; a su novia de 113 pu&ntilde;aladas</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399489.htm">La UAR le responde a su ex agente comercial</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://sms.clarin.com/home.asp"><strong>Reciba las noticias de &Uacute;ltimo Momento en su celular</strong></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399936.htm">Golf: Andr&eacute;s Romero perdi&oacute; terreno en Shanghai</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399483.htm">Citan a declarar a Pedro Pou en una causa por supuesto enriquecimiento il&iacute;cito</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399472.htm">Cae una red de narcos que utilizaban aviones para ingresar drogas desde Paraguay</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399940.htm">Coppola: "Tengo miedo por Diego"</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://sms.clarin.com/home.asp"><strong>Reciba las noticias de &Uacute;ltimo Momento en su celular</strong></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399931.htm">Independiente va por la recuperaci&oacute;n</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399557.htm">A los 61 a&ntilde;os, Sandro se cas&oacute; en una ceremonia &iacute;ntima</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399939.htm">Chocaron dos colectivos en Flores: hay 15 heridos leves</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/14/um/m-01399944.htm">Tensi&oacute;n en Bajo Flores: vuelven a tomar dos torres y hay un fuerte operativo policial</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://sms.clarin.com/home.asp"><strong>Reciba las noticias de &Uacute;ltimo Momento en su celular</strong></a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399245.htm">Neuqu&eacute;n: la CTA y la CGT se sumaron al reclamo contra Sobisch y convocaron a un paro para el lunes</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399252.htm">Racing volvi&oacute; a pagar caro por su falta de audacia</a>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;<a href="http://www.clarin.com/diario/2007/04/13/um/m-01399361.htm">Cortos del Bafici: "Te espero"</a></marquee></div>
+2f7b
+
+	</div>
+	<div class="ColumnaA"></div>
+	<div class="ColumnaB"></div>
+</div>
+<!ARCHIVO><!SECCION><!-- ULT --><!/SECCION>
+<div id="content">
+	<div id="con01">
+		<div class="subcon">
+			<div class="sep3"><br clear="all"><br></div>
+			<div class="lf"><span class="tt1">Ultimo Momento</span></div>
+<div id="env_imp" style="float:right">
+	<span class="sep"><br><br><br></span>
+	<span>
+	<a href="javascript:aumentarFontSize('texto2');"><img src="/shared/v8/img/nota/bt_AMas.gif" width="16" height="15" border="0" alt="ampliar tama&ntilde;o" hspace="3" align="absmiddle"></a><a href="javascript:reducirFontSize('texto2');"><img src="/shared/v8/img/nota/bt_AMenos.gif" width="16" height="15" border="0" alt="reducir tama&ntilde;o" hspace="3"  align="absmiddle"></a>&nbsp;&nbsp;<a href="javascript:Popup('http://www.servicios.clarin.com/notas/jsp/clarin/v8/notas/envio.jsp?pagid=1399924','envio',320,280,'no','no');" title="Enviar">Enviar</a>&nbsp;&nbsp;&nbsp;<a href="javascript:Popup('http://www.servicios.clarin.com/notas/jsp/clarin/v8/notas/imprimir.jsp?pagid=1399924','impresion',500,480,'no','yes');" title="Imprimir">Imprimir</a>
+	</span>
+</div>
+<span class="sep"><br clear="all"></span>
+			<div class="br7"></div>
+			<span class="tt2">
+				07:45 | 	
+			</span>
+			<span class="tt3">
+			<!TITULO>Detienen al ex ajedrecista Garry Kasparov durante una protesta en Mosc&uacute;<!/TITULO>
+			</span>
+			<span class="sep"><br clear="all"></span><div class="sep14"><br></div>
+			<div id="bajada"><span class="txt9"><!BAJADA>El ex campe&oacute;n del mundo y l&iacute;der de la oposici&oacute;n fue arrestado en el centro de la capital rusa cuando encabezaba una marcha de protesta contra el gobierno de Putin. Hubo un amplio despliegue policial. Tambi&eacute;n fue detenidos varios de sus seguidores. 
+<!/BAJADA></span></div>
+			
+			<div class="sep4"></div>
+
+			<div  style="float:right">
+				<a href="http://www.servicios.clarin.com/buscador/jsp/rc.jsp?fDesde=20070414&tagId=1476" class="txt25c" title="Haga clic para ver todas las noticias de esta categoria.">El Mundo</a>
+			</div>
+			<div class="sep2"><br /></div>
+			<br clear="all" />
+			<div class="br7"></div>
+
+<script type="text/javascript">
+	var ii = 0;
+	var mm = Array();
+	var mmNro = Array();
+		mm[ii] = 'mm_IMAGEN_RED1';
+		mmNro[ii++] = 10;
+
+	mmFotos = false;
+	mmFotos = true;
+
+	mmVideos = false;
+
+	mmInfos = false;
+</script>
+
+
+<script type="text/javascript">
+	fotosrc = new Array(
+	'thumb/kasparov.jpg'
+	);
+	var epigrafe = new Array(
+	'VIOLENCIA. Efectivos de la Polic&iacute;a luchan con los seguidores de Kasparov. (AP)'
+	);
+	var idfoto = new Array(
+	'689536'
+	);
+
+	mmOn = "fotos";
+</script>
+<!--//////////////// IMAGEN ///////////////////-->
+<center>
+<div id="mm_IMAGEN_RED1" style="display:none;">
+<div class="NavMM clearfix">
+	<ul>
+	<script type="text/javascript">
+		if (mmInfos && (mmFotos || mmVideos))
+			{document.write("<li><a href=\"javascript:mostrarMM(mm,'mm_IMAGEN_INFOGRAFIA');\">");
+			 if (mmOn == "infos")
+			 	document.write("<img width=\"80\" height=\"20\" alt=\"Infografia\" src=\"/shared/v8.1/img/mm/bt_infografia_on.gif\"/>");
+			 else
+			 	document.write("<img width=\"73\" height=\"20\" alt=\"Infografia\" src=\"/shared/v8.1/img/mm/bt_infografia_off.gif\"/>");
+			 document.write("</a></li>");
+			 }
+		if (mmFotos && (mmInfos || mmVideos))
+			{document.write("<li><a href=\"javascript:mostrarMM(mm,'mm_IMAGEN_RED1');\">");
+			 if (mmOn == "fotos")
+			 	document.write("<img width=\"63\" height=\"20\" alt=\"Galeria de Fotos\" src=\"/shared/v8.1/img/mm/bt_fotos_on.gif\"/>");
+			 else
+			 	document.write("<img width=\"63\" height=\"20\" alt=\"Galeria de Fotos\" src=\"/shared/v8.1/img/mm/bt_fotos_off.gif\"/>");
+			 document.write("</a></li>");
+			 }
+		if (mmVideos && (mmInfos || mmFotos))
+			{document.write("<li><a href=\"javascript:mostrarMM(mm,'mm_VIDEO_EMBEDDED');\">");
+			 if (mmOn == "videos")
+			 	document.write("<img width=\"63\" height=\"20\" alt=\"Videos\" src=\"/shared/v8.1/img/mm/bt_videos_on.gif\"/>");
+			 else
+			 	document.write("<img width=\"63\" height=\"20\" alt=\"Videos\" src=\"/shared/v8.1/img/mm/bt_videos_off.gif\"/>");
+			 document.write("</a></li>");
+			 }
+	</script>
+	</ul>
+</div>
+<div class="Caja Fotos clearfix">
+		<div class="Imagen">
+			<a href="javascript:Popup('http://www.servicios.clarin.com/notas/jsp/clarin/v8/galeria/galeria.jsp?notaId=1335969&mtmTipo=Imagen&mostrar=[[nroFoto]]','fotos','900','650','yes','yes');" id="vinculofoto">
+			<img src="thumb/kasparov.jpg" border="0" alt="" id="foto" />
+			</a>
+		</div>
+		<div class="Texto" id="epigrafe">VIOLENCIA. Efectivos de la Polic&iacute;a luchan con los seguidores de Kasparov. (AP)</div>
+		<div class="Spacer"></div>
+
+		<div class="Botones clearfix">
+			<a href="javascript:galeria.antFoto();"><img src="/shared/v8.1/img/mm/bt_prev.gif" width="16" height="16" alt="Anterior"  align="absmiddle"/></a>
+			<p><span id="nrofoto">1</span> de <script type="text/javascript">document.write(fotosrc.length);</script></p>
+			<a href="javascript:galeria.sgtFoto();"><img src="/shared/v8.1/img/mm/bt_next.gif" width="16" height="16" alt="Siguiente" align="absmiddle"/></a>
+		</div>
+</div>
+	<script type="text/javascript">
+		galeria = new Galeria(document.images["foto"], fotosrc, document.getElementById("epigrafe"), epigrafe, document.getElementById("vinculofoto"),idfoto,document.getElementById("nrofoto"));
+		galeria.setFoto(0);
+	</script>
+
+</div>
+</center>
+<!--////////////////////  INFOGRAFIA  /////////////////-->
+
+
+<script type="text/javascript">
+	var mmMin = 0;
+	for(var ii = 1; ii < mm.length; ii++)
+		if (mmNro[ii] < mmNro[mmMin])
+			mmMin = ii;
+	mostrarMM(mm, mm[mmMin]);
+</script>
+
+			
+			<span class="sep"><br clear="all"></span>
+
+			<p id="texto2">
+			<!CUERPO>
+
+El ex campe&oacute;n mundial de ajedrez Garry Kasparov, y actual l&iacute;der de la oposici&oacute;n, fue detenido hoy en Mosc&uacute; por la polic&iacute;a local, luego que sus simpatizantes trataron de realizar una marcha de protesta en el centro de la ciudad. <br><br>
+
+Varios periodistas, apostados en las inmediaciones de la Plaza Pushkin, vieron a Kasparov cuando ingresaba a una camioneta de la Polic&iacute;a. Pero no fue el &uacute;nico detenido: varios de sus seguidores fueron arrestados y traslados por la fuerza a distintas comisar&iacute;as. Al lugar hab&iacute;an llegado cientos de polic&iacute;as, muchos con equipo antimotines. <br><br>
+
+Kasparov encabeza el Frente Unido civil, una organizaci&oacute;n opositora, que trat&oacute; de realizar una protesta contra el Kremlin en alianza con otros grupos integrados en la coalici&oacute;n &quot;Otra Rusia&quot;, que convoc&oacute; a otra marcha para ma&ntilde;ana, en San Petersburgo. Al igual que la protesta en Mosc&uacute;, las autoridades prohibieron esa marcha. <br><br> 
+
+Kasparov es mitad jud&iacute;o, mitad armenio, nacido en Azerbaijan. Le gan&oacute; el cetro de campe&oacute;n mundial de ajedrez a Anatoly Karpov en 1985 y pronto dio su apoyo a las reformas de Gorbachov. Luego se pas&oacute; un corto tiempo al lado de Yeltsin hasta que tuvo esperanzas de que Putin har&iacute;a las reformas necesarias en su pa&iacute;s. Pero cuando Putin no hab&iacute;a cumplido un a&ntilde;o en el poder, Kasparov escribi&oacute; un art&iacute;culo en el Wall Street Journal diciendo que se hab&iacute;a equivocado. 
+
+
+
+
+			<!/CUERPO>
+			</p>
+<div id="env_imp" style="float:right">
+	<span class="sep"><br><br><br></span>
+	<span>
+	<a href="javascript:aumentarFontSize('texto2');"><img src="/shared/v8/img/nota/bt_AMas.gif" width="16" height="15" border="0" alt="ampliar tama&ntilde;o" hspace="3" align="absmiddle"></a><a href="javascript:reducirFontSize('texto2');"><img src="/shared/v8/img/nota/bt_AMenos.gif" width="16" height="15" border="0" alt="reducir tama&ntilde;o" hspace="3"  align="absmiddle"></a>&nbsp;&nbsp;<a href="javascript:Popup('http://www.servicios.clarin.com/notas/jsp/clarin/v8/notas/envio.jsp?pagid=1399924','envio',320,280,'no','no');" title="Enviar">Enviar</a>&nbsp;&nbsp;&nbsp;<a href="javascript:Popup('http://www.servicios.clarin.com/notas/jsp/clarin/v8/notas/imprimir.jsp?pagid=1399924','impresion',500,480,'no','yes');" title="Imprimir">Imprimir</a>
+	</span>
+</div>
+<span class="sep"><br clear="all"></span>
+			<span class="sep2"><br /></span>
+			<div class="br7"></div>
+			<div align="center"><script type="text/javascript">OAS_AD('Bottom','468','60');</script></div>
+		</div>
+	</div>
+	<div id="con02">
+		<div class="subcon02">
+			<script type="text/javascript">OAS_AD('Top1','296','294');</script>
+			<span class="sep"><br clear="all"><br /></span>
+			<div class="br7"></div>
+			<div><script type="text/javascript">OAS_AD('x07','295','50');</script></div>
+			<div id="takeover_div">&nbsp;</div>
+			<div class="br7"></div>
+			<div><script type="text/javascript">OAS_AD('x05','295','50');</script></div>
+			<div class="br7"></div>
+			<div><script type="text/javascript">OAS_AD('x04','295','50');</script></div>
+			<div class="br7"></div>	
+
+<!--FIN RECUADRO-->			<div><script type="text/javascript">OAS_AD('Right','284','90');</script></div>
+			<div class="br7"></div>	
+			<div><script type="text/javascript">OAS_AD('Right1','284','90');</script></div>
+			<div class="br7"></div>	
+		</div>
+	</div>
+</div>
+<br clear="all"><br>
+<script type="text/javascript">hitCertifica('105904','UM/Notas','Notas Ultimo Momento');</script>
+<script type="text/javascript">OAS_AD('x31','160','600');</script>
+<script type="text/javascript">OAS_AD('x32','1','1');</script>
+<br clear="all" class="sep" >
+<div id="pie">
+	<div class="ffo_logo"><a href="/redirect.html?url=http://www.451.com/" target="_blank"><img src="/shared/v8/img/lgs/lg_451.gif" width="45" height="22" border="0" alt=""></a></div>
+	<div class="footer">
+		<span class="pie">
+			<a href="/shared/v8/ayuda-clarin/index.html" class="pie"><strong>Ayuda</strong></a>&nbsp;|&nbsp;<a href="http://www.servicios.clarin.com/notas/jsp/clarin/v8/edicant/edicantArchivo.jsp?edAntTipo=edanter_diario" class="pie"><strong>Ediciones Anteriores</strong></a>&nbsp;|&nbsp;<a href="/shared/v8/palm.htm" class="pie"><strong>Versi&oacute;n Palm</strong></a>&nbsp;|&nbsp;<a href="/shared/v8/rss.html" class="pie"><strong>Noticias gratis en su sitio - RSS</strong></a>&nbsp;|&nbsp;<a onClick="this.style.behavior='url(#default#homepage)';this.setHomePage('http://www.clarin.com');" href="javascript:void(0);" class="pie"><strong>Clar&iacute;n.com p&aacute;gina de inicio</strong></a>
+		</span>
+	</div>
+	<div class="sep"><br></div>
+	<div class="br3"></div>
+	<span class="pie">
+		Copyright 1996-2006 Clar&iacute;n.com - All rights reserved<br>	
+		Directora Ernestina Herrera de Noble&nbsp;|&nbsp;<a href="/shared/v8/disclaimer.htm" class="pie">Normas de confidencialidad y privacidad</a><br>
+		<a href="http://www.ole.clarin.com/diario/hoy/index.html" class="pie">Diario Ol&eacute;</a>&nbsp;|&nbsp;<a href="/redirect.html?url=http://www.larazon.com.ar" class="pie">Diario La Raz&oacute;n</a>&nbsp;|&nbsp;<a href="/redirect.html?url=http://www.ciudad.com.ar/" class="pie">Ciudad Internet</a>&nbsp;|&nbsp;<a href="/redirect.html?url=http://www.biblioteca.clarin.com/" class="pie">Biblioteca Digital</a>&nbsp;|&nbsp;<a href="mailto:mediakit@claringlobal.com.ar" class="pie">Publicidad</a>&nbsp;|&nbsp;<a href="/redirect.html?url=http://www.grupoclarin.com.ar/" class="pie">Grupo Clar&iacute;n</a><br>
+	</span>
+	<div class="sep3"><br></div>
+	<img src="/shared/v8/img/lgs/lg_Pie.gif" width="380" height="42" border=0 alt="" usemap="#Mapfoot">
+	<map name="Mapfoot"><area shape="rect" coords="15,2,137,41" href="/redirect.html?url=http://www.certifica.com/" alt="">
+	<area shape="rect" coords="144,2,241,41" href="/redirect.html?url=http://www.iabargentina.com.ar/" alt="">
+	<area shape="rect" coords="247,1,368,41" href="/redirect.html?url=http://www.pwc.com/extweb/home.nsf/docid/40B30C91E6D9EAEB85256D4E00655A21" alt=""></map>
+</div>
+<div class="fin"><br clear="all"><br><br></div></body>
+</html>
+
+0
+

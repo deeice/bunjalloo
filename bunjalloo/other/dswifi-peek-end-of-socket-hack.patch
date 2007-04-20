@@ -1,0 +1,10 @@
+--- ./arm9/source/sgIP_sockets.c	2007-01-19 01:39:43.000000000 +0100
++++ ../dswifi-0.3d-patched/./arm9/source/sgIP_sockets.c	2007-04-01 16:39:23.000000000 +0200
+@@ -177,6 +177,7 @@
+    if((socketlist[socket].flags&SGIP_SOCKET_FLAG_TYPEMASK)==SGIP_SOCKET_FLAG_TYPE_TCP) {
+       do {
+          retval=sgIP_TCP_Recv((sgIP_Record_TCP *)socketlist[socket].conn_ptr,data,recvlength,flags);
++         if (retval==-1 && (flags&MSG_PEEK)) retval = 0;
+          if(retval!=-1) break;
+          if(errno!=EWOULDBLOCK) break;
+          if(socketlist[socket].flags&SGIP_SOCKET_FLAG_NONBLOCKING) break;

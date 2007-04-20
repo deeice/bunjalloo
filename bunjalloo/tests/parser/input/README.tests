@@ -1,0 +1,7 @@
+404.txt - 404 not found (pointless?).
+bogus-doctype.txt - check doctype with newlines.
+iso.txt - iso in Content-type header.
+metaiso.txt - meta tag with http-equiv and charset info.
+not-html.txt - text/plain in Content-type.
+redirect.txt - 3XX redirect header and location header.
+test0.txt - sanity test for simple html + 2 tag document.

@@ -1,0 +1,29 @@
+<html>
+  Nested list:
+  <ul>
+    <li>Item 1</li>
+    <ul>
+      Should be indented to Child of Item 1
+      <li>Child of Item 1
+    </ul>
+    <li>Item 2
+    <ul><li>Child of Item 2</ul>
+  </ul>
+  <pre>
++ html
+    head
+    + body
+        #TEXT
+        + ul
+            + li
+                #TEXT
+            + ul
+                #TEXT
+                + li
+                    #TEXT
+            + li
+                #TEXT
+                + ul
+                    + li
+                        #TEXT
+</html>

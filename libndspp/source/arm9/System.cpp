@@ -15,3 +15,8 @@ void nds::System::checkSleep()
     powerON(POWER_LCD);
   }
 }
+
+const char * nds::System::uname()
+{
+  return "Nintendo DS";
+}
