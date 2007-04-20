@@ -194,8 +194,8 @@ void Client::read()
     int retval;
     FD_ZERO(&rfds);
     FD_SET(m_tcp_socket, &rfds);
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
+    tv.tv_sec = 0;
+    tv.tv_usec = 500000;
     retval = select(m_tcp_socket+1, &rfds, NULL, NULL, &tv);
     if (retval == -1) {
       debug("Select error");
@@ -212,6 +212,7 @@ void Client::read()
         break;
       continue;
     }
+    notReadyCount = 0;
     int amountRead = ::recv(m_tcp_socket, buffer, bufferSize, 0 /*MSG_DONTWAIT*/);
     int tmpErrno = errno;
     if (amountRead <= 0) {
