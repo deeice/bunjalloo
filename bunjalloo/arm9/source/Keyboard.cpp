@@ -150,6 +150,7 @@ void Keyboard::initCursor()
   nds::ObjectPalette p(1);
   p.load(_binary_pointer_pal_bin_start, (int)&_binary_pointer_pal_bin_size);
 
+  m_cursor->color(256);
   m_cursor->loadTileData(_binary_pointer_img_bin_start, (int)&_binary_pointer_img_bin_size);
 
   m_cursor->x(KEYBOARD_POSITION_X+KEYBOARD_TILE_SIZE/2);
