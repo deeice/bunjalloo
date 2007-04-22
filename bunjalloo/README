@@ -1,0 +1,19 @@
+README for Bunjalloo 0.1
+
+What is Bunjalloo?
+
+Bunjalloo is a HTTP user agent (web browser) for the Nintendo DS.
+For more information 
+
+Availability
+
+Bunjalloo is freely available.  See COPYRIGHT and
+http://code.google.com/p/quirkysoft/ for details.  
+Bunjalloo can be downloaded at
+http://code.google.com/p/quirkysoft/downloads/list
+
+Installation
+
+Bunjalloo uses DLDI for viewing local files (file:// URL). To view remote
+http:// URLs, no patching is required. Bunjalloo can be run using Wireless
+Multiboot, without an attached cartridge.

@@ -26,6 +26,7 @@ class TextArea
      * @param fileName the name of the font palette.
      */
     void setPalette(const std::string & fileName);
+    void setPalette(const char * data, unsigned int size);
 
     /** Set the cursor position. This is where the text will be "drawn" the
      * next time a print routine is called.

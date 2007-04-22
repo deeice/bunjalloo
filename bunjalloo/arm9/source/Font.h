@@ -32,7 +32,7 @@ class Font
      * @param imageData the font image data representing the way to draw glyphs.
      * @param mapData the data to map to glyph sizes and positions.
      */
-    Font(unsigned char * imageData, unsigned char * mapData);
+    Font(const unsigned char * imageData, const unsigned char * mapData);
 
     //! Destructor.
     ~Font();
@@ -67,7 +67,7 @@ class Font
     //! Total width of the image.
     unsigned int m_width;
     unsigned int m_height;
-    unsigned char * m_glyphData;
+    const unsigned char * m_glyphData;
     unsigned char * m_glyphSize;
     unsigned short * m_glyphPosition;
     unsigned short * m_palette;
@@ -76,7 +76,7 @@ class Font
 
     int valueToIndex(unsigned int glyphId) const;
     int minGlyph() const;
-    void init(unsigned char * imageData, unsigned char * mapData);
+    void init(const unsigned char * imageData, const unsigned char * mapData);
 };
 
 inline int Font::totalWidth() const

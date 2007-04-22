@@ -9,6 +9,8 @@
 #include "UTF8.h"
 #include "File.h"
 #include "Link.h"
+#include "libnds.h"
+#include "vera.h"
 
 using namespace nds;
 using namespace std;
@@ -30,7 +32,7 @@ TextArea::TextArea() :
   m_fgCol(0),
   m_indentLevel(0)
 {
-  string fontname = Config::instance().font();
+  string fontname = "";//= Config::instance().font();
   init(fontname);
 }
 
@@ -68,8 +70,10 @@ int TextArea::startLine() const
 
 void TextArea::init(const std::string & fontBase)
 {
-  m_font=new Font(fontBase);
-  setPalette(fontBase+".pal");
+  //m_font=new Font(fontBase);
+  //setPalette(fontBase+".pal");
+  m_font = new Font(_binary_vera_img_start,_binary_vera_map_start);
+  setPalette((char*)_binary_vera_pal_start, 32);
 }
 
 void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
@@ -220,8 +224,11 @@ void TextArea::printu(const UnicodeString & unicodeString)
     m_cursorx = m_initialCursorx+m_indentLevel;
     m_cursory = m_initialCursory;
   }
-  UnicodeString printString = unicodeString.substr(currPosition , unicodeString.length()-currPosition);
-  printuImpl(printString);
+  if ( m_cursory < Canvas::instance().height())
+  {
+    UnicodeString printString = unicodeString.substr(currPosition , unicodeString.length()-currPosition);
+    printuImpl(printString);
+  }
 }
 
 int TextArea::textSize(const UnicodeString & unicodeString) const
@@ -349,7 +356,7 @@ void TextArea::addFormControl(FormControl * formCtrl)
     m_cursorx = m_initialCursorx+m_indentLevel;
     m_cursory = m_initialCursory;
   }
-  if (m_foundPosition) {
+  if (m_foundPosition and m_cursory < Canvas::instance().height() ) {
     // get the real position?
     assert(not m_formControls.empty());
     if (m_cursorx + formCtrl->width() > Canvas::instance().width())
@@ -492,6 +499,17 @@ void TextArea::setPalette(const std::string & fileName)
   } else {
     Canvas::instance().fillRectangle(130,0,10,128,Color(31,0,0));
   }
+}
+
+void TextArea::setPalette(const char * data, unsigned int size)
+{
+  m_palette = new unsigned short[size/2];
+  copy(data, data+size, (char*)m_palette);
+  char * baseData = new char[size+2];
+  copy(data, data+size, baseData);
+  m_basePalette = (unsigned short*)baseData;
+  m_paletteLength = size/2;
+  setBackgroundColor(m_palette[0]);
 }
 
 TextArea::~TextArea()

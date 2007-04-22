@@ -19,12 +19,12 @@ static const char s_errorText[] = {
 #include "error.txt"
 };
 
-static const int MAX_CONNECT_ATTEMPTS(40);
+static const int MAX_CONNECT_ATTEMPTS(60);
 
 Controller::Controller()
   : m_document(new Document())
 {
-  Config::instance().initialise(m_document, this);
+  //Config::instance().initialise(m_document, this);
   m_view = new View(*m_document, *this);
 }
 

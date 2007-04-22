@@ -13,7 +13,7 @@ LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lpcnds -lpthread `sdl-config --libs` -limg
+LIBS	:= -lpcnds -lpthread `sdl-config --libs` -limg -lfont
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -58,9 +58,12 @@ export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
  
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD) -I$(TOPDIR)/common/img
+                        -I$(CURDIR)/$(BUILD) -I$(TOPDIR)/common/img \
+                        -I$(TOPDIR)/common/builtin
+
  
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) -L$(TOPDIR)/common/img/build.sdl
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) -L$(TOPDIR)/common/img/build.sdl \
+                        -L$(TOPDIR)/common/builtin/build.sdl
  
 .PHONY: $(BUILD) clean
  

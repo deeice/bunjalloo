@@ -35,8 +35,8 @@ class Range
     unsigned int m_upper;
 };
 
-Font::Font(unsigned char * imageData, 
-    unsigned char * mapData):
+Font::Font(const unsigned char * imageData, 
+    const unsigned char * mapData):
   m_width(8),
   m_height(8),
   m_glyphData(0),
@@ -48,7 +48,7 @@ Font::Font(unsigned char * imageData,
 
 #define READ_U16(value, from) { value = (from[index]<<8) |(from[index+1]); index += 2; }
 #define READ_U32(value, from) { value = (from[index]<<24) |(from[index+1]<<16)|(from[index+2]<<8)|(from[index+3]); index+=4;}
-void Font::init(unsigned char * imageData, unsigned char * mapData)
+void Font::init(const unsigned char * imageData, const unsigned char * mapData)
 {
   m_glyphData = imageData;
   unsigned int glyphCount = 0;
@@ -72,7 +72,7 @@ void Font::init(unsigned char * imageData, unsigned char * mapData)
   m_glyphPosition = new unsigned short[glyphCount];
 
   unsigned char * dstSize = m_glyphSize;
-  unsigned char * src = &mapData[index];
+  const unsigned char * src = &mapData[index];
   unsigned short * dstPos = m_glyphPosition;
   for (unsigned int i = 0; i < glyphCount; ++i)
   {

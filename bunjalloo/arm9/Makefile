@@ -39,7 +39,7 @@ LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -mno-fpu -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=  -lndspp9 -lfat -lnds9 -ldswifi9 -limg
+LIBS	:=  -lndspp9 -lfat -lnds9 -ldswifi9 -limg -lfont
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -85,9 +85,11 @@ export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
  
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-			-I$(CURDIR)/$(BUILD) -I$(TOPDIR)/common/img
+			-I$(CURDIR)/$(BUILD) -I$(TOPDIR)/common/img \
+                        -I$(TOPDIR)/common/builtin/
  
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) -L$(TOPDIR)/common/img/build.ds
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) -L$(TOPDIR)/common/img/build.ds \
+                        -L$(TOPDIR)/common/builtin/build.ds
  
 .PHONY: $(BUILD) clean
  
