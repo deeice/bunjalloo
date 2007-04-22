@@ -18,6 +18,7 @@ static const char s_licenceText[] = {
 static const char s_errorText[] = {
 #include "error.txt"
 };
+extern const char * VERSION;
 
 static const int MAX_CONNECT_ATTEMPTS(60);
 
@@ -175,6 +176,8 @@ class HttpClient: public nds::Client
         s += "Accept: text/html\r\n";
         s += "User-Agent: Bunjalloo (";
         s += nds::System::uname();
+        s += ";r";
+        s += VERSION;
         s += ")\r\n";
         s += "\r\n";
         write(s.c_str(), s.length());
