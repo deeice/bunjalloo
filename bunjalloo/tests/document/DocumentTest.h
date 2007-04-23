@@ -34,6 +34,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testHeader);
   CPPUNIT_TEST( testHeader2);
   CPPUNIT_TEST( testAttribs);
+  CPPUNIT_TEST( testUnicode2String);
   CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -66,6 +67,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   void testHeader();
   void testHeader2();
   void testAttribs();
+  void testUnicode2String();
   private:
   Document * m_document;
   char * m_data;

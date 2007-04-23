@@ -6,6 +6,8 @@ class ControllerI
 {
   public:
     virtual void doUri(const std::string & uri) = 0;
+    virtual void previous() = 0;
+    virtual void next() = 0;
     virtual ~ControllerI() {}
 };
 #endif

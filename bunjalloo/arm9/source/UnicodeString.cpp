@@ -1,11 +1,27 @@
 #include "UnicodeString.h"
+#include "UTF8.h"
 std::string unicode2string(const UnicodeString & ustr)
 {
   std::string str;
   UnicodeString::const_iterator it(ustr.begin());
+  unsigned char encoded[6];
   for ( ; it != ustr.end() ; ++it)
   {
-    str += *it;
+    int used = UTF8::encode(*it, encoded);
+    if (used == 1) {
+      str += *it;
+    }
+    else
+    {
+      char buffer[4];
+      for (int i = 0; i < used; ++i)
+      {
+        // convert to %hex
+        str += '%';
+        sprintf(buffer, "%02X", encoded[i]);
+        str += buffer;
+      }
+    }
   }
   return str;
 }

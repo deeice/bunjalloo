@@ -75,6 +75,12 @@ void View::browse()
     m_textArea->setStartLine(m_textArea->startLine()-STEP);
     m_renderer->render();
   }
+  if (keys & KEY_LEFT) {
+    m_controller.previous();
+  }
+  if (keys & KEY_RIGHT) {
+    m_controller.next();
+  }
   if (keys & KEY_A) {
     // render the node tree
     m_document.dumpDOM();
@@ -139,6 +145,7 @@ void View::keyboard()
       }
       else
       {
+        m_textArea->setStartLine( m_textArea->startLine());
         m_renderer->render();
       }
     }
@@ -160,13 +167,9 @@ void View::formKeyboard()
       {
         UnicodeString ustr(string2unicode(m_keyboard->result()));
         m_form->input(ustr);
-        m_textArea->setStartLine( (-SCREEN_HEIGHT / m_textArea->font().height()) - 1);
-        m_renderer->render();
       }
-      else
-      {
-        m_renderer->render();
-      }
+      m_textArea->setStartLine( m_textArea->startLine());
+      m_renderer->render();
     }
   }
   else

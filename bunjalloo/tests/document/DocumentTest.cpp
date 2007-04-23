@@ -529,3 +529,13 @@ void DocumentTest::testAttribs()
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
 }
+
+void DocumentTest::testUnicode2String()
+{
+  
+  UnicodeString uc;
+  uc += 0xa9;
+  string c = unicode2string(uc);
+  string expected = "%C2%A9";
+  CPPUNIT_ASSERT_EQUAL(expected, c);
+}

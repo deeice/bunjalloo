@@ -129,21 +129,47 @@ void TextArea::insertNewline(int count)
 
 const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int currPosition) const
 {
+  // TODO: words that are longer than Canvas::width() break everything.
+  UnicodeString word;
   if (m_parseNewline)
   {
+    // if we are parsing new lines, look for the next delimiter
     unsigned int position = unicodeString.find_first_of(delimiters,currPosition);
     position = position==string::npos?unicodeString.length():position;
-    return unicodeString.substr(currPosition,position-currPosition+1);
+    word = unicodeString.substr(currPosition,position-currPosition+1);
   }
   else
   {
+    // not parsing new lines, so look for the next proper word, then the next non word
     unsigned int position = unicodeString.find_first_not_of(delimiters,currPosition);
     position = unicodeString.find_first_of(delimiters,position);
     position = position==string::npos?unicodeString.length():position;
-    UnicodeString word(unicodeString.substr(currPosition,position-currPosition));
+    // now make a word delimted with spaces.
+    word = unicodeString.substr(currPosition,position-currPosition);
     word += ' ';
-    return word;
   }
+  int size(textSize(unicodeString));
+  if (size > Canvas::instance().width())
+  {
+    // uh oh - this will break things.
+    UnicodeString::const_iterator it(word.begin());
+    UnicodeString shorterWord;
+    int size(0);
+    for (; it != word.end(); ++it)
+    {
+      unsigned int value(*it);
+      if (value == UTF8::MALFORMED)
+        value = '?';
+      Font::Glyph g;
+      m_font->glyph(value, g);
+      if ( (size + g.width) >= Canvas::instance().width()) {
+        return shorterWord;
+      }
+      shorterWord += *it;
+      size += g.width;
+    }
+  }
+  return word;
 }
 
 void TextArea::advanceWord(const UnicodeString & unicodeString, int wordLength,

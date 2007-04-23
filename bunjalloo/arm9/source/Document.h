@@ -88,13 +88,20 @@ class Document
 
     void dumpDOM();
 
+    bool hasPreviousHistory() const;
+    bool hasNextHistory() const;
+    std::string gotoPreviousHistory();
+    std::string gotoNextHistory();
+
   private:
-    std::string m_uri;
+    //std::string m_uri;
     Status m_status;
     int m_amount;
     std::vector<ViewI*> m_views;
     HtmlDocument* m_htmlDocument;
     HeaderParser* m_headerParser;
+    std::vector<std::string> m_history;
+    std::vector<std::string>::iterator m_historyPosition;
 
     //! Notify all registered views that there are model changes.
     void notifyAll() const;

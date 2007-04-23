@@ -22,7 +22,7 @@ unsigned int UTF8::decode(const void * p, unsigned int & returnValue)
     returnValue = data[0];
     return 1;
   }
-  if (data[0] < 0xc0 or data[0] > 0xfd)
+  if (data[0] < 0xC0 or data[0] > 0xfd)
   {
     // not a valid start byte.
     goto malformed;
@@ -110,3 +110,60 @@ checkLength:
   }
   return returnLength;
 }
+
+int UTF8::encode(signed int ucode, unsigned char encoded[6])
+{
+  if (ucode < 0x80) {
+    // regular ASCII char
+    // 0x00000000 - 0x0000007F:
+    encoded[0] = ucode;
+    return 1;
+  }
+  if (ucode >= 0x80 and ucode < 0x800)
+  {
+    // 2 bytes
+    encoded[0] = 0xC0| ((ucode>>6) & 0x1f);
+    encoded[1] = 0x80| (ucode & 0x3f);
+    return 2;
+  }
+  if (ucode >= 0x800 and ucode < 0x10000)
+  {
+    // 3 bytes
+    encoded[0] = 0xE0| ((ucode>>12) & 0xf);
+    encoded[1] = 0x80| ((ucode>>6) & 0x3f);
+    encoded[2] = 0x80| (ucode & 0x3f);
+    return 3;
+  }
+  if (ucode >= 0x10000 and ucode < 0x00200000)
+  {
+    // 4 bytes
+    encoded[0] = 0xF0| ((ucode>>18) & 0x7);
+    encoded[1] = 0x80| ((ucode>>12) & 0x3f);
+    encoded[2] = 0x80| ((ucode>>6) & 0x3f);
+    encoded[3] = 0x80| (ucode & 0x3f);
+    return 4;
+  }
+  if (ucode >= 0x00200000 and ucode <= 0x03FFFFFF)
+  {
+    // 5 bytes
+    encoded[0] = 0xF8| ((ucode>>24) & 0x3);
+    encoded[1] = 0x80| ((ucode>>18) & 0x3f);
+    encoded[2] = 0x80| ((ucode>>12) & 0x3f);
+    encoded[3] = 0x80| ((ucode>>6) & 0x3f);
+    encoded[4] = 0x80| (ucode & 0x3f);
+    return 5;
+  }
+  if (ucode >= 0x04000000 and ucode <= 0x7FFFFFFF)
+  {
+    // 6 bytes
+    encoded[0] = 0xFC| ((ucode>>30) & 0x1);
+    encoded[1] = 0x80| ((ucode>>24) & 0x3f);
+    encoded[2] = 0x80| ((ucode>>18) & 0x3f);
+    encoded[3] = 0x80| ((ucode>>12) & 0x3f);
+    encoded[4] = 0x80| ((ucode>>6) & 0x3f);
+    encoded[5] = 0x80| (ucode & 0x3f);
+    return 6;
+  }
+  return 0;
+}
+

@@ -24,6 +24,9 @@ class Controller : public ControllerI
      */
     void doUri(const std::string & uriString);
     
+    void previous();
+    void next();
+
     /** Show the software licence.*/
     void showLicence();
 

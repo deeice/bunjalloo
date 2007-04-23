@@ -13,8 +13,19 @@ CPPUNIT_TEST_SUITE_REGISTRATION( UTF8Test );
   unsigned int actualRead = UTF8::decode(data, actualResult);\
   CPPUNIT_ASSERT_EQUAL( expectedResult, actualResult ); \
   CPPUNIT_ASSERT_EQUAL( expectedRead, actualRead ); \
-}\
+}
 
+static void EncodeTest(signed int value, char * expectedData, unsigned int expectedUsed)
+{
+  unsigned char encoded[6];
+  unsigned int actualUsed = UTF8::encode(value, encoded);
+  CPPUNIT_ASSERT_EQUAL( expectedUsed, actualUsed );
+  for (int i = 0; i < actualUsed; ++i)
+  {
+    unsigned char d = (unsigned char)expectedData[i];
+    CPPUNIT_ASSERT_EQUAL(d, encoded[i]);
+  }
+}
 
 // Lower boundary cases
 void UTF8Test::testZero()
@@ -177,4 +188,13 @@ void UTF8Test::testCopyright()
 void UTF8Test::testSymbolNE()
 {
   TEST_DATA("\xe2\x89\xa0", 0x2260, 3);
+}
+
+void UTF8Test::testEncode0()
+{
+  EncodeTest(0xa9, "\xc2\xa9", 2);
+  EncodeTest(0x2260, "\xe2\x89\xa0", 3);
+  EncodeTest(0x10FFFF, "\xf4\x8f\xbf\xbf", 4);
+  EncodeTest(0x3ffffff, "\xfb\xbf\xbf\xbf\xbf", 5);
+  EncodeTest(0x7fffffff, "\xfd\xbf\xbf\xbf\xbf\xbf",6);
 }

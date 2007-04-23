@@ -1,10 +1,13 @@
 #ifndef URI_h_seen
 #define URI_h_seen
-#include <string>
+#include "UnicodeString.h"
 /** Encapsulate a URI.*/
 class URI
 {
   public:
+
+    static UnicodeString escape(const UnicodeString & input);
+
     /** Create an empty URI.*/
     URI();
 

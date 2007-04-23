@@ -17,6 +17,13 @@ class UTF8
      * */
     static unsigned int decode(const void * p, unsigned int & returnValue);
 
+    /** Encode a 32 bit value to an array of 4 chars.
+     * @param ucode 32 bit character code
+     * @param encoded an array of 6 characters that shall contain the encoded data.
+     * @return the number of bytes that are used in encoded.
+     * */
+    static int encode(signed int ucode, unsigned char encoded[6]);
+
     /* Interesting fact: ISO-8859-1 is cast from char to int. The characters
      * map directly to the ones in the font data. Hurray.
      */

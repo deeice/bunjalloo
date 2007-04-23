@@ -59,6 +59,36 @@ void Controller::doUri(const std::string & uriString)
   }
 }
 
+void Controller::previous() 
+{
+  string ph = m_document->gotoPreviousHistory();
+  if (not ph.empty())
+  {
+    URI uri(ph);
+    if (uri.isFile()) {
+      localFile(uri.fileName());
+    } else {
+      // http
+      fetchHttp(uri);
+    }
+  }
+}
+
+void Controller::next() 
+{
+  string ph = m_document->gotoNextHistory();
+  if (not ph.empty())
+  {
+    URI uri(ph);
+    if (uri.isFile()) {
+      localFile(uri.fileName());
+    } else {
+      // http
+      fetchHttp(uri);
+    }
+  }
+}
+
 void Controller::mainLoop()
 {
   for (;;) {

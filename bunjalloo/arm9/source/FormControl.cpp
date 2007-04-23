@@ -115,9 +115,9 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
         if (needAmp) {
           m_processedData += '&';
         }
-        m_processedData += unicode2string(name);
+        m_processedData += unicode2string(URI::escape(name));
         m_processedData += "=";
-        m_processedData += unicode2string(value);
+        m_processedData += unicode2string(URI::escape(value));
         needAmp = true;
       }
     }

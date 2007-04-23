@@ -126,3 +126,49 @@ void UriTest::testNavigateFile()
   CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
 
 }
+
+void UriTest::testNavigateDots()
+{
+  URI uri("http://server/file");
+  string expectedServer("server");
+  string expectedFile("/file");
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+
+  uri.navigateTo("../newfile.html");
+  expectedFile = "/newfile.html";
+  expectedServer = "server";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  string expectedURI = "http://server/newfile.html";
+  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+
+  // make sure we can't go higher than root dir
+  uri.navigateTo("../newDir/index.html");
+  expectedFile = "/newDir/index.html";
+  expectedServer = "server";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  expectedURI = "http://server/newDir/index.html";
+  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+
+  // dots and absolute == rubbish
+  uri.navigateTo("/../another/file.html");
+  expectedFile = "/another/file.html";
+  expectedServer = "server";
+  expectedURI = "http://server/another/file.html";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+
+  // and dots later on..
+  uri.navigateTo("/another/directory/sub/../file.html");
+  expectedFile = "/another/directory/file.html";
+  expectedServer = "server";
+  expectedURI = "http://server/another/directory/file.html";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+
+
+}

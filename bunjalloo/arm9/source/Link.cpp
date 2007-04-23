@@ -1,4 +1,5 @@
 #include "Link.h"
+#include "URI.h"
 #include "HtmlElement.h"
 #include "Rectangle.h"
 
@@ -38,7 +39,11 @@ bool Link::hitTest(int x, int y) const
   }
   return false;
 }
+
 std::string Link::href() const
 {
-  return unicode2string(m_anchor->attribute("href"));
+  // FIXME - what about #?
+  UnicodeString href = m_anchor->attribute("href");
+  // strip off the # part?
+  return unicode2string(URI::escape(href));
 }

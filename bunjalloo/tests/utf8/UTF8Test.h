@@ -39,6 +39,8 @@ class UTF8Test : public CPPUNIT_NS::TestFixture
 
   CPPUNIT_TEST( testCopyright );
   CPPUNIT_TEST( testSymbolNE );
+
+  CPPUNIT_TEST( testEncode0 );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -73,6 +75,8 @@ public:
   void testInvalid();
   void testCopyright();
   void testSymbolNE();
+
+  void testEncode0();
 };
 
 #endif
