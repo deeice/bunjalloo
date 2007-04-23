@@ -208,8 +208,8 @@ void Keyboard::doPress(Key * key)
   if ((key->value() == "Del")) {
     deleteLetter();
   }
-  if (key->value().length() == 1) {
-    m_result += key->value();
+  if (key->value().length() == 1 or (key->value()[0] == ' ')) {
+    m_result += key->value()[0];
     undrawResult();
     drawResult();
   }
