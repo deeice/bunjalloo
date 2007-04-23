@@ -45,5 +45,6 @@ std::string Link::href() const
   // FIXME - what about #?
   UnicodeString href = m_anchor->attribute("href");
   // strip off the # part?
-  return unicode2string(URI::escape(href));
+  // replace ' ' with %20?
+  return unicode2string(href);
 }
