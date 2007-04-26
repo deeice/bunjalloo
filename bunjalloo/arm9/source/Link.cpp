@@ -2,6 +2,8 @@
 #include "URI.h"
 #include "HtmlElement.h"
 #include "Rectangle.h"
+#include "Canvas.h"
+#include "Palette.h"
 
 Link::Link(const HtmlElement * a)
   : m_anchor(a)
@@ -38,6 +40,17 @@ bool Link::hitTest(int x, int y) const
       return true;
   }
   return false;
+}
+
+
+void Link::highlight() const
+{
+  RectangleList::const_iterator it(m_clickZones.begin());
+  for (; it != m_clickZones.end() ; ++it)
+  {
+    Rectangle * rect = *it;
+    nds::Canvas::instance().drawRectangle(rect->x,rect->y,rect->w, rect->h, nds::Color(31,0,30));
+  }
 }
 
 std::string Link::href() const

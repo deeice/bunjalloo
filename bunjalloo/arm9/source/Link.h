@@ -16,6 +16,8 @@ class Link
     bool hitTest(int x, int y) const;
     std::string href() const;
 
+    void highlight() const;
+
   private:
     const HtmlElement * m_anchor;
     typedef std::list<Rectangle*> RectangleList;

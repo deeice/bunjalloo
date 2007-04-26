@@ -31,12 +31,14 @@ void Document::setUri(const std::string & uriString)
   m_history.push_back(uriString);
   m_historyPosition = m_history.end();
   --m_historyPosition;
+#if 0
   printf("%s %d\n", m_historyPosition->c_str(), m_history.size());
   vector<string>::iterator it(m_history.begin());
   for (; it != m_history.end(); ++it)
   {
     printf("%s\n",it->c_str());
   }
+#endif
 }
 
 const std::string & Document::uri() const

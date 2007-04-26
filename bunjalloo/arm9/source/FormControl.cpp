@@ -107,7 +107,7 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
     const HtmlElement * element(*inputIt);
     UnicodeString name = element->attribute("name");
     std::string type = unicode2string(element->attribute("type"));
-    if (not name.empty() and (type.empty() or type == "text" ))
+    if (not name.empty() and (type.empty() or type == "text" or type == "password"))
     {
       UnicodeString value = element->attribute("value");
       if (not value.empty())

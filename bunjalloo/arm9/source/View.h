@@ -45,6 +45,7 @@ class View : public ViewI
     ViewRender * m_renderer;
     InputState m_state;
     FormControl * m_form;
+    int m_preInputStartLine;
 
     void browse();
     void keyboard();

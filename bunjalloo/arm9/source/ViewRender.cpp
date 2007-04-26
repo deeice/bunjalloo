@@ -14,6 +14,7 @@
 #include "Select.h"
 #include "Button.h"
 #include "InputText.h"
+#include "PasswordField.h"
 
 using namespace std;
 
@@ -257,6 +258,11 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
   else if (type.empty() or type == "text")
   {
     InputText * text = new InputText(const_cast<HtmlElement*>(inputElement), m_self->m_textArea);
+    m_self->m_textArea->addFormControl(text);
+  } 
+  else if (type == "password")
+  {
+    PasswordField * text = new PasswordField(const_cast<HtmlElement*>(inputElement), m_self->m_textArea);
     m_self->m_textArea->addFormControl(text);
   } 
 }

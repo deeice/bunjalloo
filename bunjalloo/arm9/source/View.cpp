@@ -62,6 +62,7 @@ void View::browse()
   u16 keys = keysDownRepeat();
   if (keys & KEY_START) {
     nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
+    m_preInputStartLine = m_textArea->startLine();
     m_keyboard->setVisible();
     m_state = KEYBOARD;
   }
@@ -90,6 +91,8 @@ void View::browse()
     Link * clicked = m_textArea->clickLink(tp.px, tp.py+SCREEN_HEIGHT);
     if (clicked != 0)
     {
+      clicked->highlight();
+
       string s = clicked->href();
       string original = m_document.uri();
       URI tmpURI(original);
@@ -120,6 +123,7 @@ void View::browse()
           case FormControl::KEYBOARD:
             {
               m_state = FORM_KEYBOARD;
+              m_preInputStartLine = m_textArea->startLine();
               m_keyboard->setVisible();
             }
             break;
@@ -145,7 +149,7 @@ void View::keyboard()
       }
       else
       {
-        m_textArea->setStartLine( m_textArea->startLine());
+        m_textArea->setStartLine(m_preInputStartLine);
         m_renderer->render();
       }
     }
@@ -168,7 +172,7 @@ void View::formKeyboard()
         UnicodeString ustr(string2unicode(m_keyboard->result()));
         m_form->input(ustr);
       }
-      m_textArea->setStartLine( m_textArea->startLine());
+      m_textArea->setStartLine(m_preInputStartLine);
       m_renderer->render();
     }
   }
