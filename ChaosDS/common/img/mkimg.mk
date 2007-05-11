@@ -1,14 +1,14 @@
 # create gcc object from raw binary file
-%.$(RODATASUFF): %.raw
-	@$(OBJCOPY) $(OBJCOPYFLAGS) $(notdir $<) $(notdir $@)
+$(BUILD)/%.$(RODATASUFF): %.raw
+	@$(OBJCOPY) $(OBJCOPYFLAGS) $(notdir $<) $(BUILD)/$(notdir $@)
 
 # create gcc object from palette file
-%.pal.$(RODATASUFF): %.pal
-	@$(OBJCOPY) $(OBJCOPYFLAGS) $(notdir $<) $(notdir $@)
+$(BUILD)/%.pal.$(RODATASUFF): %.pal
+	@$(OBJCOPY) $(OBJCOPYFLAGS) $(notdir $<) $(BUILD)/$(notdir $@)
 
 # create gcc object from map file
-%.map.$(RODATASUFF): %.map
-	@$(OBJCOPY) $(OBJCOPYFLAGS) $(notdir $<) $(notdir $@)
+$(BUILD)/%.map.$(RODATASUFF): %.map
+	@$(OBJCOPY) $(OBJCOPYFLAGS) $(notdir $<) $(BUILD)/$(notdir $@)
 
 # create raw binary file from pcx
 $(PALETTENAME) : $(CURRENTIMGS)

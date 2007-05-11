@@ -4,7 +4,7 @@ SUBDIRS:= $(shell ls palette* -d | egrep -v '^(CVS)$$')
 PCX_FILES:=$(shell ls palette*/*.pcx)
 
 all: images.h
-	@for i in $(SUBDIRS); do if test -e $$i/Makefile ; then $(MAKE) --no-print-dir -C $$i ; fi; done;
+	@for i in $(SUBDIRS); do if test -e $$i/Makefile ; then $(MAKE) --no-print-dir -C $$i all ; fi; done;
 
 clean:
 	@for i in $(SUBDIRS); do if test -e $$i/Makefile ; then $(MAKE) --no-print-dir -C $$i clean ; fi; done;

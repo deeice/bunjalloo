@@ -1,5 +1,12 @@
+ifeq ($(strip $(OBJCOPY)),)
+include $(DEVKITARM)/ds_rules
+BUILD := build.ds
+else
+BUILD := build.sdl
+endif
+
 SUFFIXES= .wav
-OUTDIR := lib
+OUTDIR := $(BUILD)
 
 WAVFILES  := $(wildcard *.wav)
 WAVOFILES := $(WAVFILES:%.wav=$(OUTDIR)/%.all.rodata.o)
@@ -8,11 +15,11 @@ PADPROG := $(TOOLS)/padprog
 
 LIBSND := $(OUTDIR)/libsnd.a
 
-ifeq ($(strip $(OBJCOPY)),)
-include $(DEVKITARM)/ds_rules
-endif
 
-all: $(PADPROG) $(OUTDIR) $(LIBSND) sounds.h
+all: $(BUILD) $(PADPROG) $(OUTDIR) $(LIBSND) sounds.h
+
+$(BUILD):
+	test -d $(BUILD) || mkdir -p $(BUILD)
 
 $(OUTDIR):
 	@[ -d $(OUTDIR) ] || mkdir -p $(OUTDIR)

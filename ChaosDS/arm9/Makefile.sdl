@@ -71,7 +71,8 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 			-I$(CURDIR)/$(BUILD)
  
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) $(foreach dir,$(PALETTES),-L$(dir))
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) $(foreach dir,$(PALETTES),-L$(dir)/$(BUILD)) \
+                        -L$(TOPDIR)/common/snd/$(BUILD)
  
 .PHONY: $(BUILD) clean
  

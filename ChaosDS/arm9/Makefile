@@ -48,7 +48,7 @@ LIBS	:=  -lndspp9 -lnds9 -ldswifi9 \
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBNDS) $(TOPDIR)/../libndspp $(TOPDIR)/common/snd
+LIBDIRS	:=	$(LIBNDS) $(TOPDIR)/../libndspp  $(TOPDIR)/common/snd
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -90,7 +90,8 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
 			-I$(CURDIR)/$(BUILD)
  
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) $(foreach dir,$(PALETTES),-L$(dir))
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) $(foreach dir,$(PALETTES),-L$(dir)/build.ds) \
+                        -L$(TOPDIR)/common/snd/build.ds
  
 .PHONY: $(BUILD) clean
  

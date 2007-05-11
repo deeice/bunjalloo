@@ -1,25 +1,32 @@
 # this makefile converts the .pcx graphics files to a lib file
 # so that the main makefile just has to include this lib and not all the graphics stuff
-
 ifeq ($(strip $(OBJCOPY)),)
 include $(DEVKITARM)/ds_rules
+BUILD:=build.ds
+else
+BUILD:=build.sdl
 endif
 GFX2GBA=@gfx2gba -q 
 RODATASUFF := all.rodata.o
 CURRENTIMGS :=   $(notdir $(wildcard $(CURDIR)/*.pcx))
 PALETTENAME :=   $(notdir $(CURDIR)).pal
-LIBNAME :=   lib$(notdir $(CURDIR)).a
+LIBNAME :=   $(BUILD)/lib$(notdir $(CURDIR)).a
 CURRENTOFILES := $(CURRENTIMGS:%.pcx=%.$(RODATASUFF)) \
 		$(CURRENTIMGS:%.pcx=%.map.$(RODATASUFF)) \
  		$(PALETTENAME).$(RODATASUFF)
-OUTDIR := ../../o
-allTarget  := $(foreach file,$(notdir $(CURRENTIMGS)), $(OUTDIR)/$(file))
+CURRENTOFILES := $(CURRENTOFILES:%.o=$(BUILD)/%.o)
+
 GFX2GBAFLAGS :=  -T8 -t8 -m -F -c16 -q 
 MOVE := cp
 .PHONY : raws maps all
 
-$(LIBNAME) :  $(CURRENTOFILES) 
-all :  $(LIBNAME)
+$(LIBNAME) :  $(CURRENTOFILES)
+
+$(BUILD):
+	test -d $(BUILD) || mkdir -p $(BUILD)
+
+all :  $(BUILD) $(LIBNAME)
+
 clean :  
 	@-rm -f $(CURRENTOFILES)
 	@-rm -f $(LIBNAME) $(PALETTENAME)

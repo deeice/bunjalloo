@@ -1,4 +1,5 @@
 
+export OBJCOPY :=
 export OBJCOPYFLAGS := -I binary -O elf32-littlearm -B arm --rename-section .data=.rodata,readonly,contents
 
 all:
