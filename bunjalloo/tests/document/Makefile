@@ -12,6 +12,7 @@ LINKFILES:=Document.o \
 	   HeaderParser.o \
 	   HtmlParser.o \
 	   HtmlDocument.o \
+	   HtmlConstants.o \
 	   ElementFactory.o \
 	   HtmlElement.o \
 	   HtmlBodyElement.o \

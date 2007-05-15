@@ -6,6 +6,7 @@ CPPFLAGS += -I../../arm9/source/ -g
 all : tester run
 
 LINKFILES:=HtmlElement.o\
+           HtmlConstants.o \
            ElementFactory.o \
 	   HtmlMetaElement.o \
 	   HtmlBodyElement.o \

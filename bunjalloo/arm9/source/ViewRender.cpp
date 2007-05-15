@@ -15,6 +15,7 @@
 #include "Button.h"
 #include "InputText.h"
 #include "PasswordField.h"
+#include "HtmlConstants.h"
 
 using namespace std;
 
@@ -26,22 +27,22 @@ ViewRender::ViewRender(View * self):
 
 void ViewRender::preFormat(const HtmlElement * element)
 {
-  if (element->isa("a"))
+  if (element->isa(HtmlConstants::A_TAG))
   {
     m_self->m_textArea->setTextColor(nds::Color(0,0,31));
     m_self->m_textArea->addLink(element);
   }
-  else if (element->isa("pre"))
+  else if (element->isa(HtmlConstants::PRE_TAG))
   {
     m_self->m_textArea->setParseNewline(true);
   }
-  else if (element->isa("ul") or element->isa("ol"))
+  else if (element->isa(HtmlConstants::UL_TAG) or element->isa(HtmlConstants::OL_TAG))
   {
     m_self->m_textArea->increaseIndent();
-    if (not element->isBlock() and element->parent()->isa("li"))
+    if (not element->isBlock() and element->parent()->isa(HtmlConstants::LI_TAG))
       m_self->m_textArea->insertNewline();
   }
-  else if (element->isa("li")) {
+  else if (element->isa(HtmlConstants::LI_TAG)) {
     const HtmlElement * prev(element->parent()->previousSibling(element));
     if (prev and prev->isa("#TEXT"))
     {
@@ -57,30 +58,30 @@ void ViewRender::preFormat(const HtmlElement * element)
 
 void ViewRender::postFormat(const HtmlElement * element)
 {
-  if (element->isa("pre"))
+  if (element->isa(HtmlConstants::PRE_TAG))
   {
     m_self->m_textArea->setParseNewline(false);
   }
-  else if (element->isa("ul") or element->isa("ol"))
+  else if (element->isa(HtmlConstants::UL_TAG) or element->isa(HtmlConstants::OL_TAG))
   {
     m_self->m_textArea->decreaseIndent();
     // only add an extra \n if the ul is a top level one
     const HtmlElement * next = element->parent()->nextSibling(element);
     if ( next 
-        and not next->isa("li") 
+        and not next->isa(HtmlConstants::LI_TAG) 
         and not element->isBlock() )
-        //and not (element->parent()->isa("li") or element->parent()->isa("ul") or element->parent()->isa("ol")))
+        //and not (element->parent()->isa(HtmlConstants::LI_TAG) or element->parent()->isa(HtmlConstants::UL_TAG) or element->parent()->isa(HtmlConstants::OL_TAG)))
     {
       m_self->m_textArea->insertNewline();
     }
   }
-  else if (element->isa("li"))
+  else if (element->isa(HtmlConstants::LI_TAG))
   {
     ElementList::const_iterator it(element->children().begin());
     bool hasBlock(false);
     for (; it != element->children().end(); ++it)
     {
-      if ( (*it)->isa("ul") or (*it)->isBlock()) {
+      if ( (*it)->isa(HtmlConstants::UL_TAG) or (*it)->isBlock()) {
         hasBlock = true;
         break;
       }
@@ -88,11 +89,11 @@ void ViewRender::postFormat(const HtmlElement * element)
     if (not hasBlock)
       m_self->m_textArea->insertNewline();
   }
-  else if (element->isa("p") or (element->tagName()[0] == 'h' and (element->tagName()[1] >= '1' and element->tagName()[1] <= '6')))
+  else if (element->isa(HtmlConstants::P_TAG) or (element->tagName()[0] == 'h' and (element->tagName()[1] >= '1' and element->tagName()[1] <= '6')))
   {
     m_self->m_textArea->insertNewline();
   } 
-  else if (element->isa("a"))
+  else if (element->isa(HtmlConstants::A_TAG))
   {
     m_self->m_textArea->setTextColor(nds::Color(0,0,0));
     m_self->m_textArea->setLink(false);
@@ -113,15 +114,15 @@ bool ViewRender::applyFormat(const HtmlElement * element)
   {
     m_self->m_textArea->printu(element->text());
   }
-  else if (element->isa("script") or element->isa("style"))
+  else if (element->isa(HtmlConstants::SCRIPT_TAG) or element->isa(HtmlConstants::STYLE_TAG))
   {
     return false;
   }
-  else if (element->isa("br"))
+  else if (element->isa(HtmlConstants::BR_TAG))
   {
     m_self->m_textArea->insertNewline();
   } 
-  else if (element->isa("img"))
+  else if (element->isa(HtmlConstants::IMG_TAG))
   {
     // hurrah for alt text. some people set it to "", which screws up any
     // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
@@ -148,12 +149,12 @@ bool ViewRender::applyFormat(const HtmlElement * element)
     doImage(ustr);
     return false;
   }
-  else if (element->isa("select"))
+  else if (element->isa(HtmlConstants::SELECT_TAG))
   {
     renderSelect(element);
     return false; // do not walk the children
   }
-  else if (element->isa("input"))
+  else if (element->isa(HtmlConstants::INPUT_TAG))
   {
     renderInput(element);
     return false; 
@@ -217,7 +218,7 @@ void ViewRender::render()
   m_self->m_textArea->setCursor(0, 0);
   m_self->m_textArea->setParseNewline(false);
   const HtmlElement * root = m_self->m_document.rootNode();
-  assert(root->isa("html"));
+  assert(root->isa(HtmlConstants::HTML_TAG));
   assert(root->hasChildren());
   const HtmlElement * body = root->lastChild();
   setBgColor(body);
@@ -238,7 +239,7 @@ void ViewRender::renderSelect(const HtmlElement * selectElement)
     ElementList::const_iterator it(theChildren.begin());
     for (; it != theChildren.end(); ++it)
     {
-      if ( (*it)->isa("option") ) {
+      if ( (*it)->isa(HtmlConstants::OPTION_TAG) ) {
         formSelect->addOption((*it), m_self->m_textArea);
       }
     }

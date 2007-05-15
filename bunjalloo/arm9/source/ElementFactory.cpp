@@ -10,48 +10,49 @@
 #include "HtmlFormElement.h"
 #include "HtmlInputElement.h"
 #include "HtmlElement.h"
+#include "HtmlConstants.h"
 
 
 HtmlElement * ElementFactory::create(const std::string & elementType)
 {
-  if (elementType == "a")
+  if (elementType == HtmlConstants::A_TAG)
   {
     return new HtmlAnchorElement(elementType);
   }
-  else if (elementType == "meta")
+  else if (elementType == HtmlConstants::META_TAG)
   {
     return new HtmlMetaElement(elementType);
   }
-  else if (elementType == "img")
+  else if (elementType == HtmlConstants::IMG_TAG)
   {
     return new HtmlImageElement(elementType);
   }
-  else if (elementType == "body")
+  else if (elementType == HtmlConstants::BODY_TAG)
   {
     return new HtmlBodyElement(elementType);
   }
-  else if (elementType == "p" or elementType == "div")
+  else if (elementType == HtmlConstants::P_TAG or elementType == HtmlConstants::DIV_TAG)
   {
     return new HtmlBlockElement(elementType);
   }
-  else if (elementType == "pre")
+  else if (elementType == HtmlConstants::PRE_TAG)
   {
     return new HtmlPreElement(elementType);
   }
-  else if (elementType == "option")
+  else if (elementType == HtmlConstants::OPTION_TAG)
   {
     return new HtmlOptionElement(elementType);
   }
-  else if (elementType == "form")
+  else if (elementType == HtmlConstants::FORM_TAG)
   {
     return new HtmlFormElement(elementType);
   }
-  else if (elementType == "input")
+  else if (elementType == HtmlConstants::INPUT_TAG)
   {
     return new HtmlInputElement(elementType);
   }
   /*
-  else if (elementType == "ul" or elementType == "ol" or elementType == "li")
+  else if (elementType == HtmlConstants::UL_TAG or elementType == HtmlConstants::OL_TAG or elementType == HtmlConstants::LI_TAG)
   {
     // lists have a pricipal box, then inline item boxes.
     return new HtmlListElement(elementType);

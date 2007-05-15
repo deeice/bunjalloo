@@ -10,6 +10,7 @@ clean:
 
 LINKFILES:=Document.o \
 	   UTF8.o \
+	   HtmlConstants.o \
 	   UnicodeString.o \
 	   Entity.o \
 	   HeaderParser.o \
