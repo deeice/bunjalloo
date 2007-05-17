@@ -42,16 +42,21 @@ void Controller::showLicence()
 
 void Controller::doUri(const std::string & uriString)
 {
+  doUri(URI(uriString));
+}
+
+void Controller::doUri(const URI & uri)
+{
   //cout << uriString << endl;
-  if (uriString.size()) {
-    m_document->setUri(uriString);
+  if (uri.isValid()) {
+    m_document->setUri(uri.asString());
     // split the URI into sections
-    URI uri(uriString);
+    URI uritmp(uri);
     if (uri.isFile()) {
       localFile(uri.fileName());
     } else {
       // http
-      fetchHttp(uri);
+      fetchHttp(uritmp);
     }
   }
 }

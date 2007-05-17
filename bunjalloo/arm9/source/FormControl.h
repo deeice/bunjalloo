@@ -34,7 +34,7 @@ class FormControl
      */
     virtual void input(const UnicodeString & str);
 
-    /** Input a touch value after clicking.
+    /** input a touch value after clicking.
      * @param str the input touch.
      */
     virtual void input(int x, int y, ControllerI & controller, URI & uri);

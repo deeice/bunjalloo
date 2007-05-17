@@ -1,6 +1,8 @@
 #ifndef Cookie_h_seen
 #define Cookie_h_seen
 
+#include <string>
+
 class Cookie
 {
 
@@ -18,10 +20,25 @@ class Cookie
       : m_name(name),
         m_value(value),
         m_port(port),
-        m_domain(domain)
+        m_domain(domain),
         m_domainInitialDot(domainInitialDot),
         m_path(path)
     {}
+
+    bool matchesDomain(const std::string & domain) const
+    {
+      return domain == m_domain;
+    }
+
+    const std::string & name() const
+    {
+      return m_name;
+    }
+
+    const std::string & value() const
+    {
+      return m_value;
+    }
 
   private:
     std::string m_name;

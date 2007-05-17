@@ -1,5 +1,6 @@
 #include "CookieTest.h"
 #include "CookieJar.h"
+#include "URI.h"
 
 using namespace std;
 
@@ -17,15 +18,28 @@ void CookieTest::tearDown()
 
 void CookieTest::testBasic()
 {
-#if 0
+  URI uri("http://localhost/");
   // this is from the server Set-Cookie (from HeaderParser):
-  string requestHeader = "Set-Cookie: a=b\r\n";
+  string requestHeader = "a=b\r\n";
   // this is what we return next time:
   string expectedHeader ="Cookie: a=b\r\n";
-  m_cookieJar->addCookieHeader(requestHeader);
-  string request;
+  m_cookieJar->addCookieHeader(uri, requestHeader);
   string resultHeader;
-  m_cookieJar->cookiesForRequest(request, resultHeader);
+  m_cookieJar->cookiesForRequest(uri, resultHeader);
   CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
-#endif
+}
+
+void CookieTest::testRepeats()
+{
+  URI uri("http://localhost/");
+  // this is from the server Set-Cookie (from HeaderParser):
+  string requestHeader = "a=b\r\n";
+  // this is what we return next time:
+  string expectedHeader ="Cookie: a=b\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+
+  string resultHeader;
+  m_cookieJar->cookiesForRequest(uri, resultHeader);
+  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
 }

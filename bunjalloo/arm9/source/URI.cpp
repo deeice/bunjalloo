@@ -6,7 +6,7 @@
 using namespace std;
 
 URI::URI()
-  : m_protocol(""),m_address("")
+  : m_method("GET"), m_protocol(""),m_address(""),m_requestHeader("")
 {
 }
 
@@ -265,4 +265,25 @@ UnicodeString URI::escape(const UnicodeString & input)
     }
   }
   return output;
+}
+
+const std::string URI::method() const
+{
+  return m_method;
+}
+
+void URI::setMethod(const std::string & method)
+{
+  m_method = method;
+  transform(m_method.begin(), m_method.end(), m_method.begin(), ::toupper);
+}
+
+void URI::setRequestHeader(const std::string & headerData)
+{
+  m_requestHeader = headerData;
+}
+
+std::string URI::requestHeader() const
+{
+  return m_requestHeader;
 }

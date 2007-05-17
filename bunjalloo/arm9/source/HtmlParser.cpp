@@ -1348,6 +1348,7 @@ void HtmlParser::parseContentType(const std::string & value)
 
 void HtmlParser::parseRefresh(const std::string & value)
 {
+  // TODO - implement actual refreshing.
   string lowerValue(value);
   transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
   string time, url;

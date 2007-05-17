@@ -51,11 +51,30 @@ class URI
      */
     const std::string asString() const;
 
+    /** Get the method (GET or POST).
+     * @return the HTTP method.
+     */
+    const std::string method() const;
+
+    /** Set the method (GET or POST).
+     * @param the HTTP method.
+     */
+    void setMethod(const std::string & method);
 
     /** Navigate to a new URI.
      * @param newFile the relative or absolute URI.
      */
     void navigateTo(const std::string & newFile);
+
+    /** Set an extra request header to be sent as part of the HTTP request.
+     * @param headerData the header data to set
+     */
+    void setRequestHeader(const std::string & headerData);
+
+    /** Retrieve any extra headers for this request.
+     * @return the headers to send.
+     */
+    std::string requestHeader() const;
 
     /** Compare this URI to the @a other one. URIs are the same if they have
      * the same protocol and address.
@@ -68,8 +87,10 @@ class URI
     bool operator!=(const URI & other);
 
   private:
+    std::string m_method;
     std::string m_protocol;
     std::string m_address;
+    std::string m_requestHeader;
     bool m_fix;
 };
 #endif

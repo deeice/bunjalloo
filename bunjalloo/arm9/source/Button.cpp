@@ -29,3 +29,4 @@ void Button::draw(TextArea * textArea)
   textArea->printu(m_element->attribute("value"));
   textArea->setBackgroundColor(Color(31,31,31));
 }
+

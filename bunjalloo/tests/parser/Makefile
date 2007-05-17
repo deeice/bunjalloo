@@ -10,6 +10,9 @@ clean:
 
 LINKFILES:=Document.o \
 	   UTF8.o \
+	   URI.o \
+	   ParameterSet.o \
+	   CookieJar.o \
 	   HtmlConstants.o \
 	   UnicodeString.o \
 	   Entity.o \

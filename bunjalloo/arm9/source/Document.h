@@ -7,6 +7,7 @@
 class HeaderParser;
 class HtmlDocument;
 class HtmlElement;
+class CookieJar;
 
 /** This class represents the Document Model and the model in the MVC pattern. */
 class Document
@@ -56,6 +57,8 @@ class Document
      */
     const HtmlElement * rootNode() const;
 
+    const CookieJar * cookieJar() const;
+
     /** Get the status of the document.
      * @return the current status.
      */
@@ -86,11 +89,27 @@ class Document
      */
     void unregisterView(ViewI * v);
 
+    //! Debug function - dump to stdout the DOM.
     void dumpDOM();
 
+    /** Check if there are history pages before the actual page.
+     * @return true if there is history, false otherwise.
+     */
     bool hasPreviousHistory() const;
+
+    /** Check if there are history pages after the actual page.
+     * @return true if there is forward history, false otherwise.
+     */
     bool hasNextHistory() const;
+
+    /** Go to the previous (older) page in the history, returning its URL.
+     * @return the URL of the previous page.
+     */
     std::string gotoPreviousHistory();
+
+    /** Go to the next (newer) page in the history, returning its URL.
+     * @return the URL of the next page.
+     */
     std::string gotoNextHistory();
 
   private:
@@ -98,6 +117,7 @@ class Document
     Status m_status;
     int m_amount;
     std::vector<ViewI*> m_views;
+    CookieJar*    m_cookieJar;
     HtmlDocument* m_htmlDocument;
     HeaderParser* m_headerParser;
     std::vector<std::string> m_history;

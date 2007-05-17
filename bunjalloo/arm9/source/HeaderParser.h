@@ -2,8 +2,12 @@
 #define HeaderParser_h_seen
 #include <string>
 
+
 class HtmlParser;
 class HtmlElement;
+class CookieJar;
+class URI;
+
 /** Parse the headers and chunks from a HTTP GET request. 
  * The payload is then passed on to the HtmlParser.
  */
@@ -12,8 +16,9 @@ class HeaderParser
   public:
     /** Constructor for the parser.
      * @param html a pointer to the HtmlParser for parsing the rest of the message.
+     * @param cookieJar a pointer to the class that manages the cookies.
      */
-    HeaderParser(HtmlParser * html);
+    HeaderParser(HtmlParser * html, CookieJar * cookieJar);
 
     /** Destructor.*/
     ~HeaderParser();
@@ -50,6 +55,8 @@ class HeaderParser
     //! Reset the internal parser state.
     void reset();
 
+    void setUri(const std::string & uri);
+
   private:
     enum HeaderState
     {
@@ -66,6 +73,7 @@ class HeaderParser
     };
 
     HeaderState m_state;
+    URI & m_uri;
     unsigned int m_value;
     const char * m_position;
     const char * m_end;
@@ -81,6 +89,7 @@ class HeaderParser
     unsigned int m_expected;
 
     HtmlParser* m_htmlParser;
+    CookieJar * m_cookieJar;
 
     void parseError();
     void handleHeader(const std::string & field, const std::string & value);

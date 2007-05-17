@@ -8,9 +8,7 @@ all : tester run
 LINKFILES:=\
 	    UTF8.o \
 	    UnicodeString.o \
-	    ParameterSet.o \
-	    CookieJar.o \
-	    URI.o
+	    ParameterSet.o 
 
 clean:
 	rm -f *.o tester

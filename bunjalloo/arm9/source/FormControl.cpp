@@ -6,6 +6,7 @@
 #include "FormControl.h"
 #include "Rectangle.h"
 #include "TextArea.h"
+//#include "md5.h"
 
 using nds::Canvas;
 using nds::Color;
@@ -82,6 +83,17 @@ void FormControl::walkForm(const HtmlElement * formElement)
 }
 #endif
 
+static void addBoundary(std::string & processedData, unsigned char boundary[16])
+{
+  for (int i = 0; i < 16; ++i) {
+    char buffer[3];
+    sprintf(buffer,"%02x",boundary[i]);
+    processedData += buffer;
+  }
+  processedData += "\r\n";
+}
+
+
 void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
 {
   // need to walk up m_element until we find the form father or the html element.
@@ -97,31 +109,101 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
     return;
   }
   // select the "successful controls" and post them
-  m_processedData = unicode2string(currentNode->attribute("action"));
-  m_processedData += '?';
+  //m_processedData = unicode2string(currentNode->attribute("action"));
+  //m_processedData += '?';
+  uri.setMethod(unicode2string(currentNode->attribute("method")));
+
   ElementList inputs(currentNode->elementsByTagName("input"));
   ElementList::const_iterator inputIt(inputs.begin());
   bool needAmp(false);
+  bool isGet = uri.method() == "GET";
+  /*
+  // use md5 when forms support larger fields...
+  std::vector<std::string> postData;
+  md5_context ctx;
+  if (not isGet)
+  {
+    md5_starts(&ctx);
+  }
+  */
+  std::string processedData;
   for (; inputIt != inputs.end(); ++inputIt)
   {
     const HtmlElement * element(*inputIt);
     UnicodeString name = element->attribute("name");
     std::string type = unicode2string(element->attribute("type"));
-    if (not name.empty() and (type.empty() or type == "text" or type == "password"))
+    if (not name.empty() and (type.empty() or type == "text" or type == "password")
+        or (m_element == element) )
     {
       UnicodeString value = element->attribute("value");
-      if (not value.empty())
+      if (not value.empty() or (m_element == element))
       {
-        if (needAmp) {
-          m_processedData += '&';
+        //if (isGet) {
+          if (needAmp) {
+            processedData += '&';
+          }
+          processedData += unicode2string(URI::escape(name));
+          processedData += "=";
+          processedData += unicode2string(URI::escape(value));
+          needAmp = true;
+        /*}
+        else
+        {
+          // post adds the data to the content type..
+          postData.push_back(unicode2string(URI::escape(name)));
+          md5_update(&ctx, (unsigned char*)postData.back().c_str(), postData.back().length());
+          postData.push_back(unicode2string(URI::escape(value)));
+          md5_update(&ctx, (unsigned char*)postData.back().c_str(), postData.back().length());
         }
-        m_processedData += unicode2string(URI::escape(name));
-        m_processedData += "=";
-        m_processedData += unicode2string(URI::escape(value));
-        needAmp = true;
+        */
       }
     }
   }
-  uri.navigateTo(m_processedData);
-  controller.doUri(uri.asString());
+  if (isGet) {
+    m_processedData = unicode2string(currentNode->attribute("action"));
+    m_processedData += '?';
+    m_processedData += processedData;
+    uri.navigateTo(m_processedData);
+  }
+  else {
+    std::string contentType = "Content-Type: application/x-www-form-urlencoded\r\n";
+    char buffer[256];
+    sprintf(buffer, "%d", processedData.length());
+    contentType += "Content-Length: ";
+    contentType += buffer;
+    contentType += "\r\n";
+    contentType += "\r\n";
+    // add url
+
+    contentType += processedData;
+    uri.setRequestHeader(contentType);
+
+    /*
+    unsigned char output[16];
+    md5_finish(&ctx, output);
+    std::vector<std::string>::const_iterator it(postData.begin());
+    std::string processedData;
+    processedData += "Content-Type: multipart/form-data; boundary=";
+    addBoundary(processedData, output);
+    processedData += "\r\n";
+    processedData += "--";
+    addBoundary(processedData, output);
+    for ( ; it != postData.end(); ++it)
+    {
+      processedData += "Content-Disposition: form-data; name=\"";
+      processedData += *it;
+      processedData += "\"\r\n";
+      //processedData += "Content-Type: text/plain\r\n";
+      processedData += "\r\n";
+      // add the value
+      ++it;
+      processedData += *it;
+      processedData += "\r\n";
+      processedData += "--";
+      addBoundary(processedData, output);
+    }
+    uri.setRequestHeader(processedData);
+    */
+  }
+  controller.doUri(uri);
 }

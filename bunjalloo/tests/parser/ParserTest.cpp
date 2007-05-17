@@ -44,7 +44,7 @@ void ParserTest::setUp()
   m_data = 0;
   m_length = 0;
   m_htmlParser = new HtmlParserDriver;
-  m_headerParser = new HeaderParser(m_htmlParser);
+  m_headerParser = new HeaderParser(m_htmlParser, 0);
 }
 
 void ParserTest::test0()

@@ -20,9 +20,14 @@ class Controller : public ControllerI
     ~Controller();
 
     /** Handle the user request for setting a URI.
-     * @param uriString the URI string to use.
+     * @param uri the URI to use.
      */
-    void doUri(const std::string & uriString);
+    void doUri(const URI & uri);
+
+    /** Helper function to go to an address by text address.
+     * @param uri the URI string to use.
+     */
+    void doUri(const std::string & uri);
     
     void previous();
     void next();

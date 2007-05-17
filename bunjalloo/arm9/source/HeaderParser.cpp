@@ -2,14 +2,18 @@
 #include "HeaderParser.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
+#include "CookieJar.h"
+#include "URI.h"
 
 using namespace std;
 static const string HTTP1("HTTP/1.");
 static const int HTTP1_LEN = HTTP1.length();
 
-HeaderParser::HeaderParser(HtmlParser * htmlParser):
+HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
+  m_uri(*(new URI())),
   m_expected(0),
-  m_htmlParser(htmlParser)
+  m_htmlParser(htmlParser),
+  m_cookieJar(cookieJar)
 {
   reset();
 }
@@ -24,6 +28,12 @@ void HeaderParser::reset()
   m_chunkLength = 0;
   m_chunkLengthString = "";
   m_htmlParser->setToStart();
+  m_uri.setUri("");
+}
+
+void HeaderParser::setUri(const std::string & uri)
+{
+  m_uri.setUri(uri);
 }
 
 void HeaderParser::rewind()
@@ -111,6 +121,10 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   }
   else if (field == "refresh") {
     m_htmlParser->parseRefresh(value);
+  }
+  else if (field == "set-cookie")
+  {
+    m_cookieJar->addCookieHeader(m_uri, value);
   }
 }
 

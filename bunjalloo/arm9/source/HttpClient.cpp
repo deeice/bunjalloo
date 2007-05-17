@@ -4,6 +4,7 @@
 #include "HttpClient.h"
 #include "Controller.h"
 #include "Document.h"
+#include "CookieJar.h"
 #include "URI.h"
 
 using namespace std;
@@ -70,7 +71,12 @@ void HttpClient::get(const URI & uri)
 {
   if (isConnected())
   {
-    string s("GET ");
+    string cookieString;
+    m_self->m_document->cookieJar()->cookiesForRequest(uri, cookieString);
+    printf("Cookie: %s\n", cookieString.c_str());
+
+    string s(uri.method());
+    s += " ";
     s += uri.fileName();
     s += " HTTP/1.1\r\n";
     s += "Host:" + uri.server()+"\r\n";
@@ -82,7 +88,15 @@ void HttpClient::get(const URI & uri)
     s += ";r";
     s += VERSION;
     s += ")\r\n";
-    s += "\r\n";
+    s += cookieString;
+    if (uri.requestHeader().empty())
+    {
+      s += "\r\n";
+    }
+    else
+    {
+      s += uri.requestHeader();
+    }
     write(s.c_str(), s.length());
     m_finished = false;
   }

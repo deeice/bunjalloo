@@ -7,9 +7,12 @@ all : tester run
 
 LINKFILES:=Document.o \
 	   UTF8.o \
+	   URI.o \
 	   UnicodeString.o \
 	   Entity.o \
 	   HeaderParser.o \
+	   ParameterSet.o \
+	   CookieJar.o \
 	   HtmlParser.o \
 	   HtmlDocument.o \
 	   HtmlConstants.o \

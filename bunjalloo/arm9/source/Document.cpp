@@ -2,13 +2,15 @@
 #include "HtmlDocument.h"
 #include "HeaderParser.h"
 #include "HtmlElement.h"
+#include "CookieJar.h"
 
 using namespace std;
 
 Document::Document():
   m_amount(0),
+  m_cookieJar(new CookieJar),
   m_htmlDocument(new HtmlDocument),
-  m_headerParser(new HeaderParser(m_htmlDocument))
+  m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar))
 {
   m_history.clear();
   m_historyPosition = m_history.begin();
@@ -18,6 +20,7 @@ Document::~Document()
 {
   delete m_htmlDocument;
   delete m_headerParser;
+  delete m_cookieJar;
 }
 
 void Document::setUri(const std::string & uriString)
@@ -31,6 +34,7 @@ void Document::setUri(const std::string & uriString)
   m_history.push_back(uriString);
   m_historyPosition = m_history.end();
   --m_historyPosition;
+  m_headerParser->setUri(uriString);
 #if 0
   printf("%s %d\n", m_historyPosition->c_str(), m_history.size());
   vector<string>::iterator it(m_history.begin());
@@ -171,4 +175,9 @@ std::string Document::gotoNextHistory()
     return *m_historyPosition;
   }
   return "";
+}
+
+const CookieJar * Document::cookieJar() const
+{
+  return m_cookieJar;
 }

@@ -2,6 +2,7 @@
 #include "Document.h"
 #include "ControllerI.h"
 #include "HtmlElement.h"
+#include "URI.h"
 const std::string Config::s_configFile("file:///"DATADIR"/config.html");
 using namespace std;
 

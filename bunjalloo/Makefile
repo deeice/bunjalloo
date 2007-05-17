@@ -3,7 +3,7 @@
 target=$(shell basename $(CURDIR))
 export DATADIR:="\"data/$(target)\""
 
-all: arm9/source/version.c
+all:  ctags arm9/source/version.c
 	$(MAKE) -f Makefile.ds
 	$(MAKE) -f Makefile.sdl
 
@@ -13,6 +13,9 @@ clean:
 
 docs:
 	@-doxygen doxygen.cfg
+
+ctags:
+	ctags -R .
 
 arm9/source/version.c:
 	version=$$(svn info | grep ^Revision | cut -d: -f2 | tr -d ' ') ;\
