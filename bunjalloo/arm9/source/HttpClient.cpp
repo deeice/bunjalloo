@@ -73,9 +73,9 @@ void HttpClient::get(const URI & uri)
   {
     string cookieString;
     m_self->m_document->cookieJar()->cookiesForRequest(uri, cookieString);
-    printf("Cookie: %s\n", cookieString.c_str());
 
-    string s(uri.method());
+    string s;
+    s += uri.method();
     s += " ";
     s += uri.fileName();
     s += " HTTP/1.1\r\n";

@@ -11,7 +11,7 @@ URI::URI()
 }
 
 URI::URI(const std::string & uriString, bool fix):
-  m_protocol(""), m_address(""), m_fix(fix)
+  m_method("GET"), m_protocol(""), m_address(""), m_fix(fix)
 {
   setUri(uriString);
 }

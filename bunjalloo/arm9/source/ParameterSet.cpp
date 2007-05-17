@@ -139,14 +139,15 @@ void PSImpl::inValue()
   else 
   {
     // whitespace
-    if (m_state == VALUE_UNQUOTED)
+    /*if (m_state == VALUE_UNQUOTED)
     {
       addCurrentParam();
     }
     else
     {
+    */
       m_paramValue += m_value;
-    }
+    //}
   }
 }
 
