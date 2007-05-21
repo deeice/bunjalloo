@@ -2,9 +2,9 @@
 #define Link_h_seen
 #include <string>
 #include <list>
+#include "Rectangle.h"
 
 class HtmlElement;
-class Rectangle;
 class Link
 {
   public:
@@ -20,7 +20,7 @@ class Link
 
   private:
     const HtmlElement * m_anchor;
-    typedef std::list<Rectangle*> RectangleList;
+    typedef std::list<nds::Rectangle*> RectangleList;
     RectangleList m_clickZones;
 };
 

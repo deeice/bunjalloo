@@ -4,7 +4,6 @@
 #include "ControllerI.h"
 #include "Palette.h"
 #include "FormControl.h"
-#include "Rectangle.h"
 #include "TextArea.h"
 //#include "md5.h"
 
@@ -14,7 +13,7 @@ const int FormControl::MAX_SIZE(120);
 const int FormControl::MIN_SIZE(8);
 
 FormControl::FormControl(HtmlElement * element)
-  : m_size(new Rectangle), m_element(element)
+  : m_size(new nds::Rectangle), m_element(element)
 {
   m_size->x = 0;
   m_size->y = 0;
@@ -81,7 +80,6 @@ void FormControl::walkForm(const HtmlElement * formElement)
     }
   }
 }
-#endif
 
 static void addBoundary(std::string & processedData, unsigned char boundary[16])
 {
@@ -92,6 +90,7 @@ static void addBoundary(std::string & processedData, unsigned char boundary[16])
   }
   processedData += "\r\n";
 }
+#endif
 
 
 void FormControl::input(int x, int y, ControllerI & controller, URI & uri)

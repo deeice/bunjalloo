@@ -5,6 +5,8 @@
 #include "Canvas.h"
 #include "Palette.h"
 
+using nds::Rectangle;
+
 Link::Link(const HtmlElement * a)
   : m_anchor(a)
 { }

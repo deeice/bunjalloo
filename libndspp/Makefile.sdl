@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------------
 BUILD		:= build
 
-SOURCES :=	source/pc
+SOURCES :=	source/pc source/common
 
 DATESTRING	:=	$(shell date +%Y)$(shell date +%m)$(shell date +%d)
 

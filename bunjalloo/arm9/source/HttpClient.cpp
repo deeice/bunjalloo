@@ -78,6 +78,8 @@ void HttpClient::get(const URI & uri)
     s += uri.method();
     s += " ";
     s += uri.fileName();
+    // for proxy connection, need to send the whole request:
+    //s += uri.asString();
     s += " HTTP/1.1\r\n";
     s += "Host:" + uri.server()+"\r\n";
     s += "Connection: close\r\n";

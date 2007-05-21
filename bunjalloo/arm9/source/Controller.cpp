@@ -144,6 +144,8 @@ void Controller::fetchHttp(URI & uri)
     // open a socket to the server.
     // FIXME - hardcoded 80 port.
     HttpClient client(uri.server().c_str(), uri.port());
+    // for a proxy, do this:
+    // HttpClient client(proxy_ip, uri.port());
     client.setController(this);
     client.connect();
     if (client.isConnected())

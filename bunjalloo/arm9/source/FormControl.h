@@ -2,7 +2,8 @@
 #define FormControl_h_seen
 
 #include "UnicodeString.h"
-class Rectangle;
+#include "Rectangle.h"
+
 class TextArea;
 class ControllerI;
 class HtmlElement;
@@ -45,7 +46,7 @@ class FormControl
     bool hitTest(int x, int y) const;
 
   protected:
-    Rectangle * m_size;
+    nds::Rectangle * m_size;
     HtmlElement * m_element;
     std::string m_processedData;
 };

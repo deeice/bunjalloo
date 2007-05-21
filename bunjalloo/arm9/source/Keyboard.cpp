@@ -35,7 +35,7 @@ class Key {
       m_selected(false)
     { }
 
-    void dimensions(Rectangle & rect, const Font & font) {
+    void dimensions(nds::Rectangle & rect, const Font & font) {
       int rectx = m_x - m_size/4;
       int recty = m_y - m_size/4;
       int width, height;
@@ -51,7 +51,7 @@ class Key {
     }
 
     void draw(TextArea * textArea) {
-      Rectangle rect;
+      nds::Rectangle rect;
       dimensions(rect, textArea->font());
       unsigned short col(m_selected?nds::Color(0,31,31):nds::Color(30,29,31));
       nds::Canvas::instance().fillRectangle(rect.x, rect.y, 
@@ -66,7 +66,7 @@ class Key {
     }
 
     bool hit(int testx, int testy, const Font & font) {
-      Rectangle rect;
+      nds::Rectangle rect;
       dimensions(rect, font);
       nds::Canvas::instance().drawPixel(testx,testy, nds::Color(31,0,0));
       return rect.hit(testx, testy);

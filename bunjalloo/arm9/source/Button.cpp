@@ -7,6 +7,7 @@
 
 using nds::Canvas;
 using nds::Color;
+using nds::Rectangle;
 
 Button::Button(HtmlElement * element, const TextArea * textArea)
   : FormControl(element)
