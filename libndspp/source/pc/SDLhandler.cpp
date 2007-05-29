@@ -256,6 +256,14 @@ Uint32 SDLhandler::decodeColor(unsigned short rgb16)
     green = (int)fgreen;
     blue = (int)fblue;
   }
+  if (m_whiteLevel) {
+    // if white = 16, then all are 256
+    // if white = 8, then c = (256 - n)
+    // if white = 0, then all are normal color
+    red = (int)(m_whiteLevel * (256/16));
+    green = (int)(m_whiteLevel * (256/16));
+    blue = (int)(m_whiteLevel * (256/16));
+  }
   return SDL_MapRGB(m_screen->format, red, blue, green);
 }
 

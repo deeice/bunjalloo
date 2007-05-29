@@ -1,7 +1,7 @@
 #ifndef Options_h_seen
 #define Options_h_seen
 
-#include "ScreenI.h"
+#include "TouchScreen.h"
 
 
 //! object that represents a single option
@@ -72,15 +72,19 @@ class Option
 };
 
 //! screen to show the options
-class OptionScreen : public ScreenI
+class OptionScreen : public TouchScreen
 {
   public:
+    OptionScreen();
     virtual void show();
     virtual void animate();
     virtual void handleKeys();
 
   private:
     int m_hilightItem;
+    static void incrOptionCb(void * arg);
+    static void decrOptionCb(void * arg);
+    static void activateOptionCb(void * arg);
     void drawOptions() const;
     void drawOption(Option & opt, int x, int y, int pal) const;
 
@@ -94,6 +98,7 @@ class OptionScreen : public ScreenI
     void right();
     void back();
 
+    void selectFromTouch(); 
 
 };
 

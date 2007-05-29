@@ -10,8 +10,28 @@
 #include "GameState.h"
 #include "CreatePlayers.h"
 #include "SoundEffect.h"
+#include "HotSpot.h"
+#include "Rectangle.h"
 
 using nds::Color;
+using nds::Rectangle;
+
+static const int OK_LETTER(71);
+static const int DELETE_LETTER(70);
+
+EditName::EditName()
+{
+  // create one big rectangle for the keyboard and 2 smaller ones for OK and back buttons
+  Rectangle lettersRect = { 2*8, 6*8, 25*8, 16*5};
+  m_hotspots.push_back(new HotSpot(lettersRect, letterCb, this));
+
+  Rectangle okRect = { 14*8, 16*8, 32, 16 };
+  m_hotspots.push_back(new HotSpot(okRect, okCb, this));
+
+  Rectangle deleteRect = { 25*8, 16*8, 16, 16};
+  m_hotspots.push_back(new HotSpot(deleteRect, deleteCb, this));
+
+}
 
 void EditName::show()
 {
@@ -22,17 +42,19 @@ void EditName::show()
   arena.clear();
   Graphics::instance().clearPalettes();
   strcpy(m_name, Wizard::currentPlayer().name());
-  m_hilightItem = 71;
+  m_hilightItem = OK_LETTER;
   
   // draw the alphabet...
   updateName();
   
+  char backspace[2] = {Text16::LEFT_ARROW_INDEX, 0};
   text16.print("A B C D E F G H I J K L M", 2,6, 10);
   text16.print("N O P Q R S T U V W X Y Z", 2,8, 10);
   text16.print("                         ", 2,10, 10);
   text16.print("a b c d e f g h i j k l m", 2,12, 10);
   text16.print("n o p q r s t u v w x y z", 2,14, 10);
   text16.print("OK", 15,16, 13);
+  text16.print(backspace,                  26,16, 10);
   
   text16.setColour(10, Color(0,30,30)); // l blue
   text16.setColour(11, Color(31,30,30)); // white
@@ -78,12 +100,17 @@ void EditName::indexToPosition(int & x, int &y, char & c)
     y = 14;
     c = 'n'+m_hilightItem-52;
   }
+  if (m_hilightItem == DELETE_LETTER) {
+    x = 24;
+    y = 16;
+    c = Text16::LEFT_ARROW_INDEX;
+  }
   x += 2;
 }
 
 void EditName::selectLetter()
 {
-  if (m_hilightItem > 64) {
+  if (m_hilightItem == OK_LETTER) {
     // OK hilited
     Text16::instance().setColour(13, Color(0,30,0)); // white
   } else {
@@ -101,7 +128,7 @@ void EditName::selectLetter()
 
 void EditName::deselectLetter() {
   
-  if (m_hilightItem > 64) {
+  if (m_hilightItem == OK_LETTER) {
     // OK hilited
     Text16::instance().setColour(13, Color(31,30,30)); // white
   }
@@ -125,10 +152,16 @@ void EditName::up()
   // move up a row...
   deselectLetter();
   if (m_hilightItem > 12) {
-    m_hilightItem -= 13;
+    if (m_hilightItem == DELETE_LETTER)
+    {
+      m_hilightItem -= 6;
+    }
+    else {
+      m_hilightItem -= 13;
+    }
   }
   else {
-    m_hilightItem = 71;
+    m_hilightItem = OK_LETTER;
   }
   selectLetter();
   
@@ -143,9 +176,15 @@ void EditName::down()
     m_hilightItem += 13;
   }
   else {
-    //m_hilightItem -= 13*4;
-    // select OK
-    m_hilightItem = 71;
+    if (m_hilightItem > 60 and m_hilightItem != OK_LETTER) {
+      m_hilightItem = DELETE_LETTER;
+    }
+    else
+    {
+      //m_hilightItem -= 13*4;
+      // select OK
+      m_hilightItem = OK_LETTER;
+    }
   }
   selectLetter();
   
@@ -154,6 +193,15 @@ void EditName::down()
 void EditName::left(){
   
   deselectLetter();
+  if (m_hilightItem == OK_LETTER) {
+    return;
+  }
+  if (m_hilightItem == DELETE_LETTER)
+  {
+    m_hilightItem = OK_LETTER;
+    selectLetter();
+    return;
+  }
   
   // get the multiple of 13..
   int this_row_index = m_hilightItem; 
@@ -175,6 +223,16 @@ void EditName::left(){
 void EditName::right()
 {
   deselectLetter();
+  if (m_hilightItem == OK_LETTER) {
+    m_hilightItem = DELETE_LETTER;
+    selectLetter();
+    return;
+  }
+  if (m_hilightItem == DELETE_LETTER)
+  {
+    return;
+  }
+  
   
   // get the multiple of 12..
   int this_row_index = m_hilightItem; 
@@ -194,9 +252,13 @@ void EditName::right()
 void EditName::a()
 {
   // add the currently selected character to the name
-  if (m_hilightItem > 64) {
+  if (m_hilightItem == OK_LETTER) {
     // OK hilited...
     start();
+  }
+  else if (m_hilightItem == DELETE_LETTER)
+  {
+    b();
   }
   else {
     int x, y;
@@ -254,7 +316,7 @@ void EditName::updateName()
 
 void EditName::animate()
 {
-  if (m_hilightItem > 64) {
+  if (m_hilightItem == OK_LETTER) {
     Color c(0,31,0);
     Graphics::instance().animateSelection(13, c);
   } else {
@@ -288,4 +350,35 @@ void EditName::handleKeys()
   if (keysSlow & KEY_START) {
     start();
   } 
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
+  } 
 }
+
+void EditName::letterCb(void * arg)
+{
+  EditName * self = (EditName*)arg;
+  self->deselectLetter();
+  // get the selected letter from the x/y position
+  int x = (self->m_x - self->m_checking->area().x) /16;
+  int y = (self->m_y - self->m_checking->area().y)/16;
+  self->m_hilightItem = x+y*13;
+  self->selectLetter();
+  self->a();
+
+}
+
+void EditName::okCb(void * arg)
+{
+  EditName * self = (EditName*)arg;
+  self->m_hilightItem = OK_LETTER;
+  self->a();
+}
+
+void EditName::deleteCb(void * arg)
+{
+  EditName * self = (EditName*)arg;
+  self->m_hilightItem = DELETE_LETTER;
+  self->b();
+}
+

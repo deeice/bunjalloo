@@ -1,8 +1,8 @@
 #ifndef CreatePlayers_h_seen
 #define CreatePlayers_h_seen
 
-#include "ScreenI.h"
-class CreatePlayers: public ScreenI
+#include "TouchScreen.h"
+class CreatePlayers: public TouchScreen
 {
   public:
     /** @param start flag to say if the screen is the first, or if it should
@@ -19,6 +19,17 @@ class CreatePlayers: public ScreenI
     int m_hilightItem;
     int m_hilightWizard;
     bool m_start;
+
+    static void incrPlayerCb(void * arg);
+    static void decrPlayerCb(void * arg);
+    static void changeIconCb(void * arg);
+    static void changeIconColCb(void * arg);
+    static void changeNameCb(void * arg);
+    static void changeLevelCb(void * arg);
+    static void resetPlayersCb(void * arg);
+    static void startCb(void * arg);
+
+    void selectWizFromY();
 
     void selectItem(int);
     void deselectItem();

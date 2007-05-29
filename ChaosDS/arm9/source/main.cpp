@@ -14,7 +14,6 @@ int main(void) {
   irqSet(IRQ_VBLANK, Interrupt::processVblank);
   
   Graphics::initialiseScreen();
-  nds::Video::instance(0).setFade(0);
   // debug...
   nds::Background bg(1,0,0,31);
   nds::Palette p(1);

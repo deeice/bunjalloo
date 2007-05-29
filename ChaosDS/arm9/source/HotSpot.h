@@ -10,6 +10,11 @@ class HotSpot
   public:
     HotSpot(nds::Rectangle & rect, HotSpotCallback_t callback, void * data=0);
     void hitTest(int x, int y);
+    inline const nds::Rectangle & area() const
+    {
+      return m_area;
+    }
+
 
   private:
     nds::Rectangle m_area;

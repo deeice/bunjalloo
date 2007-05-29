@@ -45,7 +45,7 @@ void Graphics::initialiseScreen()
   subScreen.setMode(0);
   mainScreen.setMode(0);
   mainScreen.enableObjects();
-  mainScreen.setWhite(16);
+  mainScreen.setFade(16);
   subScreen.setToTop();
 
   // initialise all palettes.
@@ -55,7 +55,6 @@ void Graphics::initialiseScreen()
   ObjectPalette p(0);
   p.load(_binary_paletteb_pal_start, 128);
 
-  nds::Video::instance(0).whiteout(false, 1);
 }
 
 void Graphics::clearPalettes(void) {

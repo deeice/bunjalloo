@@ -1,11 +1,12 @@
 #ifndef GameMenu_h_seen
 #define GameMenu_h_seen
 
-#include "ScreenI.h"
+#include "TouchScreen.h"
 
-class GameMenu: public ScreenI
+class GameMenu: public TouchScreen
 {
   public:
+    GameMenu();
     //! Continue the game, corresponds to option 3 on the menu.
     static void continueGame();
     virtual void show();
@@ -14,6 +15,9 @@ class GameMenu: public ScreenI
   private:
     int m_hilightItem;
 
+    static void continueCb(void * arg);
+    static void examineCb(void * arg);
+    static void selectSpellCb(void * arg);
     void deselectItem(int item);
     inline void deselectItem() { deselectItem(m_hilightItem); };
     void selectItem();

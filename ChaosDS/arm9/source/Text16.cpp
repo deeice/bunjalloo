@@ -16,6 +16,8 @@ static const char EMPTY_MESSAGE[] = "                               ";
 const int Text16::FIRST_CHAR_INDEX((int) '\'');
 const int Text16::MESSAGE_X(0);
 const int Text16::MESSAGE_Y(22);
+const int Text16::LEFT_ARROW_INDEX((int)('='-1));
+const int Text16::RIGHT_ARROW_INDEX((int)('='+1));
 
 // namespaces
 using namespace nds;

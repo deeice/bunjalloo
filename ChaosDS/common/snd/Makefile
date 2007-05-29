@@ -21,10 +21,6 @@ all: $(BUILD) $(PADPROG) $(OUTDIR) $(LIBSND) sounds.h
 $(BUILD):
 	test -d $(BUILD) || mkdir -p $(BUILD)
 
-$(OUTDIR):
-	@[ -d $(OUTDIR) ] || mkdir -p $(OUTDIR)
-
-
 $(PADPROG):
 	@$(MAKE) --no-print-dir -C $(TOOLS)
 

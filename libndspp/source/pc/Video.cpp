@@ -163,6 +163,7 @@ void Video::setWhite(int level)
         BLDMOD_BG2 | BLDMOD_BG1 | BLDMOD_BG0 | BLDMOD_BD | BLDMOD_OBJ,
          0 );
   BLEND_Y = level;
+  SDLhandler::instance().setWhite(level);
 }
 
 void Video::whiteout(bool towhite, unsigned int speed)

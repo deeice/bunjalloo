@@ -13,6 +13,10 @@ class Text16
     static const int MESSAGE_X;
     //! Y position of the message bar.
     static const int MESSAGE_Y;
+    //! Index of the left arrow
+    static const int LEFT_ARROW_INDEX;
+    //! Index of the right arrow
+    static const int RIGHT_ARROW_INDEX;
     //! Singleton instance.
     static Text16 & instance();
     //! Clear all text.

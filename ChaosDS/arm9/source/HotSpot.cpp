@@ -11,7 +11,7 @@ HotSpot::HotSpot(nds::Rectangle & rect,
 }
 void HotSpot::hitTest(int x, int y)
 {
-  if (m_area.hit(x,y))
+  if (m_area.hit(x,y) and m_callback)
   {
     m_callback(m_data);
   }

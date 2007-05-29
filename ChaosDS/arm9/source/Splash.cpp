@@ -8,8 +8,19 @@
 #include "GameState.h"
 #include "CreatePlayers.h"
 #include "Options.h"
+#include "HotSpot.h"
 
 using namespace nds;
+
+Splash::Splash()
+{
+  Rectangle initial = {0,0,256,192};
+  Rectangle start = {7*8,17*8,5*8,16};
+  Rectangle option = {15*8,17*8,5*8,16};
+  m_hotspots.push_back(new HotSpot(initial, showMenuCb, this));
+  m_hotspots.push_back(new HotSpot(start, startCb, this));
+  m_hotspots.push_back(new HotSpot(option, optionCb, this));
+}
 
 void Splash::show()
 {
@@ -64,6 +75,37 @@ void Splash::handleKeys()
   if (keysSlow & KEY_START) {
     start();
   } 
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
+  }
+}
+
+void Splash::optionCb(void * arg)
+{
+  Splash * self = (Splash*)arg;
+  if (self->m_menuOn)
+  {
+    self->m_hilightItem = 1;
+    self->a();
+  }
+}
+
+void Splash::startCb(void * arg)
+{
+  Splash * self = (Splash*)arg;
+  if (self->m_menuOn)
+  {
+    self->start();
+  }
+}
+
+void Splash::showMenuCb(void * arg)
+{
+  Splash * self = (Splash*)arg;
+  if (not self->m_menuOn)
+  {
+    self->start();
+  }
 }
 
 // start key pressed, for now start the game

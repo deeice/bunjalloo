@@ -10,12 +10,28 @@
 #include "SoundEffect.h"
 #include "GameState.h"
 #include "ExamineBoard.h"
+#include "Rectangle.h"
+#include "HotSpot.h"
+#include "Misc.h"
 
 using namespace nds;
 static const int MENU_XPOS(4);
 static const int MENU_YPOS(8);
 static const int CHAOS_GAUGE_YPOS(4);
 static const int MAX_GAME_MENU(3);
+
+GameMenu::GameMenu()
+{
+  int width = 20*8;
+  Rectangle selectSpellRect = {MENU_XPOS*8, MENU_YPOS*8, width, 16 };
+  m_hotspots.push_back(new HotSpot(selectSpellRect, selectSpellCb, this));
+
+  Rectangle examineRect = {MENU_XPOS*8, (3+MENU_YPOS)*8, width, 16 };
+  m_hotspots.push_back(new HotSpot(examineRect, examineCb, this));
+
+  Rectangle continueRect = {MENU_XPOS*8, (6+MENU_YPOS)*8, width, 16 };
+  m_hotspots.push_back(new HotSpot(continueRect, continueCb, this));
+}
 
 void GameMenu::show()
 {
@@ -75,8 +91,8 @@ void GameMenu::show()
   text16.print("1. SELECT SPELL", MENU_XPOS,MENU_YPOS, 0);  
   text16.print("2. EXAMINE BOARD", MENU_XPOS,MENU_YPOS+3, 1);  
   text16.print("3. CONTINUE WITH GAME", MENU_XPOS,MENU_YPOS+6, 2);
-  // sleep mode should probably be automatic when closing the lid...
-  text16.print("4. ENTER SLEEP MODE", MENU_XPOS,MENU_YPOS+9, 3);   // FIXME!
+  // sleep mode automatic when closing the lid
+  // text16.print("4. ENTER SLEEP MODE", MENU_XPOS,MENU_YPOS+9, 3);
   Video::instance().fade(false);
 }
 void GameMenu::animate()
@@ -95,6 +111,9 @@ void GameMenu::handleKeys()
   } 
   if (keysSlow & KEY_A) {
     a();
+  } 
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
   } 
 }
 
@@ -157,13 +176,36 @@ void GameMenu::a() {
       // continue game
       continueGame();
       break;
-#if 0
-      TODO
-         case 3: // sleep mode
-         Sleep_Mode(1);
-         break;
-#endif
     default: break;    
   }
 }
 
+void GameMenu::continueCb(void * arg)
+{
+  GameMenu * self = (GameMenu*) arg;
+  self->deselectItem();
+  self->m_hilightItem = 2;
+  self->selectItem();
+  Misc::delay(10);
+  self->a();
+}
+
+void GameMenu::examineCb(void * arg)
+{
+  GameMenu * self = (GameMenu*) arg;
+  self->deselectItem();
+  self->m_hilightItem = 1;
+  self->selectItem();
+  Misc::delay(10);
+  self->a();
+}
+
+void GameMenu::selectSpellCb(void * arg)
+{
+  GameMenu * self = (GameMenu*) arg;
+  self->deselectItem();
+  self->m_hilightItem = 0;
+  self->selectItem();
+  Misc::delay(10);
+  self->a();
+}

@@ -9,6 +9,8 @@
 #include "Misc.h"
 #include "GameState.h"
 #include "Splash.h"
+#include "Rectangle.h"
+#include "HotSpot.h"
 
 using namespace std;
 using namespace nds;
@@ -25,6 +27,67 @@ Option Options::s_option[] = {
  Option("Quit Game",Option::NONE,0,1),
  Option("          BACK",Option::NONE,0,1)
 };
+
+OptionScreen::OptionScreen()
+{
+  // start of the text.
+  int x = 3+12;
+  // y pos start of options
+  int y = 5;
+  Option * option = Options::instance().options();
+  for (int j = 0; j < Options::OPTION_COUNT; j++) { 
+    char buffer[32];
+    int ypos = y + j*3;
+    option[j].asText(buffer);
+    if (buffer[0] != 0)
+    {
+      // bounding boxes for increase and decrease arrows
+      Rectangle decr = {x*8,ypos*8,8,16};
+      Rectangle incr = {(x+8)*8,ypos*8,8,16};
+      // bounding box for activate
+      Rectangle actv = {(x+1)*8,ypos*8,64,16};
+      // register the callbacks
+      m_hotspots.push_back(new HotSpot(incr, incrOptionCb, this));
+      m_hotspots.push_back(new HotSpot(decr, decrOptionCb, this));
+      m_hotspots.push_back(new HotSpot(actv, activateOptionCb, this));
+    }
+    else
+    {
+      // bounding box for activate
+      Rectangle actv = {(x-12)*8,ypos*8,strlen(option[j].m_name)*8,16};
+      m_hotspots.push_back(new HotSpot(actv, activateOptionCb, this));
+    }
+  }
+}
+
+void OptionScreen::decrOptionCb(void * arg)
+{
+  OptionScreen * self = (OptionScreen*)arg;
+  self->selectFromTouch();
+  self->left();
+}
+
+void OptionScreen::incrOptionCb(void * arg)
+{
+  OptionScreen * self = (OptionScreen*)arg;
+  self->selectFromTouch();
+  self->right();
+}
+
+void OptionScreen::activateOptionCb(void * arg)
+{
+  OptionScreen * self = (OptionScreen*)arg;
+  self->selectFromTouch();
+  self->a();
+}
+
+void OptionScreen::selectFromTouch()
+{
+  int optionIndex = (((m_checking->area().y/8)-5)/3);
+  deselectOption(m_hilightItem);
+  m_hilightItem = optionIndex;
+  selectOption(m_hilightItem);
+}
 
 void OptionScreen::show()
 {
@@ -73,6 +136,9 @@ void OptionScreen::handleKeys()
   if (keysSlow & KEY_B) {
     back();
   } 
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
+  }
 }
 
 void OptionScreen::drawOptions() const
@@ -224,7 +290,8 @@ Option::operator bool() const
 
 void Option::asText(char * buffer) const
 {
-
+  char * tmp = buffer;
+  buffer++;
   if (m_type == ON_OFF) 
   {
     if (m_value)
@@ -242,6 +309,7 @@ void Option::asText(char * buffer) const
   else if (m_type == NONE)
   {
     buffer[0] = 0;
+    tmp[0] = 0;
   }
   else
   {
@@ -251,6 +319,13 @@ void Option::asText(char * buffer) const
     while (len < 7) {
       buffer[len++] = ' ';
     }
+    buffer[len] = 0;
+  }
+  if (m_type != NONE)
+  {
+    tmp[0] = Text16::LEFT_ARROW_INDEX;
+    int len = strlen(buffer);
+    buffer[len++] = Text16::RIGHT_ARROW_INDEX;
     buffer[len] = 0;
   }
 

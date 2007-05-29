@@ -15,5 +15,6 @@ class ScreenI
     virtual void vblank() {}
     //! Handle keypad presses
     virtual void handleKeys()=0;
+    
 };
 #endif

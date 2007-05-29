@@ -11,14 +11,49 @@
 #include "Graphics.h"
 #include "Text16.h"
 #include "Wizard.h"
+#include "Rectangle.h"
+#include "HotSpot.h"
 #include "EditName.h"
 
 using namespace nds;
 static const int PLAYER_WIZ_Y(2);
+static const int PLAYER_WIZ_X(1);
+static const int PLAYER_WIZ_NAME_X(6);
+static const int PLAYER_WIZ_LEVEL_X(16);
+static const int HOW_MANY_NUM_POS_X(22);
+static const int HOW_MANY_NUM_POS_Y(1);
+static const int START_POS_X(10);
+static const int START_POS_Y(20);
 
 CreatePlayers::CreatePlayers(bool start)
   : m_start(start)
-{}
+{
+  // Increase/decrease players
+  Rectangle decrPlayerRect = {(HOW_MANY_NUM_POS_X-1)*8, HOW_MANY_NUM_POS_Y*8, 24, 16 };
+  Rectangle incrPlayerRect = {(HOW_MANY_NUM_POS_X+3)*8, HOW_MANY_NUM_POS_Y*8, 24, 16 };
+  m_hotspots.push_back(new HotSpot(decrPlayerRect, decrPlayerCb, this));
+  m_hotspots.push_back(new HotSpot(incrPlayerRect, incrPlayerCb, this));
+
+  // adjust player icons - have a giant rectangle that covers the icons
+  int rectHeight(16*8);
+  Rectangle iconRect = {16, 24, 8, rectHeight };
+  m_hotspots.push_back(new HotSpot(iconRect, changeIconCb, this));
+  Rectangle iconColRect = {16+8, 24, 8, rectHeight };
+  m_hotspots.push_back(new HotSpot(iconColRect, changeIconColCb, this));
+  // name rect - width is the width of the name (start of where level is drawn to start of name)
+  Rectangle nameRect = {PLAYER_WIZ_NAME_X*8, 24, 8*(PLAYER_WIZ_LEVEL_X-PLAYER_WIZ_NAME_X), rectHeight };
+  m_hotspots.push_back(new HotSpot(nameRect, changeNameCb, this));
+  // level rect
+  Rectangle levelRect = {PLAYER_WIZ_LEVEL_X*8, 24, 8*9, rectHeight };
+  m_hotspots.push_back(new HotSpot(levelRect, changeLevelCb, this));
+
+  Rectangle resetRect = {4*8, HOW_MANY_NUM_POS_Y*8, 17*8, 16 };
+  m_hotspots.push_back(new HotSpot(resetRect, resetPlayersCb, this));
+
+  Rectangle startRect = {START_POS_X*8, START_POS_Y*8, 11*8, 16};
+  m_hotspots.push_back(new HotSpot(startRect, startCb, this));
+
+}
 
 // from IF ScreenI
 void CreatePlayers::show()
@@ -39,6 +74,9 @@ void CreatePlayers::show()
   p[0] = 0;
   text16.setColour(10, Color(31,30,30));
   text16.print("How many players?", 4, 1, 10);
+
+  text16.setColour(12, Color(31,30,0));
+  text16.print("Press Start", START_POS_X, START_POS_Y, 12);
 
   if (m_start) {
     // create the default start wizards
@@ -95,8 +133,81 @@ void CreatePlayers::handleKeys()
   if (keysSlow & KEY_START) {
     start();
   } 
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
+  } 
 }
 // Other CreatePlayers functions ....
+void CreatePlayers::incrPlayerCb(void * arg)
+{
+  CreatePlayers * self = (CreatePlayers*)arg;
+  self->deselectItem();
+  self->m_hilightItem = 0;
+  self->right();
+}
+ 
+void CreatePlayers::decrPlayerCb(void * arg)
+{
+  CreatePlayers * self = (CreatePlayers*)arg;
+  self->deselectItem();
+  self->m_hilightItem = 0;
+  self->left();
+}
+void CreatePlayers::changeIconCb(void * arg)
+{
+  CreatePlayers * self = (CreatePlayers*)arg;
+  self->selectWizFromY();
+  self->r();
+}
+void CreatePlayers::changeIconColCb(void * arg)
+{
+  CreatePlayers * self = (CreatePlayers*)arg;
+  self->selectWizFromY();
+  self->l();
+}
+void CreatePlayers::changeNameCb(void * arg)
+{
+  CreatePlayers * self = (CreatePlayers*)arg;
+  self->selectWizFromY();
+  self->a();
+}
+void CreatePlayers::changeLevelCb(void * arg)
+{
+  CreatePlayers * self = (CreatePlayers*)arg;
+  self->selectWizFromY();
+  Wizard & player = Wizard::player(self->m_hilightItem-1);
+  int level = player.level();
+  if (level == 8) {
+    player.setLevel(0);
+    SoundEffect::play(SND_MENU);
+    self->updatePlayers();
+  }
+  else {
+    self->right();
+  }
+}
+
+void CreatePlayers::resetPlayersCb(void * arg)
+{
+  CreatePlayers * self = (CreatePlayers*)arg;
+  self->deselectItem();
+  self->m_hilightItem = 0;
+  self->a();
+}
+
+void CreatePlayers::startCb(void * arg)
+{
+  CreatePlayers * self = (CreatePlayers*)arg;
+  self->start();
+}
+
+void CreatePlayers::selectWizFromY()
+{
+  int y = this->m_y - 8;
+  int wizIndex = y/16;
+  deselectItem();
+  m_hilightItem = wizIndex;
+}
  
 void CreatePlayers::selectItem(int item) {
   Graphics::instance().setAnimationParams(-31,-8);
@@ -133,15 +244,17 @@ class DrawWizard: public std::unary_function<Wizard,bool> {
     //! Draws the wizard.
     result_type operator() (argument_type & element) {
       element.updateColour();
-      element.draw8(1, m_index*2 + PLAYER_WIZ_Y, 0);
+      int ypos = m_index*2 + PLAYER_WIZ_Y;
+      element.draw8(PLAYER_WIZ_X, ypos, 0);
       if (m_index == (m_hilightItem - 1)) {
         m_text16.setColour(m_index, Color(31,30,30));
       } 
       else {
         m_text16.setColour(m_index, Color(0,30,30));
       }
-      element.printNameAt(6, 3+m_index*2);
-      element.printLevelAt(16,3+m_index*2);
+      ypos += 1;
+      element.printNameAt(PLAYER_WIZ_NAME_X,   ypos);
+      element.printLevelAt(PLAYER_WIZ_LEVEL_X, ypos);
       m_index++;
       return true;
     }
@@ -165,7 +278,13 @@ void CreatePlayers::updatePlayers(void)
   char str[30];
   Text16::int2a(playerCount, str);
   Text16::instance().setColour(10, Color(0,30,30));
-  Text16::instance().print(str, 22,1, 10);
+  Text16::instance().print(str, HOW_MANY_NUM_POS_X+2,1, 10);
+
+  str[0] = Text16::LEFT_ARROW_INDEX;
+  str[1] = 0;
+  Text16::instance().print(str, HOW_MANY_NUM_POS_X,HOW_MANY_NUM_POS_Y, 10);
+  str[0] = Text16::RIGHT_ARROW_INDEX;
+  Text16::instance().print(str, HOW_MANY_NUM_POS_X+4,HOW_MANY_NUM_POS_Y, 10);
 }
 
 void CreatePlayers::up(void) {
