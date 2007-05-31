@@ -1,9 +1,9 @@
 #ifndef Movement_h_seen
 #define Movement_h_seen
 
-#include "ScreenI.h"
+#include "ArenaTouchScreen.h"
 
-class Movement : public ScreenI
+class Movement : public ArenaTouchScreen
 {
   public:
     //!@param start true if this is the first time called. false if returning from examine screen.
@@ -26,9 +26,14 @@ class Movement : public ScreenI
     }
 
     //! Press A to select the creature.
-    void a();
+    virtual void execute();
     //! Press B to cancel the selection.
-    void b();
+    void cancel();
+
+    virtual void examine();
+
+    //! Either cancel or end turn.
+    virtual void next();
 
     //! @return the currently selected creature.
     inline int selectedCreature() const
@@ -73,6 +78,5 @@ class Movement : public ScreenI
     void setEngagedToEnemy();
     void doAttackAnim(int index);
     void removeCreature(int creature);
-    void examineSquare();
 };
 #endif

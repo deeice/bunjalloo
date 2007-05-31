@@ -11,6 +11,12 @@ class TouchScreen: public ScreenI
   public:
     ~TouchScreen();
 
+    /** Get the last touch position as an X-Y tile position offset from the corner of the touch rectangle.
+     * @param x Return value for the x tile position.
+     * @param y Return value for the y tile position.
+     */
+    void lastTouchToTile16(int & x, int &y) const;
+
   protected:
     HotSpot * m_checking;
     int m_x;

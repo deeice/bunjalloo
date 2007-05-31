@@ -12,10 +12,19 @@ class Arena
   public:
     //! number that represents a wizard-type creature
     static const int WIZARD_INDEX;
-    //! The height of the arena.
+    //! The height of the arena in 8x8 tiles.
     static const int HEIGHT;
     //! The size (width*height) of the arena
     static const int ARENA_SIZE;
+
+    //! X position of top left corner in pixels
+    static const int POSITION_X;
+    //! Y position of top left corner in pixels
+    static const int POSITION_Y;
+    //! Width of arena in pixels
+    static const int PIXEL_WIDTH;
+    //! Height of arena in pixels
+    static const int PIXEL_HEIGHT;
 
     /** Get the distance between 2 squares.
      * @param square1 the start index, equal to x + y * 16

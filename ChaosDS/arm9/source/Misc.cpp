@@ -4,6 +4,8 @@
 #include "Misc.h"
 #include "GameState.h"
 #include "Wizard.h"
+#include "Rectangle.h"
+#include "Text16.h"
 
 // default seed
 static unsigned int s_random(14071977);
@@ -91,7 +93,7 @@ bool Misc::keypressWait()
     u16 keysSlow = keysDownRepeat();
     if ( keysSlow & (KEY_A|KEY_B|KEY_L|KEY_R|
                      KEY_UP|KEY_DOWN|KEY_LEFT|KEY_RIGHT|
-                     KEY_START|KEY_SELECT|KEY_X|KEY_Y)) 
+                     KEY_START|KEY_SELECT|KEY_X|KEY_Y|KEY_TOUCH)) 
       return true;
     return false;
 }
@@ -143,6 +145,10 @@ bool Misc::confirm()
 {
   waitForLetgo();
   int yes_pressed = 0;
+  // 012345678901234567890123456
+  // DISMOUNT WIZARD? A=YES B=NO
+  nds::Rectangle yesRect = {17*8, Text16::MESSAGE_Y*8, 5*8, 16 };
+  nds::Rectangle noRect = { 23*8, Text16::MESSAGE_Y*8, 4*8, 16 };
   while (yes_pressed == 0) {
     swiWaitForVBlank();
     scanKeys();
@@ -151,6 +157,18 @@ bool Misc::confirm()
       yes_pressed = 2;
     if (keysSlow & KEY_B)
       yes_pressed = 1;
+    if (keysSlow & KEY_TOUCH)
+    {
+      touchPosition pos = touchReadXY();
+      if ( yesRect.hit(pos.px, pos.py) )
+      {
+        yes_pressed = 2;
+      }
+      else if ( noRect.hit(pos.px, pos.py) )
+      {
+        yes_pressed = 1;
+      }
+    }
   }
   waitForLetgo();
   yes_pressed--;

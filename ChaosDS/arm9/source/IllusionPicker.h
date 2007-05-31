@@ -6,7 +6,11 @@
 class IllusionPicker: public SpellSelect
 {
   public:
+    IllusionPicker(); 
     virtual void show();
     virtual void handleKeys();
+  private:
+    static void yesCb(void * arg);
+    static void noCb(void * arg);
 };
 #endif

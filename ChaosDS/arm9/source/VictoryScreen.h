@@ -1,9 +1,9 @@
 #ifndef VictoryScreen_h_seen
 #define VictoryScreen_h_seen
 
-#include "ScreenI.h"
+#include "TouchScreen.h"
 
-class VictoryScreen: public ScreenI
+class VictoryScreen: public TouchScreen
 {
   public:
     //!Types of possible end game.
@@ -28,6 +28,9 @@ class VictoryScreen: public ScreenI
     int m_cycleColour3;
     int m_cycleFrame;
 
+    static void exitCb(void * arg);
+
+    void exit();
 
     void win();
     void draw();

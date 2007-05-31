@@ -12,6 +12,7 @@
 #include "Line.h"
 #include "VictoryScreen.h"
 #include "ExamineSquare.h"
+#include "HotSpot.h"
 
 using namespace nds;
 using Misc::delay;
@@ -22,7 +23,10 @@ bool Casting::s_castSuccess(false);
 int Casting::worldChaos() {
   return s_worldChaos;
 }
-Casting::Casting(bool start) : m_start(start) {}
+
+Casting::Casting(bool start) : ArenaTouchScreen(), m_start(start) 
+{ }
+
 void Casting::show()
 {
   Arena & arena(Arena::instance());
@@ -73,14 +77,18 @@ void Casting::handleKeys()
   }
   // cancel...
   if (keysSlow & KEY_B) {
-    cancel();
+    next();
   }
   if (keysSlow & KEY_R) {
-    examineSquare();
+    examine();
+  }
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
   }
 }
 
-void Casting::examineSquare() 
+
+void Casting::examine() 
 {
   int theCreature = Arena::instance().cursorContents();
   // return instantly if we examine an empty square
@@ -176,7 +184,7 @@ void Casting::startCastRound()
   }
 }
 
-void Casting::cancel() {
+void Casting::next() {
 }
 
 void Casting::execute() 

@@ -1,8 +1,8 @@
 #ifndef ExamineBoard_h_seen
 #define ExamineBoard_h_seen
-#include "ScreenI.h"
+#include "ArenaTouchScreen.h"
 
-class ExamineBoard: public ScreenI
+class ExamineBoard: public ArenaTouchScreen
 {
   public:
     /** Show the examine board screen.
@@ -14,10 +14,13 @@ class ExamineBoard: public ScreenI
     virtual void vblank();
     virtual void handleKeys();
 
+    // from ArenaTouchScreen
+    virtual void next();
+    virtual void execute();
+    virtual void examine();
+
   private:
     bool m_start;
 
-    void a();
-    void b();
 };
 #endif

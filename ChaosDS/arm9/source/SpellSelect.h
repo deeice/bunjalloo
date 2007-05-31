@@ -1,19 +1,27 @@
 #ifndef SpellSelect_h_seen
 #define SpellSelect_h_seen
 
-#include "ScreenI.h"
+#include "TouchScreen.h"
 
-class SpellSelect: public ScreenI
+class SpellSelect: public TouchScreen
 {
   public:
-    //!Spell selection starts.
-    SpellSelect();
+    /** Spell selection starts.
+     * @param examine if true then the spell selection is really spell examine
+     */
+    SpellSelect(bool examine);
     virtual void show();
     virtual void animate();
     virtual void handleKeys();
   private:
     int m_hilightItem;
     int m_topIndex;
+    bool m_examine;
+
+    static void scrollDownCb(void * arg);
+    static void scrollUpCb(void * arg);
+    static void spellSelectCb(void * arg);
+    static void returnCb(void * arg);
 
     void initPalettes();
     void listSpells();
@@ -28,6 +36,9 @@ class SpellSelect: public ScreenI
     void right();
     void r();
     void a();
+
+    void examineSpell();
+    void chooseSpell();
   protected:
     //! Cancel spell selection.
     void b();

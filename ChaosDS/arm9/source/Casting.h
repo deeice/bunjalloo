@@ -1,9 +1,9 @@
 #ifndef Casting_h_seen
 #define Casting_h_seen
 
-#include "ScreenI.h"
+#include "ArenaTouchScreen.h"
 
-class Casting: public ScreenI
+class Casting: public ArenaTouchScreen
 {
   public:
     /** initialise the object. 
@@ -32,15 +32,17 @@ class Casting: public ScreenI
     virtual void animate();
     virtual void vblank();
     virtual void handleKeys();
+
+    virtual void execute();
+    virtual void examine();
+    virtual void next();
   private:
     static int s_worldChaos;
     static bool s_castSuccess;
+
     bool m_start;
     void startCastRound();
-    void execute();
-    void cancel();
     void nextPlayerCast();
-    void examineSquare();
     
 };
 #endif

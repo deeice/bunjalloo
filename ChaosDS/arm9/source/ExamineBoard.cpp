@@ -8,6 +8,9 @@
 #include "Arena.h"
 #include "Line.h"
 #include "Wizard.h"
+#include "Text16.h"
+#include "Misc.h"
+#include "HotSpot.h"
 
 using namespace nds;
 
@@ -28,6 +31,8 @@ void ExamineBoard::show()
     arena.cursorSet();
   }
   Interrupt::enable();
+  Text16::instance().clearMessage();
+
   Video::instance().fade(false);
 }
 void ExamineBoard::animate()
@@ -62,10 +67,13 @@ void ExamineBoard::handleKeys()
     arena.cursorRight();
   }
   if (keysSlow & KEY_A) {
-    a();
+    examine();
   }
   if (keysSlow & KEY_B) {
-    b();
+    next();
+  }
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
   }
 #if 0
   static Line::Line_t type(Line::ARROW);
@@ -87,7 +95,12 @@ void ExamineBoard::handleKeys()
 #endif
 }
 
-void ExamineBoard::a() 
+void ExamineBoard::execute()
+{
+  examine();
+}
+
+void ExamineBoard::examine() 
 {
   int theCreature = Arena::instance().cursorContents();
   // return instantly if we examine an empty square
@@ -99,7 +112,7 @@ void ExamineBoard::a()
   Arena::instance().enableCursor(false);
 }
 
-void ExamineBoard::b() {
+void ExamineBoard::next() {
   Video::instance().fade();
   GameState::instance().setNextScreen(new GameMenu());
   Arena::instance().enableCursor(false);

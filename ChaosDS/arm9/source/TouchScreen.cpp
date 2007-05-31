@@ -25,3 +25,9 @@ void TouchScreen::handleTouch()
     spot->hitTest(m_x, m_y);
   }
 }
+
+void TouchScreen::lastTouchToTile16(int & x, int &y) const
+{
+  x = (m_x - m_checking->area().x)/16;
+  y = (m_y - m_checking->area().y)/16;
+}

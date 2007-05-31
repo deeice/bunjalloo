@@ -18,18 +18,19 @@ using namespace nds;
 static const int MENU_XPOS(4);
 static const int MENU_YPOS(8);
 static const int CHAOS_GAUGE_YPOS(4);
-static const int MAX_GAME_MENU(3);
+static const int MAX_GAME_MENU(4);
+static const int TOUCH_PAUSE(4);
 
 GameMenu::GameMenu()
 {
   int width = 20*8;
-  Rectangle selectSpellRect = {MENU_XPOS*8, MENU_YPOS*8, width, 16 };
+  Rectangle selectSpellRect = {MENU_XPOS*8, MENU_YPOS*8, width, 16+16+8 };
   m_hotspots.push_back(new HotSpot(selectSpellRect, selectSpellCb, this));
 
-  Rectangle examineRect = {MENU_XPOS*8, (3+MENU_YPOS)*8, width, 16 };
+  Rectangle examineRect = {MENU_XPOS*8, (6+MENU_YPOS)*8, width, 16 };
   m_hotspots.push_back(new HotSpot(examineRect, examineCb, this));
 
-  Rectangle continueRect = {MENU_XPOS*8, (6+MENU_YPOS)*8, width, 16 };
+  Rectangle continueRect = {MENU_XPOS*8, (9+MENU_YPOS)*8, width, 16 };
   m_hotspots.push_back(new HotSpot(continueRect, continueCb, this));
 }
 
@@ -88,9 +89,10 @@ void GameMenu::show()
   
   selectItem();
   
-  text16.print("1. SELECT SPELL", MENU_XPOS,MENU_YPOS, 0);  
-  text16.print("2. EXAMINE BOARD", MENU_XPOS,MENU_YPOS+3, 1);  
-  text16.print("3. CONTINUE WITH GAME", MENU_XPOS,MENU_YPOS+6, 2);
+  text16.print("1. EXAMINE SPELL", MENU_XPOS,MENU_YPOS, 0);  
+  text16.print("2. SELECT SPELL", MENU_XPOS,MENU_YPOS+3, 1);  
+  text16.print("3. EXAMINE BOARD", MENU_XPOS,MENU_YPOS+6, 2);  
+  text16.print("4. CONTINUE WITH GAME", MENU_XPOS,MENU_YPOS+9, 3);
   // sleep mode automatic when closing the lid
   // text16.print("4. ENTER SLEEP MODE", MENU_XPOS,MENU_YPOS+9, 3);
   Video::instance().fade(false);
@@ -159,20 +161,23 @@ void GameMenu::continueGame()
 void GameMenu::a() {
   // get the hilited item...
   SoundEffect::play(SND_CHOSEN);
+  bool isExamine(false);
   switch (m_hilightItem) 
   {
     case 0: 
-      // view spells
-      Video::instance().fade();
-      GameState::instance().setNextScreen(new SpellSelect());
-      // show_spell_screen();
-      break;
+      // examine spells
+      isExamine = true;
     case 1: 
+      // select or examine spells
+      Video::instance().fade();
+      GameState::instance().setNextScreen(new SpellSelect(isExamine));
+      break;
+    case 2: 
       // view arena
       Video::instance().fade();
       GameState::instance().setNextScreen(new ExamineBoard());
       break;
-    case 2: 
+    case 3: 
       // continue game
       continueGame();
       break;
@@ -184,9 +189,9 @@ void GameMenu::continueCb(void * arg)
 {
   GameMenu * self = (GameMenu*) arg;
   self->deselectItem();
-  self->m_hilightItem = 2;
+  self->m_hilightItem = 3;
   self->selectItem();
-  Misc::delay(10);
+  Misc::delay(TOUCH_PAUSE);
   self->a();
 }
 
@@ -194,18 +199,20 @@ void GameMenu::examineCb(void * arg)
 {
   GameMenu * self = (GameMenu*) arg;
   self->deselectItem();
-  self->m_hilightItem = 1;
+  self->m_hilightItem = 2;
   self->selectItem();
-  Misc::delay(10);
+  Misc::delay(TOUCH_PAUSE);
   self->a();
 }
 
 void GameMenu::selectSpellCb(void * arg)
 {
   GameMenu * self = (GameMenu*) arg;
+  int y = self->m_y - self->m_checking->area().y;
+  int menuIndex = y/24;
   self->deselectItem();
-  self->m_hilightItem = 0;
+  self->m_hilightItem = menuIndex;
   self->selectItem();
-  Misc::delay(10);
+  Misc::delay(TOUCH_PAUSE);
   self->a();
 }

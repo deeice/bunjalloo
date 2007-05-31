@@ -11,7 +11,7 @@ const static int TEXT_PALETTE_ENTRY(1);
 static const int SPACE_CHAR_INDEX(32);
 static const int FILLED_CHAR_INDEX((int)('z'+2));
 static const int TRANSP_CHAR_INDEX((int)('z'+1));
-static const char EMPTY_MESSAGE[] = "                               ";
+static const char EMPTY_MESSAGE[] = "                              > ";
 
 const int Text16::FIRST_CHAR_INDEX((int) '\'');
 const int Text16::MESSAGE_X(0);
@@ -125,7 +125,8 @@ void Text16::clear()  {
 }
 
 void Text16::clearMessage() {
-  print(EMPTY_MESSAGE, MESSAGE_X,MESSAGE_Y, 12);
+  //print(EMPTY_MESSAGE, MESSAGE_X,MESSAGE_Y, 12);
+  displayMessage("");
 }
 void Text16::displayMessage(const char * message, unsigned short color) {
   print(EMPTY_MESSAGE, MESSAGE_X,MESSAGE_Y, 12);

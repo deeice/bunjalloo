@@ -1,8 +1,8 @@
 #ifndef ExamineSquare_h_seen
 #define ExamineSquare_h_seen
-#include "ScreenI.h"
+#include "TouchScreen.h"
 
-class ExamineSquare: public ScreenI
+class ExamineSquare: public TouchScreen
 {
   public:
     /** Print a statistic with its name and value. For example "CAST CHANCE = 10%".
@@ -42,8 +42,10 @@ class ExamineSquare: public ScreenI
     bool m_first;
     bool m_showCastChance; //!< Show the cast chance too. False by default.
     ScreenI * m_returnScreen;
+    static void exitCb(void * arg);
 
     void displayCreatureData(int creature, int underneath, int flags);
     void displaySpellData(int creature);
+    void next();
 };
 #endif

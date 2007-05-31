@@ -14,7 +14,7 @@ using namespace nds;
 
 Splash::Splash()
 {
-  Rectangle initial = {0,0,256,192};
+  Rectangle initial = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
   Rectangle start = {7*8,17*8,5*8,16};
   Rectangle option = {15*8,17*8,5*8,16};
   m_hotspots.push_back(new HotSpot(initial, showMenuCb, this));

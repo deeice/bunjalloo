@@ -71,6 +71,10 @@ static const int X_LIMIT(31);
 const int Arena::HEIGHT(23);
 const int Arena::WIZARD_INDEX(0x2A);
 const int Arena::ARENA_SIZE(0x9f);
+const int Arena::POSITION_X(8);
+const int Arena::POSITION_Y(8);
+const int Arena::PIXEL_WIDTH(15*16);
+const int Arena::PIXEL_HEIGHT(10*16);
 
 // namespace usage
 using namespace nds;

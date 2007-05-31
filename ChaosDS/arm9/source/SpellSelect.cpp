@@ -12,9 +12,20 @@
 #include "GameMenu.h"
 #include "IllusionPicker.h"
 #include "SoundEffect.h"
+#include "HotSpot.h"
 
 using namespace nds;
 static const int ARROWHEAD_CHAR('+' - Text16::FIRST_CHAR_INDEX);
+static const int SPELL_NAME_X(1);
+static const int SPELL_NAME_WIDTH(14);
+static const int SPELL_START_INDEX(8);
+static const int SPELL_END_INDEX(20);
+static const int ARROW_X(16);
+static const int ARROW_UP_Y(3);
+static const int ARROW_DOWN_Y(17);
+static const int RETURN_MENU_X(12);
+static const int RETURN_MENU_Y(21);
+
 const static u16 s_castingChancePalette[6] = {
   Color(31,0,0),    // Red = 0-10%
   Color(31,0,31),   // Purple = 20-30%   
@@ -24,9 +35,29 @@ const static u16 s_castingChancePalette[6] = {
   Color(31,31,31),  // White = 100%      
 };
 
-SpellSelect::SpellSelect():
-  m_hilightItem(0), m_topIndex(0) 
-{ }
+SpellSelect::SpellSelect(bool examine):
+  m_hilightItem(0), m_topIndex(0) , m_examine(examine)
+{ 
+  // register callbacks for touch screen
+  // "scrollbar" - the 2 little arrows:
+  Rectangle upRect = {(ARROW_X*8)-4, ARROW_UP_Y*8, 16, 16};
+  m_hotspots.push_back(new HotSpot(upRect, scrollUpCb, this));
+  Rectangle downRect = {(ARROW_X*8)-4, ARROW_DOWN_Y*8, 16, 16};
+  m_hotspots.push_back(new HotSpot(downRect, scrollDownCb, this));
+
+  // spell selection - one big rectangle
+  Rectangle spellRect = {
+    SPELL_NAME_X*8, 
+    ARROW_UP_Y*8, 
+    SPELL_NAME_WIDTH*8, 
+    (SPELL_END_INDEX-SPELL_START_INDEX)*16
+  };
+  m_hotspots.push_back(new HotSpot(spellRect, spellSelectCb, this));
+
+  // return to menu
+  Rectangle returnRect = {RETURN_MENU_X*8, RETURN_MENU_Y*8, 14*8, 16};
+  m_hotspots.push_back(new HotSpot(returnRect, returnCb, this));
+}
 
 // implement ScreenI
 void SpellSelect::show()
@@ -52,10 +83,13 @@ void SpellSelect::show()
   text16.print(str, 1,1, 6);  
   text16.setColour(6, Color(0,30,30));
   
-  // ask if they want an illusion and wait for response
   text16.setColour(14, Color(21,21,29));
-  text16.print("PRESS R TO", 18,4, 14);  
-  text16.print("EXAMINE", 18,6, 14);
+  if (not m_examine) {
+    text16.print("PRESS R TO", 18,4, 14);  
+    text16.print("EXAMINE", 18,6, 14);
+  }
+
+  text16.print("RETURN TO MENU", RETURN_MENU_X, RETURN_MENU_Y, 14);
   
   // write all the spells
   listSpells();
@@ -99,8 +133,44 @@ void SpellSelect::handleKeys()
   if (keysSlow & KEY_B) {
     b();
   } 
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
+  } 
 }
 // end of ScreenI implementation
+//
+
+void SpellSelect::scrollUpCb(void * arg)
+{
+  SpellSelect * self = (SpellSelect*)arg;
+  self->up();
+}
+
+void SpellSelect::scrollDownCb(void * arg)
+{
+  SpellSelect * self = (SpellSelect*)arg;
+  self->down();
+}
+void SpellSelect::spellSelectCb(void * arg)
+{
+  SpellSelect * self = (SpellSelect*)arg;
+  int y = self->m_y - self->m_checking->area().y;
+  int spellIndex = y/16;
+  if (spellIndex != self->m_hilightItem) {
+    self->deselectSpell();
+    self->m_hilightItem = spellIndex;
+    self->selectSpell();
+  }
+  else {
+    self->a();
+  }
+}
+
+void SpellSelect::returnCb(void * arg)
+{
+  SpellSelect * self = (SpellSelect*)arg;
+  self->b();
+}
 
 void SpellSelect::initPalettes()
 {
@@ -124,27 +194,26 @@ void SpellSelect::listSpells() {
   int loop = 0;
   // set the first spell index to the spell at the top of the list
   int spellIndex(m_topIndex);
-  int y(3);
+  int y(ARROW_UP_Y);
   Wizard & currentPlayer(Wizard::currentPlayer());
-  while (loop < 8 and spellIndex < 20) 
+  while (loop < SPELL_START_INDEX and spellIndex < SPELL_END_INDEX) 
   {
     //int index(1+spellIndex*2);
     const SpellData * spell = currentPlayer.spell(spellIndex);
     if (spell != 0) {
-      spell->printName(1,y);
-      // print_spell_name(players[current_player].spells[index], 1, y);
+      spell->printName(SPELL_NAME_X,y);
       y+=2;
       loop++;
     }
     spellIndex++;
   }
   
-  int x;
   // draw the up down arrows...
   // these are the first part of character "^" flipped vertically for "v"
   // a bit of a hack - it uses the top half of the law symbol!
   
-  x = 16; y = 3;
+  int x = ARROW_X; 
+  y = ARROW_UP_Y;
   Text16::instance().setColour(7, Color(31,0,0));
 
   unsigned char letter(ARROWHEAD_CHAR);
@@ -153,7 +222,7 @@ void SpellSelect::listSpells() {
   }
   Text16::instance().putChar(letter, x, y, 7, 0);
   
-  y = 17;
+  y = ARROW_DOWN_Y;
   
   letter = ARROWHEAD_CHAR;
   if ((m_topIndex + 7) >= currentPlayer.spellCount()) {
@@ -226,22 +295,26 @@ void SpellSelect::right(void) {
   // go to end of list
   deselectSpell();
   int spellCount = Wizard::currentPlayer().spellCount();
-  if (  spellCount < 8) {
+  if (  spellCount < SPELL_START_INDEX) {
     m_hilightItem = spellCount-1;
   } else {
-    m_topIndex = spellCount - 8;
+    m_topIndex = spellCount - SPELL_START_INDEX;
     m_hilightItem = 7;
   }
   listSpells();
   selectSpell();
 }
 
-void SpellSelect::r(void) {
+void SpellSelect::r() {
+  examineSpell();
+}
+
+void SpellSelect::examineSpell() {
   Arena & arena(Arena::instance());
   arena.setCursor(15,0);
   arena.setSpellAt(15, 0, Wizard::currentPlayer().spellId(m_hilightItem+m_topIndex));
   Video::instance().fade();
-  SpellSelect * spellSelect(new SpellSelect());
+  SpellSelect * spellSelect(new SpellSelect(m_examine));
   spellSelect->m_hilightItem = m_hilightItem;
   spellSelect->m_topIndex = m_topIndex;
   ExamineSquare * examineScreen(new ExamineSquare(spellSelect));
@@ -251,7 +324,17 @@ void SpellSelect::r(void) {
 
 
 void SpellSelect::a(void) {
-  
+  if (m_examine)
+  {
+    examineSpell();
+  }
+  else
+  {
+    chooseSpell();
+  }
+}
+
+void SpellSelect::chooseSpell() {
   // store the spell...
   Wizard & player(Wizard::currentPlayer());
   int currentSpellIndex(m_hilightItem+m_topIndex);

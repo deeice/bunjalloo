@@ -9,6 +9,7 @@
 #include "Casting.h"
 #include "GameState.h"
 #include "Splash.h"
+#include "HotSpot.h"
 
 using namespace nds;
 
@@ -19,7 +20,10 @@ VictoryScreen::VictoryScreen(Victory_t winOrDraw):
   m_cycleColour3(8),
   m_cycleFrame(0)
 
-{}
+{
+  Rectangle screenRect = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
+  m_hotspots.push_back(new HotSpot(screenRect, exitCb, this));
+}
 
 void VictoryScreen::show()
 {
@@ -126,18 +130,31 @@ void VictoryScreen::handleKeys()
 {
   u16 keysSlow = keysDownRepeat();
   if (keysSlow & KEY_A){
-    Video::instance().fade();
-    Arena & arena = Arena::instance();
-    arena.clearGameBorder();
-    arena.reset();
-    Wizard::resetPlayers();
-    Casting::resetWorldChaos();
-    arena.setCurrentPlayer(0);
-    Wizard::resetDeadWizards();
-    arena.setPlayers(0);
-    Graphics::loadAllPalettes();
-    GameState::instance().setNextScreen(new Splash());
+    exit();
   }
+  if (keysSlow & KEY_TOUCH){
+    handleTouch();
+  }
+}
+
+void VictoryScreen::exitCb(void * arg)
+{
+  ((VictoryScreen*)arg)->exit();
+}
+
+void VictoryScreen::exit()
+{
+  Video::instance().fade();
+  Arena & arena = Arena::instance();
+  arena.clearGameBorder();
+  arena.reset();
+  Wizard::resetPlayers();
+  Casting::resetWorldChaos();
+  arena.setCurrentPlayer(0);
+  Wizard::resetDeadWizards();
+  arena.setPlayers(0);
+  Graphics::loadAllPalettes();
+  GameState::instance().setNextScreen(new Splash());
 }
 
 // Only CPU left, ask if we should carry on...

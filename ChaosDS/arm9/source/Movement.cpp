@@ -21,8 +21,11 @@
 
 using namespace nds;
 
-Movement::Movement(bool start):m_start(start)
-{}
+Movement::Movement(bool start):
+  ArenaTouchScreen(),
+  m_start(start)
+{
+}
 
 void Movement::show()
 {
@@ -183,20 +186,23 @@ void Movement::handleKeys()
     arena.highlightTargetCreations();
   }
   if (keys & KEY_R) {
-    examineSquare();
+    examine();
   }
 
   if (keysSlow & KEY_A) {
-    a();
+    execute();
   }
   if (keysSlow & KEY_B) {
-    b();
+    cancel();
   }
   if (keysSlow & KEY_START) {
     start();
   }
   if (keysSlow & KEY_Y) {
     y();
+  }
+  if (keysSlow & KEY_TOUCH) {
+    handleTouch();
   }
 
 #if 0
@@ -210,7 +216,7 @@ void Movement::handleKeys()
 #endif
 }
 
-void Movement::examineSquare() 
+void Movement::examine() 
 {
   int theCreature = Arena::instance().cursorContents();
   // return instantly if we examine an empty square
@@ -252,6 +258,18 @@ void Movement::start()
         Arena::instance().currentPlayer() + 1
         );
     startMovementRound();
+  }
+}
+
+void Movement::next()
+{
+  // if no creature selected, end
+  if (m_selectedCreature != 0) {
+    cancel();
+  }
+  else
+  {
+    start();
   }
 }
 
@@ -326,7 +344,7 @@ void Movement::y() {
   }
 }
 
-void Movement::a() 
+void Movement::execute() 
 {
   // A pressed in movement round
   // check in the actual arena...
@@ -373,7 +391,7 @@ void Movement::a()
   }
 }
 
-void Movement::b(void)
+void Movement::cancel()
 {
   if (m_selectedCreature != 0) {
     Arena & arena(Arena::instance());

@@ -484,7 +484,7 @@ void WizardCPU::doAiMovement()
       m_moveTableCreated = true;
       
       Movement * movement(static_cast<Movement*>(GameState::instance().currentScreen()));
-      movement->a(); // select the wizard...
+      movement->execute(); // select the wizard...
       Misc::delay(30);
       // now try moving it to the target square...
       doThisMovement();
@@ -500,7 +500,7 @@ void WizardCPU::doAiMovement()
     Arena::instance().setTargetIndex(i);
     Arena::instance().setStartIndex(i);
     // select the creature...
-    movement->a();
+    movement->execute();
     if (movement->selectedCreature() != 0) {
       Misc::delay(30);
       doThisMovement();
@@ -552,7 +552,7 @@ void WizardCPU::doThisMovement()
         if (m_tableIndex > 2) {
           m_tableIndex -= 2;
         } else {
-          movement->b();
+          movement->cancel();
           // if we have range attack after our movement, make sure it is handled properly
           // best solution is a goto here... otherwise I'd have a load of confusing ifs
           if (movement->rangeAttack() != 0) {
@@ -568,7 +568,7 @@ void WizardCPU::doThisMovement()
       Arena::instance().setTargetIndex(target_index);
 
       Text16::instance().clearMessage();
-      movement->a(); 
+      movement->execute(); 
       
       Misc::delay(4);
       
@@ -585,7 +585,7 @@ void WizardCPU::doThisMovement()
         m_tableIndex -= 2;
       } else {
 	// no good square to go to..
-        movement->b();
+        movement->cancel();
         
         if (movement->rangeAttack() != 0) {
           // again, could have used break instead of goto
@@ -608,11 +608,11 @@ range_attacking:
     int ra = getBestRangeattack();
     if (ra == 0x4b) {
       // the best square is crap
-      movement->b();
+      movement->cancel();
       return;
     } else {
       // the target square is good
-      movement->a();
+      movement->execute();
     }
     
   }
@@ -647,7 +647,7 @@ void WizardCPU::doFlyingMove()
         if (m_tableIndex > 2) {
           m_tableIndex -= 2;
         } else {
-          movement->b();
+          movement->cancel();
           return;
         }
         
@@ -677,11 +677,11 @@ void WizardCPU::doFlyingMove()
     
     m_flyingTargetFound = true;
     Text16::instance().clearMessage();
-    movement->a();
+    movement->execute();
     Misc::delay(30);
   } else {
     // ran out...
-    movement->b();
+    movement->cancel();
     return;
   }
  

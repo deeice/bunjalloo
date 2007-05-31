@@ -8,6 +8,7 @@
 #include "Text16.h"
 #include "Graphics.h"
 #include "SpellData.h"
+#include "HotSpot.h"
 
 
 //! define the positions of the stats
@@ -50,6 +51,8 @@ ExamineSquare::ExamineSquare(ScreenI * returnScreen):
   m_showCastChance(false),
   m_returnScreen(returnScreen)
 {
+  Rectangle screenRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+  m_hotspots.push_back(new HotSpot(screenRect, exitCb, this));
   Arena::instance().cursorContents(m_creature, m_underneath, m_flags);
 }
 
@@ -93,14 +96,28 @@ void ExamineSquare::handleKeys()
 {
   u16 keysSlow = keysDownRepeat();
   if (keysSlow & KEY_B) {
-    if (m_first and m_underneath) {
-      Video::instance().fade();
-      m_first = false;
-      this->show();
-    } else {
-      Video::instance().fade();
-      GameState::instance().setNextScreen(m_returnScreen);
-    }
+    next();
+  }
+  if (keysSlow & KEY_TOUCH)
+  {
+    handleTouch();
+  }
+}
+
+void ExamineSquare::exitCb(void * arg)
+{
+  ((ExamineSquare*)arg)->next();
+}
+
+void ExamineSquare::next()
+{
+  if (m_first and m_underneath) {
+    Video::instance().fade();
+    m_first = false;
+    this->show();
+  } else {
+    Video::instance().fade();
+    GameState::instance().setNextScreen(m_returnScreen);
   }
 }
 
