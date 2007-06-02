@@ -13,10 +13,13 @@ clean:
 docs:
 	@-doxygen doxygen.cfg
 
-distdir=$(target)-dist
+version := 2.0
+
+distdir=$(target)-$(version)
 dist: all
 	mkdir $(distdir) -p
 	cp $(target).nds $(distdir)/$(target).nds
 	cp COPYING $(distdir)
-	zip -r $(target).zip $(distdir)/
+	zip -r $(target)-$(version).zip $(distdir)/
+	rm -rf $(distdir)
 
