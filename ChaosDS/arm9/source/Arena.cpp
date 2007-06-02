@@ -79,7 +79,7 @@ const int Arena::PIXEL_HEIGHT(10*16);
 // namespace usage
 using namespace nds;
 
-Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28)),
+Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28,1)),
   m_cursor(new Sprite(0, 16, 16, 0, 256)),
   m_playerCount(0), m_roundNumber(0),m_highlightCreations(HIGHLIGHT_INIT)
 {

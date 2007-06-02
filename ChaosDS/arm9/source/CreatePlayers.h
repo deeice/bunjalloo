@@ -29,7 +29,7 @@ class CreatePlayers: public TouchScreen
     static void resetPlayersCb(void * arg);
     static void startCb(void * arg);
 
-    void selectWizFromY();
+    bool selectWizFromY();
 
     void selectItem(int);
     void deselectItem();

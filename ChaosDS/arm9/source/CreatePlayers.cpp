@@ -14,6 +14,7 @@
 #include "Rectangle.h"
 #include "HotSpot.h"
 #include "EditName.h"
+#include "Misc.h"
 
 using namespace nds;
 static const int PLAYER_WIZ_Y(2);
@@ -156,34 +157,38 @@ void CreatePlayers::decrPlayerCb(void * arg)
 void CreatePlayers::changeIconCb(void * arg)
 {
   CreatePlayers * self = (CreatePlayers*)arg;
-  self->selectWizFromY();
-  self->r();
+  if ( self->selectWizFromY() ) {
+    self->r();
+  }
 }
 void CreatePlayers::changeIconColCb(void * arg)
 {
   CreatePlayers * self = (CreatePlayers*)arg;
-  self->selectWizFromY();
-  self->l();
+  if ( self->selectWizFromY() ) {
+    self->l();
+  }
 }
 void CreatePlayers::changeNameCb(void * arg)
 {
   CreatePlayers * self = (CreatePlayers*)arg;
-  self->selectWizFromY();
-  self->a();
+  if ( self->selectWizFromY() ) {
+    self->a();
+  }
 }
 void CreatePlayers::changeLevelCb(void * arg)
 {
   CreatePlayers * self = (CreatePlayers*)arg;
-  self->selectWizFromY();
-  Wizard & player = Wizard::player(self->m_hilightItem-1);
-  int level = player.level();
-  if (level == 8) {
-    player.setLevel(0);
-    SoundEffect::play(SND_MENU);
-    self->updatePlayers();
-  }
-  else {
-    self->right();
+  if ( self->selectWizFromY() ) {
+    Wizard & player = Wizard::player(self->m_hilightItem-1);
+    int level = player.level();
+    if (level == 8) {
+      player.setLevel(0);
+      SoundEffect::play(SND_MENU);
+      self->updatePlayers();
+    }
+    else {
+      self->right();
+    }
   }
 }
 
@@ -201,12 +206,18 @@ void CreatePlayers::startCb(void * arg)
   self->start();
 }
 
-void CreatePlayers::selectWizFromY()
+bool CreatePlayers::selectWizFromY()
 {
   int y = this->m_y - 8;
   int wizIndex = y/16;
-  deselectItem();
-  m_hilightItem = wizIndex;
+  bool selected(false);
+  if (wizIndex <= Arena::instance().players()) {
+    deselectItem();
+    m_hilightItem = wizIndex;
+    selected = true;
+    Misc::delay(4);
+  }
+  return selected;
 }
  
 void CreatePlayers::selectItem(int item) {

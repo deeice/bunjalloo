@@ -16,15 +16,23 @@
 
 using namespace nds;
 static const int ARROWHEAD_CHAR('+' - Text16::FIRST_CHAR_INDEX);
-static const int SPELL_NAME_X(1);
+static const int SPELL_NAME_X(1+1);
 static const int SPELL_NAME_WIDTH(14);
 static const int SPELL_START_INDEX(8);
 static const int SPELL_END_INDEX(20);
-static const int ARROW_X(16);
-static const int ARROW_UP_Y(3);
-static const int ARROW_DOWN_Y(17);
+static const int ARROW_X(16+1);
+static const int ARROW_UP_Y(3+1);
+static const int ARROW_DOWN_Y(17+1);
 static const int RETURN_MENU_X(12);
 static const int RETURN_MENU_Y(21);
+
+static const int PRESS_R_POS_X(19+1);
+static const int PRESS_R_POS_Y(4+1);
+
+static const int PLAYER_NAME_X(1+1);
+static const int PLAYER_NAME_Y(1+1);
+
+static const int CAST_CHANCE_POS_Y(14);
 
 const static u16 s_castingChancePalette[6] = {
   Color(31,0,0),    // Red = 0-10%
@@ -50,7 +58,7 @@ SpellSelect::SpellSelect(bool examine):
     SPELL_NAME_X*8, 
     ARROW_UP_Y*8, 
     SPELL_NAME_WIDTH*8, 
-    (SPELL_END_INDEX-SPELL_START_INDEX)*16
+    8*16
   };
   m_hotspots.push_back(new HotSpot(spellRect, spellSelectCb, this));
 
@@ -69,10 +77,11 @@ void SpellSelect::show()
   // should remove all 0 spells and update spell count accordingly
   currentPlayer.removeNullSpells();
   Text16 & text16(Text16::instance());
-  Text16::instance().clear();
-  Arena::instance().clear();
+  Arena & arena(Arena::instance());
+  text16.clear();
+  arena.clear();
   // remove any examined spell...
-  Arena::instance().setSpellAt(15, 0, 0);
+  arena.setSpellAt(15, 0, 0);
   Graphics::instance().clearPalettes();
   // set up the palette so that 0-5 are the spell colours
   initPalettes();
@@ -80,21 +89,21 @@ void SpellSelect::show()
   // 6 can be the default colour, 10 is the selected colour
   strcpy(str, currentPlayer.name());
   strcat(str, "'S SPELLS");
-  text16.print(str, 1,1, 6);  
+  text16.print(str, PLAYER_NAME_X, PLAYER_NAME_Y, 6);  
   text16.setColour(6, Color(0,30,30));
   
   text16.setColour(14, Color(21,21,29));
   if (not m_examine) {
-    text16.print("PRESS R TO", 18,4, 14);  
-    text16.print("EXAMINE", 18,6, 14);
+    text16.print("PRESS R TO", PRESS_R_POS_X, PRESS_R_POS_Y, 14);  
+    text16.print("EXAMINE",    PRESS_R_POS_X, PRESS_R_POS_Y+2, 14);
   }
-
   text16.print("RETURN TO MENU", RETURN_MENU_X, RETURN_MENU_Y, 14);
   
   // write all the spells
   listSpells();
   selectSpell();
 
+  arena.decorativeBorder(15, Color(31,31,0), Color(0,31,0));
   Video::instance().fade(false);
 }
 
@@ -143,23 +152,29 @@ void SpellSelect::handleKeys()
 void SpellSelect::scrollUpCb(void * arg)
 {
   SpellSelect * self = (SpellSelect*)arg;
-  self->up();
+  if (self->m_topIndex > 0) {
+    // scroll up one row
+    self->scrollUp();
+  }
 }
 
 void SpellSelect::scrollDownCb(void * arg)
 {
   SpellSelect * self = (SpellSelect*)arg;
-  self->down();
+  self->scrollDown();
 }
 void SpellSelect::spellSelectCb(void * arg)
 {
   SpellSelect * self = (SpellSelect*)arg;
   int y = self->m_y - self->m_checking->area().y;
   int spellIndex = y/16;
+  int spellCount = Wizard::currentPlayer().spellCount();
   if (spellIndex != self->m_hilightItem) {
-    self->deselectSpell();
-    self->m_hilightItem = spellIndex;
-    self->selectSpell();
+    if ( spellIndex <= spellCount ) {
+      self->deselectSpell();
+      self->m_hilightItem = spellIndex;
+      self->selectSpell();
+    }
   }
   else {
     self->a();
@@ -260,7 +275,7 @@ void SpellSelect::up(void) {
     
 }
 
-void SpellSelect::down(void) {
+void SpellSelect::down() {
   int spellCount = Wizard::currentPlayer().spellCount();
   if ( (m_topIndex + 7) >= spellCount) {
     // no need to scroll
@@ -280,6 +295,30 @@ void SpellSelect::down(void) {
   }
   
 }
+
+void SpellSelect::scrollUp()
+{
+  deselectSpell();
+  m_topIndex--;
+  if (m_hilightItem < 7)
+    m_hilightItem++;
+  listSpells();
+  selectSpell();
+}
+
+void SpellSelect::scrollDown()
+{
+  int spellCount = Wizard::currentPlayer().spellCount();
+  if ( (m_topIndex + 7) < spellCount) {
+    deselectSpell();
+    m_topIndex++;
+    if (m_hilightItem > 0)
+      m_hilightItem--;
+    listSpells();
+    selectSpell();
+  }
+}
+
 
 void SpellSelect::left(void) {
   // go to top of list
@@ -310,10 +349,10 @@ void SpellSelect::r() {
 }
 
 void SpellSelect::examineSpell() {
+  Video::instance().fade();
   Arena & arena(Arena::instance());
   arena.setCursor(15,0);
   arena.setSpellAt(15, 0, Wizard::currentPlayer().spellId(m_hilightItem+m_topIndex));
-  Video::instance().fade();
   SpellSelect * spellSelect(new SpellSelect(m_examine));
   spellSelect->m_hilightItem = m_hilightItem;
   spellSelect->m_topIndex = m_topIndex;
@@ -363,12 +402,12 @@ void SpellSelect::selectSpell() {
   int spellIndex = m_hilightItem+m_topIndex;
   const SpellData * currentSpell = Wizard::currentPlayer().spell(spellIndex);
   
-  currentSpell->printName(1,3+m_hilightItem*2, 10);
+  currentSpell->printName(SPELL_NAME_X,ARROW_UP_Y+m_hilightItem*2, 10);
   
   int chance = currentSpell->realCastChance() + 1;
   Text16 & text16 = Text16::instance();
-  text16.print("CASTING", 18,14, 2);
-  text16.print("CHANCE=    ", 18,16, 2);
+  text16.print("CASTING",     PRESS_R_POS_X,CAST_CHANCE_POS_Y, 2);
+  text16.print("CHANCE=    ", PRESS_R_POS_X,CAST_CHANCE_POS_Y+2, 2);
   char str[30];
   Text16::int2a(chance*10, str);
   strcat(str,"/");
@@ -389,5 +428,5 @@ void SpellSelect::deselectSpell(int item) {
   int spellIndex = item+m_topIndex;
   const SpellData * spell = Wizard::currentPlayer().spell(spellIndex);
   if (spell)
-    spell->printName(1,3+(item*2));
+    spell->printName(SPELL_NAME_X,ARROW_UP_Y+(item*2));
 }

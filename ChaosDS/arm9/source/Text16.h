@@ -77,5 +77,6 @@ class Text16
     int m_mapOffset;
     Text16();
     ~Text16();
+    const char* emptyMessage() const;
 };
 #endif

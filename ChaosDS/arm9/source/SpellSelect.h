@@ -30,6 +30,8 @@ class SpellSelect: public TouchScreen
     inline void deselectSpell() { deselectSpell(m_hilightItem); };
     void selectSpell();
 
+    void scrollUp();
+    void scrollDown();
     void up(); 
     void down();
     void left(); 
