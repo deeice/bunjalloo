@@ -14,6 +14,7 @@
 #include "WizardCPU.h"
 #include "SpellData.h"
 #include "SoundEffect.h"
+#include "Options.h"
 
 using namespace Misc;
 using nds::Color;
@@ -171,20 +172,28 @@ void Wizard::initialisePlayers()
      
     // generate the spells...
     int spellindex = 0;
-    int spellid = 0x01;
+    player.m_spells[spellindex] = 0; // set to 0 for "no spell selected"
     if (player.isCpu()) {
       // disbelieve has random priority
       player.m_spells[spellindex] = rand(10)+0x0c;
     } else {
-      player.m_spells[spellindex] = 0; // set to 0 for "no spell selected"
       player.m_selectedSpell = 0; // set to 0 for "no spell selected"
     }
     
-    spellindex++;
-    player.m_spells[spellindex] = spellid;
-    spellindex++;
+    int spellid = SPELL_DISBELIEVE;
+    player.m_spells[spellindex+1] = spellid;
+    spellindex += 2;
 
-    for (int spell = 1; spell < player.m_spellCount; spell++) 
+    int startIndex = 1;
+    if (Options::instance().option(Options::NEW_FEATURES)) {
+      spellid = SPELL_MEDITATE;
+      player.m_spells[spellindex] = s_spellData[spellid].castPriority;
+      player.m_spells[spellindex+1] = spellid;
+      spellindex += 2;
+      startIndex = 2;
+    }
+
+    for (int spell = startIndex; spell < player.m_spellCount; spell++) 
     {
       spellid = rand(255) & 0x3F;
       while (spellid < SPELL_KING_COBRA or spellid > SPELL_RAISE_DEAD) 
@@ -544,7 +553,13 @@ void Wizard::displayData() const
 
 void Wizard::removeSelectedSpell()
 {
-  if (m_spells[m_selectedSpell] != SPELL_DISBELIEVE) {
+  if (m_selectedSpell) {
+    m_lastSpellCast = m_spells[m_selectedSpell];
+  } else {
+    m_lastSpellCast = 0;
+  }
+  // First spells are infinite.
+  if (m_spells[m_selectedSpell] >= SPELL_KING_COBRA) {
     m_spells[m_selectedSpell] = 0;
   }
   m_selectedSpell = 0;
@@ -865,4 +880,22 @@ void Wizard::orderSpells()
 {
   m_spells[0] = 12 + Misc::rand(10);
   Misc::orderTable(m_spellCount, m_spells);
+}
+
+void Wizard::newRandomSpell()
+{
+  char str[30];
+  strcpy(str,"NEW SPELL FOR ");
+  strcat(str,m_name);
+  Text16::instance().displayMessage(str, Color(30,30,0)); // yellow
+  Misc::delay(100);
+
+  // generate new spell...
+  Text16::instance().clearMessage();
+  u8 randspell = Misc::rand(127);
+  while (randspell < SPELL_KING_COBRA or randspell > SPELL_TURMOIL)
+  {
+    randspell = Misc::rand(127);
+  }
+  addSpell(randspell);
 }

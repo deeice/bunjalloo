@@ -141,8 +141,8 @@ void Casting::startCastRound()
           player.setupHumanPlayerCast();
           
           // auto cast certain spells...
-          if (currentSpellId == SPELL_MAGIC_WOOD or currentSpellId == SPELL_TURMOIL 
-              or (currentSpellId >= SPELL_MAGIC_SHIELD and currentSpellId <= SPELL_SHADOW_FORM) 
+          if (currentSpellId == SPELL_MAGIC_WOOD 
+              or s_spellData[currentSpellId].castRange == 0
              )
           {
             arena.enableCursor(false);

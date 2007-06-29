@@ -78,7 +78,7 @@ void ExamineSquare::show()
 
   Text16::instance().clear();
   // which creature is here?
-  if ((creature > SPELL_DISBELIEVE and creature < SPELL_GOOEY_BLOB)
+  if ((creature >= SPELL_KING_COBRA and creature < SPELL_GOOEY_BLOB)
       or (creature >= Arena::WIZARD_INDEX and not m_showCastChance))
   {
     // it is a creature or a wizard (and we want to see wizards)

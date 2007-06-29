@@ -21,10 +21,10 @@ const int Options::OPTION_COUNT(BACK+1);
 
 Option Options::s_option[] = {
  Option("Round Limit", Option::ROUND_LIMIT,0,500),
- Option("Old Bugs",Option::ON_OFF,0,59),
+ Option("Old Bugs",Option::ON_OFF,0,1),
+ Option("New Stuff",Option::ON_OFF,0,1),
  Option("Sound",Option::ON_OFF,0,1),
  Option("Sound Test",Option::NUMBER,SND_ATTACK,SND_WALK),
- Option("Quit Game",Option::NONE,0,1),
  Option("          BACK",Option::NONE,0,1)
 };
 
@@ -175,7 +175,7 @@ void OptionScreen::drawOption(Option & opt, int x, int y, int pal) const
 void OptionScreen::a()
 {
   Option & opt(Options::instance().option(Options::OptionPosition_t(m_hilightItem)));
-  if (m_hilightItem == Options::QUIT)  {
+  if (m_hilightItem == Options::NEW_FEATURES)  {
 #if 0
     // opt++; /* Doesn't work? Cart dependent... */
     // swi 00? FIXME
@@ -337,7 +337,7 @@ Options::Options()
 {
   s_option[ROUND_LIMIT].setValue(DEFAULT_ROUNDS);
   s_option[OLD_BUGS].setValue(Option::ON);
-  s_option[QUIT].setValue(Option::OFF);
+  s_option[NEW_FEATURES].setValue(Option::ON);
   s_option[SOUND_ENABLE].setValue(Option::OFF);
 }
 

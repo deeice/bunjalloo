@@ -5,6 +5,7 @@
 const SpellData s_spellData[] = {
   {"None", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, cast_disbelieve, 0, 0, },
   {"Disbelieve", 0, 10, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, cast_disbelieve, 0, 0, },
+  {"Meditate", 0, 1, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, cast_meditate, 0, 0, },
   {"King Cobra", 1, 10, 3, 18, 0, 4, 0, 0, 1, 1, 6, 1, cast_creature, _binary_king_cobra_raw_start, _binary_king_cobra_map_start, },
   {"Dire Wolf", -1, 9, 3, 18, 1, 3, 0, 0, 2, 3, 7, 2, cast_creature, _binary_dire_wolf_raw_start, _binary_dire_wolf_map_start, },
   {"Goblin", -1, 9, 3, 18, 6, 2, 0, 0, 4, 1, 4, 4, cast_creature, _binary_goblin_raw_start, _binary_goblin_map_start, },

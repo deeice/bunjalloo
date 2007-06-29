@@ -7,7 +7,7 @@
 #include "GameState.h"
 #include "Splash.h"
 #include "Text16.h"
-#include "Options.h"
+//#include "Options.h"
 
 int main(void) {
   irqInit();
@@ -23,7 +23,7 @@ int main(void) {
   // iprintf("Chaos DS\n");
   GameState::instance().setNextScreen(new Splash());
   keysSetRepeat(30,10);
-  while(not Options::instance().option(Options::QUIT)) {
+  while(/*not Options::instance().option(Options::QUIT)*/ true) {
     scanKeys();
     swiWaitForVBlank();
     GameState::instance().mainLoopExecute();

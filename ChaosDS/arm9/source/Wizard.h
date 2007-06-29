@@ -244,6 +244,9 @@ class Wizard : public Computer
     //! @return true if the current spell can be cast tot he chosen location.
     bool isCastAllowed() const;
 
+    //! Add a new random spell and print name.
+    void newRandomSpell();
+
     //! Player types.
     enum Player_t {
       PLYR_HUMAN=0, //!< indicates that is human
@@ -297,6 +300,12 @@ class Wizard : public Computer
       return m_magicResistance;
     }
 
+    //!Get the spell id of the last spell that the player cast.
+    inline int lastSpellCast() const
+    {
+      return m_lastSpellCast;
+    }
+
   private:
     char m_name[12];
     unsigned char m_combat;
@@ -327,6 +336,7 @@ class Wizard : public Computer
     unsigned char m_modifierFlag;
     unsigned char m_illusionCast;
     unsigned char m_selectedSpell;
+    unsigned char m_lastSpellCast;
     unsigned char m_timid; //!< Either is timid or has creatures, not sure.
     //! player id - used for colouring in
     unsigned char m_id;

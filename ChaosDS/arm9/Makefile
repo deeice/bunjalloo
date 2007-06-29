@@ -48,7 +48,7 @@ LIBS	:=  -lndspp9 -lnds9 -ldswifi9 \
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBNDS) $(TOPDIR)/../libndspp  $(TOPDIR)/common/snd
+LIBDIRS	:=	$(LIBNDS) $(TOPDIR)/../libndspp
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

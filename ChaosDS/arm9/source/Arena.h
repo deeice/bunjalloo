@@ -465,6 +465,7 @@ class Arena
     void spreadFireBlob();
     void destroyCastles();
     void randomNewSpell();
+    void freezeMeditatingWizards();
 
     void displayCursorContents();
     void drawSilhouetteGfx(

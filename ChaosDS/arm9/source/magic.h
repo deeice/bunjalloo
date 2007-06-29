@@ -2,6 +2,7 @@
 #define magic_h_seen
 
 void cast_disbelieve();
+void cast_meditate();
 void cast_creature();
 void cast_chaos_law();
 void cast_trees_castles();
@@ -35,4 +36,5 @@ void doBowCast();
 void doWingsCast();
 void doShadowformCast();
 void doTurmoilCast();
+void doMeditateCast();
 #endif

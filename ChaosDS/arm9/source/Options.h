@@ -115,9 +115,9 @@ class Options
     {
       ROUND_LIMIT,
       OLD_BUGS,
+      NEW_FEATURES,
       SOUND_ENABLE,
       SOUND_TEST,
-      QUIT,
       BACK
     };
     //! Get the options instance

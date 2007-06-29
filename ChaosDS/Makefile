@@ -19,6 +19,8 @@ distdir=$(target)-$(version)
 dist: all
 	mkdir $(distdir) -p
 	cp $(target).nds $(distdir)/$(target).nds
+	cp $(target).ds.gba $(distdir)/$(target).ds.gba
+	cp README $(distdir)
 	cp COPYING $(distdir)
 	zip -r $(target)-$(version).zip $(distdir)/
 	rm -rf $(distdir)

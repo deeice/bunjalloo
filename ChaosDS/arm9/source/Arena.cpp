@@ -826,6 +826,7 @@ void Arena::nextRound()
   spreadFireBlob();
   destroyCastles();
   randomNewSpell();
+  freezeMeditatingWizards();
 }
 
 // called at the end of the moves round
@@ -834,6 +835,18 @@ void Arena::unsetMovedFlags()
 {
   for (int i = 0; i < 0x9f; i++) {
     m_arena[3][i] &= 0x7F;  // unset bit 7
+  }
+}
+
+void Arena::freezeMeditatingWizards()
+{
+  // meditating wizards cannot move
+  for (int i = 0; i < 0x9f; i++) {
+    if (m_arena[0][i] >= WIZARD_INDEX
+        and Wizard::player(m_arena[0][i]-WIZARD_INDEX).lastSpellCast() == SPELL_MEDITATE) 
+    {
+      setHasMoved(i);
+    }
   }
 }
 
@@ -1076,7 +1089,6 @@ void Arena::destroyCastles()
 // give a player a spell from the magic wood
 void Arena::randomNewSpell()
 {
-  char str[30];
   for (int i = 0; i < ARENA_SIZE; i++) {
     if (m_arena[0][i] == SPELL_MAGIC_WOOD and m_arena[4][i] != 0) {
       // is a wood with someone inside
@@ -1084,23 +1096,10 @@ void Arena::randomNewSpell()
         continue;
       
       // got here? then the wood has given us a spell!
-      strcpy(str,"NEW SPELL FOR ");
       int luckyPlayerId(m_arena[4][i] - WIZARD_INDEX);
       Wizard & luckyPlayer(Wizard::player(luckyPlayerId));
+      luckyPlayer.newRandomSpell();
 
-      strcat(str,luckyPlayer.name());
-      Text16::instance().displayMessage(str, Color(30,30,0)); // yellow
-      Misc::delay(100);
-      
-      // generate new spell...
-      Text16::instance().clearMessage();
-      u8 randspell = Misc::rand(127);
-      while (randspell < SPELL_KING_COBRA or randspell > SPELL_TURMOIL)
-      {
-        randspell = Misc::rand(127);
-      }
-      
-      luckyPlayer.addSpell(randspell);
 
       m_arena[0][i] = m_arena[4][i];
       m_arena[4][i] = 0;

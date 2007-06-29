@@ -39,7 +39,7 @@ LIBDIRS	:=	$(LIBNDS) $(TOPDIR)/../libndspp $(TOPDIR)/common/snd
 ifneq ($(BUILD),$(notdir $(CURDIR)))
 #---------------------------------------------------------------------------------
  
-export ARM9ELF	:= $(CURDIR)/$(TARGET).elf
+export ARM9ELF	:= $(CURDIR)/$(TARGET).exe
 export DEPSDIR := $(CURDIR)/$(BUILD)
 
 export VPATH	:=	$(foreach dir,$(SOURCES),$(CURDIR)/$(dir)) \
@@ -84,7 +84,7 @@ $(BUILD):
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) *.elf *.bin 
+	@rm -fr $(BUILD) *.exe *.bin 
  
  
 #---------------------------------------------------------------------------------

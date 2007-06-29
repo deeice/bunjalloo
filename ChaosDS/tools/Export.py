@@ -39,8 +39,8 @@ class SpellData:
       self.map[row0[i]] = value
     # set up the gfx and map data if this spell has a palette defined
     if self.map['palette'] != None:
-      self.map['gfxData'] = self.nameToData('raw')
-      self.map['mapData'] = self.nameToData('map')
+      self.map['gfx'] = self.nameToData('raw')
+      self.map['map'] = self.nameToData('map')
     if self.map['castRange'] != 0:
       self.map['castRange'] = (2*self.map['castRange']) + 1
     
@@ -95,7 +95,7 @@ def getUsedCells(sheet):
 def writeHeader(headerFile, row0, types, spells):
   
   headerFile.write('#ifndef SpellData_h_seen\n#define SpellData_h_seen\n')
-  headerFile.write('#include <nds/jtypes.h>\n')
+  headerFile.write('#include "libnds.h"\n')
   headerFile.write('typedef void (*FunctionPtr_t)(void);\n')
   headerFile.write('struct SpellData {\n')
   for i in range(len(types)):
@@ -115,7 +115,7 @@ def writeHeader(headerFile, row0, types, spells):
   headerFile.write('#endif\n')
 
 def writeBody(bodyFile, spells):
-  bodyFile.write('#include <nds/jtypes.h>\n')
+  bodyFile.write('#include "libnds.h"\n')
   bodyFile.write('#include "SpellData.h"\n')
   bodyFile.write('#include "images.h"\n')
   bodyFile.write('#include "magic.h"\n')
@@ -136,8 +136,8 @@ def ExportData(args=None):
   typeRow.append('const u16 *')
   typeRow.append('const u16 *')
   row0 = cells[1]
-  row0.append('gfxData')
-  row0.append('mapData')
+  row0.append('gfx')
+  row0.append('map')
   spells = []
   for row in cells[2:]:
     spells.append(SpellData(row0, row))

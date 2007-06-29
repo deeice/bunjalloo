@@ -9,7 +9,7 @@ export TOPDIR		:=	$(CURDIR)
 #---------------------------------------------------------------------------------
 # path to tools - this can be deleted if you set the path in windows
 #---------------------------------------------------------------------------------
-.PHONY: $(TARGET) arm9/$(TARGET).elf
+.PHONY: $(TARGET) arm9/$(TARGET).exe
 
 #---------------------------------------------------------------------------------
 # main targets
@@ -18,12 +18,12 @@ all: $(TARGET)
 
 
 #---------------------------------------------------------------------------------
-$(TARGET)	: arm9/$(TARGET).elf
+$(TARGET)	: arm9/$(TARGET).exe
 	cp $< $@
 
 export PALETTES := $(shell ls -d $(TOPDIR)/common/img/palette*)
 #---------------------------------------------------------------------------------
-arm9/$(TARGET).elf:
+arm9/$(TARGET).exe:
 	$(MAKE) -C common -f Makefile.sdl
 	$(MAKE) -f Makefile.sdl -C arm9
 

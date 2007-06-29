@@ -40,6 +40,23 @@ void cast_disbelieve()
   
 }
 
+void cast_meditate()
+{
+  // If a Wizard does not cast a spell or move for one turn, there could be
+  // a 10% chance of the Wizard gaining another spell.
+  Wizard & player(Wizard::currentPlayer());
+  if (player.isCpu())
+  {
+    player.setHasTargetSquare(true);
+    doMeditateCast();
+  }
+  else
+  {
+    doMeditateCast();
+    player.setCastAmount(0);
+  }
+}
+
 void cast_creature()
 {  
   // if human just do the check on target_index, if CPU find the optimum square to cast to
@@ -825,4 +842,16 @@ void doTurmoilCast()
   Arena::instance().setStartIndex(tsi);
   Casting::printSuccessStatus();
   Wizard::currentPlayer().setCastAmount(0);
+}
+
+void doMeditateCast()
+{
+  Wizard & player(Wizard::currentPlayer());
+  player.setupRange0Spell();
+  if (Casting::spellSuccess()) {
+    // new spell
+    player.newRandomSpell();
+    Misc::delay(4);
+  }
+  Casting::printSuccessStatus();
 }

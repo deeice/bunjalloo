@@ -389,7 +389,7 @@ void WizardCPU::createEnemyTableEntry(int wizardid)
   for (int i = 0; i < 0x9f; i++) {
     // Check that this is right..
     int creature(Arena::instance().at(0,i));
-    if (creature > SPELL_DISBELIEVE and creature < SPELL_MAGIC_CASTLE) 
+    if (creature >= SPELL_KING_COBRA and creature < SPELL_MAGIC_CASTLE) 
     {
       if (Arena::instance().owner(i) != wizardid) {
         s_priorityTable[m_tableIndex] += (Arena::instance().attackPref(creature) / 4) + 
