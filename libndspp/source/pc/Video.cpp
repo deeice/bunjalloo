@@ -93,7 +93,7 @@ void Video::enableObjects(bool enable)
 void Video::fade(bool fadeout, unsigned int speed)
 {
   for (int loop = 0; loop < 17; loop++) {
-    for (unsigned int i = 0; i < speed; ++i) {
+    for (unsigned int i = 0; i < speed/2; ++i) {
       swiWaitForVBlank();
     }
     if (fadeout)
