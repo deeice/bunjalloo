@@ -596,12 +596,14 @@ void doMagicMissile()
   }
   
   int defence;
+  int magicResistance; // for blind/sleep
   // get the defence of the creature here
   if (arena.atTarget() >= Arena::WIZARD_INDEX) {
     // wiz
     int plyr = arena.atTarget() - Arena::WIZARD_INDEX;
     Wizard & targetPlayer(Wizard::player(plyr));
     defence = targetPlayer.defence();
+    magicResistance = targetPlayer.magicResistance(); // blind/sleep
     if (targetPlayer.hasMagicShield()) {
       // has magic shield
       defence += 2;
@@ -613,21 +615,36 @@ void doMagicMissile()
   } else {
     // creature
     defence = s_spellData[arena.atTarget()].defence;
+    magicResistance = s_spellData[arena.atTarget()].magicRes; // blind/sleep
   }
   
   defence += Misc::rand(10);
+  magicResistance += Misc::rand(10); // blind/sleep
   int attack = 3 + Misc::rand(10);
   
   if (currentSpell == SPELL_LIGHTNING) {
     attack += 3;
   }
   
-  if (attack < defence)
-    return;
-  
-  Misc::delay(2);
-  
-  arena.magicMissileEnd();
+  if (currentSpell == SPELL_MAGIC_SLEEP or currentSpell == SPELL_BLIND)
+  {
+    // for blind/sleep
+    Casting::setSpellSuccess(false);
+    if (true or attack > magicResistance)
+    {
+      Casting::setSpellSuccess(true);
+      arena.sleepBlind();
+    }
+    Casting::printSuccessStatus();
+  }
+  else
+  {
+    if (attack < defence)
+      return;
+    Misc::delay(2);
+
+    arena.magicMissileEnd();
+  }
 }
 
 void doJusticeCast()
@@ -734,16 +751,20 @@ void doSubversion()
     
     u8 r = Misc::rand(10);
     
-    if (r < magic_res ) {
-      // subvert SUCCEEDED!!!??! but the random value was less than magic resistance!
-      // this is how it was done in the original though...
-      arena.subvert();
-      Casting::setSpellSuccess(true);
+    // A possible bug in the original: Subversion succeeded if the random value
+    // was less than magic resistance! Fixed here. See code at 85c7. 
+    if (r > magic_res ) {
+      if (player.selectedSpellId() == SPELL_MUTATION) {
+        Casting::setSpellSuccess(arena.mutate());
+      } else {
+        arena.subvert();
+        Casting::setSpellSuccess(true);
+      }
     } 
   }
   Casting::printSuccessStatus();
-  
 }
+
 
 void doShieldCast()
 {

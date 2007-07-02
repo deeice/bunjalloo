@@ -471,14 +471,26 @@ void Arena::displayCursorContents()
     // print the creature owner or status...
     // yellow text by default
     Color c(30,30,0);
-    if (m_arena[2][m_targetIndex] == 4) {
+    if (isDead(m_targetIndex)) {
       // dead - green
       c = Color(0,30,0);
       strcpy(str, "(DEAD)");
     } else {
       str[0] = '(';
       str[1] = 0;
-      strcat(str, Wizard::player(owner(m_targetIndex)).name() );
+      if (isAsleep(m_targetIndex))
+      {
+        c = Color(0,30,0);
+        strcat(str, "ASLEEP");
+      }
+      else if (isBlind(m_targetIndex))
+      {
+        c = Color(0,30,0);
+        strcat(str, "BLIND");
+      }
+      else {
+        strcat(str, Wizard::player(owner(m_targetIndex)).name() );
+      }
       strcat(str, ")");
     }
     text16.setColour(13, c);
@@ -779,7 +791,7 @@ int Arena::containsEnemy(int index)
     return 0; // jr c6d2 - was if creature == 0 jump, but that is buggy
   }
   
-  if (m_arena[2][index] == 4) {
+  if (isDead(index)) {
     // frame 4 showing, i.e. dead
     return 0; // jr c6d2
   }
@@ -914,7 +926,7 @@ void Arena::spreadFireBlob()
             continue;
           }
           
-          if (m_arena[2][m_targetIndex] != 4) {
+          if (not isDead(m_targetIndex)) {
             // if not dead
             int target_owner = owner(m_targetIndex);
             if (target_owner == this_owner) {
@@ -1127,7 +1139,7 @@ void Arena::highlightCreatures(int playerId)
       }
       
     }
-    else if (m_arena[2][i] != 4) {
+    else if (not isDead(i)) {
       // creature, not dead
       if (owner(i) == playerId)
       {
@@ -1240,8 +1252,7 @@ void Arena::highlightTargetCreations()
   // get the owner of the creature
   // make sure dead ones don't count...
   int arena0 = m_arena[0][m_targetIndex];
-  int arena2 = m_arena[2][m_targetIndex];
-  if (arena0 != 0 and arena2 != 4)
+  if (arena0 != 0 and not isDead(m_targetIndex))
   {
     enableCursor(false);
     m_highlightCreations = HIGHLIGHT_INIT;
@@ -1249,7 +1260,7 @@ void Arena::highlightTargetCreations()
     if (arena0 >= WIZARD_INDEX) {
       playerid = arena0 - WIZARD_INDEX;
     }
-    else if (arena2 != 4) {
+    else if (not isDead(m_targetIndex)) {
       playerid = owner(m_targetIndex);
     }
     if (playerid == HIGHLIGHT_INIT)
@@ -1324,9 +1335,29 @@ bool Arena::hasMoved(int index) const
 {
   return m_arena[3][index]&0x80;
 }
+
 bool Arena::isDead(int index) const
 {
-  return m_arena[2][index] == 4;
+  if ( not blindBitSet(index))
+  {
+    return m_arena[2][index] == 4;
+  }
+  return false;
+}
+
+bool Arena::blindBitSet(int index) const
+{
+  return (m_arena[3][index] & 8);
+}
+
+bool Arena::isBlind(int index) const
+{
+  return blindBitSet(index) and (m_arena[2][index] != 4);
+}
+
+bool Arena::isAsleep(int index) const
+{
+  return blindBitSet(index) and (m_arena[2][index] == 4);
 }
 
 bool Arena::doSuccessfulMove(int selectedCreature)
@@ -1452,6 +1483,8 @@ void Arena::leaveCorpse()
 {
   m_arena[1][m_targetIndex] = 1;
   m_arena[2][m_targetIndex] = 4;
+  // for sleep/blind
+  m_arena[3][m_targetIndex] &= 7;
   Misc::delay(12);
   // do sound fx
 }
@@ -1597,6 +1630,47 @@ void Arena::magicMissileEnd()
   }
 }
 
+void Arena::sleepBlind()
+{
+  // blind sets bit flag
+  // sleep sets bit flag and sets animation frame to 4
+  // casting on wizard affects all creatures for the wizard
+  int target(m_arena[0][m_targetIndex]);
+  int targetOwner(0);
+  int loopCount = 0;
+  int startIndex = 0;
+  if (target >= WIZARD_INDEX)
+  {
+    loopCount = ARENA_SIZE;
+    targetOwner = target - WIZARD_INDEX;
+  }
+  else
+  {
+    targetOwner = owner(m_targetIndex);
+    startIndex  = m_targetIndex;
+    loopCount = startIndex + 1;
+  }
+  int currentSpell(Wizard::currentPlayer().selectedSpellId());
+  for (int i = startIndex; i < loopCount; ++i)
+  {
+    int spellId(m_arena[0][i]);
+    int frame(m_arena[4][i]);
+    if (spellId >= SPELL_KING_COBRA 
+        and frame != 4
+        and owner(i) == targetOwner
+        and spellId < SPELL_MAGIC_FIRE)
+    {
+      if (currentSpell == SPELL_MAGIC_SLEEP)
+      {
+        m_arena[1][i] = 1;
+        m_arena[2][i] = 4;
+        Misc::delay(4);
+      }
+      m_arena[3][i] |= 0x8;
+    }
+  }
+}
+
 void Arena::justice() 
 {
   // single creature only...
@@ -1712,6 +1786,55 @@ void Arena::subvert()
   creatureVal &= 0xF8; // mask lower 3 bits
   creatureVal |= m_currentPlayer;
   m_arena[3][m_targetIndex] = creatureVal;
+}
+
+bool Arena::mutate()
+{
+  // d53c
+  // cheat: make subversion and mutation always work:
+  // set 0x85c7 0xc3    ; changes conditional jump to always jump
+  // set 0x791c 70      ; change spell 2 to mutation
+  // set 0x791e 16      ; change spell 3 to horse
+
+  int target(m_arena[0][m_targetIndex]);
+  int targetOwner(0);
+  int loopCount = 0;
+  bool mutateSuccess = false;
+  int startIndex = 0;
+  if (target >= WIZARD_INDEX)
+  {
+    loopCount = ARENA_SIZE;
+    targetOwner = target - WIZARD_INDEX;
+  }
+  else
+  {
+    targetOwner = owner(m_targetIndex);
+    startIndex  = m_targetIndex;
+    loopCount = startIndex + 1;
+  }
+
+  for (int i = startIndex; i < loopCount; ++i)
+  {
+    int spellId(m_arena[0][i]);
+    // if it is a creature, is not dead and is the owner's, then mutate.
+    if (spellId >= SPELL_KING_COBRA 
+        and spellId <= SPELL_ZOMBIE
+        and not isDead(i)
+        and owner(i) == targetOwner)
+    {
+      // mutate to a random creature.
+      int r = Misc::rand(SPELL_ZOMBIE+1);
+      while (r < SPELL_KING_COBRA or r == spellId)
+      {
+        r = Misc::rand(SPELL_ZOMBIE+1);
+      }
+      popAnimation();
+      m_arena[0][m_targetIndex] = r;
+      Misc::delay(4);
+      mutateSuccess = true;
+    }
+  }
+  return mutateSuccess;
 }
 
 void Arena::wizardDeath(int image)

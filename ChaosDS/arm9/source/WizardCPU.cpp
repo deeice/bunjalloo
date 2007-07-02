@@ -1262,6 +1262,10 @@ void WizardCPU::aiCastJustice()
 // code from 9d8a
 void WizardCPU::aiCastMagicMissile()
 {
+
+  // CPU should avoid casting on wizard with no creatures.
+  // CPU should avoid showdow wood, magic wood, 
+  // CPU should avoid casting on creature already blinded/asleep
   createAllEnemiesTable();
   Arena & arena(Arena::instance());
   
@@ -1335,14 +1339,8 @@ void WizardCPU::aiCastSubversion() {
     m_tableIndex += 2;
   }
   
-  if (s_priorityTable[m_tableIndex] == 0xFF) {
-    // no decent square
-    m_targetSquareFound = false;
-    m_wizard.setCastAmount(0);
-    return;
-  }
-  
-  m_targetSquareFound = 0;
+  // no decent square found
+  m_targetSquareFound = false;
   m_wizard.setCastAmount(0);
 }
 

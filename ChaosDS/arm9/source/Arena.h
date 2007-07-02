@@ -354,6 +354,20 @@ class Arena
      */
     bool isDead(int index) const;
 
+    /** Checks the flag - if the blindness bit is set and the frame is not 4
+     * then the creature here is blind.
+     * @return true if there is a blind creature in this square.
+     * @param index the square to check.
+     */
+    bool isBlind(int index) const;
+
+    /** Checks the flag - if the blindness bit is set and the frame is 4
+     * then the creature here is asleep.
+     * @return true if there creature in this square is asleep.
+     * @param index the square to check.
+     */
+    bool isAsleep(int index) const;
+
     /** Move selected creature from start index to target index.
      * @return true if the move caused a wizard to end its turn.
      */
@@ -379,6 +393,8 @@ class Arena
      * creature, cleans up underneath.
      */
     void magicMissileEnd();
+    //! Perform the sleep or blind action on the target square.
+    void sleepBlind();
     //! Perform justice on the current target square.
     void justice();
 
@@ -399,6 +415,11 @@ class Arena
     void raiseDead();
     //! subvert the creature at target index and set to current player
     void subvert();
+
+    /*! Mutate the creature at target index, or all of the wizards creatures if mutating a wizard.  
+     * @return true if the mutation succeeds, false otherwise.
+     */
+    bool mutate();
 
     //! Draw the wizard death animation using the given image index.
     void wizardDeath(int image);
@@ -435,7 +456,7 @@ class Arena
            | | | | | | | +-\
            | | | | | | +----- the owner (or player id for wizards)
            | | | | | +-----/ 
-           | | | | +--------- is asleep
+           | | | | +--------- is asleep/blind
            | | | +----------- is illusionary
            | | +------------- has had disbelieve cast on it
            | +--------------- undead
@@ -478,6 +499,7 @@ class Arena
     void drawPopFrame(int x, int y, int frame);
     void uncoverSquare(int start, int target);
     void doSpread(int start, int target);
+    bool blindBitSet(int index) const;
 };
 
 #endif

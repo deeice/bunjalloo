@@ -5,8 +5,8 @@
 namespace Misc
 {
   /*! @brief get a random number
-   * @param maximum the range of the random number is 0-maximum
-   * @return a random number 0-@arg maximum
+   * @param maximum the range of the random number is 0-(maximum-1)
+   * @return a random number 0-@arg maximum -1
    */
   unsigned int rand(unsigned int maximum);
   /*! @brief set the random number seed

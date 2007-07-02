@@ -209,13 +209,13 @@ void Wizard::initialisePlayers()
     }
 #ifdef CHEATING_DEBUG
     spellindex++; 
-    spellid = SPELL_MAGIC_WINGS;
+    spellid = SPELL_MAGIC_SLEEP;
     player.m_spells[spellindex] = spellid;
     player.m_spellCount++;
     spellindex++; 
 
     spellindex++; 
-    spellid = SPELL_WRAITH;
+    spellid = SPELL_BLIND;
     player.m_spells[spellindex] = spellid;
     player.m_spellCount++;
     spellindex++;
@@ -718,7 +718,7 @@ bool Wizard::isCastAllowed() const
     if (spellId >= SPELL_MAGIC_WOOD) {
       return false;
     }
-    if (frame != 4) {
+    if (not arena.isDead(arena.targetIndex())) {
       // creature is not dead, can't cast here.
       return false;
     }

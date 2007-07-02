@@ -47,7 +47,9 @@ const SpellData s_spellData[] = {
   {"Dark Citadel", -1, 6, 17, 23, 5, 0, 0, 0, 0, 0, 0, 0, cast_trees_castles, _binary_dark_citadel_raw_start, _binary_dark_citadel_map_start, },
   {"Wall", 0, 8, 13, 12, 3, 0, 0, 0, 0, 0, 0, 0, cast_wall, _binary_wall_raw_start, _binary_wall_map_start, },
   {"Magic Bolt", 0, 10, 13, 18, 0, 0, 0, 0, 0, 0, 0, 0, cast_magic_missile, 0, 0, },
+  {"Blind", 0, 10, 13, 18, 0, 0, 0, 0, 0, 0, 0, 0, cast_magic_missile, 0, 0, },
   {"Lightning", 0, 10, 9, 18, 0, 0, 0, 0, 0, 0, 0, 0, cast_magic_missile, 0, 0, },
+  {"Magic Sleep", 0, 10, 13, 18, 0, 0, 0, 0, 0, 0, 0, 0, cast_magic_missile, 0, 0, },
   {"Vengeance", -1, 8, 41, 12, 0, 0, 0, 0, 0, 0, 0, 0, cast_justice, 0, 0, },
   {"Decree", 1, 8, 41, 12, 0, 0, 0, 0, 0, 0, 0, 0, cast_justice, 0, 0, },
   {"Dark Power", -2, 5, 41, 11, 0, 0, 0, 0, 0, 0, 0, 0, cast_justice, 0, 0, },
@@ -64,6 +66,7 @@ const SpellData s_spellData[] = {
   {"Chaos 2", -4, 6, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, cast_chaos_law, 0, 0, },
   {"Shadow Form", 0, 8, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, cast_shadow_form, 0, 0, },
   {"Subversion", 0, 10, 15, 18, 0, 0, 0, 0, 0, 0, 0, 0, cast_subversion, 0, 0, },
+  {"Mutation", 0, 10, 15, 18, 0, 0, 0, 0, 0, 0, 0, 0, cast_subversion, 0, 0, },
   {"Raise Dead", -1, 5, 9, 18, 0, 0, 0, 0, 0, 0, 0, 0, cast_raise_dead, 0, 0, },
   {"Turmoil", -1, 5, 0, 17, 0, 0, 0, 0, 0, 0, 0, 0, cast_turmoil, 0, 0, },
 };
