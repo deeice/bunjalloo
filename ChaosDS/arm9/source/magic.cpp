@@ -574,7 +574,13 @@ void doMagicMissile()
   Line::Line_t anim_type = Line::BOLT;
   int currentSpell(player.selectedSpellId());
   if (currentSpell == SPELL_LIGHTNING)
+  {
     anim_type = Line::LIGHTNING;
+  }
+  else if (currentSpell == SPELL_MAGIC_SLEEP or currentSpell == SPELL_BLIND)
+  {
+    anim_type = Line::SPELL;
+  }
   SoundEffect::play(SND_BEAM);
   Line::doLine(anim_type);
   
@@ -630,7 +636,7 @@ void doMagicMissile()
   {
     // for blind/sleep
     Casting::setSpellSuccess(false);
-    if (true or attack > magicResistance)
+    if (attack > magicResistance)
     {
       Casting::setSpellSuccess(true);
       arena.sleepBlind();

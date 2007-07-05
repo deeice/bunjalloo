@@ -6,6 +6,7 @@
 #include "Wizard.h"
 #include "Arena.h"
 
+
 void SpellData::printName(int x, int y, int pal) const
 {
   char str[30];
@@ -103,6 +104,10 @@ bool SpellData::isSpellInRange() const
   return false;
 }
 
+bool SpellData::isNewFeature() const
+{
+  return this->flags & NEW_FEATURE;
+}
 
 void SpellData::drawJusticeGfx(int frame) const
 {

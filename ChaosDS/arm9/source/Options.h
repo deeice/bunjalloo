@@ -116,6 +116,7 @@ class Options
       ROUND_LIMIT,
       OLD_BUGS,
       NEW_FEATURES,
+      INSTA_TOUCH, //!< touch to move, instead of touch to select.
       SOUND_ENABLE,
       SOUND_TEST,
       BACK

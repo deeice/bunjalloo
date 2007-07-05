@@ -460,7 +460,8 @@ class Arena
            | | | +----------- is illusionary
            | | +------------- has had disbelieve cast on it
            | +--------------- undead
-           +----------------- "has been spread" for gooey blob and fire
+           +----------------- "has been spread" for gooey blob and fire, has moved for everything else
+                               is asleep when underneath a blob spread
     */
     unsigned char m_arena[6][160];  
 
@@ -486,7 +487,18 @@ class Arena
     void spreadFireBlob();
     void destroyCastles();
     void randomNewSpell();
+    /** When a wizard meditates, set the hasMoved flag so the wizard stands
+     * still
+     */
     void freezeMeditatingWizards();
+
+    /** Update sleeping/blind creatures. There is a random chance that the
+     * effect wears off.  If the effect does not wear off and the creature's
+     * asleep, then set the hasMoved flag.
+     */
+    void updateSleepers();
+
+    void liberateFromBlob(int index);
 
     void displayCursorContents();
     void drawSilhouetteGfx(

@@ -140,6 +140,21 @@ const u8 s_positionTable[56] = {
   0x07,0x11,0x1d,0x60,0x6e,0x94,0x9a,0x00,
   0x00,0x07,0x0e,0x40,0x4e,0x90,0x97,0x9e
 };
+
+static int generateRandomSpell()
+{
+  int spellid = 0;
+  do {
+    // turmoil is not included.
+    spellid = rand(SPELL_TURMOIL);
+  }
+  while ( (spellid < SPELL_KING_COBRA or spellid > SPELL_RAISE_DEAD) or 
+      ( not Options::instance().option(Options::NEW_FEATURES) 
+        and s_spellData[spellid].isNewFeature() )
+      );
+
+  return spellid;
+}
 void Wizard::initialisePlayers()
 {
   int playerCount = Arena::instance().players();
@@ -195,11 +210,7 @@ void Wizard::initialisePlayers()
 
     for (int spell = startIndex; spell < player.m_spellCount; spell++) 
     {
-      spellid = rand(255) & 0x3F;
-      while (spellid < SPELL_KING_COBRA or spellid > SPELL_RAISE_DEAD) 
-      {
-        spellid = rand(255) & 0x3F;
-      }
+      spellid = generateRandomSpell();
        
       player.m_spells[spellindex] = s_spellData[spellid].castPriority;
       
@@ -584,30 +595,47 @@ void Wizard::setIllusionCast(bool isIllusion)
   m_illusionCast = isIllusion;
 }
 
-void Wizard::updateCreatureCount() 
+int Wizard::creatureCount(bool includeBlob) const
 {
-  
-  if (Arena::instance().roundNumber() < 6) {
-    m_timid = 0;
-    return;
-  }
-  
+  int creatures = 0;
   Arena & arena(Arena::instance());
+  SpellID_t topLimit(SPELL_GOOEY_BLOB);
+  if (includeBlob)
+  {
+    topLimit = SPELL_MAGIC_FIRE;
+  }
   for (int i = 0; i < Arena::ARENA_SIZE; i++) {
     int creature = arena.at(0,i);
-    if (creature >= SPELL_KING_COBRA and creature < SPELL_GOOEY_BLOB) 
+    // gah, need to include gooey blob for sleep...
+    
+    if (creature >= SPELL_KING_COBRA and creature < topLimit) 
     {
       // is a creature
       int underneath = arena.at(4,i);
       if (underneath != Arena::WIZARD_INDEX+m_id) {
         // is not a ridden creature
         int owner = arena.owner(i);
-        if (owner == m_id) {
-          m_timid = 0;
-          return;
+        // check it is ours and is not blind/asleep
+        if (owner == m_id and not arena.isAsleep(i) and not arena.isBlind(i)) {
+          creatures++;
         }
       }
     }
+  }
+  return creatures;
+}
+
+void Wizard::updateBravery() 
+{
+  
+  if (Arena::instance().roundNumber() < 6) {
+    m_timid = 0;
+    return;
+  }
+  // creatures - but not gooey blob
+  if ( creatureCount(false) > 0) {
+    m_timid = 0;
+    return;
   }
   
   // if we are past round 6 and have no creatures

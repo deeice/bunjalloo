@@ -839,13 +839,14 @@ void Arena::nextRound()
   destroyCastles();
   randomNewSpell();
   freezeMeditatingWizards();
+  updateSleepers();
 }
 
 // called at the end of the moves round
 // resets the movement flags so that the creatures can move next time
 void Arena::unsetMovedFlags()
 {
-  for (int i = 0; i < 0x9f; i++) {
+  for (int i = 0; i < ARENA_SIZE; i++) {
     m_arena[3][i] &= 0x7F;  // unset bit 7
   }
 }
@@ -853,12 +854,42 @@ void Arena::unsetMovedFlags()
 void Arena::freezeMeditatingWizards()
 {
   // meditating wizards cannot move
-  for (int i = 0; i < 0x9f; i++) {
+  for (int i = 0; i < ARENA_SIZE; i++) {
     if (m_arena[0][i] >= WIZARD_INDEX
         and Wizard::player(m_arena[0][i]-WIZARD_INDEX).lastSpellCast() == SPELL_MEDITATE) 
     {
       setHasMoved(i);
     }
+  }
+}
+
+void Arena::updateSleepers()
+{
+  for (int i = 0; i < ARENA_SIZE; i++) {
+    m_targetIndex = i;
+    if (isAsleep(i))
+    {
+      if (Misc::rand(10) < 8)
+      {
+        setHasMoved(i);
+        continue;
+      }
+      // else wake up
+      popAnimation();
+      m_arena[1][i] = 1;
+      m_arena[2][i] = 1;
+      m_arena[3][i] &= ~8;
+      Misc::delay(4);
+    }
+    else if (isBlind(i))
+    {
+      if (Misc::rand(10) >= 8)
+      {
+        m_arena[3][i] &= ~8;
+        popAnimation();
+      }
+    }
+    // random wake up
   }
 }
 
@@ -879,6 +910,12 @@ void Arena::spreadFireBlob()
       continue;
     }
     if (spreadCreature >= SPELL_MAGIC_WOOD) {
+      continue;
+    }
+    // sleeping blob does not spread
+    if (isAsleep(i))
+    {
+      setHasMoved(i);
       continue;
     }
     int this_owner = owner(m_targetIndex);
@@ -986,7 +1023,16 @@ void Arena::spreadFireBlob()
                   // what about undead and illusionary flags?
                   m_arena[5][m_targetIndex] = m_arena[3][m_targetIndex];
                 }
-                
+                // spread blindness and sleep
+                if (isAsleep(m_targetIndex))
+                {
+                  m_arena[5][m_targetIndex] |= 8;
+                  m_arena[5][m_targetIndex] |= 0x80;
+                } 
+                if (isBlind(m_targetIndex))
+                {
+                  m_arena[5][m_targetIndex] |= 8;
+                }
               } // else jump to a09b - target dead
             }
             
@@ -1017,6 +1063,19 @@ void Arena::spreadFireBlob()
   
 }
 
+void Arena::liberateFromBlob(int index)
+{
+  m_arena[0][index] = m_arena[4][index];
+  m_arena[1][index] = 1;
+  m_arena[4][index] = 0;
+  m_arena[3][index] = m_arena[5][index];
+  m_arena[5][index] = 0;
+  if (hasMoved(index) and blindBitSet(index))
+  {
+    // take advantage of move flag to indicate sleep
+    m_arena[2][index] = 4;
+  }
+}
 
 void Arena::uncoverSquare(int start, int target)
 {
@@ -1040,10 +1099,7 @@ void Arena::uncoverSquare(int start, int target)
     m_arena[5][start] = 0;
     
   } else {
-    m_arena[0][start] = m_arena[4][start];
-    m_arena[4][start] = 0;
-    m_arena[3][start] = m_arena[5][start];
-    m_arena[5][start] = 0;
+    liberateFromBlob(start);
   }
   Misc::delay(24);
 }
@@ -1352,7 +1408,7 @@ bool Arena::blindBitSet(int index) const
 
 bool Arena::isBlind(int index) const
 {
-  return blindBitSet(index) and (m_arena[2][index] != 4);
+  return blindBitSet(index) and (m_arena[2][index] != 4) and m_arena[0][index] < WIZARD_INDEX;
 }
 
 bool Arena::isAsleep(int index) const
@@ -1458,7 +1514,7 @@ void Arena::killCreature()
   m_arena[4][m_targetIndex] = 0;
   if (arena0 == SPELL_GOOEY_BLOB) {
     // uncover whatever was underneath
-    m_arena[3][m_targetIndex] = m_arena[5][m_targetIndex];
+    liberateFromBlob(m_targetIndex);
   }
   else if (Options::instance().option(Options::OLD_BUGS) == 0)
   {
@@ -1540,7 +1596,7 @@ void Arena::turmoil()
     while (r >= ARENA_SIZE or x >= 0x10 or m_arena[0][r] != 0)
     {
       r = Misc::rand(10) + Misc::rand(255);
-      if (r < 0x9f) {
+      if (r < ARENA_SIZE) {
         getXY(r, x, y);
       } else {
         x = 0x10;
@@ -1615,13 +1671,24 @@ void Arena::magicMissileEnd()
       // e.g. wizard 1 blob covers wizard 2 creature
       // someone kills the blob, wizard 2's creature now belongs to wizard 1!
       if (m_arena[0][m_targetIndex] == SPELL_GOOEY_BLOB) {
-        m_arena[3][m_targetIndex] = m_arena[5][m_targetIndex];
+        liberateFromBlob(m_targetIndex);
       }
       else {
         // the famous "undead wizard" bug is caused by not updating the m_arena[3] flag properly
         if (arena4 >= Arena::WIZARD_INDEX) {
           m_arena[3][m_targetIndex] = arena4-Arena::WIZARD_INDEX;
         }
+      }
+    }
+    else
+    {
+      // if old bugs are on, make sure the new sleep code is not buggy
+      int blobOwner = owner(m_targetIndex);
+      if (m_arena[0][m_targetIndex] == SPELL_GOOEY_BLOB) {
+        liberateFromBlob(m_targetIndex);
+        // but set the owner to be that of the blob!
+        m_arena[3][m_targetIndex] &= ~7;
+        m_arena[3][m_targetIndex] |= blobOwner;
       }
     }
 
@@ -1741,10 +1808,7 @@ void Arena::destroyAllCreatures(int playerid)
           // same owner as effected wiz
           if (m_arena[0][i] == SPELL_GOOEY_BLOB and m_arena[4][i] != 0) {
             // b5a9
-            m_arena[0][i] = m_arena[4][i];
-            m_arena[4][i] = 0;
-            m_arena[3][i] = m_arena[5][i];
-            m_arena[5][i] = 0;
+            liberateFromBlob(i);
             continue;
           }
           // b5be

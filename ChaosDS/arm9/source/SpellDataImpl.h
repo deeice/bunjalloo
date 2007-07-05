@@ -29,6 +29,11 @@ public:
    */
   void drawJusticeGfx(int frame) const;
 
+  /** Is this spell a new feature or was it in the original Chaos?.
+   * @return true if the spell is new for the remake. 
+   */
+  bool isNewFeature() const;
+
 private:
   void fullText(char * str) const;
 // }

@@ -15,14 +15,18 @@
 using namespace std;
 using namespace nds;
 
-
+static const int LINES_PER_OPTION(2);
+static const int OPTION_VALUE_X(15);
+static const int OPTION_MARGIN_X(4);
+static const int OPTION_MARGIN_Y(5);
 const int Options::DEFAULT_ROUNDS = 1;
 const int Options::OPTION_COUNT(BACK+1);
 
 Option Options::s_option[] = {
  Option("Round Limit", Option::ROUND_LIMIT,0,500),
  Option("Old Bugs",Option::ON_OFF,0,1),
- Option("New Stuff",Option::ON_OFF,0,1),
+ Option("New Features",Option::ON_OFF,0,1),
+ Option("One Touch",Option::ON_OFF,0,1),
  Option("Sound",Option::ON_OFF,0,1),
  Option("Sound Test",Option::NUMBER,SND_ATTACK,SND_WALK),
  Option("          BACK",Option::NONE,0,1)
@@ -31,13 +35,13 @@ Option Options::s_option[] = {
 OptionScreen::OptionScreen()
 {
   // start of the text.
-  int x = 3+12;
+  int x = OPTION_MARGIN_X+OPTION_VALUE_X;
   // y pos start of options
-  int y = 5;
+  int y = OPTION_MARGIN_Y;
   Option * option = Options::instance().options();
   for (int j = 0; j < Options::OPTION_COUNT; j++) { 
     char buffer[32];
-    int ypos = y + j*3;
+    int ypos = y + j*LINES_PER_OPTION;
     option[j].asText(buffer);
     if (buffer[0] != 0)
     {
@@ -54,7 +58,7 @@ OptionScreen::OptionScreen()
     else
     {
       // bounding box for activate
-      Rectangle actv = {(x-12)*8,ypos*8,strlen(option[j].m_name)*8,16};
+      Rectangle actv = {(x-OPTION_VALUE_X)*8,ypos*8,strlen(option[j].m_name)*8,16};
       m_hotspots.push_back(new HotSpot(actv, activateOptionCb, this));
     }
   }
@@ -83,7 +87,7 @@ void OptionScreen::activateOptionCb(void * arg)
 
 void OptionScreen::selectFromTouch()
 {
-  int optionIndex = (((m_checking->area().y/8)-5)/3);
+  int optionIndex = (((m_checking->area().y/8)-OPTION_MARGIN_Y)/LINES_PER_OPTION);
   deselectOption(m_hilightItem);
   m_hilightItem = optionIndex;
   selectOption(m_hilightItem);
@@ -143,11 +147,11 @@ void OptionScreen::handleKeys()
 
 void OptionScreen::drawOptions() const
 {
-  int x = 3;
-  int y = 5;
+  int x = OPTION_MARGIN_X;
+  int y = OPTION_MARGIN_Y;
   Option * option = Options::instance().options();
   for (int j = 0; j < Options::OPTION_COUNT; j++) { 
-    drawOption(option[j], x, y+j*3, j+1);
+    drawOption(option[j], x, y+j*LINES_PER_OPTION, j+1);
     deselectOption(j);
   }
 }
@@ -169,7 +173,7 @@ void OptionScreen::drawOption(Option & opt, int x, int y, int pal) const
   text16.print(opt.m_name, x, y, pal);
   char buffer[128];
   opt.asText(buffer);
-  text16.print(buffer, x+12, y, pal);
+  text16.print(buffer, x+OPTION_VALUE_X, y, pal);
 }
 
 void OptionScreen::a()
@@ -219,14 +223,14 @@ void OptionScreen::left(void) {
 
   Option & opt(Options::instance().option(Options::OptionPosition_t(m_hilightItem)));
   opt--;
-  drawOption(opt, 3, 5+m_hilightItem*3, m_hilightItem+1);
+  drawOption(opt, OPTION_MARGIN_X, OPTION_MARGIN_Y+m_hilightItem*LINES_PER_OPTION, m_hilightItem+1);
     
 }
 
 void OptionScreen::right(void) {
   Option & opt(Options::instance().option(Options::OptionPosition_t(m_hilightItem)));
   opt++;
-  drawOption(opt, 3, 5+m_hilightItem*3, m_hilightItem+1);
+  drawOption(opt, OPTION_MARGIN_X, OPTION_MARGIN_Y+m_hilightItem*LINES_PER_OPTION, m_hilightItem+1);
   
 }
 

@@ -114,7 +114,7 @@ void Casting::startCastRound()
     // temp_cast_amount = 0; // moved to Wizard - the amount of goes this spell has
     if (player.isDead()) {
       // player is dead...
-      player.updateCreatureCount();
+      player.updateBravery();
       arena.setCurrentPlayer(currentPlayer+1);
       startCastRound();
     } else {
@@ -126,13 +126,13 @@ void Casting::startCastRound()
         arena.enableCursor(false);
         player.doAiSpell();
         delay(10);
-        player.updateCreatureCount();
+        player.updateBravery();
         arena.setCurrentPlayer(currentPlayer+1);
         startCastRound();
       } else {
         int currentSpellId(player.selectedSpellId());
         if (currentSpellId == 0) {
-          player.updateCreatureCount();
+          player.updateBravery();
           arena.setCurrentPlayer(currentPlayer+1);
           startCastRound();
         } else {
@@ -213,7 +213,7 @@ void Casting::nextPlayerCast()
   if (currentPlayer < playerCount) {
     Wizard & player(Wizard::currentPlayer());
 
-    player.updateCreatureCount();
+    player.updateBravery();
     // set the current spell to 0 if it isn't disblv.
     player.removeSelectedSpell();
 

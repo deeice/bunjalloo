@@ -225,8 +225,14 @@ class Wizard : public Computer
 
     //!Make this player wait until he presses a key.
     void waitForKeypress();
-    //!Update the number of creatures this player has.
-    void updateCreatureCount();
+    //! Update the bravery of this player based on round number and creature count.
+    void updateBravery();
+
+    /** Get the number of non-mounted creatures that belong to this wizard.
+     * @param includeBlobs true if we should include gooey blobs.
+     * @return the number of creatures
+     */
+    int creatureCount(bool includeBlobs) const;
 
     //! Set up the generic part needed for casting range 0 spells (magic knife, etc)
     void setupRange0Spell();

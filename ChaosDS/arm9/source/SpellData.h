@@ -17,6 +17,7 @@ struct SpellData {
   u8 manvr;
   u8 magicRes;
   FunctionPtr_t spellFunction;
+  u16 flags;
   const u16 * gfx;
   const u16 * map;
 #include "SpellDataImpl.h"
@@ -90,4 +91,8 @@ typedef enum {
   SPELL_RAISE_DEAD,
   SPELL_TURMOIL
 } SpellID_t;
+
+typedef enum {
+  NEW_FEATURE=1,
+} SpellFlag_t;
 #endif

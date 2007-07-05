@@ -71,6 +71,7 @@ class WizardCPU : public Computer
     void aiCastTurmoil();
 
     void createAllEnemiesTable();
+    bool shouldCastSleepBlind();
 
     void doThisMovement();
     void setupMove();

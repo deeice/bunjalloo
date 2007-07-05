@@ -1,18 +1,15 @@
-import uno 
+import uno
 import sys
 import os
+import os.path
 
 class FolderPicker:
-  def __init__(self):
+  def __init__(self, displayDir):
     ctx = uno.getComponentContext()
     smgr = ctx.ServiceManager
-    folderPicker = smgr.createInstanceWithContext( 
+    folderPicker = smgr.createInstanceWithContext(
                     'com.sun.star.ui.dialogs.FolderPicker', ctx)
-    if os.environ.has_key('HOME'):
-      folderPicker.setDisplayDirectory(os.environ['HOME'])
-    else:
-      # cwd is shot to pieces
-      folderPicker.setDisplayDirectory(os.getcwd())
+    folderPicker.setDisplayDirectory(displayDir)
     result = folderPicker.execute()
     if result:
       self.directory = uno.pyuno.fileUrlToSystemPath(folderPicker.getDirectory())
@@ -23,7 +20,7 @@ class FolderPicker:
 class SpellData:
   def __init__(self, row0, row):
     ## row 0 defines stuff
-    self.map = {}  
+    self.map = {}
     for i in row0:
       self.map[i] = None
 
@@ -43,11 +40,11 @@ class SpellData:
       self.map['map'] = self.nameToData('map')
     if self.map['castRange'] != 0:
       self.map['castRange'] = (2*self.map['castRange']) + 1
-    
+
     for key in self.map:
       if self.map[key] == None:
         self.map[key] = 0
-      
+
   def nameToData(self,dataType):
     name = self.map['spellName']
     # convert spaces to _, lowercase and add _binary_<name>_map_start
@@ -70,7 +67,7 @@ class SpellData:
       returnString += ', '
     returnString += '},'
     return returnString
-    
+
 def getUsedCells(sheet):
   row_ind = 0
   col_ind = 0
@@ -90,10 +87,10 @@ def getUsedCells(sheet):
     col_ind = 0
     row_ind += 1
     cell = sheet.getCellByPosition(col_ind,row_ind)
-  return cells  
+  return cells
 
 def writeHeader(headerFile, row0, types, spells):
-  
+
   headerFile.write('#ifndef SpellData_h_seen\n#define SpellData_h_seen\n')
   headerFile.write('#include "libnds.h"\n')
   headerFile.write('typedef void (*FunctionPtr_t)(void);\n')
@@ -112,6 +109,11 @@ def writeHeader(headerFile, row0, types, spells):
     needComma = True
     headerFile.write('  %s'%spell.nameToEnum())
   headerFile.write('\n} SpellID_t;\n')
+  # enum for the spell flags
+  headerFile.write('\ntypedef enum {\n')
+  headerFile.write('  NEW_FEATURE=1,')
+  headerFile.write('\n} SpellFlag_t;\n')
+
   headerFile.write('#endif\n')
 
 def writeBody(bodyFile, spells):
@@ -141,8 +143,8 @@ def ExportData(args=None):
   spells = []
   for row in cells[2:]:
     spells.append(SpellData(row0, row))
-    
-  f = FolderPicker()
+
+  f = FolderPicker(os.path.dirname(model.getURL()))
   if f.directory != '':
     spellData_c = open(f.directory + '/SpellData.cpp','w')
     spellData_h = open(f.directory + '/SpellData.h','w')

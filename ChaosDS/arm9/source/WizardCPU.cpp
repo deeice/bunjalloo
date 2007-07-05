@@ -1258,27 +1258,74 @@ void WizardCPU::aiCastJustice()
   
 }
 
+bool WizardCPU::shouldCastSleepBlind()
+{
+  Arena & arena(Arena::instance());
+  int creature(arena.atTarget());
+  int currentSpellId = m_wizard.selectedSpellId();
+  bool sleepSpell(currentSpellId == SPELL_MAGIC_SLEEP or currentSpellId == SPELL_BLIND);
+  if ( sleepSpell and creature == SPELL_SHADOW_WOOD)
+  {
+    // CPU should avoid showdow wood for sleep/blind
+    return false;
+  }
+  if (currentSpellId == SPELL_BLIND and creature == SPELL_GOOEY_BLOB)
+  {
+    // Avoid blinding a Blob.
+    // "My blob's got no eyes. Or nose."
+    // "But how does it smell?"
+    // "Terrible!"
+    return false;
+  }
+  if (sleepSpell and ( arena.isAsleep(arena.targetIndex()) or arena.isBlind(arena.targetIndex())))
+  {
+    // already cast on this creature.
+    return false;
+  }
+  if (creature >= Arena::WIZARD_INDEX 
+      and Wizard::player(creature-Arena::WIZARD_INDEX).
+                creatureCount(currentSpellId == SPELL_MAGIC_SLEEP) == 0)
+  {
+    // do not cast on creature-less wizard (no effect)
+    return false;
+  }
+  if (creature >= SPELL_HORSE 
+      and creature <= SPELL_MANTICORE
+      and arena.at(4,arena.targetIndex()) != 0)
+  {
+    // mounted creature - so no effect
+    return false;
+  }
+  return true;
+}
+
 // used for lightning and magic bolt
 // code from 9d8a
 void WizardCPU::aiCastMagicMissile()
 {
 
-  // CPU should avoid casting on wizard with no creatures.
-  // CPU should avoid showdow wood, magic wood, 
-  // CPU should avoid casting on creature already blinded/asleep
   createAllEnemiesTable();
   Arena & arena(Arena::instance());
-  
+  int currentSpellId = m_wizard.selectedSpellId();
+  bool sleepSpell(currentSpellId == SPELL_MAGIC_SLEEP or currentSpellId == SPELL_BLIND);
   arena.setTargetIndex(s_priorityTable[m_tableIndex]);
   while (arena.targetIndex() != 0xFF) {
     arena.setTargetIndex(s_priorityTable[m_tableIndex]);
-    if (arena.atTarget() == SPELL_SHADOW_WOOD 
-        or arena.atTarget() >= Arena::WIZARD_INDEX
-        or arena.atTarget() < SPELL_MAGIC_FIRE )
+    int creature(arena.atTarget());
+
+    // a bit hacky - set the creature to WALL to skip the check.
+    if (sleepSpell and not shouldCastSleepBlind())
+    {
+      creature = SPELL_WALL;
+    }
+
+    if (creature == SPELL_SHADOW_WOOD 
+        or creature >= Arena::WIZARD_INDEX
+        or creature < SPELL_MAGIC_FIRE )
     {
       // see if in range...
       
-      if (s_spellData[m_wizard.selectedSpellId()].isSpellInRange())
+      if (s_spellData[currentSpellId].isSpellInRange())
       {
         if (not arena.isBlockedLOS()) {
           // spell is good!

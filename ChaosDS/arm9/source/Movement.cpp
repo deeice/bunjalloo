@@ -450,6 +450,11 @@ void Movement::end()
   }  else {
     hasRangedCombat = (s_spellData[creature].rangedCombat != 0);
     m_rangeAttack = s_spellData[creature].rangedCombatRange*2+1;
+    // blinded creatures lose their ranged combat
+    if (arena.isBlind(startIndex))
+    {
+      hasRangedCombat = false;
+    }
   }
   
   if (hasRangedCombat) {
@@ -509,11 +514,10 @@ void Movement::selectCreature()
   WizardCPU * cpu  = static_cast<WizardCPU*>(Wizard::currentPlayer().computer());
   cpu->setFlyingTargetFound(false);
 
-
   // is there a creature here?
   if (m_selectedCreature == 0) 
     return;
-  
+
   // check if we have moved already HAS_MOVED(arena.at(3, start_index))
   if (arena.hasMoved(startIndex)) {
     m_selectedCreature = 0;
@@ -551,6 +555,12 @@ void Movement::selectCreature()
       m_isFlying = 1;
       m_movementAllowance++;
     }
+    // blindness reduces movement to 1 square.
+    if (arena.isBlind(startIndex))
+    {
+      m_movementAllowance = 2;
+    }
+
     // check if there is something inside
     int inside_creature = arena.at(4,startIndex);
     bool yes_pressed(false);
@@ -744,6 +754,11 @@ void Movement::moveCreature(int distanceMoved)
           // we are a wizard... check the target creature
           if (creature < SPELL_HORSE or creature >= SPELL_BAT) {
             // not a mount, return
+            return;
+          }
+          // Cannot ride around on sleeping creatures.
+          if (arena.isAsleep(targetIndex))
+          {
             return;
           }
           // successful move
@@ -1105,20 +1120,28 @@ void Movement::makeAttack()
       attacking_val = Wizard::player(m_attacker-Arena::WIZARD_INDEX).rangedCombat();
   }
   else {
-    if (m_attacker < Arena::WIZARD_INDEX)
+    if (m_attacker < Arena::WIZARD_INDEX) {
       attacking_val = s_spellData[m_attacker].combat;
-    else
+      // penalty for blind attackers
+      if (arena.isBlind(startIndex)) { 
+        attacking_val = 1;
+      }
+    }
+    else {
       attacking_val = Wizard::player(m_attacker-Arena::WIZARD_INDEX).combat();
+    }
   }
   
   // bug here - if the wizard has magic knife, it improves his ranged combat!
   attacking_val += attacker_modifier + Misc::rand(10);
   
   // get defending val...
-  if (defender < Arena::WIZARD_INDEX)
+  if (defender < Arena::WIZARD_INDEX) {
     defending_val = s_spellData[defender].defence;
-  else
+  }
+  else {
     defending_val = Wizard::player(defender-Arena::WIZARD_INDEX).defence();
+  }
   
   defending_val += defender_modifier + Misc::rand(10);
   
