@@ -299,7 +299,3 @@ unsigned short * Background::tileData() const
 {
   return m_bg.tileData;
 }
-
-
-
-

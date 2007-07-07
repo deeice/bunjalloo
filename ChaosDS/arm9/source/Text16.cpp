@@ -21,14 +21,16 @@ const int Text16::MESSAGE_Y(22);
 const int Text16::LEFT_ARROW_INDEX((int)('='-1));
 const int Text16::RIGHT_ARROW_INDEX((int)('='+1));
 
+int Text16::s_screen(0);
+
 // namespaces
 using namespace nds;
 
 // Text16 implementation
 const int Text16::MAX_LETTERS(85);
 
-Text16::Text16():
-  m_screen(0),
+Text16::Text16(int screen):
+  m_screen(screen),
   m_bg(new nds::Background(m_screen,1,0,30)),
   m_mapOffset(DEFAULT_OFFSET)
 {
@@ -45,8 +47,12 @@ Text16::Text16():
 
 Text16 & Text16::instance()
 {
-  static Text16 s_instance;
-  return s_instance;
+  static Text16 s_instance0(0);
+  static Text16 s_instance1(1);
+  if (s_screen == 0)
+    return s_instance0;
+  else
+    return s_instance1;
 }
 Text16::~Text16() {}
 
@@ -143,4 +149,19 @@ void Text16::displayMessage(const char * message, unsigned short color) {
   print(emptyMessage(), MESSAGE_X,MESSAGE_Y, 12);
   setColour(12, color);
   print(message, MESSAGE_X,MESSAGE_Y, 12);
+}
+
+void Text16::drawToTop()
+{
+  s_screen = 1;
+}
+
+void Text16::drawToBottom()
+{
+  s_screen = 0;
+}
+
+int Text16::screen() const
+{
+  return m_bg->screen();
 }

@@ -48,6 +48,10 @@ void Casting::show()
 void Casting::animate()
 {
   Arena::instance().drawCreatures();
+  if (m_examineScreen)
+  {
+    m_examineScreen->animate();
+  }
 }
 
 void Casting::vblank()
@@ -88,18 +92,6 @@ void Casting::handleKeys()
 }
 
 
-void Casting::examine() 
-{
-  int theCreature = Arena::instance().cursorContents();
-  // return instantly if we examine an empty square
-  if (theCreature == 0) {
-    return;
-  }
-  Video::instance().fade();
-  Casting * casting = new Casting(false);
-  GameState::instance().setNextScreen(new ExamineSquare(casting));
-  Arena::instance().enableCursor(false);
-}
 
 
 // approximately at 95ee

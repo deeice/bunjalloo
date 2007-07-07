@@ -729,13 +729,10 @@ void Wizard::setupHumanPlayerCast()
 
 bool Wizard::isCastAllowed() const
 {
-  Text16 & text16(Text16::instance());
   Arena & arena(Arena::instance());
   int spellId = selectedSpellId();
   // check spell is in range .... call 9786
-  if (not arena.isSpellInRange(spellId)) {
-    text16.clearMessage();
-    text16.displayMessage("OUT OF RANGE", Color(30,31,0));
+  if (not arena.isSpellInRange(spellId, true)) {
     return false;
   }
   int creature, underneath, flags, frame;
@@ -761,10 +758,8 @@ bool Wizard::isCastAllowed() const
     return false;
   }
   
-  // do LOS check...
-  if (arena.isBlockedLOS()) {
-    text16.clearMessage();
-    text16.displayMessage("NO LINE OF SIGHT", Color(0,30,31)); // lblue
+  // do LOS check... print message
+  if (arena.isBlockedLOS(true)) {
     return false;
   }
   // call spell anim, etc...

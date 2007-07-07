@@ -34,7 +34,6 @@ class Casting: public ArenaTouchScreen
     virtual void handleKeys();
 
     virtual void execute();
-    virtual void examine();
     virtual void next();
   private:
     static int s_worldChaos;

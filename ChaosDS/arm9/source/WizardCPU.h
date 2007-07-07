@@ -82,6 +82,7 @@ class WizardCPU : public Computer
     void doFlyingMove();
     void setupCreatureMove();
     int getBestIndex();
+    void addBestIndex(Arena & arena);
 
 
 };

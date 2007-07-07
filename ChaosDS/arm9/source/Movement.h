@@ -30,8 +30,6 @@ class Movement : public ArenaTouchScreen
     //! Press B to cancel the selection.
     void cancel();
 
-    virtual void examine();
-
     //! Either cancel or end turn.
     virtual void next();
 

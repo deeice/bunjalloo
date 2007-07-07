@@ -38,6 +38,10 @@ void ExamineBoard::show()
 void ExamineBoard::animate()
 {
   Arena::instance().drawCreatures();
+  if (m_examineScreen)
+  {
+    m_examineScreen->animate();
+  }
 }
 
 void ExamineBoard::vblank()
@@ -100,19 +104,8 @@ void ExamineBoard::execute()
   examine();
 }
 
-void ExamineBoard::examine() 
-{
-  int theCreature = Arena::instance().cursorContents();
-  // return instantly if we examine an empty square
-  if (theCreature == 0) {
-    return;
-  }
-  Video::instance().fade();
-  GameState::instance().setNextScreen(new ExamineSquare(new ExamineBoard(false)));
-  Arena::instance().enableCursor(false);
-}
-
 void ExamineBoard::next() {
+  Video::instance(1).fade();
   Video::instance().fade();
   GameState::instance().setNextScreen(new GameMenu());
   Arena::instance().enableCursor(false);

@@ -3,6 +3,8 @@
 
 #include "TouchScreen.h"
 
+class ExamineSquare;
+
 class SpellSelect: public TouchScreen
 {
   public:
@@ -10,6 +12,7 @@ class SpellSelect: public TouchScreen
      * @param examine if true then the spell selection is really spell examine
      */
     SpellSelect(bool examine);
+    ~SpellSelect();
     virtual void show();
     virtual void animate();
     virtual void handleKeys();
@@ -17,6 +20,7 @@ class SpellSelect: public TouchScreen
     int m_hilightItem;
     int m_topIndex;
     bool m_examine;
+    ExamineSquare * m_examineScreen;
 
     static void scrollDownCb(void * arg);
     static void scrollUpCb(void * arg);

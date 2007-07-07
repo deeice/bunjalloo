@@ -95,15 +95,6 @@ int SpellData::mainColour(int frame) const
   return maxIndex;
 }
 
-bool SpellData::isSpellInRange() const
-{
-  int distance = Arena::distance(Arena::instance().wizardIndex(), Arena::instance().targetIndex());
-  if (this->castRange >= distance) {
-    return true;
-  }
-  return false;
-}
-
 bool SpellData::isNewFeature() const
 {
   return this->flags & NEW_FEATURE;

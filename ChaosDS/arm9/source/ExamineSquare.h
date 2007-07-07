@@ -1,8 +1,11 @@
 #ifndef ExamineSquare_h_seen
 #define ExamineSquare_h_seen
-#include "TouchScreen.h"
+//#include "TouchScreen.h"
+#include "ScreenI.h"
 
-class ExamineSquare: public TouchScreen
+class Text16;
+
+class ExamineSquare: public ScreenI
 {
   public:
     /** Print a statistic with its name and value. For example "CAST CHANCE = 10%".
@@ -23,11 +26,9 @@ class ExamineSquare: public TouchScreen
      */
     static void drawStats(const unsigned char * p);
 
-    /*! @brief Create the examine screen, passing in the screen that should be
-     * shown when this one ends.
-     * @param returnScreen screen to show when the user exits this one.
+    /*! @brief Create the examine screen
      */
-    ExamineSquare(ScreenI * returnScreen);
+    ExamineSquare();
     virtual void show();
     virtual void animate();
     virtual void handleKeys();
@@ -41,7 +42,8 @@ class ExamineSquare: public TouchScreen
     int m_flags;
     bool m_first;
     bool m_showCastChance; //!< Show the cast chance too. False by default.
-    ScreenI * m_returnScreen;
+    Text16 * m_text;
+    int m_counter;
     static void exitCb(void * arg);
 
     void displayCreatureData(int creature, int underneath, int flags);

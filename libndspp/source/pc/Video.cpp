@@ -93,7 +93,8 @@ void Video::enableObjects(bool enable)
 void Video::fade(bool fadeout, unsigned int speed)
 {
   for (int loop = 0; loop < 17; loop++) {
-    for (unsigned int i = 0; i < speed/2; ++i) {
+    if ( (loop % 2) == 0) 
+    {
       swiWaitForVBlank();
     }
     if (fadeout)
@@ -114,7 +115,7 @@ void Video::setFade(int level)
   /*blend( BLDMOD_FADE,
          BLDMOD_BG0 | BLDMOD_BG1 | BLDMOD_BG2| BLDMOD_OBJ ,
          BLDMOD_BD );*/
-  SDLhandler::instance().setFade(level);
+  SDLhandler::instance().setFade(m_screen, level);
   //BLEND_Y = level;
 }
 
@@ -163,7 +164,7 @@ void Video::setWhite(int level)
         BLDMOD_BG2 | BLDMOD_BG1 | BLDMOD_BG0 | BLDMOD_BD | BLDMOD_OBJ,
          0 );
   BLEND_Y = level;
-  SDLhandler::instance().setWhite(level);
+  SDLhandler::instance().setWhite(m_screen, level);
 }
 
 void Video::whiteout(bool towhite, unsigned int speed)

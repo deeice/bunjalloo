@@ -60,8 +60,10 @@ void Graphics::initialiseScreen()
 void Graphics::clearPalettes(void) {
   u16 i;
   for (i = 0; i < 16; i++) {
-    Palette p(0,i);
-    p.clear();
+    Palette p0(0,i);
+    Palette p1(1,i);
+    p0.clear();
+    p1.clear();
   }
 }
 

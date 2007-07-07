@@ -15,12 +15,14 @@ int main(void) {
   
   Graphics::initialiseScreen();
   // debug...
+  /*
   nds::Background bg(1,0,0,31);
   nds::Palette p(1);
   p[255] = nds::Color(31,31,31);
   // consoleInitDefault(bg.mapData(), bg.tileData(),16);
   bg.enable();
   // iprintf("Chaos DS\n");
+  */
   GameState::instance().setNextScreen(new Splash());
   keysSetRepeat(30,10);
   while(/*not Options::instance().option(Options::QUIT)*/ true) {

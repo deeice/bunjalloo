@@ -1,12 +1,16 @@
 #include "libnds.h"
+#include "ndspp.h"
 #include "ArenaTouchScreen.h"
 #include "Arena.h"
 #include "Text16.h"
 #include "HotSpot.h"
+#include "Options.h"
+#include "ExamineSquare.h"
 
 using nds::Rectangle;
+using nds::Video;
 
-ArenaTouchScreen::ArenaTouchScreen()
+ArenaTouchScreen::ArenaTouchScreen():m_examineScreen(0)
 {
   Rectangle screenRect = {Arena::POSITION_X, Arena::POSITION_Y, Arena::PIXEL_WIDTH, Arena::PIXEL_HEIGHT};
   m_hotspots.push_back(new HotSpot(screenRect, arenaCb, this));
@@ -16,6 +20,11 @@ ArenaTouchScreen::ArenaTouchScreen()
 
   Rectangle endRect = { SCREEN_WIDTH - 16,  Text16::MESSAGE_Y*8, 8, 16};
   m_hotspots.push_back(new HotSpot(endRect, exitCb, this));
+}
+
+ArenaTouchScreen::~ArenaTouchScreen()
+{
+  delete m_examineScreen;
 }
 
 void ArenaTouchScreen::exitCb(void * arg)
@@ -44,5 +53,31 @@ void ArenaTouchScreen::arenaCb(void * arg)
   else
   {
     arena.setCursor(tileX, tileY);
+    if (Options::instance().option(Options::ONE_TOUCH))
+    {
+      self->execute();
+    }
   }
 }
+
+void ArenaTouchScreen::examine() 
+{
+  int theCreature = Arena::instance().cursorContents();
+  // return instantly if we examine an empty square
+  if (theCreature == 0) {
+    return;
+  }
+  if (m_examineScreen) {
+    Video::instance(1).fade();
+    delete m_examineScreen;
+  }
+  else {
+    Video::instance(1).setFade(16);
+  }
+  m_examineScreen = new ExamineSquare();
+  Text16::drawToTop();
+  m_examineScreen->show();
+  Text16::drawToBottom();
+  Video::instance(1).fade(false);
+}
+

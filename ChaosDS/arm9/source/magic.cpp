@@ -203,6 +203,18 @@ void cast_wall()
   }
 }
 
+bool checkRangeLos(int currentSpell, Arena & arena)
+{
+  if (not arena.isSpellInRange(currentSpell, true)) {
+    return false;
+  }
+  // do LOS check...
+  if (arena.isBlockedLOS(true)) {
+    return false;
+  }
+  return true;
+}
+
 void cast_magic_missile()
 {
   Arena & arena(Arena::instance());
@@ -219,19 +231,8 @@ void cast_magic_missile()
     }
     
     // in range?
-    const SpellData & currentSpell(s_spellData[player.selectedSpellId()]);
-    if (not currentSpell.isSpellInRange()) {
-      Text16 & text16(Text16::instance());
-      text16.clearMessage();
-      text16.displayMessage("OUT OF RANGE", Color(30,31,0)); // yellow
-      return;
-    }
-    
-    // do LOS check...
-    if (arena.isBlockedLOS()) {
-      Text16 & text16(Text16::instance());
-      text16.clearMessage();
-      text16.displayMessage("NO LINE OF SIGHT", Color(31,30,0)); // yellow
+    if (not checkRangeLos(player.selectedSpellId(), arena))
+    {
       return;
     }
     
@@ -307,19 +308,8 @@ void cast_raise_dead()
     if (not arena.isDead(arena.targetIndex())) 
       return;
     
-    const SpellData & currentSpell(s_spellData[player.selectedSpellId()]);
-    if (not currentSpell.isSpellInRange()) {
-      Text16 & text16(Text16::instance());
-      text16.clearMessage();
-      text16.displayMessage("OUT OF RANGE", Color(30,31,0)); // lblue
-      return;
-    }
-    
-    // do LOS check...
-    if (arena.isBlockedLOS()) {
-      Text16 & text16(Text16::instance());
-      text16.clearMessage();
-      text16.displayMessage("NO LINE OF SIGHT", Color(31,30,0)); // lblue
+    if (not checkRangeLos(player.selectedSpellId(), arena))
+    {
       return;
     }
     doRaisedeadCast();
@@ -353,19 +343,8 @@ void cast_subversion()
       return;
     }
     
-    const SpellData & currentSpell(s_spellData[player.selectedSpellId()]);
-    if (not currentSpell.isSpellInRange()) {
-      Text16 & text16(Text16::instance());
-      text16.clearMessage();
-      text16.displayMessage("OUT OF RANGE", Color(30,31,0)); // lblue
-      return;
-    }
-    
-    // do LOS check...
-    if (arena.isBlockedLOS()) {
-      Text16 & text16(Text16::instance());
-      text16.clearMessage();
-      text16.displayMessage("NO LINE OF SIGHT", Color(31,30,0)); // lblue
+    if (not checkRangeLos(player.selectedSpellId(), arena))
+    {
       return;
     }
     

@@ -17,7 +17,7 @@ class Text16
     static const int LEFT_ARROW_INDEX;
     //! Index of the right arrow
     static const int RIGHT_ARROW_INDEX;
-    //! Singleton instance.
+    //! Multiton instances.
     static Text16 & instance();
     //! Clear all text.
     void clear();
@@ -62,6 +62,9 @@ class Text16
     void displayMessage(const char * message, 
         unsigned short color=nds::Color(0,30,30));
 
+    int screen() const;
+
+
     /*! @brief convert an integer to a character string using decimal format.
      * @param n the integer value
      * @param str the array to store the return value in
@@ -71,11 +74,16 @@ class Text16
     //! The number of letter glyphs available.
     static const int MAX_LETTERS;
 
+    static void drawToTop();
+    static void drawToBottom();
+
+
   private:
+    static int s_screen;
     int m_screen;
     nds::Background * m_bg;
     int m_mapOffset;
-    Text16();
+    Text16(int screen);
     ~Text16();
     const char* emptyMessage() const;
 };

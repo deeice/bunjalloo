@@ -19,11 +19,6 @@ public:
    */
   int mainColour(int frame) const;
 
-  /** Returns if the spell is in range of the wizard. Uses the wizard index and target index from arena.
-   * @return true if the spell is in range, false otherwise.
-   */
-  bool isSpellInRange() const;
-
   /** Draw the justice graphic frame for the spell. Draws a multicoloured silhoutte.
    * @param frame the frame number to use.
    */

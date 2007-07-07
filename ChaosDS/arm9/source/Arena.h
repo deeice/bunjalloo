@@ -17,6 +17,9 @@ class Arena
     //! The size (width*height) of the arena
     static const int ARENA_SIZE;
 
+    static const int SCREEN;
+    static const int ALT_SCREEN;
+
     //! X position of top left corner in pixels
     static const int POSITION_X;
     //! Y position of top left corner in pixels
@@ -67,7 +70,7 @@ class Arena
      * @param col2 colour 2 of the frame in RGB format
      * @param height the height of the border, default Y_LIMIT
      */
-    void decorativeBorder(int pal, unsigned short col1,  unsigned short col2, int height=HEIGHT);
+    void decorativeBorder(int pal, unsigned short col1,  unsigned short col2, int height=HEIGHT, int screen=SCREEN);
 
     /*! @brief Set the palette used at the given location
      * @param x the x position 0-29
@@ -243,9 +246,10 @@ class Arena
 
     /*! @brief check if the currently selected spell can be cast to where the target square.
      * @param spellId the spell id to check the range of
+     * @param printMessage if true then the message "out of range" is drawn if the check fails.
      * @return true if the spell is in range, false otherwise.
      */
-    bool isSpellInRange(int spellId) const;
+    bool isSpellInRange(int spellId, bool printMessage) const;
 
     /*! @brief check if there is a tree next to where the current spell is being cast.
      * @param spellId the spell being cast.
@@ -258,10 +262,13 @@ class Arena
      * @return true if there is a wall-like spell next to the casting wizard, false otherwise.
      */
     bool isWallAdjacent(int spellId, int wizardId) const;
-    /** @return true if the line of sight between the start index and the
+
+    /** Check for Line of sight.
+     * @param printMessage if true then the message "No line of sight" is drawn in this case.
+     * @return true if the line of sight between the start index and the
      * target index is blocked. returns false if it is not 
      */
-    bool isBlockedLOS() const;
+    bool isBlockedLOS(bool printMessage) const;
 
     //! Fetch the X and Y positions of the current target index. (where is this used?)
     void targetXY(int & x, int & y);
@@ -426,6 +433,7 @@ class Arena
 
   private:
     nds::Background * m_bg;
+    nds::Background * m_alternateBg;
     nds::Sprite * m_cursor;
     int m_playerCount;
     int m_currentPlayer;

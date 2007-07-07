@@ -2,14 +2,16 @@
 #define ArenaTouchScreen_h_seen
 
 #include "TouchScreen.h"
+class ExamineSquare;
 class ArenaTouchScreen: public TouchScreen
 {
 
   public:
     ArenaTouchScreen();
+    ~ArenaTouchScreen();
 
     /** Examine the current square.  */
-    virtual void examine() = 0;
+    void examine();
 
     /** Execute action on the current square (selected twice) */
     virtual void execute() = 0;
@@ -21,6 +23,9 @@ class ArenaTouchScreen: public TouchScreen
     static void examineCb(void * arg);
     static void exitCb(void * arg);
     static void arenaCb(void * arg);
+
+  protected:
+    ExamineSquare * m_examineScreen;
 
 };
 #endif

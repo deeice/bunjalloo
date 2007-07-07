@@ -28,7 +28,11 @@ SDLhandler::SDLhandler():
     m_mainOnTop(true),
     m_fn(0),
     m_fadeLevel(0),
-    m_whiteLevel(0)
+    m_fadeLevelMain(0),
+    m_fadeLevelSub(0),
+    m_whiteLevel(0),
+    m_whiteLevelMain(0),
+    m_whiteLevelSub(0)
 {
   init();
   m_vramMain = new unsigned short[0x16000];
@@ -338,8 +342,9 @@ void SDLhandler::clear()
   else
   {
     u16 * vram = vramSub(0);
-    for (int x = 0; x < SCREEN_WIDTH; ++x) {
-      for (int y = 0; y < SCREEN_HEIGHT; ++y)
+    for (int y = 0; y < SCREEN_HEIGHT; ++y)
+    {
+      for (int x = 0; x < SCREEN_WIDTH; ++x)
       {
         drawPixel(x, y, 1, vram[x+y*SCREEN_WIDTH]);
       }
@@ -452,9 +457,14 @@ void SDLhandler::waitVsync()
   // pallete conversions:
   for (int i = 0; i < 256; i++)
   {
+    m_fadeLevel = m_fadeLevelMain;
+    m_whiteLevel = m_whiteLevelMain;
     m_backgroundPaletteSDL[i] = decodeColor(m_backgroundPalette[i]);
-    m_subBackgroundPaletteSDL[i] = decodeColor(m_subBackgroundPalette[i]);
     m_spritePaletteSDL[i] = decodeColor(m_spritePalette[i]);
+
+    m_fadeLevel = m_fadeLevelSub;
+    m_whiteLevel = m_whiteLevelSub;
+    m_subBackgroundPaletteSDL[i] = decodeColor(m_subBackgroundPalette[i]);
     m_subSpritePaletteSDL[i] = decodeColor(m_subSpritePalette[i]);
 #if 0
     if (m_backgroundPaletteSDL[i] or
@@ -503,21 +513,27 @@ void SDLhandler::waitVsync()
   }
 }
 
-void SDLhandler::setFade(int level)
+void SDLhandler::setFade(int screen, int level)
 {
   if (level > 16)
     level = 16;
   if (level < 0)
     level = 0;
-  m_fadeLevel = level;
+  if (screen)
+    m_fadeLevelSub = level;
+  else 
+    m_fadeLevelMain = level;
 }
-void SDLhandler::setWhite(int level)
+void SDLhandler::setWhite(int screen, int level)
 {
   if (level > 16)
     level = 16;
   if (level < 0)
     level = 0;
-  m_whiteLevel = level;
+  if (screen)
+    m_whiteLevelSub = level;
+  else 
+    m_whiteLevelMain = level;
 }
 
 void SDLhandler::lcdSwap()

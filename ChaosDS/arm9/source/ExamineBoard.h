@@ -17,7 +17,6 @@ class ExamineBoard: public ArenaTouchScreen
     // from ArenaTouchScreen
     virtual void next();
     virtual void execute();
-    virtual void examine();
 
   private:
     bool m_start;

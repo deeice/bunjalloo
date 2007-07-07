@@ -37,7 +37,7 @@ namespace Misc
    */
   void waitForLetgo();
 
-  /** Delay for the given number of frames. Optionally calls the main loo.
+  /** Delay for the given number of frames. Optionally calls the main loop.
    * @param time the number of frames to wait (1/60th of a second per frame)
    * @param callMainLoop true if the main loop should be called while frozen. 
    * Use this to keep animating the screen during the delay.

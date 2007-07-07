@@ -47,7 +47,7 @@ void SoundEffect::play() const
 {
   if (Options::instance().option(Options::SOUND_ENABLE)) {
     SoundEngine::instance();
-    playGenericSound(this->data, this->size);
+    //playGenericSound(this->data, this->size);
   }
 }
 

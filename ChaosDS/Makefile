@@ -1,4 +1,4 @@
-.PHONY: all clean docs
+.PHONY: all clean docs checkdupes
 
 target=$(shell basename $(CURDIR))
 
@@ -12,6 +12,10 @@ clean:
 
 docs:
 	@-doxygen doxygen.cfg
+
+
+checkdupes:
+	java -jar /home/rich/bin/checkstyle-all-4.3.jar -c /home/rich/bin/dupe.xml arm9/source/*.* 
 
 version := 2.0
 

@@ -46,37 +46,38 @@ static const char * const s_statStrings [] = {
 
 using namespace nds;
 
-ExamineSquare::ExamineSquare(ScreenI * returnScreen):
+ExamineSquare::ExamineSquare():
   m_first(true), 
   m_showCastChance(false),
-  m_returnScreen(returnScreen)
+  m_counter(0)
 {
+#if 0
   Rectangle screenRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
   m_hotspots.push_back(new HotSpot(screenRect, exitCb, this));
+#endif
   Arena::instance().cursorContents(m_creature, m_underneath, m_flags);
 }
 
 void ExamineSquare::show()
 {
-  Text16 & text16(Text16::instance());
-  Arena & arena(Arena::instance());
+  m_text = &Text16::instance();
   int creature(m_creature);
   int underneath(m_underneath);
   if (m_first) {
-    text16.clear();
-    arena.clear();
-    Graphics::instance().clearPalettes();
-    text16.setColour(1, Color(30,31,0));  // yel
-    text16.setColour(2, Color(0,31,31));  // light blue
-    text16.setColour(3, Color(30,31,31)); // white
-    text16.setColour(4, Color(30,0,31));  // purple
-    text16.setColour(5, Color(0,31,0));   // green
+    m_text->clear();
+    //arena.clear();
+    //Graphics::instance().clearPalettes();
+    m_text->setColour(1, Color(30,31,0));  // yel
+    m_text->setColour(2, Color(0,31,31));  // light blue
+    m_text->setColour(3, Color(30,31,31)); // white
+    m_text->setColour(4, Color(30,0,31));  // purple
+    m_text->setColour(5, Color(0,31,0));   // green
   } else {
     creature = m_underneath;
     underneath = 0;
   }
 
-  Text16::instance().clear();
+  m_text->clear();
   // which creature is here?
   if ((creature >= SPELL_KING_COBRA and creature < SPELL_GOOEY_BLOB)
       or (creature >= Arena::WIZARD_INDEX and not m_showCastChance))
@@ -87,13 +88,21 @@ void ExamineSquare::show()
     // it is another type of spell
     displaySpellData(creature);
   }
-  Video::instance().fade(false);
 }
+
 void ExamineSquare::animate()
-{}
+{
+  m_counter++;
+  if (m_counter == 50)
+  {
+    m_counter = 0;
+    next();
+  }
+}
 
 void ExamineSquare::handleKeys()
 {
+  /*
   u16 keysSlow = keysDownRepeat();
   if (keysSlow & KEY_B) {
     next();
@@ -102,6 +111,7 @@ void ExamineSquare::handleKeys()
   {
     handleTouch();
   }
+  */
 }
 
 void ExamineSquare::exitCb(void * arg)
@@ -111,14 +121,17 @@ void ExamineSquare::exitCb(void * arg)
 
 void ExamineSquare::next()
 {
+  Text16::drawToTop();
   if (m_first and m_underneath) {
-    Video::instance().fade();
     m_first = false;
     this->show();
-  } else {
-    Video::instance().fade();
-    GameState::instance().setNextScreen(m_returnScreen);
+  } 
+  else if (m_underneath)
+  {
+    m_first = true;
+    this->show();
   }
+  Text16::drawToBottom();
 }
 
 void ExamineSquare::printStat(int value, int index, int palette, 
@@ -126,6 +139,7 @@ void ExamineSquare::printStat(int value, int index, int palette,
     bool percent)
 {
   char statval[5];
+  Text16::drawToTop();
   Text16::instance().print(
       s_statStrings[index], 
       s_statPosition[index].startx, 
@@ -139,6 +153,7 @@ void ExamineSquare::printStat(int value, int index, int palette,
       s_statPosition[index].statx, 
       s_statPosition[index].starty, 
       palette2);
+  Text16::drawToBottom();
 
 }
 
@@ -159,8 +174,7 @@ void ExamineSquare::drawStats(const unsigned char * stat_pointer)
 void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
 {
   if (creature != 0) {
-    Text16 & text16(Text16::instance());
-    Arena::instance().decorativeBorder(15, Color(0,31,0), 0);
+    Arena::instance().decorativeBorder(15, Color(0,31,0), 0, Arena::HEIGHT, Arena::ALT_SCREEN);
     if (creature < Arena::WIZARD_INDEX) {
       // creature
       // c479
@@ -176,19 +190,19 @@ void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
         if (spellData.chaosRating < 0) {
           // chaos value, drawn in purple
           col = 4; // purple
-          text16.print("(CHAOS ", screen_x,1, col); 
+          m_text->print("(CHAOS ", screen_x,1, col); 
           screen_x += 7;
           Text16::int2a((spellData.chaosRating*-1), str);
-          text16.print(str, screen_x++,1, col); 
+          m_text->print(str, screen_x++,1, col); 
         } else {
           // law, drawn in light blue
           col = 2; // l blue
-          text16.print("(LAW ", screen_x,1, col); 
+          m_text->print("(LAW ", screen_x,1, col); 
           screen_x += 5;
           Text16::int2a(spellData.chaosRating, str);
-          text16.print(str, screen_x++,1, col); 
+          m_text->print(str, screen_x++,1, col); 
         }
-        text16.print(")", screen_x,1, col); 
+        m_text->print(")", screen_x,1, col); 
       } // end chaos / law type display
 
       bool need_comma(false);
@@ -199,17 +213,17 @@ void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
         const char * str = "MOUNT";
         if (need_comma) {
           // draw a comma...
-          text16.print(",", x,3, 5);
+          m_text->print(",", x,3, 5);
           x++;
         }
         // write value
-        text16.print(str, x,3, 5);
+        m_text->print(str, x,3, 5);
         x += strlen(str);
         need_comma = true;
       }
       // draw any "inside" wizards - for mounts or trees/castles
       if (underneath >= Arena::WIZARD_INDEX) {
-        text16.print("(", x,3, 5);
+        m_text->print("(", x,3, 5);
         x++;
         Wizard & player(Wizard::player(underneath-Arena::WIZARD_INDEX));
         player.printNameAt(x,3,5);
@@ -224,7 +238,7 @@ void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
         else {
           x += namelength;
         }
-        text16.print(")", x,3, 5);
+        m_text->print(")", x,3, 5);
         x++;
       }
 
@@ -233,11 +247,11 @@ void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
         const char * str = "FLYING";
         if (need_comma) {
           // draw a comma...
-          text16.print(",", x,3, 5);
+          m_text->print(",", x,3, 5);
           x++;
         }
         // write value
-        text16.print(str, x,3, 5);
+        m_text->print(str, x,3, 5);
         x += strlen(str);
         need_comma = true;
       }
@@ -248,11 +262,11 @@ void ExamineSquare::displayCreatureData(int creature, int underneath, int flags)
         const char * str = "UNDEAD";
         if (need_comma) {
           // draw a comma...
-          text16.print(",", x,3, 5);
+          m_text->print(",", x,3, 5);
           x++;
         }
         // write value
-        text16.print(str, x,3, 5);
+        m_text->print(str, x,3, 5);
         x += strlen(str);
         need_comma = true;
       }
@@ -279,8 +293,7 @@ void ExamineSquare::displaySpellData(int spellId)
   // code from 94e2
   // this is used for displaying a spell sheet...
   // set up the colours
-  Text16 & text16(Text16::instance());
-  Arena::instance().decorativeBorder(15, Color(0,0,31), Color(0,31,31)); 
+  Arena::instance().decorativeBorder(15, Color(0,0,31), Color(0,31,31), Arena::HEIGHT, Arena::ALT_SCREEN); 
   const SpellData & spellData(s_spellData[spellId]);
   // write spell name
   int start_x = 5;
@@ -296,44 +309,43 @@ void ExamineSquare::displaySpellData(int spellId)
     if (spellData.chaosRating < 0) {
       // chaos value, drawn in purple
       col = 4; // purp
-      text16.print("(CHAOS ", screen_x,start_y, col); 
+      m_text->print("(CHAOS ", screen_x,start_y, col); 
       screen_x += 7;
       
       Text16::int2a((spellData.chaosRating*-1), str);
-      text16.print(str, screen_x++,start_y, col); 
+      m_text->print(str, screen_x++,start_y, col); 
       
     } else {
       // law, drawn in light blue
       col = 2; // l blue
-      text16.print("(LAW ", screen_x,start_y, col); 
+      m_text->print("(LAW ", screen_x,start_y, col); 
       screen_x += 5;
       
       Text16::int2a(spellData.chaosRating, str);
-      text16.print(str, screen_x++,start_y, col); 
+      m_text->print(str, screen_x++,start_y, col); 
 
       
     }
-    text16.print(")", screen_x,start_y, col); 
+    m_text->print(")", screen_x,start_y, col); 
     
   } // end chaos / law type display
   start_y += 4;
   // casting chance...
-  text16.print(s_statStrings[7], start_x,start_y, 5);
+  m_text->print(s_statStrings[7], start_x,start_y, 5);
   char statval[10];
   Text16::int2a(spellData.realCastChance()*10, statval);
   strcat(statval, "/");
   
-  text16.print(statval, start_x+15, start_y, 1);
+  m_text->print(statval, start_x+15, start_y, 1);
   start_y+=4;
   // casting range
-  text16.print(s_statStrings[2], start_x,start_y, 5);
+  m_text->print(s_statStrings[2], start_x,start_y, 5);
   u8 A = spellData.castRange>>1;
   if (A > 10)
     A = 20;
   Text16::int2a(A, statval);
   
-  
-  text16.print(statval, start_x+6, start_y, 1);
+  m_text->print(statval, start_x+6, start_y, 1);
 }
 
 void ExamineSquare::showCastChance(bool castChance) {

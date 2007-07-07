@@ -1,18 +1,19 @@
 #include "libnds.h"
 #include <string.h>
 #include "ndspp.h"
+#include "Arena.h"
+#include "ExamineSquare.h"
+#include "GameMenu.h"
+#include "GameState.h"
+#include "Graphics.h"
+#include "HotSpot.h"
+#include "IllusionPicker.h"
+#include "Options.h"
+#include "SoundEffect.h"
 #include "SpellData.h"
 #include "SpellSelect.h"
-#include "ExamineSquare.h"
 #include "Text16.h"
-#include "Arena.h"
-#include "Graphics.h"
 #include "Wizard.h"
-#include "GameState.h"
-#include "GameMenu.h"
-#include "IllusionPicker.h"
-#include "SoundEffect.h"
-#include "HotSpot.h"
 
 using namespace nds;
 static const int ARROWHEAD_CHAR('+' - Text16::FIRST_CHAR_INDEX);
@@ -44,7 +45,7 @@ const static u16 s_castingChancePalette[6] = {
 };
 
 SpellSelect::SpellSelect(bool examine):
-  m_hilightItem(0), m_topIndex(0) , m_examine(examine)
+  m_hilightItem(0), m_topIndex(0) , m_examine(examine), m_examineScreen(0)
 { 
   // register callbacks for touch screen
   // "scrollbar" - the 2 little arrows:
@@ -65,6 +66,11 @@ SpellSelect::SpellSelect(bool examine):
   // return to menu
   Rectangle returnRect = {RETURN_MENU_X*8, RETURN_MENU_Y*8, 14*8, 16};
   m_hotspots.push_back(new HotSpot(returnRect, returnCb, this));
+}
+
+SpellSelect::~SpellSelect()
+{
+  delete m_examineScreen;
 }
 
 // implement ScreenI
@@ -174,6 +180,10 @@ void SpellSelect::spellSelectCb(void * arg)
       self->deselectSpell();
       self->m_hilightItem = spellIndex;
       self->selectSpell();
+    }
+    if (Options::instance().option(Options::ONE_TOUCH))
+    {
+      self->a();
     }
   }
   else {
@@ -349,16 +359,27 @@ void SpellSelect::r() {
 }
 
 void SpellSelect::examineSpell() {
-  Video::instance().fade();
+  if (m_examineScreen)
+  {
+    Video::instance(1).fade();
+    delete m_examineScreen;
+  }
+  else
+  {
+    Video::instance(1).setFade(16);
+  }
+  Text16::drawToTop();
   Arena & arena(Arena::instance());
   arena.setCursor(15,0);
   arena.setSpellAt(15, 0, Wizard::currentPlayer().spellId(m_hilightItem+m_topIndex));
-  SpellSelect * spellSelect(new SpellSelect(m_examine));
-  spellSelect->m_hilightItem = m_hilightItem;
-  spellSelect->m_topIndex = m_topIndex;
-  ExamineSquare * examineScreen(new ExamineSquare(spellSelect));
-  examineScreen->showCastChance(true);
-  GameState::instance().setNextScreen(examineScreen);
+  //SpellSelect * spellSelect(new SpellSelect(m_examine));
+  //spellSelect->m_hilightItem = m_hilightItem;
+  //spellSelect->m_topIndex = m_topIndex;
+  m_examineScreen = new ExamineSquare();
+  m_examineScreen->showCastChance(true);
+  m_examineScreen->show();
+  Text16::drawToBottom();
+  Video::instance(1).fade(false);
 }
 
 
@@ -390,7 +411,14 @@ void SpellSelect::chooseSpell() {
 }
 
 void SpellSelect::b(void) {
+  Video::instance(1).fade();
   Video::instance().fade();
+  Text16::drawToTop();
+  Text16::instance().clear();
+  Arena::instance().clear();
+  // remove any examined spell...
+  Arena::instance().setSpellAt(15, 0, 0);
+  Text16::drawToBottom();
   GameState::instance().setNextScreen(new GameMenu());
 }
 
@@ -411,7 +439,7 @@ void SpellSelect::selectSpell() {
   char str[30];
   Text16::int2a(chance*10, str);
   strcat(str,"/");
-  text16.print(str, 25,16, 5);
+  text16.print(str, PRESS_R_POS_X+7,16, 5);
   
   Color colour(s_castingChancePalette[chance/2]);
   colour.red(colour.red()+31);

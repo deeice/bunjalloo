@@ -84,6 +84,14 @@ namespace nds {
       //! set or unset the wraparound flag.
       void wraparound(bool );
 
+      /** Get the screen that the background is rendered on.
+       * @return the screen number
+       */
+      inline int screen() const
+      {
+        return m_bg.screen;
+      }
+
       //! @returns true if the mosaic flag is set.
       bool mosaic() const;
       //! set or unset the mosaic flag.

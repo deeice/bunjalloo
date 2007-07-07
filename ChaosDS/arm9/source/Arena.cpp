@@ -22,7 +22,6 @@
 extern const unsigned short _binary_bg_raw_start[];
 
 // static defines
-static const int ARENA_SCREEN(0);
 static const int ARENA_BORDER_1(2);
 static const int ARENA_BORDER_2(1);
 static const int ARENA_CORNER_TILE(601);
@@ -68,6 +67,8 @@ static const char s_attackPref[48] = {
 
 
 static const int X_LIMIT(31);
+const int Arena::SCREEN(0);
+const int Arena::ALT_SCREEN(1);
 const int Arena::HEIGHT(23);
 const int Arena::WIZARD_INDEX(0x2A);
 const int Arena::ARENA_SIZE(0x9f);
@@ -79,12 +80,15 @@ const int Arena::PIXEL_HEIGHT(10*16);
 // namespace usage
 using namespace nds;
 
-Arena::Arena():m_bg(new Background(ARENA_SCREEN,0,0,28,1)),
+Arena::Arena():
+  m_bg(new Background(SCREEN,0,0,28,1)),
+  m_alternateBg(new Background(ALT_SCREEN,0,0,28,1)),
   m_cursor(new Sprite(0, 16, 16, 0, 256)),
   m_playerCount(0), m_roundNumber(0),m_highlightCreations(HIGHLIGHT_INIT)
 {
   initialiseMap();
   m_bg->enable();
+  m_alternateBg->enable();
 }
 Arena::~Arena()
 {
@@ -125,7 +129,12 @@ void Arena::clearSquare(int x, int y) {
   // clears a square in the arena
   unsigned int startOAM = 16+x*2*16+2*y*30*16;
   // FIXME: use DMA
+  
   u16 * tileData = m_bg->tileData();
+  if (Text16::instance().screen() == ALT_SCREEN)
+  {
+    tileData = m_alternateBg->tileData();
+  }
   
   for (int i = 0; i < 32; i++)
   {
@@ -194,14 +203,20 @@ void Arena::countdownAnim()
 
 
 
-void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2, int height) {
+void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2, int height, int screen) {
   
+  Background * bg(m_bg);
+  if (screen != SCREEN)
+  {
+    bg = m_alternateBg;
+  }
+
   // set the colours
-  Palette palette(ARENA_SCREEN,pal);
+  Palette palette(bg->screen(),pal);
   palette[ARENA_BORDER_1] = col1;
   palette[ARENA_BORDER_2] = col2;
-  u16 * tileData = m_bg->tileData();
-  u16 * mapData = m_bg->mapData();
+  u16 * tileData = bg->tileData();
+  u16 * mapData = bg->mapData();
   // And these magic numbers??
   // board size = 10*15, == 20*30 tiles
   // each tile is 32 bytes (8*8 pixels, 4 bits per pixel)
@@ -236,9 +251,9 @@ void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2,
   for (int y=1; y < height; y++) {
     mapData[X_LIMIT+y*32] = ARENA_VERT_EDGE_TILE|TILE_FLIP_HORZ|(pal<<12);
   }
-  m_bg->xScroll(0);
-  m_bg->yScroll(0);
-  m_bg->update();
+  bg->xScroll(0);
+  bg->yScroll(0);
+  bg->update();
 }
 int Arena::players() const
 {
@@ -623,12 +638,18 @@ int Arena::distance(int square1, int square2) {
   return ydiff + (xdiff * 2);
 }
 
-bool Arena::isSpellInRange(int selectedSpellId) const
+bool Arena::isSpellInRange(int selectedSpellId, bool printMessage) const
 {
   int dist= distance(m_wizardIndex, m_targetIndex);
   int range = s_spellData[selectedSpellId].castRange;
   if (range >= dist) {
     return 1;
+  }
+  if (printMessage)
+  {
+    Text16 & text16(Text16::instance());
+    text16.clearMessage();
+    text16.displayMessage("OUT OF RANGE", Color(30,31,0));
   }
   return 0;
 }
@@ -715,9 +736,18 @@ void Arena::targetXY(int & x, int & y)
   getXY(m_targetIndex, x, y);
 }
 
-bool Arena::isBlockedLOS() const
+bool Arena::isBlockedLOS(bool printMessage) const
 {
-  return Line::doLine(Line::SIGHT);
+  if (Line::doLine(Line::SIGHT))
+  {
+    if (printMessage)
+    {
+      Text16 & text16(Text16::instance());
+      text16.clearMessage();
+      text16.displayMessage("NO LINE OF SIGHT", Color(0,30,31));
+    }
+  }
+  return false;
 }
 
 void Arena::drawPopFrame(int x, int y, int frame)

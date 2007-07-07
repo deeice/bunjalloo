@@ -103,7 +103,10 @@ void Video::setFade(int level)
   blend( BLDMOD_FADE,
          BLDMOD_BG0 | BLDMOD_BG1 | BLDMOD_BG2| BLDMOD_OBJ ,
          BLDMOD_BD );
-  BLEND_Y = level;
+  if (m_screen)
+    SUB_BLEND_Y = level;
+  else
+    BLEND_Y = level;
 }
 
 void Video::setMode(unsigned int mode)
@@ -147,7 +150,10 @@ void Video::setWhite(int level)
   blend( BLDMOD_WHITE,
         BLDMOD_BG2 | BLDMOD_BG1 | BLDMOD_BG0 | BLDMOD_BD | BLDMOD_OBJ,
          0 );
-  BLEND_Y = level;
+  if (m_screen)
+    SUB_BLEND_Y = level;
+  else
+    BLEND_Y = level;
 }
 
 void Video::whiteout(bool towhite, unsigned int speed)

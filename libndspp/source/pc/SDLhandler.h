@@ -53,8 +53,8 @@ class SDLhandler
     unsigned short * spriteGfx();
     unsigned short * subSpriteGfx();
 
-    void setFade(int level);
-    void setWhite(int level);
+    void setFade(int screen, int level);
+    void setWhite(int screen, int level);
     void lcdSwap();
     void mainOnTop();
     void mainOnBottom();
@@ -89,7 +89,11 @@ class SDLhandler
     VoidFunctionPointer m_fn;
 
     int m_fadeLevel;
+    int m_fadeLevelMain;
+    int m_fadeLevelSub;
     int m_whiteLevel;
+    int m_whiteLevelMain;
+    int m_whiteLevelSub;
 
     SDLhandler();
     ~SDLhandler();

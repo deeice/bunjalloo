@@ -2,22 +2,22 @@
 #include <string.h>
 #include "ndspp.h"
 #include "images.h"
-#include "Movement.h"
 #include "Arena.h"
-#include "Misc.h"
-#include "SoundEffect.h"
-#include "Wizard.h"
-#include "Interrupt.h"
-#include "Text16.h"
-#include "WizardCPU.h"
-#include "SpellData.h"
-#include "Options.h"
+#include "ExamineSquare.h"
 #include "GameMenu.h"
 #include "GameState.h"
-#include "VictoryScreen.h"
-#include "ExamineSquare.h"
-#include "Line.h"
 #include "Graphics.h"
+#include "Interrupt.h"
+#include "Line.h"
+#include "Misc.h"
+#include "Movement.h"
+#include "Options.h"
+#include "SoundEffect.h"
+#include "SpellData.h"
+#include "Text16.h"
+#include "VictoryScreen.h"
+#include "WizardCPU.h"
+#include "Wizard.h"
 
 using namespace nds;
 
@@ -157,6 +157,10 @@ void Movement::startMovementRound()
 void Movement::animate()
 {
   Arena::instance().drawCreatures();
+  if (m_examineScreen)
+  {
+    m_examineScreen->animate();
+  }
 }
 
 void Movement::vblank()
@@ -214,32 +218,6 @@ void Movement::handleKeys()
     }
   }
 #endif
-}
-
-void Movement::examine() 
-{
-  int theCreature = Arena::instance().cursorContents();
-  // return instantly if we examine an empty square
-  if (theCreature == 0) {
-    return;
-  }
-  Video::instance().fade();
-  Movement * movement = new Movement(false);
-  // copy to the "new" one...
-  movement->m_selectedCreature  = this->m_selectedCreature;
-  movement->m_rangeAttack       = this->m_rangeAttack;
-  movement->m_movementAllowance = this->m_movementAllowance;
-  movement->m_isFlying          = this->m_isFlying;
-  movement->m_engagedFlag       = this->m_engagedFlag;
-  movement->m_creatureId        = this->m_creatureId;
-  movement->m_rangeAttackVal    = this->m_rangeAttackVal;
-  movement->m_wizardMovementAllowance
-                                = this->m_wizardMovementAllowance;
-  movement->m_attacker          = this->m_attacker;
-  movement->m_highlightItem     = this->m_highlightItem;
-
-  GameState::instance().setNextScreen(new ExamineSquare(movement));
-  Arena::instance().enableCursor(false);
 }
 
 bool Movement::isFlying() const
@@ -906,9 +884,7 @@ void Movement::doRangeAttack()
     return;
   }
   // in range, not attacking self...
-  if (arena.isBlockedLOS()) {
-    Text16::instance().clearMessage();
-    Text16::instance().displayMessage("NO LINE OF SIGHT", Color(31,30,0)); // lblue
+  if (arena.isBlockedLOS(true)) {
     Misc::delay(4,false);
     return;
   }

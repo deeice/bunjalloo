@@ -307,8 +307,8 @@ void WizardCPU::setFurthestInrange()
     Arena::instance().targetXY(x, y);
     if (x < 0x10) {
       // in range
-      // isBlockedLOS()
-      if (not Arena::instance().isBlockedLOS()) {
+      // los check, no messages
+      if (not Arena::instance().isBlockedLOS(false)) {
         
         if (Arena::instance().atTarget() == 0) {
           // nothing here
@@ -1108,7 +1108,7 @@ void WizardCPU::aiCastTreesCastles()
         continue;
       }
       
-      if (arena.isBlockedLOS()) {
+      if (arena.isBlockedLOS(false)) {
         continue;
       }
       
@@ -1197,7 +1197,7 @@ void WizardCPU::aiCastWall()
     if (arena.isWallAdjacent(m_wizard.selectedSpellId(), m_wizard.id())) {
       continue;
     }
-    if (arena.isBlockedLOS()){
+    if (arena.isBlockedLOS(false)){
       continue;
     }
     
@@ -1208,6 +1208,26 @@ void WizardCPU::aiCastWall()
   }
   m_wizard.setCastAmount(0);
   m_targetSquareFound = tmpSquareFound;
+}
+
+void WizardCPU::addBestIndex(Arena & arena)
+{
+  // get the best index for each cast...
+  while (s_priorityTable[m_tableIndex] != 0xFF) {
+    // check the creature at this index...
+    int creature = arena.at(0, s_priorityTable[m_tableIndex]);
+    if (creature >= Arena::WIZARD_INDEX 
+        or (creature < SPELL_GOOEY_BLOB and creature != 0) )
+    {
+      // wizard or proper creature
+      arena.setTargetIndex(s_priorityTable[m_tableIndex]);
+      m_tableIndex++;
+      m_tableIndex++;
+      break;
+    } 
+    m_tableIndex++;
+    m_tableIndex++;
+  }
 }
 
 // from 9ef9
@@ -1225,29 +1245,13 @@ void WizardCPU::aiCastJustice()
   }
   Arena & arena(Arena::instance());
   u8 tmpStart = arena.wizardIndex();
-  u8 creature;
   while (m_wizard.castAmount() != 0) {
     arena.setStartIndex(tmpStart);
     arena.setTargetIndex(arena.startIndex());
     createAllEnemiesTable();
     m_tableIndex = 1;
     
-    // get the best index for each cast...
-    while (s_priorityTable[m_tableIndex] != 0xFF) {
-      // check the creature at this index...
-      creature = arena.at(0,s_priorityTable[m_tableIndex]);
-      if (creature >= Arena::WIZARD_INDEX 
-          or (creature < SPELL_GOOEY_BLOB and creature != 0) )
-      {
-        // wizard or proper creature
-        arena.setTargetIndex(s_priorityTable[m_tableIndex]);
-        m_tableIndex++;
-        m_tableIndex++;
-        break;
-      } 
-      m_tableIndex++;
-      m_tableIndex++;
-    }
+    addBestIndex(arena);
     if (s_priorityTable[m_tableIndex] == 0xFF) {
       return;
     }
@@ -1325,9 +1329,9 @@ void WizardCPU::aiCastMagicMissile()
     {
       // see if in range...
       
-      if (s_spellData[currentSpellId].isSpellInRange())
+      if (arena.isSpellInRange(currentSpellId, false))
       {
-        if (not arena.isBlockedLOS()) {
+        if (not arena.isBlockedLOS(false)) {
           // spell is good!
           m_targetSquareFound = 1;
           m_wizard.setCastAmount(0);
@@ -1370,7 +1374,7 @@ void WizardCPU::aiCastSubversion() {
       int si = arena.startIndex();
       int dist = Arena::distance(si, s_priorityTable[m_tableIndex]);
       arena.setStartIndex(s_priorityTable[m_tableIndex]);
-      bool losBlocked = arena.isBlockedLOS();
+      bool losBlocked = arena.isBlockedLOS(false);
       arena.setStartIndex(si);
       if (tmp_cast_range >= dist 
           and not losBlocked 
@@ -1410,33 +1414,18 @@ void WizardCPU::aiCastRaiseDead() {
   Misc::orderTable(m_targetCount, s_priorityTable);
   
   // get the best value and try and cast it...
-  // get the best index for each cast...
   m_tableIndex = 1;
   while (m_wizard.castAmount() != 0) {
-    while (s_priorityTable[m_tableIndex] != 0xFF) {
-      // check the creature at this index...
-      int creature = arena.at(0, s_priorityTable[m_tableIndex]);
-      if (creature >= Arena::WIZARD_INDEX 
-          or (creature < SPELL_GOOEY_BLOB and creature != 0) ) 
-      {
-        // wizard or proper creature
-        arena.setTargetIndex(s_priorityTable[m_tableIndex]);
-        m_tableIndex++;
-        m_tableIndex++;
-        break;
-      } 
-      m_tableIndex++;
-      m_tableIndex++;
-    }
+    addBestIndex(arena);
     if (s_priorityTable[m_tableIndex] == 0xFF) {
       return;
     }
     // ok, got a square to cast to... is it in range, los, etc?
     if (arena.atTarget() == 0 or arena.isDead(arena.targetIndex()))
       continue;
-    if (not s_spellData[m_wizard.selectedSpellId()].isSpellInRange())
+    if (not arena.isSpellInRange(m_wizard.selectedSpellId(), false))
       continue;
-    if (arena.isBlockedLOS())
+    if (arena.isBlockedLOS(false))
       continue;
     
     // got to here? good, print name and spell and do cast
