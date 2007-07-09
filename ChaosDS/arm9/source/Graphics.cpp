@@ -128,11 +128,12 @@ void Graphics::animateSelection(int pal, nds::Color & c)
   
 }
 
-
-void Graphics::draw_splat_frame(int x, int y, int frame)
+void Graphics::drawSplatFrame(int x, int y, int frame)
 {
   Arena::instance().setPalette8(x*2,y*2,8);
-  Arena::instance().drawGfx8(_binary_bolt_anim_raw_start, 
+  Arena::instance().drawGfx8(
+      _binary_bolt_anim_raw_start, 
       _binary_bolt_anim_map_start, 
       x*2, y*2, frame);
 }
+

@@ -12,11 +12,20 @@
 
 using namespace nds;
 
+static const int START_TEXT_POS_X(7);
+static const int START_TEXT_POS_Y(17);
+static const int OPTION_TEXT_POS_X(15);
+static const int OPTION_TEXT_POS_Y(17);
+static const int START_STR_LENGTH(5);
+static const int OPTIONS_STR_LENGTH(7);
+
 Splash::Splash()
 {
   Rectangle initial = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
-  Rectangle start = {7*8,17*8,5*8,16};
-  Rectangle option = {15*8,17*8,5*8,16};
+  Rectangle start = {START_TEXT_POS_X*8,START_TEXT_POS_Y*8,
+                     START_STR_LENGTH*8,16};
+  Rectangle option = {OPTION_TEXT_POS_X*8,OPTION_TEXT_POS_Y*8,
+                     OPTIONS_STR_LENGTH*8,16};
   m_hotspots.push_back(new HotSpot(initial, showMenuCb, this));
   m_hotspots.push_back(new HotSpot(start, startCb, this));
   m_hotspots.push_back(new HotSpot(option, optionCb, this));
@@ -115,8 +124,8 @@ void Splash::start(void) {
     m_hilightItem = 0;
     Text16 & textBg = Text16::instance();
     textBg.print("                    ", 2,17, 12);
-    textBg.print("START",    7, 17, 12);
-    textBg.print("OPTIONS", 15, 17, 13);
+    textBg.print("START",    START_TEXT_POS_X, START_TEXT_POS_Y, 12);
+    textBg.print("OPTIONS", OPTION_TEXT_POS_X, OPTION_TEXT_POS_Y, 13);
     selectItem(0);
   }
   else {

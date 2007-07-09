@@ -20,7 +20,7 @@ class Graphics
      * @param y position.
      * @param frame frame to draw.
      */
-    static void draw_splat_frame(int x, int y, int frame);
+    static void drawSplatFrame(int x, int y, int frame);
 
     /*! @brief load a pre-defined palette to the given palette index.
      * @param from the pre defined palette to load from

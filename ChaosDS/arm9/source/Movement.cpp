@@ -856,7 +856,7 @@ void Movement::doSuccessfulMove(int distanceMoved)
   
 }
 
-static void draw_breath_frame(int x, int y, int frame) {
+static void drawBreathFrame(int x, int y, int frame) {
     
   Arena::instance().setPalette8(x*2,y*2,8);
   Arena::instance().drawGfx8(_binary_fire_anim_raw_start, 
@@ -911,12 +911,12 @@ void Movement::doRangeAttack()
   void (*animFunc)(int x, int y, int frame);
   if (rangeAttackType == Line::DRAGON) {
     // dragon breath attack
-    animFunc = draw_breath_frame;
+    animFunc = drawBreathFrame;
     SoundEffect::play(SND_FIRE);
   }
   else {
     // bloop attack thing
-    animFunc = Graphics::draw_splat_frame;
+    animFunc = Graphics::drawSplatFrame;
     SoundEffect::play(SND_SPELLSUCCESS);
   }
   int x, y;

@@ -70,7 +70,7 @@ static const int X_LIMIT(31);
 const int Arena::SCREEN(0);
 const int Arena::ALT_SCREEN(1);
 const int Arena::HEIGHT(23);
-const int Arena::WIZARD_INDEX(0x2A);
+const int Arena::WIZARD_INDEX(SPELL_MAGIC_BOLT); // 42
 const int Arena::ARENA_SIZE(0x9f);
 const int Arena::POSITION_X(8);
 const int Arena::POSITION_Y(8);
@@ -194,7 +194,7 @@ void Arena::countdownAnim()
           m_arena[2][i]--;
         } 
         // each spell has a "speed" count
-        m_arena[1][i] = anim_speed_data[m_arena[0][i]-2];
+        m_arena[1][i] = anim_speed_data[m_arena[0][i]-SPELL_KING_COBRA];
       }
     }
   }
@@ -756,6 +756,7 @@ void Arena::drawPopFrame(int x, int y, int frame)
   drawGfx8(_binary_disappear_raw_start, _binary_disappear_map_start, x*2, y*2, frame);
 }
 
+
 void Arena::drawSpellcastFrame(int x, int y, int frame)
 {
   setPalette8(x*2, y*2, 0);
@@ -833,7 +834,7 @@ int Arena::containsEnemy(int index)
   // got to here? contains a living enemy creature....
   // get the "creature attack preference" value
   int range = distance(index, m_startIndex);
-  int pref = s_attackPref[creature-2] + 4;
+  int pref = s_attackPref[creature-SPELL_KING_COBRA] + 4;
 
   // pref += var_cc55; // no idea what is stored here... 0x60 for lightning
   // priority_offset .... a big fat global :-/
@@ -1662,8 +1663,8 @@ void Arena::splatAnimation()
   x--;
   y--;
   for (int i = 0; i < 8; i++) {
-    Misc::delay(2);
-    Graphics::draw_splat_frame(x, y, i);
+    Misc::delay(2,false);
+    Graphics::drawSplatFrame(x, y, i);
   }
 }
 
@@ -1820,7 +1821,7 @@ void Arena::destroyAllCreatures(int playerid)
       // draw the pop frame at this creatures location...
       int x,y;
       getXY(i, x, y);
-      Graphics::draw_splat_frame(x-1, y-1, frame);
+      Graphics::drawSplatFrame(x-1, y-1, frame);
       
       // do a sound effect, once only
       if (not samplePlayed) {
