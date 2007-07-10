@@ -4,18 +4,20 @@
 #include "ndspp.h"
 #include "images.h"
 #include "Arena.h"
-#include "Text16.h"
+#include "ArenaTouchScreen.h"
+#include "Casting.h"
 #include "ChaosData.h"
-#include "SpellData.h"
-#include "SoundEffect.h"
+#include "GameState.h"
 #include "Graphics.h"
-#include "Wizard.h"
-#include "WizardData.h"
 #include "Interrupt.h"
 #include "Line.h"
 #include "Misc.h"
 #include "Options.h"
-#include "Casting.h"
+#include "SoundEffect.h"
+#include "SpellData.h"
+#include "Text16.h"
+#include "WizardData.h"
+#include "Wizard.h"
 
 
 // external data
@@ -428,7 +430,9 @@ void Arena::setCursor(int x, int y)
   m_targetIndex = x+y*16;
   m_cursor->setXY(8+m_cursorPosition.x*16, 8+m_cursorPosition.y*16);
   m_cursor->update();
-  displayCursorContents();
+  if (x != 15) {
+    displayCursorContents();
+  }
 }
 
 void Arena::cursorSet()
@@ -438,6 +442,9 @@ void Arena::cursorSet()
 
 void Arena::displayCursorContents()
 {
+  ArenaTouchScreen * screen = (ArenaTouchScreen*) GameState::instance().currentScreen();
+  screen->examine();
+
   // dispay the creature name, etc in the right colours...
   // taken from bd18 onwards
   Text16 & text16(Text16::instance());
@@ -511,6 +518,7 @@ void Arena::displayCursorContents()
     text16.setColour(13, c);
     text16.print(str, x, Text16::MESSAGE_Y, 13);
   }
+
 }
 
 void Arena::drawCursor(Cursor_t type)
@@ -746,6 +754,7 @@ bool Arena::isBlockedLOS(bool printMessage) const
       text16.clearMessage();
       text16.displayMessage("NO LINE OF SIGHT", Color(0,30,31));
     }
+    return true;
   }
   return false;
 }

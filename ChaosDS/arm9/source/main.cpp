@@ -26,8 +26,8 @@ int main(void) {
   GameState::instance().setNextScreen(new Splash());
   keysSetRepeat(30,10);
   while(/*not Options::instance().option(Options::QUIT)*/ true) {
-    scanKeys();
     swiWaitForVBlank();
+    scanKeys();
     GameState::instance().mainLoopExecute();
   }
 

@@ -35,7 +35,9 @@ void ArenaTouchScreen::exitCb(void * arg)
 void ArenaTouchScreen::examineCb(void * arg)
 {
   ArenaTouchScreen * self = (ArenaTouchScreen*)arg;
-  self->examine();
+  if (self->m_examineScreen) {
+    self->m_examineScreen->handleKeys();
+  }
 }
 
 void ArenaTouchScreen::arenaCb(void * arg)
@@ -60,16 +62,33 @@ void ArenaTouchScreen::arenaCb(void * arg)
   }
 }
 
-void ArenaTouchScreen::examine() 
+void ArenaTouchScreen::deleteScreen()
 {
-  int theCreature = Arena::instance().cursorContents();
-  // return instantly if we examine an empty square
-  if (theCreature == 0) {
-    return;
-  }
   if (m_examineScreen) {
     Video::instance(1).fade();
     delete m_examineScreen;
+    m_examineScreen = 0;
+  }
+}
+
+void ArenaTouchScreen::examine() 
+{
+
+  // if examine the same square again, call "next" instead
+  if (m_examineScreen and Arena::instance().targetIndex() == m_examineScreen->index())
+  {
+    m_examineScreen->handleKeys();
+    return;
+  }
+
+  int theCreature = Arena::instance().cursorContents();
+  // remove current examining screen if we examine an empty square
+  if (theCreature == 0) {
+    deleteScreen();
+    return;
+  }
+  if (m_examineScreen) {
+    deleteScreen();
   }
   else {
     Video::instance(1).setFade(16);

@@ -36,10 +36,13 @@ class ExamineSquare: public ScreenI
     //! Set whether the cast chance should be shown or not.
     void showCastChance(bool castChance=true);
 
+    int index() const;
+
   private:
     int m_creature;
     int m_underneath;
     int m_flags;
+    int m_index;
     bool m_first;
     bool m_showCastChance; //!< Show the cast chance too. False by default.
     Text16 * m_text;

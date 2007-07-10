@@ -56,6 +56,7 @@ ExamineSquare::ExamineSquare():
   m_hotspots.push_back(new HotSpot(screenRect, exitCb, this));
 #endif
   Arena::instance().cursorContents(m_creature, m_underneath, m_flags);
+  m_index = Arena::instance().targetIndex();
 }
 
 void ExamineSquare::show()
@@ -95,23 +96,13 @@ void ExamineSquare::animate()
   m_counter++;
   if (m_counter == 50)
   {
-    m_counter = 0;
     next();
   }
 }
 
 void ExamineSquare::handleKeys()
 {
-  /*
-  u16 keysSlow = keysDownRepeat();
-  if (keysSlow & KEY_B) {
-    next();
-  }
-  if (keysSlow & KEY_TOUCH)
-  {
-    handleTouch();
-  }
-  */
+  next();
 }
 
 void ExamineSquare::exitCb(void * arg)
@@ -119,8 +110,14 @@ void ExamineSquare::exitCb(void * arg)
   ((ExamineSquare*)arg)->next();
 }
 
+int ExamineSquare::index() const
+{
+  return m_index;
+}
+
 void ExamineSquare::next()
 {
+  m_counter = 0;
   Text16::drawToTop();
   if (m_first and m_underneath) {
     m_first = false;

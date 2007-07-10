@@ -18,7 +18,7 @@ using namespace nds;
 static const int MENU_XPOS(4);
 static const int MENU_YPOS(8);
 static const int CHAOS_GAUGE_YPOS(4);
-static const int MAX_GAME_MENU(4);
+static const int MAX_GAME_MENU(3);
 static const int TOUCH_PAUSE(4);
 
 GameMenu::GameMenu()
