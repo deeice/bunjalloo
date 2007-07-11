@@ -33,10 +33,23 @@ class ExamineSquare: public ScreenI
     virtual void animate();
     virtual void handleKeys();
     
+    //! Hide the examine screen.
+    void hide();
+
+    /** Get the current hidden status.
+     * @return true if hidden, false if shown.
+     */
+    bool isHidden() const;
+    
     //! Set whether the cast chance should be shown or not.
     void showCastChance(bool castChance=true);
 
+    /** Get the arena index that is being examined.
+     * @return the arena index that is examined.
+     */
     int index() const;
+
+    void initialise();
 
   private:
     int m_creature;
@@ -47,6 +60,7 @@ class ExamineSquare: public ScreenI
     bool m_showCastChance; //!< Show the cast chance too. False by default.
     Text16 * m_text;
     int m_counter;
+    bool m_shown;
     static void exitCb(void * arg);
 
     void displayCreatureData(int creature, int underneath, int flags);

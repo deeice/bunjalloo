@@ -24,8 +24,6 @@ class ArenaTouchScreen: public TouchScreen
     static void exitCb(void * arg);
     static void arenaCb(void * arg);
 
-    void deleteScreen();
-
   protected:
     ExamineSquare * m_examineScreen;
 

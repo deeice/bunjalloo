@@ -1,15 +1,14 @@
 #include <stdio.h>
+#include "Arena.h"
+#include "Casting.h"
+#include "GameState.h"
+#include "magic.h"
+#include "Misc.h"
+#include "Movement.h"
+#include "SpellData.h"
+#include "Text16.h"
 #include "WizardCPU.h"
 #include "Wizard.h"
-#include "Arena.h"
-#include "SpellData.h"
-#include "Misc.h"
-#include "Text16.h"
-#include "Casting.h"
-#include "Movement.h"
-#include "GameState.h"
-#include "Casting.h"
-#include "magic.h"
 
 // create the priority table - stored at d3f2
 // will contain {priority, index} for all living enemy creatures

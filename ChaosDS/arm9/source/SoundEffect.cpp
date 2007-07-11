@@ -1,7 +1,7 @@
 #include "libnds.h"
 #include "sounds.h"
-#include "SoundEffect.h"
 #include "Options.h"
+#include "SoundEffect.h"
 
 const SoundEffect s_soundData[] = {
   {_binary_attack_snd_start, (u32)_binary_attack_snd_size},

@@ -1,17 +1,17 @@
 #include <string.h>
 #include "libnds.h"
 #include "ndspp.h"
-#include "EditName.h"
-#include "Text16.h"
 #include "Arena.h"
-#include "Wizard.h"
-#include "Graphics.h"
-#include "Misc.h"
-#include "GameState.h"
 #include "CreatePlayers.h"
-#include "SoundEffect.h"
+#include "EditName.h"
+#include "GameState.h"
+#include "Graphics.h"
 #include "HotSpot.h"
+#include "Misc.h"
 #include "Rectangle.h"
+#include "SoundEffect.h"
+#include "Text16.h"
+#include "Wizard.h"
 
 using nds::Color;
 using nds::Rectangle;

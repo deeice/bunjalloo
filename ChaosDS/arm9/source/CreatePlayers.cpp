@@ -1,20 +1,20 @@
-#include "libnds.h"
 #include <algorithm>
 #include <functional>
+#include "libnds.h"
 #include "ndspp.h"
 
-#include "SoundEffect.h"
+#include "Arena.h"
 #include "CreatePlayers.h"
+#include "EditName.h"
 #include "GameMenu.h"
 #include "GameState.h"
-#include "Arena.h"
 #include "Graphics.h"
+#include "HotSpot.h"
+#include "Misc.h"
+#include "Rectangle.h"
+#include "SoundEffect.h"
 #include "Text16.h"
 #include "Wizard.h"
-#include "Rectangle.h"
-#include "HotSpot.h"
-#include "EditName.h"
-#include "Misc.h"
 
 using namespace nds;
 static const int PLAYER_WIZ_Y(2);

@@ -1,16 +1,17 @@
 #include "libnds.h"
 #include "ndspp.h"
-#include "ArenaTouchScreen.h"
 #include "Arena.h"
-#include "Text16.h"
-#include "HotSpot.h"
-#include "Options.h"
+#include "ArenaTouchScreen.h"
 #include "ExamineSquare.h"
+#include "HotSpot.h"
+#include "Misc.h"
+#include "Options.h"
+#include "Text16.h"
 
 using nds::Rectangle;
 using nds::Video;
 
-ArenaTouchScreen::ArenaTouchScreen():m_examineScreen(0)
+ArenaTouchScreen::ArenaTouchScreen():m_examineScreen(new ExamineSquare)
 {
   Rectangle screenRect = {Arena::POSITION_X, Arena::POSITION_Y, Arena::PIXEL_WIDTH, Arena::PIXEL_HEIGHT};
   m_hotspots.push_back(new HotSpot(screenRect, arenaCb, this));
@@ -62,20 +63,11 @@ void ArenaTouchScreen::arenaCb(void * arg)
   }
 }
 
-void ArenaTouchScreen::deleteScreen()
-{
-  if (m_examineScreen) {
-    Video::instance(1).fade();
-    delete m_examineScreen;
-    m_examineScreen = 0;
-  }
-}
-
 void ArenaTouchScreen::examine() 
 {
 
   // if examine the same square again, call "next" instead
-  if (m_examineScreen and Arena::instance().targetIndex() == m_examineScreen->index())
+  if (not m_examineScreen->isHidden() and Arena::instance().targetIndex() == m_examineScreen->index())
   {
     m_examineScreen->handleKeys();
     return;
@@ -84,19 +76,13 @@ void ArenaTouchScreen::examine()
   int theCreature = Arena::instance().cursorContents();
   // remove current examining screen if we examine an empty square
   if (theCreature == 0) {
-    deleteScreen();
+    m_examineScreen->hide();
     return;
   }
-  if (m_examineScreen) {
-    deleteScreen();
-  }
-  else {
-    Video::instance(1).setFade(16);
-  }
-  m_examineScreen = new ExamineSquare();
+  m_examineScreen->hide();
   Text16::drawToTop();
+  m_examineScreen->initialise();
   m_examineScreen->show();
   Text16::drawToBottom();
-  Video::instance(1).fade(false);
 }
 

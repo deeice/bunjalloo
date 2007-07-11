@@ -1,7 +1,7 @@
 #include <algorithm>
 #include "libnds.h"
-#include "TouchScreen.h"
 #include "HotSpot.h"
+#include "TouchScreen.h"
 
 static void rmHS(HotSpot * hs)
 {
@@ -9,7 +9,12 @@ static void rmHS(HotSpot * hs)
 }
 TouchScreen::~TouchScreen() 
 {
+  clearHotSpots();
+}
+void TouchScreen::clearHotSpots()
+{
   std::for_each(m_hotspots.begin(), m_hotspots.end(), rmHS);
+  m_hotspots.clear();
 }
 
 void TouchScreen::handleTouch()

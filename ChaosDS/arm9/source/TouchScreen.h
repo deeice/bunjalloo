@@ -24,5 +24,6 @@ class TouchScreen: public ScreenI
     std::list<HotSpot*> m_hotspots;
     //! Handle touch screen presses
     void handleTouch();
+    void clearHotSpots();
 };
 #endif

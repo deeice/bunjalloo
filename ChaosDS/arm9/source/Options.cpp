@@ -1,16 +1,16 @@
-#include "libnds.h"
 #include <string.h>
+#include "libnds.h"
 #include "ndspp.h"
-#include "SoundEffect.h"
-#include "Options.h"
 #include "Arena.h"
-#include "Graphics.h"
-#include "Text16.h"
-#include "Misc.h"
 #include "GameState.h"
-#include "Splash.h"
-#include "Rectangle.h"
+#include "Graphics.h"
 #include "HotSpot.h"
+#include "Misc.h"
+#include "Options.h"
+#include "Rectangle.h"
+#include "SoundEffect.h"
+#include "Splash.h"
+#include "Text16.h"
 
 using namespace std;
 using namespace nds;

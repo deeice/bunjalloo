@@ -27,8 +27,7 @@ static const int ARROW_DOWN_Y(17+1);
 static const int RETURN_MENU_X(12);
 static const int RETURN_MENU_Y(21);
 
-static const int PRESS_R_POS_X(19+1);
-static const int PRESS_R_POS_Y(4+1);
+static const int CAST_CHANCE_POS_X(19+1);
 
 static const int PLAYER_NAME_X(1+1);
 static const int PLAYER_NAME_Y(1+1);
@@ -99,10 +98,6 @@ void SpellSelect::show()
   text16.setColour(6, Color(0,30,30));
   
   text16.setColour(14, Color(21,21,29));
-  if (not m_examine) {
-    text16.print("PRESS R TO", PRESS_R_POS_X, PRESS_R_POS_Y, 14);  
-    text16.print("EXAMINE",    PRESS_R_POS_X, PRESS_R_POS_Y+2, 14);
-  }
   text16.print("RETURN TO MENU", RETURN_MENU_X, RETURN_MENU_Y, 14);
   
   // write all the spells
@@ -359,27 +354,21 @@ void SpellSelect::r() {
 }
 
 void SpellSelect::examineSpell() {
-  if (m_examineScreen)
-  {
-    Video::instance(1).fade();
-    delete m_examineScreen;
-  }
-  else
-  {
-    Video::instance(1).setFade(16);
-  }
+  
   Text16::drawToTop();
   Arena & arena(Arena::instance());
   arena.setCursor(15,0);
   arena.setSpellAt(15, 0, Wizard::currentPlayer().spellId(m_hilightItem+m_topIndex));
-  //SpellSelect * spellSelect(new SpellSelect(m_examine));
-  //spellSelect->m_hilightItem = m_hilightItem;
-  //spellSelect->m_topIndex = m_topIndex;
-  m_examineScreen = new ExamineSquare();
+
+  if (not m_examineScreen) {
+    m_examineScreen = new ExamineSquare();
+  } else {
+    m_examineScreen->initialise();
+  }
   m_examineScreen->showCastChance(true);
   m_examineScreen->show();
   Text16::drawToBottom();
-  Video::instance(1).fade(false);
+  Video::instance(1).setFade(0);
 }
 
 
@@ -434,12 +423,12 @@ void SpellSelect::selectSpell() {
   
   int chance = currentSpell->realCastChance() + 1;
   Text16 & text16 = Text16::instance();
-  text16.print("CASTING",     PRESS_R_POS_X,CAST_CHANCE_POS_Y, 2);
-  text16.print("CHANCE=    ", PRESS_R_POS_X,CAST_CHANCE_POS_Y+2, 2);
+  text16.print("CASTING",     CAST_CHANCE_POS_X,CAST_CHANCE_POS_Y, 2);
+  text16.print("CHANCE=    ", CAST_CHANCE_POS_X,CAST_CHANCE_POS_Y+2, 2);
   char str[30];
   Text16::int2a(chance*10, str);
   strcat(str,"/");
-  text16.print(str, PRESS_R_POS_X+7,16, 5);
+  text16.print(str, CAST_CHANCE_POS_X+7,16, 5);
   
   Color colour(s_castingChancePalette[chance/2]);
   colour.red(colour.red()+31);
@@ -448,6 +437,7 @@ void SpellSelect::selectSpell() {
   
   text16.setColour(10, colour);
   Graphics::instance().setAnimationParams(-15,-8);
+  examineSpell();
 }
 
 void SpellSelect::deselectSpell(int item) {

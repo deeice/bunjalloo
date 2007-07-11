@@ -1,12 +1,12 @@
 #include "libnds.h"
 #include "ndspp.h"
+#include "GameMenu.h"
+#include "GameState.h"
+#include "HotSpot.h"
 #include "IllusionPicker.h"
+#include "SoundEffect.h"
 #include "Text16.h"
 #include "Wizard.h"
-#include "SoundEffect.h"
-#include "GameState.h"
-#include "GameMenu.h"
-#include "HotSpot.h"
 
 using nds::Rectangle;
 
@@ -15,6 +15,7 @@ static const int YES_POS_Y(10);
 
 IllusionPicker::IllusionPicker():SpellSelect(false) 
 {
+  clearHotSpots();
   Rectangle yesRect = { YES_POS_X*8, YES_POS_Y*8, 6*8, 16};
   m_hotspots.push_back(new HotSpot(yesRect, yesCb, this));
   Rectangle noRect = { (YES_POS_X*8)+yesRect.w, YES_POS_Y*8, 6*8, 16};

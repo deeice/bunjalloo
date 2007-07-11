@@ -1,5 +1,5 @@
-#include "libnds.h"
 #include <stdio.h>
+#include "libnds.h"
 #include "ndspp.h"
 #include "Text16.h"
 #include "Wizard.h"

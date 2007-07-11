@@ -1,14 +1,15 @@
 #include "libnds.h"
-#include <string.h>
 #include "ndspp.h"
+#include <string.h>
+#include "Arena.h"
 #include "ExamineSquare.h"
 #include "GameState.h"
-#include "Arena.h"
-#include "Wizard.h"
-#include "Text16.h"
 #include "Graphics.h"
-#include "SpellData.h"
 #include "HotSpot.h"
+#include "Misc.h"
+#include "SpellData.h"
+#include "Text16.h"
+#include "Wizard.h"
 
 
 //! define the positions of the stats
@@ -46,15 +47,17 @@ static const char * const s_statStrings [] = {
 
 using namespace nds;
 
-ExamineSquare::ExamineSquare():
-  m_first(true), 
-  m_showCastChance(false),
-  m_counter(0)
+ExamineSquare::ExamineSquare()
 {
-#if 0
-  Rectangle screenRect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-  m_hotspots.push_back(new HotSpot(screenRect, exitCb, this));
-#endif
+  m_shown = false;
+  initialise();
+}
+
+void ExamineSquare::initialise()
+{
+  m_first = true;
+  m_showCastChance = false;
+  m_counter = 0;
   Arena::instance().cursorContents(m_creature, m_underneath, m_flags);
   m_index = Arena::instance().targetIndex();
 }
@@ -89,14 +92,19 @@ void ExamineSquare::show()
     // it is another type of spell
     displaySpellData(creature);
   }
+  Misc::delay(1, false);
+  Video::instance(1).setFade(0);
+  m_shown = true;
 }
 
 void ExamineSquare::animate()
 {
-  m_counter++;
-  if (m_counter == 50)
-  {
-    next();
+  if (m_shown) {
+    m_counter++;
+    if (m_counter == 50)
+    {
+      next();
+    }
   }
 }
 
@@ -347,4 +355,18 @@ void ExamineSquare::displaySpellData(int spellId)
 
 void ExamineSquare::showCastChance(bool castChance) {
   m_showCastChance = castChance;
+}
+
+void ExamineSquare::hide()
+{
+  if (m_shown) {
+    Misc::delay(1, false);
+    Video::instance(1).setFade(16);
+    m_shown = false;
+  }
+}
+
+bool ExamineSquare::isHidden() const
+{
+  return not m_shown;
 }

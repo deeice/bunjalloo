@@ -1,12 +1,12 @@
-#include "libnds.h"
 #include <algorithm>
 #include <functional>
+#include "libnds.h"
 #include "ndspp.h"
 #include "images.h"
-#include "Text16.h"
-#include "Graphics.h"
 #include "Arena.h"
 #include "GfxData.h"
+#include "Graphics.h"
+#include "Text16.h"
 #include "Wizard.h"
 
 using namespace nds;

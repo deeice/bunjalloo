@@ -1,7 +1,7 @@
 #include "libnds.h"
-#include "SpellData.h"
 #include "images.h"
 #include "magic.h"
+#include "SpellData.h"
 const SpellData s_spellData[] = {
   {"None", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, cast_disbelieve, 0, 0, 0, },
   {"Disbelieve", 0, 10, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, cast_disbelieve, 0, 0, 0, },

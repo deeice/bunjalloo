@@ -1,10 +1,10 @@
 #include <string.h>
-#include "SpellData.h"
-#include "Casting.h"
-#include "Text16.h"
-#include "Graphics.h"
-#include "Wizard.h"
 #include "Arena.h"
+#include "Casting.h"
+#include "Graphics.h"
+#include "SpellData.h"
+#include "Text16.h"
+#include "Wizard.h"
 
 
 void SpellData::printName(int x, int y, int pal) const

@@ -1,11 +1,11 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "libnds.h"
-#include "Misc.h"
 #include "GameState.h"
-#include "Wizard.h"
+#include "Misc.h"
 #include "Rectangle.h"
 #include "Text16.h"
+#include "Wizard.h"
 
 // default seed
 static unsigned int s_random(14071977);

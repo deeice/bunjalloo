@@ -1,13 +1,12 @@
-#include "libnds.h"
 #include <stdio.h>
+#include "libnds.h"
 #include "ndspp.h"
-#include "Graphics.h"
-#include "Interrupt.h"
 #include "Arena.h"
 #include "GameState.h"
+#include "Graphics.h"
+#include "Interrupt.h"
 #include "Splash.h"
 #include "Text16.h"
-//#include "Options.h"
 
 int main(void) {
   irqInit();

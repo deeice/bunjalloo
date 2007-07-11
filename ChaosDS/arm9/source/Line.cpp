@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include "libnds.h"
 #include "ndspp.h"
-#include "Line.h"
 #include "Arena.h"
 #include "Graphics.h"
+#include "Line.h"
 #include "SpellData.h"
 
 using namespace nds;

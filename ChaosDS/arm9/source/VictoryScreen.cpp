@@ -1,15 +1,15 @@
 #include "libnds.h"
 #include "ndspp.h"
-#include "VictoryScreen.h"
 #include "Arena.h"
-#include "Text16.h"
-#include "Wizard.h"
-#include "Misc.h"
-#include "Graphics.h"
 #include "Casting.h"
 #include "GameState.h"
-#include "Splash.h"
+#include "Graphics.h"
 #include "HotSpot.h"
+#include "Misc.h"
+#include "Splash.h"
+#include "Text16.h"
+#include "VictoryScreen.h"
+#include "Wizard.h"
 
 using namespace nds;
 

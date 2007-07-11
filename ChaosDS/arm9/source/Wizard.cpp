@@ -3,18 +3,18 @@
 #include <string.h>
 #include "libnds.h"
 #include "ndspp.h"
-#include "Wizard.h"
-#include "Graphics.h"
 #include "Arena.h"
-#include "Misc.h"
 #include "Casting.h"
-#include "Text16.h"
 #include "ExamineSquare.h"
-#include "WizardData.h"
-#include "WizardCPU.h"
-#include "SpellData.h"
-#include "SoundEffect.h"
+#include "Graphics.h"
+#include "Misc.h"
 #include "Options.h"
+#include "SoundEffect.h"
+#include "SpellData.h"
+#include "Text16.h"
+#include "WizardCPU.h"
+#include "WizardData.h"
+#include "Wizard.h"
 
 using namespace Misc;
 using nds::Color;

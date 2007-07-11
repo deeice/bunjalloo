@@ -1,5 +1,5 @@
-#include "libnds.h"
 #include <string.h>
+#include "libnds.h"
 #include "ndspp.h"
 #include "images.h"
 #include "Arena.h"

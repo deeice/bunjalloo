@@ -1,16 +1,16 @@
 #include "libnds.h"
 #include "ndspp.h"
-#include "Interrupt.h"
+#include "Arena.h"
 #include "ExamineBoard.h"
 #include "ExamineSquare.h"
-#include "GameState.h"
 #include "GameMenu.h"
-#include "Arena.h"
-#include "Line.h"
-#include "Wizard.h"
-#include "Text16.h"
-#include "Misc.h"
+#include "GameState.h"
 #include "HotSpot.h"
+#include "Interrupt.h"
+#include "Line.h"
+#include "Misc.h"
+#include "Text16.h"
+#include "Wizard.h"
 
 using namespace nds;
 
