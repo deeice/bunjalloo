@@ -24,6 +24,7 @@ using namespace nds;
 Client::Client(const char * ip, int port):
   m_ip(ip),
   m_port(port),
+  m_tcp_socket(0),
   m_connected(false),
   m_timeout(1)
 { }

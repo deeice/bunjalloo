@@ -77,6 +77,9 @@ namespace nds {
       int m_timeout;
 
       bool connect(sockaddr_in & socketAddress);
+
+      Client(const Client &);
+      const Client operator=(const Client &);
   };
 }
 #endif

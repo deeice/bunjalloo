@@ -41,6 +41,8 @@ namespace nds
 
     private:
       FileImplementation * m_details;
+      File(const File &);
+      const File operator=(const File &);
   };
 }
 

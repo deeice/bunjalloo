@@ -43,6 +43,8 @@ class nds::FileImplementation
   private:
     FILE * m_stream;
   
+    FileImplementation(const FileImplementation&);
+    const FileImplementation operator=(const FileImplementation&);
 };
 
 // delegate class:

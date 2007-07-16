@@ -9,7 +9,7 @@ Color::Color(unsigned short s):m_c(s)
 {}
 Color::Color(int r, 
     int g, 
-    int b)
+    int b):m_c(0)
 { 
   set(r,g,b);
 }

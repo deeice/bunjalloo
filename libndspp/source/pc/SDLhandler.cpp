@@ -75,7 +75,7 @@ void SDLhandler::enableVblank(VoidFunctionPointer fn)
 {
   // runs at 30 frames... hmm..
   if (!m_vblank) {
-    m_vblank =  SDL_AddTimer((33/10)*10, vblank, this);
+    m_vblank =  SDL_AddTimer((10/10)*10, vblank, this);
   }
   m_fn = fn;
   waitVsync();
@@ -259,6 +259,9 @@ Uint32 SDLhandler::decodeColor(unsigned short rgb16)
     red = (int)fred;
     green = (int)fgreen;
     blue = (int)fblue;
+    if (m_fadeLevel == 16) {
+      red = green = blue = 0;
+    }
   }
   if (m_whiteLevel) {
     // if white = 16, then all are 256
@@ -448,12 +451,7 @@ unsigned short * SDLhandler::vramSub(int offset) {
 void SDLhandler::waitVsync()
 {
   int tmpGF = m_frames;
-  while (tmpGF == m_frames) {
-    SDL_Delay(5);
-  }
 
-  if (m_fn)
-    m_fn();
   // pallete conversions:
   for (int i = 0; i < 256; i++)
   {
@@ -511,6 +509,11 @@ void SDLhandler::waitVsync()
         break;
     }
   }
+  while (tmpGF == m_frames) {
+    SDL_Delay(5);
+  }
+  if (m_fn)
+    m_fn();
 }
 
 void SDLhandler::setFade(int screen, int level)

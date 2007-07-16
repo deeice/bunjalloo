@@ -292,6 +292,9 @@ namespace nds {
       void setAttrBit(unsigned int attr, unsigned int bits,bool set,unsigned int clear=0);
 
       void draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char * gfx);
+
+      Sprite(const Sprite &);
+      const Sprite & operator=(const Sprite &);
   };
 };
 #endif

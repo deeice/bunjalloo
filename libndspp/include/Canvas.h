@@ -24,6 +24,10 @@ namespace nds
       Canvas();
       ~Canvas();
 
+      Canvas(const Canvas &);
+      const Canvas operator=(const Canvas &);
+      
+
   };
 }
 #endif
