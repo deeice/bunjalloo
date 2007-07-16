@@ -86,5 +86,8 @@ class Text16
     Text16(int screen);
     ~Text16();
     const char* emptyMessage() const;
+
+    Text16(const Text16 &);
+    const Text16 & operator=(const Text16 &);
 };
 #endif

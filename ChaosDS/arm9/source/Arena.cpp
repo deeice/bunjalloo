@@ -66,8 +66,6 @@ static const char s_attackPref[48] = {
   /*wizards*/
   0x09,0x09,0x09,0x09,0x09,0x09,0x09,0x09,};
   
-
-
 static const int X_LIMIT(31);
 const int Arena::SCREEN(0);
 const int Arena::ALT_SCREEN(1);

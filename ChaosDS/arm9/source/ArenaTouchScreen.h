@@ -24,6 +24,9 @@ class ArenaTouchScreen: public TouchScreen
     static void exitCb(void * arg);
     static void arenaCb(void * arg);
 
+    ArenaTouchScreen(const ArenaTouchScreen &);
+    const ArenaTouchScreen & operator=(const ArenaTouchScreen &);
+
   protected:
     ExamineSquare * m_examineScreen;
 

@@ -479,6 +479,9 @@ class Arena
     Arena();
     ~Arena();
 
+    Arena(const Arena &);
+    const Arena & operator=(const Arena &);
+
     /*! @brief Initialise the arena background map values.  */
     void initialiseMap();
 

@@ -44,6 +44,8 @@ class Line
     unsigned short * m_mapData;
     unsigned short * m_tileData;
 
+    Line(const Line &);
+    const Line & operator=(const Line &);
 
     void drawPixel4bpp(unsigned short x, unsigned short y);
     void xyUpper(int index, int & x, int & y) const;
