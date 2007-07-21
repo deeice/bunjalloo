@@ -17,7 +17,7 @@ docs:
 checkdupes:
 	java -jar /home/rich/bin/checkstyle-all-4.3.jar -c /home/rich/bin/dupe.xml arm9/source/*.* 
 
-version := 2.0
+version := 3.0
 
 distdir=$(target)-$(version)
 dist: all
