@@ -22,7 +22,7 @@ void Config::initialise(Document * doc, ControllerI * controller)
   m_document = doc;
   m_controller = controller;
   m_document->registerView(this);
-  //reload();
+  reload();
 }
 
 void Config::reload()

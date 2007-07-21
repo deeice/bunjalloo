@@ -22,7 +22,7 @@ static const char s_errorText[] = {
 Controller::Controller()
   : m_document(new Document())
 {
-  //Config::instance().initialise(m_document, this);
+  Config::instance().initialise(m_document, this);
   m_view = new View(*m_document, *this);
 }
 

@@ -1,16 +1,15 @@
 #include <assert.h>
+#include "libnds.h"
 #include "ndspp.h"
-#include "TextArea.h"
-#include "Palette.h"
 #include "Canvas.h"
 #include "Config.h"
+#include "File.h"
 #include "Font.h"
 #include "FormControl.h"
-#include "UTF8.h"
-#include "File.h"
 #include "Link.h"
-#include "libnds.h"
-#include "vera.h"
+#include "Palette.h"
+#include "TextArea.h"
+#include "UTF8.h"
 
 using namespace nds;
 using namespace std;
@@ -32,7 +31,7 @@ TextArea::TextArea() :
   m_fgCol(0),
   m_indentLevel(0)
 {
-  string fontname = "";//= Config::instance().font();
+  string fontname = Config::instance().font();
   init(fontname);
 }
 
@@ -70,10 +69,10 @@ int TextArea::startLine() const
 
 void TextArea::init(const std::string & fontBase)
 {
-  //m_font=new Font(fontBase);
-  //setPalette(fontBase+".pal");
-  m_font = new Font(_binary_vera_img_start,_binary_vera_map_start);
-  setPalette((char*)_binary_vera_pal_start, 32);
+  m_font=new Font(fontBase);
+  setPalette(fontBase+".pal");
+  //m_font = new Font(_binary_vera_img_start,_binary_vera_map_start);
+  //setPalette((char*)_binary_vera_pal_start, 32);
 }
 
 void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)

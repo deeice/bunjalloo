@@ -39,7 +39,7 @@ LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -mno-fpu -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=  -lndspp9 -lfat -lnds9 -ldswifi9 -limg -lfont
+LIBS	:=  -lndspp9 -lfat -lnds9 -ldswifi9 -limg
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
