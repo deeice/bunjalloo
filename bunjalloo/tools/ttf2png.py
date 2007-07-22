@@ -11,8 +11,9 @@ import Image, ImageDraw, ImageFont
 # @return aligned value
 # 
 def align(value, alignment):
-  if value & (alignment-1):
-    value += alignment - (value&(alignment-1))
+  remainder = (value & (alignment-1))
+  if  remainder != 0:
+    value += (alignment - remainder)
   return value
 
 ## Crappy file wrapper that can write raw bytes.
@@ -60,6 +61,7 @@ class FileWrapper:
 
 ## SubFont class to wrap a TrueType Font
 class SubFont:
+  MINIMAL_ALIGN = 2
   ## Constructor.
   # @param self the self reference.
   # @param fileName the name of the TTF file
@@ -118,7 +120,7 @@ class SubFont:
       if (h > self.__height):
         self.__height = h
       # align 2 bytes
-      self.__totalWidth += align(w, 2)
+      self.__totalWidth += align(w, SubFont.MINIMAL_ALIGN)
     self.__totalWidth = align(self.__totalWidth, 8)
 
   ## Get the TrueType Font.
@@ -156,8 +158,12 @@ class SubFont:
     for i in self.glyphRanges():
       #fp.write('%2d // h: %2d val:'%self.glyphSize(unichr(i)))
       w, h = self.__ttf.getsize(unichr(i))
-      w = align(w, 2)
-      #print unichr(i) +' '+ str(position) +' ' +str(w)
+      w = align(w, SubFont.MINIMAL_ALIGN)
+      try:
+        #print unichr(i) +' '+ str(position) +' ' +str(w)
+        pass
+      except UnicodeEncodeError,ex:
+        pass
       fp.write8(w)
       fp.write16(position)
       position += w
@@ -185,7 +191,13 @@ class BitmapFont:
     for i in self._subfont.glyphRanges():
       self._draw.text((position, 0), unichr(i), fill='black')
       w, h = self._subfont.ttf().getsize(unichr(i))
-      position += align(w, 2)
+      w = align(w, SubFont.MINIMAL_ALIGN)
+      try:
+        #print unichr(i) +' '+ str(position) +' ' +str(w)
+        pass
+      except UnicodeEncodeError,ex:
+        pass
+      position += w
     self._image.save(self._subfont.basename()+'.png','PNG')
 
     self._subfont.save()
@@ -199,7 +211,7 @@ class BitmapFont:
 
 if __name__ == '__main__':
 
-  if len(sys.argv) == 0:
+  if len(sys.argv) == 1:
     print "Usage ttf2png.py ttf height [range,range ...]"
 
   if len(sys.argv) > 2:
