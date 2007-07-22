@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+""" Convert a True Type font file to png and map file """
 import sys
 import struct
 import os.path
@@ -28,7 +29,7 @@ class FileWrapper:
   # @param whatever the stuff to write
   def write(self, whatever):
     self.__fp.write(whatever)
-  
+
   ## Write a value as an 8 bit "byte"
   # @param self the self reference.
   # @param uint8 the value to write, it is truncated to 8 bits
@@ -70,7 +71,7 @@ class SubFont:
     self.__width = 0
     self.__totalWidth = 0
     self.__ttf = ImageFont.truetype(fileName, size)
-  
+
   ## Set the height attribute of the font
   def setHeight(self, height):
     self.__height = height
@@ -80,7 +81,7 @@ class SubFont:
   # @param lower the lower boundary of the range.
   # @param upper the upper boundary of the range.
   def addRange(self, lower, upper):
-    self.__ranges.append((lower,upper))
+    self.__ranges.append((lower, upper))
     self.recalculate()
 
   ## Fetch the current ranges in one big range
@@ -88,19 +89,19 @@ class SubFont:
   def glyphRanges(self):
     ranges = []
     for rangeTuplet in self.__ranges:
-      ranges.extend(range(rangeTuplet[0],rangeTuplet[1]))
+      ranges.extend(range(rangeTuplet[0], rangeTuplet[1]))
     return ranges
 
   ## Fetch the current height.
   def height(self):
     return self.__height
-  
+
   ## Fetch the basename of the font file.
   def basename(self):
     return os.path.basename(self.__fileName)
 
   ## Fetch the font file name.
-  def fileName():
+  def fileName(self):
     return self.__fileName
 
   ## Fetch the total width of the font (used ranges).
@@ -111,14 +112,14 @@ class SubFont:
   def recalculate(self):
     self.__totalWidth = 0
     for i in self.glyphRanges():
-      w,h = self.__ttf.getsize(unichr(i))
+      w, h = self.__ttf.getsize(unichr(i))
       if (w > self.__width):
         self.__width = w
       if (h > self.__height):
         self.__height = h
       # align 2 bytes
       self.__totalWidth += align(w, 2)
-    self.__totalWidth = align(self.__totalWidth,8)
+    self.__totalWidth = align(self.__totalWidth, 8)
 
   ## Get the TrueType Font.
   def ttf(self):
@@ -154,8 +155,8 @@ class SubFont:
     # save sizes of the glyphs - all have the same fixed height, so just save the width.
     for i in self.glyphRanges():
       #fp.write('%2d // h: %2d val:'%self.glyphSize(unichr(i)))
-      w,h = self.__ttf.getsize(unichr(i))
-      w = align(w,2)
+      w, h = self.__ttf.getsize(unichr(i))
+      w = align(w, 2)
       #print unichr(i) +' '+ str(position) +' ' +str(w)
       fp.write8(w)
       fp.write16(position)
@@ -183,8 +184,8 @@ class BitmapFont:
     position = 0
     for i in self._subfont.glyphRanges():
       self._draw.text((position, 0), unichr(i), fill='black')
-      w,h = self._subfont.ttf().getsize(unichr(i))
-      position += align(w,2)
+      w, h = self._subfont.ttf().getsize(unichr(i))
+      position += align(w, 2)
     self._image.save(self._subfont.basename()+'.png','PNG')
 
     self._subfont.save()
@@ -193,7 +194,7 @@ class BitmapFont:
   # @param self the self reference.
   # @param rangeArg the range, a string like "0,100"
   def addRange(self, rangeArg):
-    bounds=rangeArg.split(',')
+    bounds = rangeArg.split(',')
     self._subfont.addRange(int(bounds[0],0),int(bounds[1],0))
 
 if __name__ == '__main__':
@@ -205,7 +206,7 @@ if __name__ == '__main__':
     f = BitmapFont(sys.argv[1], int(sys.argv[2]))
   elif len(sys.argv) > 1:
     f = BitmapFont(sys.argv[1])
-  
+
   if len(sys.argv) > 3:
     for r in sys.argv[3:]:
       f.addRange(r)
@@ -218,4 +219,4 @@ if __name__ == '__main__':
     f.addRange('8216,8218')
     f.addRange('8220,8221')
     f.addRange('8226,8226')
-  f.save()  
+  f.save()
