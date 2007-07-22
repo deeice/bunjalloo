@@ -1,8 +1,10 @@
+#include "File.h"
 #include "Config.h"
 #include "Document.h"
 #include "ControllerI.h"
 #include "HtmlElement.h"
 #include "URI.h"
+#include "CookieJar.h"
 const std::string Config::s_configFile("file:///"DATADIR"/config.html");
 using namespace std;
 
@@ -29,36 +31,40 @@ void Config::reload()
 {
   m_reload = true;
   m_controller->doUri(s_configFile);
+  // now configure the cookie list
+  // read each line in the m_cookieList file and add it as an allowed one to CookieJar
+  CookieJar * cookieJar(m_document->cookieJar());
+  nds::File cookieList;
+  cookieList.open(m_cookieList.c_str());
+  if (cookieList.is_open())
+  {
+    // read each line
+    int size = cookieList.size();
+    char * data = new char[size+2];
+    cookieList.read(data);
+    int startOfLine = 0;
+    for (int i = 0; i < size; ++i)
+    {
+      if (data[i] == '\n')
+      {
+        string domain(&data[startOfLine], i-startOfLine);
+        cookieJar->setAcceptCookies(domain);
+        startOfLine = i+1;
+      }
+    }
+    delete [] data;
+    cookieList.close();
+  }
 }
 
 void Config::notify()
 {
-  if (m_document->status() == Document::LOADED) {
+  if (m_document->status() == Document::LOADED)
+  {
     if (m_reload)
     {
-      const HtmlElement * root = m_document->rootNode();
-      const HtmlElement * body = root->lastChild();
-      if (body->isa("body"))
-      {
-        const ElementList & children = body->children();
-        string fonttxt("font");
-        ElementList::const_iterator font = find_if(children.begin(), children.end(), 
-            bind2nd( mem_fun(&HtmlElement::isa_ptr), &fonttxt)
-            );
-        if (font != children.end())
-        {
-          UnicodeString tmp;
-          tmp = (*font)->attribute("id"); 
-          m_font.clear();
-          for (unsigned int i = 0; i < tmp.length();++i)
-            m_font += tmp[i];
-          if (m_font[0] != '/')
-          {
-            m_font = "/"+m_font;
-          }
-          m_font = DATADIR+m_font;
-        }
-      }
+      configMember("font", m_font);
+      configMember("li", m_cookieList);
       m_reload = false;
     }
   }
@@ -67,10 +73,40 @@ void Config::notify()
 Config::Config():
     m_document(0),
     m_controller(0),
-    m_reload(false)
+    m_reload(false),
+    m_font("fonts/vera"),
+    m_cookieList("cfg/ckallow.lst")
 {
 }
 
 Config::~Config()
 {
+}
+
+void Config::configMember(const std::string & tag, std::string & member)
+{
+  const HtmlElement * root = m_document->rootNode();
+  const HtmlElement * body = root->lastChild();
+  if (body->isa("body"))
+  {
+    const ElementList & children = body->children();
+    ElementList::const_iterator element = find_if(children.begin(), children.end(), 
+        bind2nd( mem_fun(&HtmlElement::isa_ptr), &tag)
+        );
+    if (element != children.end())
+    {
+      UnicodeString tmp;
+      tmp = (*element)->attribute("id"); 
+      member.clear();
+      for (unsigned int i = 0; i < tmp.length(); ++i) {
+        member += tmp[i];
+      }
+      if (member[0] != '/')
+      {
+        member = "/"+member;
+        member = DATADIR+member;
+      }
+      // else is absolute path.
+    }
+  }
 }

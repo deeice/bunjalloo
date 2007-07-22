@@ -57,7 +57,7 @@ class Document
      */
     const HtmlElement * rootNode() const;
 
-    const CookieJar * cookieJar() const;
+    CookieJar * cookieJar() const;
 
     /** Get the status of the document.
      * @return the current status.

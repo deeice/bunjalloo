@@ -177,7 +177,7 @@ std::string Document::gotoNextHistory()
   return "";
 }
 
-const CookieJar * Document::cookieJar() const
+CookieJar * Document::cookieJar() const
 {
   return m_cookieJar;
 }

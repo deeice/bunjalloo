@@ -36,7 +36,29 @@ class CookieJar
     void cookiesForRequest(const URI & request,
         std::string & headers) const;
 
+    /** Check if there is a cookie for this domain already in the jar.
+     * @param uri the URL of the cookie.
+     * @param name the cookie name.
+     * @return true if there is a cookie from the domain with the given name, false otherwise.
+     */
     bool hasCookieForDomain(const URI & uri, const std::string & name) const;
+
+    /** Check if we should accept cookies from the given domain.
+     * @param domain the domain that has sent the cookie.
+     * @return true if we accept cookies from this domain. false otherwise.
+     */
+    bool acceptCookies(const std::string & domain) const;
+
+    /** Set if we should accept cookies, or not, from the given domain.
+     * Bunjalloo uses a white-list cookie management policy - everything is
+     * rejected unless it is on the list. Therefore this function is used to
+     * add domains from the internal list of allowed sites, or to remove
+     * already added sites.
+     * @param domain the domain to accept or reject cookies from.
+     * @param accept if true, then cookies are accepted for the domain.
+     * Otherwise they are rejected.
+     */
+    void setAcceptCookies(const std::string & domain, bool accept=true) const;
 
   private:
     //! List of cookies.

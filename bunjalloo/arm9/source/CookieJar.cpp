@@ -43,6 +43,12 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
   bool domainInitialDot = false; // FIXME! what does it mean??
   string path = uri.fileName();
 
+  if (not acceptCookies(domain))
+  {
+    // this server is blocked.
+    return;
+  }
+
   ParameterSet paramSet(request);
   const KeyValueMap & keyValueMap(paramSet.keyValueMap());
   if ( paramSet.hasParameter("path") )
@@ -110,4 +116,13 @@ void CookieJar::cookiesForRequest(const URI & request,
     tmp += "\r\n";
     headers = tmp;
   }
+}
+
+bool CookieJar::acceptCookies(const std::string & domain) const
+{
+  return true;
+}
+
+void CookieJar::setAcceptCookies(const std::string & domain, bool accept) const
+{
 }

@@ -43,3 +43,16 @@ void CookieTest::testRepeats()
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
 }
+
+void CookieTest::testAccept()
+{
+  const string server("foobar.com");
+  bool expected = false;
+  bool result = m_cookieJar->acceptCookies(server);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Should reject foobar.com", expected, result);
+  // now set to allow
+  m_cookieJar->setAcceptCookies(server, true);
+  expected = true;
+  result = m_cookieJar->acceptCookies(server);
+  CPPUNIT_ASSERT_EQUAL_MESSAGE("Should allow foobar.com", expected, result);
+}

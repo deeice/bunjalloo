@@ -10,11 +10,13 @@ class CookieTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST_SUITE( CookieTest );
     CPPUNIT_TEST( testBasic );
     CPPUNIT_TEST( testRepeats );
+    CPPUNIT_TEST( testAccept );
     CPPUNIT_TEST_SUITE_END();
 
   public:
     void testBasic();
     void testRepeats();
+    void testAccept();
     void setUp();
     void tearDown();
 

@@ -25,9 +25,12 @@ class Config: public ViewI
     ControllerI * m_controller;
     bool m_reload;
     std::string m_font;
+    std::string m_cookieList;
 
     Config();
     ~Config();
+
+    void configMember(const std::string & tag, std::string & member);
 
 };
 
