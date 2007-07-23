@@ -19,6 +19,7 @@ void CookieTest::tearDown()
 void CookieTest::testBasic()
 {
   URI uri("http://localhost/");
+  m_cookieJar->setAcceptCookies("localhost");
   // this is from the server Set-Cookie (from HeaderParser):
   string requestHeader = "a=b\r\n";
   // this is what we return next time:
@@ -32,6 +33,7 @@ void CookieTest::testBasic()
 void CookieTest::testRepeats()
 {
   URI uri("http://localhost/");
+  m_cookieJar->setAcceptCookies("localhost");
   // this is from the server Set-Cookie (from HeaderParser):
   string requestHeader = "a=b\r\n";
   // this is what we return next time:

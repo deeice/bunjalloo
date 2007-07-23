@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 class Cookie;
 class URI;
@@ -58,11 +59,14 @@ class CookieJar
      * @param accept if true, then cookies are accepted for the domain.
      * Otherwise they are rejected.
      */
-    void setAcceptCookies(const std::string & domain, bool accept=true) const;
+    void setAcceptCookies(const std::string & domain, bool accept=true);
 
   private:
     //! List of cookies.
     std::vector<Cookie *> m_cookies;
+
+    typedef std::map<std::string, bool> AcceptedDomainMap;
+    AcceptedDomainMap m_acceptedDomains;
 
 
 };

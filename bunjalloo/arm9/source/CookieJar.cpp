@@ -120,9 +120,20 @@ void CookieJar::cookiesForRequest(const URI & request,
 
 bool CookieJar::acceptCookies(const std::string & domain) const
 {
-  return true;
+  AcceptedDomainMap::const_iterator it(m_acceptedDomains.find(domain));
+  return (it != m_acceptedDomains.end());
 }
 
-void CookieJar::setAcceptCookies(const std::string & domain, bool accept) const
+void CookieJar::setAcceptCookies(const std::string & domain, bool accept)
 {
+  if (not accept and acceptCookies(domain))
+  {
+    // no longer accept them
+    m_acceptedDomains.erase(domain);
+  }
+
+  if (accept) 
+  {
+    m_acceptedDomains[domain] = accept;
+  }
 }
