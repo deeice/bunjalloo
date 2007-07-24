@@ -11,9 +11,10 @@ class ParameterSet
   public:
 
     /** Create a parameter set based on a semi-colon (;) seperated list of key, value pairs.
-     * @param semiColonSeperatedKeyValueString the semi-colon seperated list of key, value pairs.
+     * @param keyValueString the list of key, value pairs seperated by @a sep
+     * @param sep the seperator for the @a keyValueString argument. ';' is the default seperator.
      */
-    ParameterSet(const std::string & semiColonSeperatedKeyValueString);
+    ParameterSet(const std::string & keyValueString, char sep=';');
 
     /** Check if this set has the requested parameter.
      * @param key the name of the parameter to check.

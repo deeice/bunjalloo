@@ -23,8 +23,10 @@ arm9/source/version.c:
 	if [ -e $@ ] ; then \
 	  currversion=$$(grep VERSION $@ | cut -d' ' -f6 | tr -d '"') ;\
 	fi ;\
-	if [ $$currversion -lt $$version ] ; then \
-	  echo 'const char * VERSION = "'$$version'" ;' > $@ ;\
+	if [ x$$version != x ] ; then \
+	  if [ $$currversion -lt $$version ] ; then \
+	    echo 'const char * VERSION = "'$$version'" ;' > $@ ;\
+	  fi ;\
 	fi
 
 

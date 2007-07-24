@@ -6,6 +6,14 @@ class URI
 {
   public:
 
+    enum Protocol_t
+    {
+      UNKNOWN_PROTOCOL,
+      HTTP_PROTOCOL,
+      FILE_PROTOCOL,
+      CONFIG_PROTOCOL
+    };
+
     static UnicodeString escape(const UnicodeString & input);
 
     /** Create an empty URI.*/
@@ -21,10 +29,11 @@ class URI
      */
     void setUri(const std::string & uriString);
 
-    /** Is this URI a file?.
-     * @return true if the URI represents a file:// URI.
+    /** Get the protocol of this URI.
+     * @return the URI protocol type, e.g. if it represents a file:// URI returns FILE_PROTOCOL.
      */
-    bool isFile() const;
+    Protocol_t protocol() const;
+
     /** Is the URI valid (syntactically). It is entirely possible too have a
      * valid URI that describes a non existent file or location.
      * @return true if the URI looks good.
@@ -61,10 +70,11 @@ class URI
      */
     void setMethod(const std::string & method);
 
-    /** Navigate to a new URI.
+    /** Navigate to a new URI and return the new address.
      * @param newFile the relative or absolute URI.
+     * @return the new URI address.
      */
-    void navigateTo(const std::string & newFile);
+    URI navigateTo(const std::string & newFile) const;
 
     /** Set an extra request header to be sent as part of the HTTP request.
      * @param headerData the header data to set

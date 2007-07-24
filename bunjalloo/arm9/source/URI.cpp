@@ -5,6 +5,10 @@
 
 using namespace std;
 
+static const char * const HTTP_STR = "http";
+static const char * const FILE_STR = "file";
+static const char * const CONFIG_STR = "config";
+
 URI::URI()
   : m_method("GET"), m_protocol(""),m_address(""),m_requestHeader("")
 {
@@ -24,7 +28,8 @@ void URI::setUri(const std::string & uriString)
     if (not m_fix) {
       return;
     }
-    tmpUri = "http://" + uriString;
+    tmpUri = HTTP_STR;
+    tmpUri += "://" + uriString;
     sep = tmpUri.find(":");
   }
   if (sep != -1) {
@@ -34,14 +39,29 @@ void URI::setUri(const std::string & uriString)
   }
 }
 
-bool URI::isFile() const
+URI::Protocol_t URI::protocol() const
 {
-  return m_protocol == "file";
+  if (m_protocol == FILE_STR) return FILE_PROTOCOL;
+  if (m_protocol == HTTP_STR) return HTTP_PROTOCOL;
+  if (m_protocol == CONFIG_STR) return CONFIG_PROTOCOL;
+  return UNKNOWN_PROTOCOL;
 }
 
 bool URI::isValid() const
 {
-  return m_address != "" and (m_protocol == "http" or m_protocol == "file");
+  if (m_address == "") 
+  {
+    return false;
+  }
+  switch (protocol())
+  {
+    case FILE_PROTOCOL:
+    case HTTP_PROTOCOL:
+    case CONFIG_PROTOCOL:
+      return true;
+    default:
+      return false;
+  }
 }
 
 int URI::port() const
@@ -65,7 +85,7 @@ int URI::port() const
 
 std::string URI::server() const
 {
-  if (isValid() and not isFile())
+  if (isValid() and protocol() == HTTP_PROTOCOL )
   {
     int firstSlash(m_address.find("/"));
     int portDots(m_address.find(":"));
@@ -91,24 +111,32 @@ std::string URI::server() const
 
 const std::string URI::fileName() const
 {
-  if (isFile()) {
-    return m_address;
-  } else {
-    // strip off server
-    int firstSlash(m_address.find("/"));
-    if (firstSlash == -1)
-    {
-      return "/";
-    }
-    else
-    {
-      return m_address.substr(firstSlash, m_address.length()-firstSlash);
-    }
-    string serverName(server());
-    if (m_address.length() == serverName.length()) {
-      return "/";
-    }
-    return m_address.substr(serverName.length(), m_address.length());
+  switch(protocol())
+  {
+    case FILE_PROTOCOL:
+    case CONFIG_PROTOCOL:
+      return m_address;
+    case HTTP_PROTOCOL:
+      {
+        // strip off server
+        int firstSlash(m_address.find("/"));
+        if (firstSlash == -1)
+        {
+          return "/";
+        }
+        else
+        {
+          return m_address.substr(firstSlash, m_address.length()-firstSlash);
+        }
+        string serverName(server());
+        if (m_address.length() == serverName.length()) {
+          return "/";
+        }
+        return m_address.substr(serverName.length(), m_address.length());
+      }
+      break;
+    default:
+      return "";
   }
 }
 
@@ -132,25 +160,25 @@ static void tokenize(const string& str,
     }
 }
 
-void URI::navigateTo(const std::string & newFile )
+URI URI::navigateTo(const std::string & newFile ) const
 {
   if (newFile.length() == 0)
-    return;
+    return *this;
 
   // first see if the newFile is a valid URI
   URI tmp(*this);
-  m_address = "";
-  m_protocol = "";
-  m_fix = false;
+  tmp.m_address = "";
+  tmp.m_protocol = "";
+  tmp.m_fix = false;
 
-  setUri(newFile);
-  if (isValid() and m_protocol == tmp.m_protocol)
+  tmp.setUri(newFile);
+  if (tmp.isValid() and m_protocol == tmp.m_protocol)
   {
     // that is all, nothing else to do
-    m_fix = tmp.m_fix;
-    return;
+    tmp.m_fix = m_fix;
+    return tmp;
   }
-  *this = tmp;
+  tmp = *this;
   // first change this: www.server.com/foo/bar -> navigateTo("/path/to/file") 
   // should go to www.server.com/path/to/file
   // string newURI(m_protocol);
@@ -159,27 +187,27 @@ void URI::navigateTo(const std::string & newFile )
   if (newFile[0] == '/')
   {
     // ok, so strip off the last part and try again
-    int firstSlash(m_address.find("/"));
+    int firstSlash(tmp.m_address.find("/"));
     if (firstSlash == -1)
     {
-      newURI += m_address + newFile;
+      newURI += tmp.m_address + newFile;
     }
     else
     {
-      newURI += m_address.substr(0,firstSlash) + newFile;
+      newURI += tmp.m_address.substr(0,firstSlash) + newFile;
     }
   }
   else
   {
     // strip off last part of file and go here.
-    int lastSlash(m_address.rfind("/"));
+    int lastSlash(tmp.m_address.rfind("/"));
     if (lastSlash == -1)
     {
-      newURI += m_address + "/" + newFile;
+      newURI += tmp.m_address + "/" + newFile;
     }
     else
     {
-      newURI += m_address.substr(0,lastSlash) +"/"+ newFile;
+      newURI += tmp.m_address.substr(0,lastSlash) +"/"+ newFile;
     }
   }
   // if contains dots -> strip them out
@@ -204,9 +232,9 @@ void URI::navigateTo(const std::string & newFile )
     }
   }
   it = newPath.begin();
-  newURI = m_protocol + "://";
+  newURI = tmp.m_protocol + "://";
   bool needSep(false);
-  if (m_protocol == "file")
+  if (protocol() == FILE_PROTOCOL)
     needSep = true;
 
   for (; it != newPath.end();++it)
@@ -219,7 +247,8 @@ void URI::navigateTo(const std::string & newFile )
     needSep = true;
   }
   
-  setUri(newURI);
+  tmp.setUri(newURI);
+  return tmp;
 }
 
 const std::string URI::asString() const

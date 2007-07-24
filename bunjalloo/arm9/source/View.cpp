@@ -92,15 +92,13 @@ void View::browse()
     if (clicked != 0)
     {
       clicked->highlight();
-
       string s = clicked->href();
-      string original = m_document.uri();
-      URI tmpURI(original);
-      tmpURI.navigateTo(s);
+
       m_textArea->setStartLine(0);
+      URI uri(m_document.uri());
       //cout << "Navigated to " << tmpURI.asString() << endl;
       // TODO - "navigate or download"..
-      m_controller.doUri( tmpURI.asString() );
+      m_controller.doUri( uri.navigateTo(s).asString() );
     }
     else
     {

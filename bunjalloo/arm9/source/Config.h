@@ -19,6 +19,13 @@ class Config: public ViewI
     void reload();
 
     void notify();
+    
+    /** Post a configuration string from a form. The encodedString has the usual
+     * cgi format of param1=value&param2=value...
+     * @param encodedString contains a CGI-like string containing & seperated key, value pairs.
+     */
+    void postConfiguration(const std::string & encodedString);
+
   private:
     static const std::string s_configFile;
     Document * m_document;
@@ -26,11 +33,14 @@ class Config: public ViewI
     bool m_reload;
     std::string m_font;
     std::string m_cookieList;
+    std::string m_proxy;
+    bool m_useProxy;
 
     Config();
     ~Config();
 
     void configMember(const std::string & tag, std::string & member);
+    void handleCookies() const;
 
 };
 

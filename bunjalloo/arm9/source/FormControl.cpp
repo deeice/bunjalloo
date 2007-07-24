@@ -162,7 +162,7 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
     m_processedData = unicode2string(currentNode->attribute("action"));
     m_processedData += '?';
     m_processedData += processedData;
-    uri.navigateTo(m_processedData);
+    uri = uri.navigateTo(m_processedData);
   }
   else {
     std::string contentType = "Content-Type: application/x-www-form-urlencoded\r\n";

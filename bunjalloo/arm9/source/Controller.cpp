@@ -45,19 +45,33 @@ void Controller::doUri(const std::string & uriString)
   doUri(URI(uriString));
 }
 
+void Controller::handleUri(const URI & uri)
+{
+  switch (uri.protocol())
+  {
+    case URI::FILE_PROTOCOL:
+      localFile(uri.fileName());
+      break;
+
+    case URI::HTTP_PROTOCOL:
+      fetchHttp(uri);
+      break;
+
+    case URI::CONFIG_PROTOCOL:
+      configureUrl(DATADIR"/config/" + uri.fileName());
+      break;
+
+    default:
+      break;
+  }
+}
+
 void Controller::doUri(const URI & uri)
 {
   //cout << uriString << endl;
   if (uri.isValid()) {
     m_document->setUri(uri.asString());
-    // split the URI into sections
-    URI uritmp(uri);
-    if (uri.isFile()) {
-      localFile(uri.fileName());
-    } else {
-      // http
-      fetchHttp(uritmp);
-    }
+    handleUri(uri);
   }
 }
 
@@ -67,12 +81,7 @@ void Controller::previous()
   if (not ph.empty())
   {
     URI uri(ph);
-    if (uri.isFile()) {
-      localFile(uri.fileName());
-    } else {
-      // http
-      fetchHttp(uri);
-    }
+    handleUri(uri);
   }
 }
 
@@ -82,12 +91,7 @@ void Controller::next()
   if (not ph.empty())
   {
     URI uri(ph);
-    if (uri.isFile()) {
-      localFile(uri.fileName());
-    } else {
-      // http
-      fetchHttp(uri);
-    }
+    handleUri(uri);
   }
 }
 
@@ -110,6 +114,24 @@ void Controller::loadError()
   href += "</a>";
   m_document->appendLocalData(href.c_str(), href.length());
   m_document->setStatus(Document::LOADED);
+}
+
+void Controller::configureUrl(const std::string & fileName)
+{
+  // if file exists, localfile it
+  // search for ? - if found, send the encoding to configure
+  // otherwise localFile the fileName
+
+  unsigned int position = fileName.find_first_of("?");
+  if (position != string::npos)
+  {
+    string postedUrl = fileName.substr(position+1, fileName.length() - position - 1);
+    Config::instance().postConfiguration(postedUrl);
+  }
+  else
+  {
+    localFile(fileName);
+  }
 }
 
 void Controller::localFile(const std::string & fileName)
@@ -137,7 +159,7 @@ void Controller::localFile(const std::string & fileName)
 
 }
 
-void Controller::fetchHttp(URI & uri)
+void Controller::fetchHttp(const URI & uri)
 {
   nds::Wifi9::instance().connect();
   if (nds::Wifi9::instance().connected()) {
@@ -157,9 +179,7 @@ void Controller::fetchHttp(URI & uri)
       if (docUri != uri)
       {
         // redirected
-        uri.navigateTo(m_document->uri());
-        printf("%s\n",uri.asString().c_str());
-        doUri(uri.asString());
+        doUri(uri.navigateTo(m_document->uri()).asString());
       }
     }
     else

@@ -10,12 +10,14 @@ class ParamSetTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testBasic );
     CPPUNIT_TEST( testQuote );
     CPPUNIT_TEST( testDoubleQuote );
+    CPPUNIT_TEST( testAmphersand );
     CPPUNIT_TEST_SUITE_END();
 
   public:
     void testBasic();
     void testQuote();
     void testDoubleQuote();
+    void testAmphersand();
 
 };
 

@@ -43,7 +43,10 @@ class Controller : public ControllerI
     View * m_view;
 
     void localFile(const std::string &);
-    void fetchHttp(URI &);
+    void fetchHttp(const URI &);
+    void configureUrl(const std::string & fileName);
     void loadError();
+    // helper to avoid code dupe
+    void handleUri(const URI & uri);
 };
 #endif

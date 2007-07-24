@@ -1,11 +1,15 @@
-#include "File.h"
 #include "Config.h"
-#include "Document.h"
 #include "ControllerI.h"
-#include "HtmlElement.h"
-#include "URI.h"
 #include "CookieJar.h"
+#include "Document.h"
+#include "File.h"
+#include "HtmlElement.h"
+#include "ParameterSet.h"
+#include "URI.h"
 const std::string Config::s_configFile("file:///"DATADIR"/config.html");
+
+static const char PROXY_STR[] = "proxy";
+static const char USE_PROXY_STR[] = "useProxy";
 using namespace std;
 
 Config & Config::instance()
@@ -33,6 +37,11 @@ void Config::reload()
   m_controller->doUri(s_configFile);
   // now configure the cookie list
   // read each line in the m_cookieList file and add it as an allowed one to CookieJar
+  handleCookies();
+}
+
+void Config::handleCookies() const
+{
   CookieJar * cookieJar(m_document->cookieJar());
   nds::File cookieList;
   cookieList.open(m_cookieList.c_str());
@@ -75,7 +84,9 @@ Config::Config():
     m_controller(0),
     m_reload(false),
     m_font("fonts/vera"),
-    m_cookieList("cfg/ckallow.lst")
+    m_cookieList("cfg/ckallow.lst"),
+    m_proxy(""),
+    m_useProxy(false)
 {
 }
 
@@ -107,6 +118,21 @@ void Config::configMember(const std::string & tag, std::string & member)
         member = DATADIR+member;
       }
       // else is absolute path.
+    }
+  }
+}
+
+void Config::postConfiguration(const std::string & encodedString)
+{
+  ParameterSet set(encodedString, '&');
+  if ( set.hasParameter(PROXY_STR) ) 
+  {
+    set.parameter(PROXY_STR, m_proxy);
+    string useProxy;
+    set.parameter(USE_PROXY_STR, useProxy);
+    if (useProxy == "on")
+    {
+      m_useProxy = true;
     }
   }
 }

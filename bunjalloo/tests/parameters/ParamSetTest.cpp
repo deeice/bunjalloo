@@ -42,3 +42,22 @@ void ParamSetTest::testDoubleQuote()
   CPPUNIT_ASSERT_EQUAL(expected, result);
 }
 
+void ParamSetTest::testAmphersand()
+{
+  string header = "proxy=234.56.78.90&proxyOn=no";
+  ParameterSet paramSet(header, '&');
+  string expected = "234.56.78.90";
+  string key = "proxy";
+  string result;
+  paramSet.parameter(key, result);
+  CPPUNIT_ASSERT(paramSet.hasParameter(key));
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+  key = "proxyOn";
+  expected = "no";
+  paramSet.parameter(key, result);
+  CPPUNIT_ASSERT(paramSet.hasParameter(key));
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+
+
+}
+

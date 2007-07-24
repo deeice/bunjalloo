@@ -7,10 +7,11 @@ class PSImpl
 {
   friend class ParameterSet;
   public:
-    PSImpl(const string & scskvs):
+    PSImpl(const string & kvs, char sep):
       m_state(BEFORE_NAME),
-      m_position(scskvs.begin()),
-      m_end(scskvs.end())
+      m_position(kvs.begin()),
+      m_end(kvs.end()),
+      m_sep(sep)
     {
       if (m_position != m_end) {
         next();
@@ -31,6 +32,7 @@ class PSImpl
     ParseState m_state;
     string::const_iterator m_position;
     string::const_iterator m_end;
+    char m_sep;
     char m_value;
     KeyValueMap m_keyValueMap;
     string m_paramName;
@@ -38,8 +40,7 @@ class PSImpl
 
     inline void next()
     {
-      m_value = *m_position;
-      ++m_position;
+      m_value = *m_position++;
     }
     void doParse();
     void cleanup();
@@ -55,7 +56,7 @@ class PSImpl
 
 void PSImpl::beforeName()
 {
-  if (m_value != ';' and not isWhitespace(m_value))
+  if (m_value != m_sep and not isWhitespace(m_value))
   {
     m_paramName += m_value;
     m_state = IN_NAME;
@@ -63,7 +64,7 @@ void PSImpl::beforeName()
 }
 void PSImpl::inName()
 {
-  if (not isWhitespace(m_value) and m_value != '=' and m_value != ';')
+  if (not isWhitespace(m_value) and m_value != '=' and m_value != m_sep)
   {
     m_paramName += m_value;
   }
@@ -71,7 +72,7 @@ void PSImpl::inName()
   {
     m_state = BEFORE_VALUE;
   }
-  else if (m_value == ';')
+  else if (m_value == m_sep)
   {
     addCurrentParam();
   }
@@ -119,7 +120,7 @@ void PSImpl::addCurrentParam()
 
 void PSImpl::inValue()
 {
-  if (m_value == ';')
+  if (m_value == m_sep)
   {
     addCurrentParam();
   }
@@ -134,6 +135,7 @@ void PSImpl::inValue()
     else
     {
       m_paramValue += m_value;
+      m_value = 0;
     }
   }
   else 
@@ -147,6 +149,7 @@ void PSImpl::inValue()
     {
     */
       m_paramValue += m_value;
+      m_value = 0;
     //}
   }
 }
@@ -157,6 +160,7 @@ void PSImpl::doParse()
   {
     if (m_value == '\r' or m_value == '\n')
     {
+      m_value = 0;
       break;
     }
     switch (m_state)
@@ -185,12 +189,17 @@ void PSImpl::doParse()
 
 void PSImpl::cleanup()
 {
-  if ( not m_paramName.empty() )
+  if ( not m_paramName.empty() ) {
+    if (m_value != 0)
+    {
+      m_paramValue += m_value;
+    }
     addCurrentParam();
+  }
 }
 
-ParameterSet::ParameterSet(const std::string & semiColonSeperatedKeyValueString):
-  m_psImpl(new PSImpl(semiColonSeperatedKeyValueString))
+ParameterSet::ParameterSet(const std::string & keyValueString, char sep):
+  m_psImpl(new PSImpl(keyValueString, sep))
 {
 }
 
