@@ -1,5 +1,6 @@
 #include "ndspp.h"
 #include "libnds.h"
+#include "URI.h"
 #include "Controller.h"
 #include "File.h"
 
@@ -17,10 +18,10 @@ int main(int argc, char * argv[])
       check.close();
       std::string localFile = "file:///";
       localFile += fileName;
-      c->doUri(localFile);
+      c->doUri(URI(localFile));
     }
     else {
-      c->doUri(fileName);
+      c->doUri(URI(fileName));
     }
   }
   else

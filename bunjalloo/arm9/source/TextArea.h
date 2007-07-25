@@ -8,12 +8,13 @@
 class HtmlElement;
 class Link;
 class FormControl;
+class Config;
 /** A widget for displaying text.*/
 class TextArea
 {
   public:
     /** Constructor.*/
-    TextArea();
+    TextArea(const Config & config);
     /** Destructor.*/
     ~TextArea();
 
@@ -99,6 +100,7 @@ class TextArea
 
     int textSize(const UnicodeString & unicodeString) const;
   private:
+    const Config & m_config;
     Font * m_font;
     unsigned short * m_palette;
     unsigned short * m_basePalette;

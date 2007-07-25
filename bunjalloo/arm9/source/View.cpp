@@ -19,7 +19,7 @@ const static int STEP(10);
 View::View(Document & doc, ControllerI & c):
   m_document(doc), 
   m_controller(c),
-  m_textArea(new TextArea),
+  m_textArea(new TextArea(c.config())),
   m_keyboard(new Keyboard(*m_textArea)),
   m_renderer(new ViewRender(this)),
   m_state(BROWSE),

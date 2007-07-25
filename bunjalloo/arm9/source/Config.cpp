@@ -3,6 +3,7 @@
 #include "CookieJar.h"
 #include "Document.h"
 #include "File.h"
+#include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "ParameterSet.h"
 #include "URI.h"
@@ -12,29 +13,15 @@ static const char PROXY_STR[] = "proxy";
 static const char USE_PROXY_STR[] = "useProxy";
 using namespace std;
 
-Config & Config::instance()
-{
-  static Config s_instance;
-  return s_instance;
-}
-
 std::string Config::font() const
 {
   return m_font;
 }
 
-void Config::initialise(Document * doc, ControllerI * controller)
-{
-  m_document = doc;
-  m_controller = controller;
-  m_document->registerView(this);
-  reload();
-}
-
 void Config::reload()
 {
   m_reload = true;
-  m_controller->doUri(s_configFile);
+  m_controller.doUri(s_configFile);
   // now configure the cookie list
   // read each line in the m_cookieList file and add it as an allowed one to CookieJar
   handleCookies();
@@ -42,7 +29,7 @@ void Config::reload()
 
 void Config::handleCookies() const
 {
-  CookieJar * cookieJar(m_document->cookieJar());
+  CookieJar * cookieJar(m_document.cookieJar());
   nds::File cookieList;
   cookieList.open(m_cookieList.c_str());
   if (cookieList.is_open())
@@ -68,26 +55,28 @@ void Config::handleCookies() const
 
 void Config::notify()
 {
-  if (m_document->status() == Document::LOADED)
+  if (m_document.status() == Document::LOADED)
   {
     if (m_reload)
     {
       configMember("font", m_font);
-      configMember("li", m_cookieList);
+      configMember(HtmlConstants::LI_TAG, m_cookieList);
       m_reload = false;
     }
   }
 }
 
-Config::Config():
-    m_document(0),
-    m_controller(0),
+Config::Config(Document & doc, ControllerI & controller):
+    m_document(doc),
+    m_controller(controller),
     m_reload(false),
     m_font("fonts/vera"),
     m_cookieList("cfg/ckallow.lst"),
     m_proxy(""),
     m_useProxy(false)
 {
+  m_document.registerView(this);
+  reload();
 }
 
 Config::~Config()
@@ -96,9 +85,9 @@ Config::~Config()
 
 void Config::configMember(const std::string & tag, std::string & member)
 {
-  const HtmlElement * root = m_document->rootNode();
+  const HtmlElement * root = m_document.rootNode();
   const HtmlElement * body = root->lastChild();
-  if (body->isa("body"))
+  if (body->isa(HtmlConstants::BODY_TAG))
   {
     const ElementList & children = body->children();
     ElementList::const_iterator element = find_if(children.begin(), children.end(), 

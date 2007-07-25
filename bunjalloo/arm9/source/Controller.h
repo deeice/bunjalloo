@@ -3,6 +3,7 @@
 
 class Document;
 class View;
+class Config;
 class URI;
 
 #include "ControllerI.h"
@@ -22,15 +23,12 @@ class Controller : public ControllerI
     /** Handle the user request for setting a URI.
      * @param uri the URI to use.
      */
-    void doUri(const URI & uri);
-
-    /** Helper function to go to an address by text address.
-     * @param uri the URI string to use.
-     */
-    void doUri(const std::string & uri);
+    virtual void doUri(const URI & uri);
     
-    void previous();
-    void next();
+    virtual void previous();
+    virtual void next();
+
+    virtual const Config & config() const;
 
     /** Show the software licence.*/
     void showLicence();
@@ -38,9 +36,12 @@ class Controller : public ControllerI
     /** Loops forever.*/
     void mainLoop();
 
+
+
   private:
     Document * m_document;
     View * m_view;
+    Config * m_config;
 
     void localFile(const std::string &);
     void fetchHttp(const URI &);

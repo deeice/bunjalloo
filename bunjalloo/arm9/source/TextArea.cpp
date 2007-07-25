@@ -17,7 +17,8 @@ static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x0
 static const UnicodeString delimiters(intDelimiters,6);
 static const int INDENT(16);
 
-TextArea::TextArea() : 
+TextArea::TextArea(const Config & config) : 
+  m_config(config),
   m_font(0),
   m_palette(0),
   m_basePalette(0),
@@ -31,7 +32,7 @@ TextArea::TextArea() :
   m_fgCol(0),
   m_indentLevel(0)
 {
-  string fontname = Config::instance().font();
+  string fontname = m_config.font();
   init(fontname);
 }
 

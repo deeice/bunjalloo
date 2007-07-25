@@ -22,7 +22,7 @@ static const char s_errorText[] = {
 Controller::Controller()
   : m_document(new Document())
 {
-  Config::instance().initialise(m_document, this);
+  m_config = new Config(*m_document, *this);
   m_view = new View(*m_document, *this);
 }
 
@@ -30,6 +30,7 @@ Controller::~Controller()
 {
   delete m_document;
   delete m_view;
+  delete m_config;
 }
 
 void Controller::showLicence()
@@ -40,9 +41,9 @@ void Controller::showLicence()
   m_document->setStatus(Document::LOADED);
 }
 
-void Controller::doUri(const std::string & uriString)
+const Config & Controller::config() const
 {
-  doUri(URI(uriString));
+  return *m_config;
 }
 
 void Controller::handleUri(const URI & uri)
@@ -126,7 +127,7 @@ void Controller::configureUrl(const std::string & fileName)
   if (position != string::npos)
   {
     string postedUrl = fileName.substr(position+1, fileName.length() - position - 1);
-    Config::instance().postConfiguration(postedUrl);
+    m_config->postConfiguration(postedUrl);
   }
   else
   {
@@ -179,7 +180,7 @@ void Controller::fetchHttp(const URI & uri)
       if (docUri != uri)
       {
         // redirected
-        doUri(uri.navigateTo(m_document->uri()).asString());
+        doUri(uri.navigateTo(m_document->uri()));
       }
     }
     else
