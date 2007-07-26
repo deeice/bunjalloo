@@ -23,8 +23,8 @@ URI::URI(const std::string & uriString, bool fix):
 void URI::setUri(const std::string & uriString)
 {
   string tmpUri = uriString;
-  int sep(tmpUri.find(":"));
-  if (sep == -1) {
+  unsigned int sep(tmpUri.find(":"));
+  if (sep == string::npos) {
     if (not m_fix) {
       return;
     }
@@ -32,7 +32,7 @@ void URI::setUri(const std::string & uriString)
     tmpUri += "://" + uriString;
     sep = tmpUri.find(":");
   }
-  if (sep != -1) {
+  if (sep != string::npos) {
     m_protocol = tmpUri.substr(0,sep);
     transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), tolower);
     m_address = tmpUri.substr(sep+3, tmpUri.length());
@@ -172,9 +172,15 @@ URI URI::navigateTo(const std::string & newFile ) const
   tmp.m_fix = false;
 
   tmp.setUri(newFile);
-  if (tmp.isValid() and m_protocol == tmp.m_protocol)
+  if (tmp.isValid())
   {
-    // that is all, nothing else to do
+    if (protocol() == HTTP_PROTOCOL and tmp.protocol() != HTTP_PROTOCOL)
+    {
+      // Security problem - remote files shouldn't be able to link to local one.
+      return *this;
+    }
+    // else FILE / CONFIG can link to HTTP.
+    // return the new URI 
     tmp.m_fix = m_fix;
     return tmp;
   }

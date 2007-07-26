@@ -18,6 +18,7 @@ static const char s_errorText[] = {
 #include "error.txt"
 };
 
+const static char * LICENCE_URL = "file:///licence";
 
 Controller::Controller()
   : m_document(new Document())
@@ -36,7 +37,7 @@ Controller::~Controller()
 void Controller::showLicence()
 {
   m_document->reset();
-  m_document->setUri("file:///licence");
+  m_document->setUri(LICENCE_URL);
   m_document->appendLocalData(s_licenceText, strlen(s_licenceText));
   m_document->setStatus(Document::LOADED);
 }
@@ -51,7 +52,14 @@ void Controller::handleUri(const URI & uri)
   switch (uri.protocol())
   {
     case URI::FILE_PROTOCOL:
-      localFile(uri.fileName());
+      if (uri.asString() == LICENCE_URL)
+      {
+        showLicence();
+      }
+      else
+      {
+        localFile(uri.fileName());
+      }
       break;
 
     case URI::HTTP_PROTOCOL:

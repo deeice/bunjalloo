@@ -1,5 +1,9 @@
-"<html><body>Bunjalloo is free software, covered by the GNU General Public License, and you \
-are welcome to change it and/or distribute copies of it under certain \
-conditions.  Click <a href='/"DATADIR"/docs/copying'>'show copying'</a> to see the conditions.\
-There is absolutely no \
-warranty for Bunjalloo.  Click <a href='/"DATADIR"/docs/warranty'>'show warranty'</a> for details.</body></html>"
+"<html><body>\
+Bunjalloo (C) 2007 Richard Quirk<p>\
+Bunjalloo comes with ABSOLUTELY NO WARRANTY; for details touch \
+<a href='/"DATADIR"/docs/warranty'>'show warranty'</a>. \
+This is free software, and you are welcome to redistribute it \
+under certain conditions; Touch <a href='/"DATADIR"/docs/copying'>'show copying'</a> \
+for details.<p>\
+<a href='http://code.google.com/p/quirkysoft'>quirkysoft.googlecode.com</a>\
+</body></html>"

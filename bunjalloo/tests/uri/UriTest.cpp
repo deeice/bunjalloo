@@ -172,3 +172,33 @@ void UriTest::testNavigateDots()
 
 
 }
+
+
+void UriTest::testHttpFromFile()
+{
+  URI uri("file:///some/file.txt");
+
+  string expectedFile = "/some/file.txt";
+  CPPUNIT_ASSERT_EQUAL( URI::FILE_PROTOCOL, uri.protocol());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+
+  uri = uri.navigateTo("http://myserver.com/newfile.html");
+  expectedFile = "/newfile.html";
+  string expectedServer = "myserver.com";
+  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+
+}
+
+void UriTest::testSecurityFile()
+{
+  // should not be able to link to local URIs from http.
+  URI uri("http://someserver.com/file.html");
+  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+  uri = uri.navigateTo("file:///my/secret/file.txt");
+  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+  uri = uri.navigateTo("config://options.html?proxy=123");
+  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+}
