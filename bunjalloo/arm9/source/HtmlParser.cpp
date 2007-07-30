@@ -7,6 +7,7 @@
 #include "HtmlElement.h"
 #include "Entity.h"
 #include "UTF8.h"
+#include "UnicodeString.h"
 
 using namespace std;
 
@@ -1300,15 +1301,6 @@ void HtmlParser::setContentModel(ContentModel newModel)
 }
 
 
-static void stripWhitespace(string & modify)
-{
-  if (modify.empty())
-    return;
-  static const string delimter(" \r\n	");
-  int firstNonBlank = modify.find_first_not_of(delimter);
-  int lastNonBlank = modify.find_last_not_of(delimter);
-  modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
-}
 
 static void extractCharset(const string & value, string & mimeType, string & charset)
 {

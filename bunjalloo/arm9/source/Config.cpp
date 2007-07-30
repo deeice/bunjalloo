@@ -7,10 +7,12 @@
 #include "HtmlElement.h"
 #include "ParameterSet.h"
 #include "URI.h"
-const std::string Config::s_configFile("file:///"DATADIR"/config.html");
+const std::string Config::s_configFile("/"DATADIR"/config.ini");
 
 static const char PROXY_STR[] = "proxy";
 static const char USE_PROXY_STR[] = "useProxy";
+static const char FONT_STR[] = "font";
+static const char COOKIE_STR[] = "cookiefile";
 using namespace std;
 
 std::string Config::font() const
@@ -20,62 +22,88 @@ std::string Config::font() const
 
 void Config::reload()
 {
-  m_reload = true;
-  m_controller.doUri(s_configFile);
-  // now configure the cookie list
-  // read each line in the m_cookieList file and add it as an allowed one to CookieJar
+  nds::File configFile;
+  configFile.open(s_configFile.c_str());
+  if (configFile.is_open())
+  {
+    vector<string> lines;
+    configFile.readlines(lines);
+    for (vector<string>::iterator it(lines.begin());
+        it != lines.end(); 
+        ++it)
+    {
+      string & line(*it);
+      stripWhitespace(line);
+      if (not line.empty() and line[0] != '#')
+      {
+        ParameterSet set(line);
+        parseLine(set);
+      }
+    }
+    configFile.close();
+  }
+
   handleCookies();
+}
+
+void Config::parseLine(ParameterSet & set)
+{
+  if ( set.hasParameter(PROXY_STR) ) 
+  {
+    set.parameter(PROXY_STR, m_proxy);
+  }
+  if (set.hasParameter(USE_PROXY_STR))
+  {
+    string useProxy;
+    set.parameter(USE_PROXY_STR, useProxy);
+    m_useProxy = (useProxy == "on");
+  }
+  if (set.hasParameter(FONT_STR))
+  {
+    string value;
+    set.parameter(FONT_STR, value);
+    configPathMember(value, m_font);
+  }
+  if (set.hasParameter(COOKIE_STR))
+  {
+    string value;
+    set.parameter(COOKIE_STR, value);
+    configPathMember(value, m_cookieList);
+  }
 }
 
 void Config::handleCookies() const
 {
+  // configure the cookie list, read each line in the m_cookieList file and
+  // add it as an allowed one to CookieJar
   CookieJar * cookieJar(m_document.cookieJar());
   nds::File cookieList;
   cookieList.open(m_cookieList.c_str());
   if (cookieList.is_open())
   {
-    // read each line
-    int size = cookieList.size();
-    char * data = new char[size+2];
-    cookieList.read(data);
-    int startOfLine = 0;
-    for (int i = 0; i < size; ++i)
+    vector<string> lines;
+    cookieList.readlines(lines);
+    for (vector<string>::iterator it(lines.begin());
+        it != lines.end(); 
+        ++it)
     {
-      if (data[i] == '\n')
-      {
-        string domain(&data[startOfLine], i-startOfLine);
-        cookieJar->setAcceptCookies(domain);
-        startOfLine = i+1;
-      }
+      string & line(*it);
+      stripWhitespace(line);
+      cookieJar->setAcceptCookies(line);
     }
-    delete [] data;
     cookieList.close();
   }
 }
 
-void Config::notify()
-{
-  if (m_document.status() == Document::LOADED)
-  {
-    if (m_reload)
-    {
-      configMember("font", m_font);
-      configMember(HtmlConstants::LI_TAG, m_cookieList);
-      m_reload = false;
-    }
-  }
-}
 
-Config::Config(Document & doc, ControllerI & controller):
+Config::Config(Document & doc)://, ControllerI & controller):
     m_document(doc),
-    m_controller(controller),
-    m_reload(false),
-    m_font("fonts/vera"),
-    m_cookieList("cfg/ckallow.lst"),
+    //m_controller(controller),
+    m_font("font"),
+    m_cookieList("ckallow.lst"),
     m_proxy(""),
     m_useProxy(false)
 {
-  m_document.registerView(this);
   reload();
 }
 
@@ -83,45 +111,24 @@ Config::~Config()
 {
 }
 
-void Config::configMember(const std::string & tag, std::string & member)
+void Config::configPathMember(const std::string & value, std::string & member)
 {
-  const HtmlElement * root = m_document.rootNode();
-  const HtmlElement * body = root->lastChild();
-  if (body->isa(HtmlConstants::BODY_TAG))
+  member.clear();
+  if (value[0] != '/')
   {
-    const ElementList & children = body->children();
-    ElementList::const_iterator element = find_if(children.begin(), children.end(), 
-        bind2nd( mem_fun(&HtmlElement::isa_ptr), &tag)
-        );
-    if (element != children.end())
-    {
-      UnicodeString tmp;
-      tmp = (*element)->attribute("id"); 
-      member.clear();
-      for (unsigned int i = 0; i < tmp.length(); ++i) {
-        member += tmp[i];
-      }
-      if (member[0] != '/')
-      {
-        member = "/"+member;
-        member = DATADIR+member;
-      }
-      // else is absolute path.
-    }
+    // == "/DATADIR/value"
+    member = "/"+value;
+    member = DATADIR+member;
+  }
+  else
+  {
+    // is absolute path.
+    member = value;
   }
 }
 
 void Config::postConfiguration(const std::string & encodedString)
 {
   ParameterSet set(encodedString, '&');
-  if ( set.hasParameter(PROXY_STR) ) 
-  {
-    set.parameter(PROXY_STR, m_proxy);
-    string useProxy;
-    set.parameter(USE_PROXY_STR, useProxy);
-    if (useProxy == "on")
-    {
-      m_useProxy = true;
-    }
-  }
+  parseLine(set);
 }

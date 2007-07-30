@@ -50,3 +50,13 @@ bool isWhitespace(unsigned int value)
       );
 }
 
+void stripWhitespace(std::string & modify)
+{
+  if (modify.empty())
+    return;
+  static const std::string delimter(" \r\n	");
+  int firstNonBlank = modify.find_first_not_of(delimter);
+  int lastNonBlank = modify.find_last_not_of(delimter);
+  modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
+}
+

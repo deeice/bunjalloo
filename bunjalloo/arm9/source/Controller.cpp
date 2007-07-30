@@ -23,7 +23,7 @@ const static char * LICENCE_URL = "file:///licence";
 Controller::Controller()
   : m_document(new Document())
 {
-  m_config = new Config(*m_document, *this);
+  m_config = new Config(*m_document);
   m_view = new View(*m_document, *this);
 }
 
