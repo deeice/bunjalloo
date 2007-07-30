@@ -1,6 +1,9 @@
 #ifndef File_h_seen
 #define File_h_seen
 
+#include <string>
+#include <vector>
+
 namespace nds
 {
   class FileImplementation;
@@ -35,6 +38,10 @@ namespace nds
        */
       int size();
 
+      /** Read the file as lines.
+       * @param lines the lines of the file.
+       */
+      void readlines(std::vector<std::string> & lines);
 
       /** Closes the file.*/
       void close();
