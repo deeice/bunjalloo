@@ -8,14 +8,15 @@ using namespace std;
 static const char * const HTTP_STR = "http";
 static const char * const FILE_STR = "file";
 static const char * const CONFIG_STR = "config";
+static const char * const GET_STR = "GET";
 
 URI::URI()
-  : m_method("GET"), m_protocol(""),m_address(""),m_requestHeader("")
+  : m_method(GET_STR), m_protocol(""),m_address(""),m_requestHeader("")
 {
 }
 
 URI::URI(const std::string & uriString, bool fix):
-  m_method("GET"), m_protocol(""), m_address(""), m_fix(fix)
+  m_method(GET_STR), m_protocol(""), m_address(""), m_fix(fix)
 {
   setUri(uriString);
 }
@@ -309,7 +310,14 @@ const std::string URI::method() const
 
 void URI::setMethod(const std::string & method)
 {
-  m_method = method;
+  if (not method.empty())
+  {
+    m_method = method;
+  }
+  else
+  {
+    m_method = GET_STR;
+  }
   transform(m_method.begin(), m_method.end(), m_method.begin(), ::toupper);
 }
 

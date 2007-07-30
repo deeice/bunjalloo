@@ -77,7 +77,7 @@ void Controller::handleUri(const URI & uri)
 
 void Controller::doUri(const URI & uri)
 {
-  //cout << uriString << endl;
+  // cout << uri.asString() << endl;
   if (uri.isValid()) {
     m_document->setUri(uri.asString());
     handleUri(uri);

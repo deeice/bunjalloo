@@ -34,7 +34,6 @@ distdir=$(target)-dist
 dist: all
 	mkdir $(distdir) -p
 	cp $(target)-unpatched.nds $(distdir)/$(target).nds
-	cp COPYING data/$(target)/docs/copying
 	cp data/ -rvfp $(distdir)/
 	find $(distdir) -name '.svn' -type d | xargs rm -rf 
 	zip -r $(target).zip $(distdir)/
