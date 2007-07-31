@@ -11,7 +11,7 @@ include $(DEVKITARM)/ds_rules
 BUILD		:= build
 
 ARM9SOURCES :=	source/arm9 source/common
-ARM7SOURCES :=	source/arm7 source/common
+ARM7SOURCES :=	source/arm7 
 
 DATESTRING	:=	$(shell date +%Y)$(shell date +%m)$(shell date +%d)
 

@@ -31,6 +31,16 @@ namespace nds {
        * @returns true if connected false otherwise.*/
       inline bool isConnected() const { return m_connected; }
 
+      /** Set the connection details.
+       * @param ip IP address to connect to.
+       * @param port port to connect to.
+       */
+      inline void setConnection(const char * ip, int port)
+      {
+        m_ip = ip;
+        m_port = port;
+      }
+
       /*! @brief Pure virtual function to handle the bytes read from the server
        * @param buffer Data recieved from the other end.
        * @param amountRead Number of bytes read.
