@@ -11,6 +11,7 @@ class UriTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testBroken );
     CPPUNIT_TEST( testNavigate );
     CPPUNIT_TEST( testPort );
+    CPPUNIT_TEST( testPort2 );
     CPPUNIT_TEST( testToString );
     CPPUNIT_TEST( testNavigateFile );
     CPPUNIT_TEST( testNavigateDots );
@@ -28,6 +29,7 @@ class UriTest : public CPPUNIT_NS::TestFixture
     void testNavigateDots();
     void testHttpFromFile();
     void testSecurityFile();
+    void testPort2();
 
 };
 

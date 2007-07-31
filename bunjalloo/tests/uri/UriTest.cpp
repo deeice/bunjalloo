@@ -202,3 +202,20 @@ void UriTest::testSecurityFile()
   CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
   CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
 }
+
+void UriTest::testPort2()
+{
+  URI uri("123.56.78.90:8080");
+  int expectedPort = 8080;
+  string expectedServer = "123.56.78.90";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
+
+  // try breaking things
+  URI uri2("123.56.78.90:");
+  expectedPort = 80;
+  expectedServer = "123.56.78.90";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri2.server());
+  CPPUNIT_ASSERT_EQUAL( expectedPort, uri2.port());
+
+}

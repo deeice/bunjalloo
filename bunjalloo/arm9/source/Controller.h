@@ -36,8 +36,6 @@ class Controller : public ControllerI
     /** Loops forever.*/
     void mainLoop();
 
-
-
   private:
     Document * m_document;
     View * m_view;

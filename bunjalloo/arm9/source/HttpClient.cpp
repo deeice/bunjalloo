@@ -1,10 +1,11 @@
 #include <string>
 #include "libnds.h"
 #include "System.h"
-#include "HttpClient.h"
+#include "Config.h"
 #include "Controller.h"
-#include "Document.h"
 #include "CookieJar.h"
+#include "Document.h"
+#include "HttpClient.h"
 #include "URI.h"
 
 using namespace std;
@@ -19,6 +20,11 @@ HttpClient::HttpClient(const char * ip, int port) :
 void HttpClient::setController(Controller * c)
 {
   m_self = c;
+  if (m_self->config().useProxy())
+  {
+    URI uri(m_self->config().proxy());
+    setConnection(uri.server().c_str(), uri.port());
+  }
 }
 
 // implement the pure virtual functions
@@ -77,9 +83,15 @@ void HttpClient::get(const URI & uri)
     string s;
     s += uri.method();
     s += " ";
-    s += uri.fileName();
-    // for proxy connection, need to send the whole request:
-    //s += uri.asString();
+    if (m_self->config().useProxy())
+    {
+      // for proxy connection, need to send the whole request:
+      s += uri.asString();
+    }
+    else
+    {
+      s += uri.fileName();
+    }
     s += " HTTP/1.1\r\n";
     s += "Host:" + uri.server()+"\r\n";
     s += "Connection: close\r\n";

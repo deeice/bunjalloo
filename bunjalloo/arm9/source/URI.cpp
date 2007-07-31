@@ -25,6 +25,28 @@ void URI::setUri(const std::string & uriString)
 {
   string tmpUri = uriString;
   unsigned int sep(tmpUri.find(":"));
+  if (sep != string::npos)
+  {
+    // check it isn't the port seperator and we are missing a http: at the start
+    // e.g. like this ->  myproxy.com:8080
+    if (tmpUri[sep+1] != '/')
+    {
+      // is it a port?
+      unsigned int nextSlash(tmpUri.find("/"));
+      if (nextSlash == string::npos) {
+        sep = string::npos;
+      } else {
+        string maybePort = tmpUri.substr(sep+1, nextSlash-1-sep);
+        int port = strtol(maybePort.c_str(), 0, 10);
+        if (port != 0)
+        {
+          // it was a port - make sure we add HTTP to the URL
+          sep = string::npos;
+        }
+      }
+    }
+  }
+
   if (sep == string::npos) {
     if (not m_fix) {
       return;

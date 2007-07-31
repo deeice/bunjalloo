@@ -10,7 +10,6 @@
 const std::string Config::s_configFile("/"DATADIR"/config.ini");
 
 static const char PROXY_STR[] = "proxy";
-static const char USE_PROXY_STR[] = "useProxy";
 static const char FONT_STR[] = "font";
 static const char COOKIE_STR[] = "cookiefile";
 using namespace std;
@@ -51,12 +50,6 @@ void Config::parseLine(ParameterSet & set)
   if ( set.hasParameter(PROXY_STR) ) 
   {
     set.parameter(PROXY_STR, m_proxy);
-  }
-  if (set.hasParameter(USE_PROXY_STR))
-  {
-    string useProxy;
-    set.parameter(USE_PROXY_STR, useProxy);
-    m_useProxy = (useProxy == "on");
   }
   if (set.hasParameter(FONT_STR))
   {
@@ -101,8 +94,7 @@ Config::Config(Document & doc)://, ControllerI & controller):
     //m_controller(controller),
     m_font("font"),
     m_cookieList("ckallow.lst"),
-    m_proxy(""),
-    m_useProxy(false)
+    m_proxy("")
 {
   reload();
 }
@@ -131,4 +123,14 @@ void Config::postConfiguration(const std::string & encodedString)
 {
   ParameterSet set(encodedString, '&');
   parseLine(set);
+}
+
+std::string Config::proxy() const
+{
+  return m_proxy;
+}
+
+bool Config::useProxy() const
+{
+  return not m_proxy.empty();
 }

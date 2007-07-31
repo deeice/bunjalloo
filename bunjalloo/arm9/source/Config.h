@@ -24,6 +24,16 @@ class Config
      */
     std::string font() const;
 
+    /** Get the proxy.
+     * @return the proxy string
+     */
+    std::string proxy() const;
+
+    /** Get the flag that says whether or not to use the proxy.
+     * @return true if we should use a proxy, false otherwise.
+     */
+    bool useProxy() const;
+
     /** Reload the config file.
      */
     void reload();
@@ -40,7 +50,6 @@ class Config
     std::string m_font;
     std::string m_cookieList;
     std::string m_proxy;
-    bool m_useProxy;
 
     void configPathMember(const std::string & value, std::string & member);
     void handleCookies() const;
