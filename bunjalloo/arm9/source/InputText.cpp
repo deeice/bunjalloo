@@ -20,7 +20,7 @@ InputText::InputText(HtmlElement * element, const TextArea * textArea)
     size *= textArea->font().height();
   }
   if (size <= 0)
-    size = MIN_SIZE;
+    size = MIN_SIZE*textArea->font().height();
   if (size > MAX_SIZE)
     size = MAX_SIZE;
   m_size->w = size;
