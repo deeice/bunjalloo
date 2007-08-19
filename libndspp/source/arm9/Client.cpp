@@ -26,7 +26,7 @@ Client::Client(const char * ip, int port):
   m_port(port),
   m_tcp_socket(0),
   m_connected(false),
-  m_timeout(1)
+  m_timeout(30)
 { }
 
 Client::~Client()

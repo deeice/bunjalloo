@@ -141,6 +141,7 @@ unsigned int Client::write(const void * data, unsigned int length)
   // can only send "buffer" amount of data, and when the buffer is full we need to wait
   unsigned int total(0);
   char * cdata = (char*)data;
+  m_timeout = 30;
 #define SEND_SIZE 2048
   do
   {

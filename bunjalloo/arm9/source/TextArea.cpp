@@ -523,7 +523,9 @@ void TextArea::setPalette(const std::string & fileName)
     m_paletteLength = size/2;
     setBackgroundColor(m_palette[0]);
   } else {
-    Canvas::instance().fillRectangle(130,0,10,128,Color(31,0,0));
+    /* If the font is not opened, then set the bg red */
+    Canvas::instance().fillRectangle(0,0,256,192,Color(31,0,0));
+    setBackgroundColor(Color(31,0,0));
   }
 }
 
