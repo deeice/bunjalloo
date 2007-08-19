@@ -197,7 +197,7 @@ void Video::capture() const
   const int mode   = 0;  // what are the sources?
   const int source = threeD()?1:0;
   const int dst    = 1;           // A = 0, B = 1, C = 2, D = 3
-  DISP_CAPTURE = 
+  REG_DISPCAPCNT = 
     DCAP_ENABLE      |  // Enable/Busy flag
     DCAP_MODE(mode)  |  // Capture mode    (0=Source A, 1=Source B, 2/3=Sources A+B blended)
     DCAP_DST(0)      |  // VRAM Write Offset (0=00000h, 0=08000h, 0=10000h, 0=18000h)
@@ -208,7 +208,7 @@ void Video::capture() const
     DCAP_A(16)       |  // Bland ignored if capture mode is 0 or 1
     DCAP_B(0);
   int loops = 4;
-  while (DISP_CAPTURE & DCAP_ENABLE) {
+  while (REG_DISPCAPCNT & DCAP_ENABLE) {
     swiWaitForVBlank();
     // shouldn't block if the emulator is broken...
     if ((--loops)==0)
