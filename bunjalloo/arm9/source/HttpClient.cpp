@@ -7,14 +7,19 @@
 #include "Document.h"
 #include "HttpClient.h"
 #include "URI.h"
+#include "File.h"
+#include "Wifi9.h"
 
 using namespace std;
+using nds::Wifi9;
 
-static const int MAX_CONNECT_ATTEMPTS(60);
+static const int MAX_CONNECT_ATTEMPTS(10);
 extern const char * VERSION;
 
-HttpClient::HttpClient(const char * ip, int port) : 
-  nds::Client(ip,port), m_total(0), m_finished(false), m_connectAttempts(0)
+HttpClient::HttpClient(const char * ip, int port, const URI & uri) : 
+  nds::Client(ip,port), m_total(0), m_finished(false), m_connectAttempts(0),
+  m_uri(uri),
+  m_state(WIFI_OFF)
 {}
 
 void HttpClient::setController(Controller * c)
@@ -38,17 +43,14 @@ void HttpClient::handle(void * bufferIn, int amountRead)
   //printf("0x0x End of buffer x0x0", buffer);
 }
 
+/*
 bool HttpClient::connectCallback() {
   //printf("Connect?...\n");
   swiWaitForVBlank();
   m_connectAttempts++;
   return m_connectAttempts < MAX_CONNECT_ATTEMPTS;
 }
-
-void HttpClient::writeCallback() {
-}
-void HttpClient::readCallback() {
-}
+*/
 
 bool HttpClient::finished() 
 {
@@ -69,7 +71,18 @@ void HttpClient::finish() {
 
 void HttpClient::debug(const char * s)
 {
-  // printf("\ndebug:%s\n",s);
+  
+  if (0) {
+    nds::File log;
+    log.open("bunjalloo.log", "a");
+    log.write(s);
+  } 
+  else {
+    swiWaitForVBlank();
+    swiWaitForVBlank();
+  }
+  printf("\ndebug:%s\n",s);
+  //m_self->m_document->appendLocalData(s, strlen(s));
 }
 
 // GET stuff
@@ -116,4 +129,154 @@ void HttpClient::get(const URI & uri)
   }
   // reset the document for downloading
   m_self->m_document->reset();
+}
+
+void HttpClient::wifiConnection()
+{
+  switch (Wifi9::instance().status())
+  {
+    case Wifi9::CANNOTCONNECT:
+      debug("FAILED Wifi9::CANNOTCONNECT\n");
+      m_state = FAILED;
+      break;
+
+    case Wifi9::DISCONNECTED:
+    case Wifi9::SEARCHING:
+    case Wifi9::AUTHENTICATING:
+    case Wifi9::ASSOCIATING:
+    case Wifi9::ACQUIRINGDHCP:
+      break;
+
+    case Wifi9::ASSOCIATED:
+      m_state = CONNECT_SOCKET;
+      break;
+
+  }
+}
+
+void HttpClient::handleNextState()
+{
+  switch (m_state)
+  {
+    case WIFI_OFF:
+      Wifi9::instance().connect();
+      m_state = CONNECT_WIFI;
+      break;
+
+    case CONNECT_WIFI:
+      wifiConnection();
+      m_connectAttempts = 0;
+      m_reconnects = 0;
+      break;
+
+    case CONNECT_SOCKET:
+      // connect to the socket.
+      this->connect();
+      if (isConnected())
+      {
+        debug("Connected, get URL\n");
+        m_state = GET_URL;
+        m_connectAttempts = 0;
+        swiWaitForVBlank();
+        swiWaitForVBlank();
+      }
+      else
+      {
+        m_connectAttempts++;
+        if (m_connectAttempts == MAX_CONNECT_ATTEMPTS)
+        {
+          debug("FAILED m_connectAttempts == MAX_CONNECT_ATTEMPTS\n");
+          m_state = FAILED;
+        }
+      }
+      break;
+
+    case GET_URL:
+      get(m_uri);
+      swiWaitForVBlank();
+      swiWaitForVBlank();
+      m_state = READING_FIRST;
+      break;
+
+    case READING_FIRST:
+      // read something, anything, to make sure all is well
+      readFirst();
+      break;
+
+    case READING_ALL:
+      // now we know the server is connected, read the remaining bytes.
+      readAll();
+      break;
+
+    case FINISHED:
+      m_finished = true;
+      break;
+
+    case FAILED:
+      m_total = 0;
+      m_finished = true;
+      finish();
+      break;
+  }
+}
+
+bool HttpClient::hasPage() const
+{
+  return m_state == FINISHED;
+}
+
+void HttpClient::readFirst()
+{
+  int read = this->read();
+  if (read == 0)
+  {
+    // worrying. resend the url request?
+    swiWaitForVBlank();
+    swiWaitForVBlank();
+    //m_state = GET_URL;
+  }
+  else if (read == -1)
+  {
+    // might not be ready yet.
+    m_connectAttempts++;
+    if (m_connectAttempts >= MAX_CONNECT_ATTEMPTS)
+    {
+      // once we reach the maximum number, retry the socket.
+      this->disconnect();
+      m_connectAttempts = 0;
+      m_state = CONNECT_SOCKET;
+      m_reconnects++;
+      if (m_reconnects == 3)
+      {
+        debug("FAILED m_reconnects == 3\n");
+        m_state = FAILED;
+      }
+    }
+  }
+  else
+  {
+    m_state = READING_ALL;
+    m_connectAttempts = 0;
+  }
+
+}
+
+void HttpClient::readAll()
+{
+  int read = this->read();
+  if (read < 0)
+  {
+    m_state = FINISHED;
+  }
+  else if (read == 0)
+  {
+    m_state = FINISHED;
+    //swiWaitForVBlank();
+    //swiWaitForVBlank();
+  }
+  else
+  {
+    // ok - there may be more bytes.
+    m_state = READING_ALL;
+  }
 }

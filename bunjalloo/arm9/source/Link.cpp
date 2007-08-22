@@ -1,13 +1,11 @@
 #include "Link.h"
-#include "URI.h"
-#include "HtmlElement.h"
 #include "Rectangle.h"
 #include "Canvas.h"
 #include "Palette.h"
 
 using nds::Rectangle;
 
-Link::Link(const HtmlElement * a)
+Link::Link(const std::string & a)
   : m_anchor(a)
 { }
 
@@ -58,8 +56,11 @@ void Link::highlight() const
 std::string Link::href() const
 {
   // FIXME - what about #?
+  /*
   UnicodeString href = m_anchor->attribute("href");
   // strip off the # part?
   // replace ' ' with %20?
   return unicode2string(href);
+  */
+  return m_anchor;
 }

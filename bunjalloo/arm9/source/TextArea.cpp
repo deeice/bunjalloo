@@ -2,7 +2,6 @@
 #include "libnds.h"
 #include "ndspp.h"
 #include "Canvas.h"
-#include "Config.h"
 #include "File.h"
 #include "Font.h"
 #include "FormControl.h"
@@ -17,8 +16,7 @@ static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x0
 static const UnicodeString delimiters(intDelimiters,6);
 static const int INDENT(16);
 
-TextArea::TextArea(const Config & config) : 
-  m_config(config),
+TextArea::TextArea(Font * font) : 
   m_font(0),
   m_palette(0),
   m_basePalette(0),
@@ -32,8 +30,8 @@ TextArea::TextArea(const Config & config) :
   m_fgCol(0),
   m_indentLevel(0)
 {
-  string fontname = m_config.font();
-  init(fontname);
+  //string fontname = m_config.font();
+  setFont(font);
 }
 
 void TextArea::setStartLine(int line, bool rmclicks)
@@ -68,10 +66,11 @@ int TextArea::startLine() const
   return m_startLine;
 }
 
-void TextArea::init(const std::string & fontBase)
+void TextArea::setFont(Font * font)
 {
-  m_font=new Font(fontBase);
-  setPalette(fontBase+".pal");
+  delete m_font;
+  m_font = font; //new Font(fontBase);
+  // setPalette(fontBase+".pal");
   //m_font = new Font(_binary_vera_img_start,_binary_vera_map_start);
   //setPalette((char*)_binary_vera_pal_start, 32);
 }
@@ -351,9 +350,9 @@ FormControl * TextArea::clickForm(int x, int y) const
   return 0;
 }
 
-void TextArea::addLink(const HtmlElement * anchor)
+void TextArea::addLink(const std::string & href)
 {
-  m_links.push_front(new Link(anchor));
+  m_links.push_front(new Link(href));
   setLink(true);
 }
 void TextArea::addFormControl(FormControl * formCtrl)

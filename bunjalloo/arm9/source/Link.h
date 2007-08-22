@@ -4,11 +4,10 @@
 #include <list>
 #include "Rectangle.h"
 
-class HtmlElement;
 class Link
 {
   public:
-    Link(const HtmlElement * a);
+    Link(const std::string & a);
     ~Link();
 
     void appendClickZone(int x, int y, int w, int h);
@@ -19,7 +18,7 @@ class Link
     void highlight() const;
 
   private:
-    const HtmlElement * m_anchor;
+    std::string m_anchor;
     typedef std::list<nds::Rectangle*> RectangleList;
     RectangleList m_clickZones;
 };

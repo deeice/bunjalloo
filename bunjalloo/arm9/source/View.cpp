@@ -2,29 +2,31 @@
 //#include <iostream>
 #include "ndspp.h"
 #include "libnds.h"
-#include "View.h"
-#include "Document.h"
-#include "URI.h"
-#include "TextArea.h"
 #include "Canvas.h"
+#include "Config.h"
 #include "ControllerI.h"
+#include "Document.h"
+#include "FormControl.h"
 #include "Keyboard.h"
 #include "Link.h"
+#include "TextArea.h"
+#include "URI.h"
+#include "View.h"
 #include "ViewRender.h"
-#include "FormControl.h"
 
 using namespace std;
-const static int STEP(10);
+const static int STEP(1);
 
 View::View(Document & doc, ControllerI & c):
   m_document(doc), 
   m_controller(c),
-  m_textArea(new TextArea(c.config())),
+  m_textArea(new TextArea( new Font ( c.config().font() ) ) ),
   m_keyboard(new Keyboard(*m_textArea)),
   m_renderer(new ViewRender(this)),
   m_state(BROWSE),
   m_form(0)
 {
+  m_textArea->setPalette(c.config().font()+".pal");
   m_document.registerView(this);
   keysSetRepeat( 10, 5 );
 }
@@ -73,8 +75,10 @@ void View::browse()
   }
   if (keys & KEY_UP) {
     // scroll up ...
-    m_textArea->setStartLine(m_textArea->startLine()-STEP);
-    m_renderer->render();
+    if (m_textArea->startLine() > ((-SCREEN_HEIGHT / m_textArea->font().height()) - 1)) {
+      m_textArea->setStartLine(m_textArea->startLine()-STEP);
+      m_renderer->render();
+    }
   }
   if (keys & KEY_LEFT) {
     m_controller.previous();
@@ -197,4 +201,5 @@ void View::tick()
       keyboard();
       break;
   }
+  nds::Canvas::instance().endPaint();
 }

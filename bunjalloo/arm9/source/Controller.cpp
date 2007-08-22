@@ -1,5 +1,4 @@
 #include "libnds.h"
-#include "Wifi9.h"
 #include <vector>
 #include "Controller.h"
 #include "Document.h"
@@ -170,13 +169,34 @@ void Controller::localFile(const std::string & fileName)
 
 void Controller::fetchHttp(const URI & uri)
 {
+  HttpClient client(uri.server().c_str(), uri.port(), uri);
+  client.setController(this);
+  while (not client.finished())
+  {
+    client.handleNextState();
+    m_view->tick();
+    swiWaitForVBlank();
+  }
+  if (client.hasPage())
+  {
+    URI docUri(m_document->uri());
+    if (docUri != uri)
+    {
+      // redirected
+      client.disconnect();
+      m_document->reset();
+      doUri(uri.navigateTo(m_document->uri()));
+    }
+    else
+    {
+      m_document->setStatus(Document::LOADED);
+    }
+  }
+  /*
   nds::Wifi9::instance().connect();
   if (nds::Wifi9::instance().connected()) {
     // open a socket to the server.
-    // FIXME - hardcoded 80 port.
     HttpClient client(uri.server().c_str(), uri.port());
-    // for a proxy, do this:
-    // HttpClient client(proxy_ip, uri.port());
     client.setController(this);
     client.connect();
     if (client.isConnected())
@@ -190,6 +210,7 @@ void Controller::fetchHttp(const URI & uri)
         // redirected
         doUri(uri.navigateTo(m_document->uri()));
       }
+      client.disconnect();
     }
     else
     {
@@ -199,5 +220,6 @@ void Controller::fetchHttp(const URI & uri)
     char * woops = "Woops, wifi not done";
     m_document->appendData(woops, strlen(woops));
   }
+  */
 }
 

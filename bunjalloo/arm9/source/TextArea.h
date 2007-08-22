@@ -5,28 +5,26 @@
 #include "UnicodeString.h"
 #include <list>
 
-class HtmlElement;
 class Link;
 class FormControl;
-class Config;
 /** A widget for displaying text.*/
 class TextArea
 {
   public:
     /** Constructor.*/
-    TextArea(const Config & config);
+    TextArea(Font * font);
     /** Destructor.*/
     ~TextArea();
-
-    /** Init the font to use.
-     * @param fontBase the base name of the font.
-     */
-    void init(const std::string & fontBase);
 
     /** Set the palette.
      * @param fileName the name of the font palette.
      */
     void setPalette(const std::string & fileName);
+
+    /** Set the palette.
+     * @param data the palette data
+     * @param size the size of the palette data
+     */
     void setPalette(const char * data, unsigned int size);
 
     /** Set the cursor position. This is where the text will be "drawn" the
@@ -52,6 +50,12 @@ class TextArea
      * @return the current font.
      */
     inline const Font & font() const;
+
+    /** Set the font to use. TextArea takes control of the memory and deletes
+     * on end/font reset.
+     * @param font the font to use from now on.
+     */
+    void setFont(Font * font);
 
     /** Set the current encoding. @see print().
      * @param encoding the encoding to use for all encoded text.
@@ -90,7 +94,7 @@ class TextArea
     inline void setLink(bool isLink=true);
     inline void setForm(bool isForm=true);
 
-    void addLink(const HtmlElement * anchor);
+    void addLink(const std::string & href);
     void addFormControl(FormControl * formCtrl);
     Link * clickLink(int x, int y) const;
     FormControl * clickForm(int x, int y) const;
@@ -100,7 +104,6 @@ class TextArea
 
     int textSize(const UnicodeString & unicodeString) const;
   private:
-    const Config & m_config;
     Font * m_font;
     unsigned short * m_palette;
     unsigned short * m_basePalette;

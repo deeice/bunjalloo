@@ -30,7 +30,7 @@ void ViewRender::preFormat(const HtmlElement * element)
   if (element->isa(HtmlConstants::A_TAG))
   {
     m_self->m_textArea->setTextColor(nds::Color(0,0,31));
-    m_self->m_textArea->addLink(element);
+    m_self->m_textArea->addLink( unicode2string(element->attribute("href")) );
   }
   else if (element->isa(HtmlConstants::PRE_TAG))
   {
