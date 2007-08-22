@@ -34,6 +34,12 @@ namespace nds
        */
       int read(char * buffer, int size=-1);
 
+      /** Write some bytes to the file.
+       * @param buffer the data to write
+       * @param size the amount to write. If ommitted or negative, writes until 0 byte.
+       */
+      int write(const char * buffer, int size=-1);
+
       /** Get the size of the file in bytes.
        */
       int size();

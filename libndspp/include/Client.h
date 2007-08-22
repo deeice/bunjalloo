@@ -6,6 +6,7 @@ namespace nds {
   class Client
   {
     public:
+
       /*!@brief Create a TCP client that connects to an IP address and port
        * @param ip IP address to connect to.
        * @param port port to connect to.
@@ -17,8 +18,14 @@ namespace nds {
 
       /*! @brief Connect to the given IP addres and port.*/
       void connect();
-      /*! @brief Read bytes from the server address and port.*/
-      void read();
+
+      /*! @brief Read bytes from the server address and port.
+       * @return the number of bytes read. -1 for an error.
+       */
+      int read();
+
+      /*! @brief Disconnect from the server.*/
+      void disconnect();
 
       /*! @brief Write data to the target address and port. 
        * @param data pointer to the data to send
@@ -41,13 +48,14 @@ namespace nds {
         m_port = port;
       }
 
+    protected:
       /*! @brief Pure virtual function to handle the bytes read from the server
        * @param buffer Data recieved from the other end.
        * @param amountRead Number of bytes read.
        */
       virtual void handle(void * buffer, int amountRead) = 0;
       /*! @brief Pure virtual function to handle the end of the reading. */
-      virtual void finish() = 0;
+      // virtual void finish() = 0;
 
       /*! @brief debug string 
        * @param c Characters to print (or whatever). */
@@ -60,18 +68,21 @@ namespace nds {
        * @return true if we have finished, false if we should try to read more data.
        *
        */
-      virtual bool finished()=0;
+      /*
+       virtual bool finished()=0;
+      */
 
       /** called during connection every second while waiting.
        * @return true if should keep trying, false to give up.
        */
-      virtual bool connectCallback()=0;
+      //virtual bool connectCallback()=0;
 
+      /*
       //! called during write every second while waiting.
       virtual void writeCallback()=0;
       //! called during read every second while waiting.
       virtual void readCallback()=0;
-
+      */
 
 
     private:

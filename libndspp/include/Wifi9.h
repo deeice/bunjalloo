@@ -20,10 +20,25 @@ namespace nds
        */
       static Wifi9 & instance();
 
-      /*! @brief connect to the AP using the built in WFC settings
-       * @returns true if connceted succesfully, false otherwise.
+      /** Connect to the AP using the built in WFC settings. */
+      void connect();
+
+      //! Status from dswifi, saves including dswifi header.
+      enum WifiStatus
+      {
+        DISCONNECTED,   //!< Not trying to connect
+        SEARCHING,      //!< Looking for AP
+        AUTHENTICATING, //!< Connecting.
+        ASSOCIATING,    //!< Connecting.
+        ACQUIRINGDHCP,  //!< Connected to AP, getting IP
+        ASSOCIATED,     //!< Connected
+        CANNOTCONNECT,  //!< Error, unable to connect
+      };
+
+      /** Get the wifi connection status.
+       * @returns the current Wifi status
        */
-      bool connect();
+      WifiStatus status() const;
 
       /*! @brief fetch the status of the connection.
        * @returns true if connected, false otherwise.
@@ -36,7 +51,6 @@ namespace nds
       void disconnect();
 
     private:
-      //! current connection status flag
       bool m_connected;
       //! construct the class, calls initialise
       Wifi9();

@@ -36,6 +36,7 @@ class nds::FileImplementation
     ~FileImplementation();
 
     int read(char * buffer, int amount=-1);
+    int write(const char * buffer, int amount=-1);
     int size();
     bool is_open();
     void close();
@@ -85,6 +86,20 @@ int FileImplementation::read(char * buffer, int amount)
   return fread(buffer, 1, bytesExpected, m_stream);
 }
 
+int FileImplementation::write(const char * buffer, int amount)
+{
+  if (not m_stream)
+  {
+    return 0;
+  }
+
+  int bytesExpected = amount;
+  if (amount < 0) {
+    bytesExpected = strlen(buffer);
+  }
+  return fwrite(buffer, 1, bytesExpected, m_stream);
+}
+
 int FileImplementation::size()
 {
   if (not m_stream)
@@ -124,6 +139,11 @@ File::~File()
 int File::read(char * buffer, int amount)
 {
   return m_details->read(buffer, amount);
+}
+
+int File::write(const char * buffer, int amount)
+{
+  return m_details->write(buffer, amount);
 }
 
 int File::size()

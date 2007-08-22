@@ -71,3 +71,8 @@ void Canvas::drawRectangle(int x, int y, int w, int h, int colour)
   verticalLine(x,y,h,colour);
   verticalLine(x+w,y,h,colour);
 }
+
+void Canvas::endPaint()
+{
+  // nop
+}

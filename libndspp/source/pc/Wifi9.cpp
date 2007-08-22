@@ -3,7 +3,7 @@
 
 using namespace nds;
 
-Wifi9::Wifi9():m_connected(false)
+Wifi9::Wifi9()
 {
   initialise();
 }
@@ -15,7 +15,7 @@ Wifi9 & Wifi9::instance()
 
 bool Wifi9::connected() const
 {
-  return m_connected;
+  return status() == ASSOCIATED;
 }
 
 void Wifi9::initialise()
@@ -23,16 +23,26 @@ void Wifi9::initialise()
   // wifi init complete - wifi lib can now be used!
 }
 
-bool Wifi9::connect()
+void Wifi9::connect()
 { 
-  // if connected, you can use the berkley sockets interface to connect to the internet
-  if (m_connected)
-    return true;
-  m_connected = true;
-  return true;
+  // nop
 } 
+
+Wifi9::WifiStatus Wifi9::status() const
+{
+  static WifiStatus s = DISCONNECTED;
+  switch (s)
+  {
+    case ASSOCIATING:
+      s = ASSOCIATED;
+      break;
+    default:
+      s = ASSOCIATING;
+      break;
+  }
+  return s;
+}
 
 void Wifi9::disconnect()
 {
-  m_connected = false;
 }

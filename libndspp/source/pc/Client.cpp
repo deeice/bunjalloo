@@ -24,6 +24,7 @@ using namespace nds;
 Client::Client(const char * ip, int port):
   m_ip(ip),
   m_port(port),
+  m_tcp_socket(0),
   m_connected(false),
   m_timeout(1)
 { }
@@ -36,15 +37,25 @@ Client::~Client()
   }
 }
 
+void Client::disconnect()
+{
+  ::close(m_tcp_socket);
+  m_connected = false;
+}
+
+static void makeNonBlocking(int socketId) {
+  int i(1);
+  int iotclResult = ::ioctl(socketId, FIONBIO, &i);
+  if (iotclResult == -1) {
+    // debug("iotcl non blocking failed");
+    // never happens on DS...
+  }
+}
+
 bool Client::connect(sockaddr_in & socketAddress)
 {
+  makeNonBlocking(m_tcp_socket);
   socklen_t addrlen = sizeof(struct sockaddr_in);
-  int i(1);
-  int iotclResult = ::ioctl(m_tcp_socket, FIONBIO, &i);
-  if (iotclResult == -1) {
-    debug("iotcl non blocking failed");
-    return false;
-  }
   int result = ::connect(m_tcp_socket, (struct sockaddr*)&socketAddress, addrlen);
   if (result == 0) {
     // connected immediately
@@ -60,6 +71,7 @@ bool Client::connect(sockaddr_in & socketAddress)
           int retval;
           FD_ZERO(&wfds);
           FD_SET(m_tcp_socket, &wfds);
+          int tries = 0;
           while (not m_connected) {
             tv.tv_sec = m_timeout;
             tv.tv_usec = 0;
@@ -76,8 +88,9 @@ bool Client::connect(sockaddr_in & socketAddress)
             }
             else {
               debug("No data within 1 second.");
-              // keep trying - let the client know what is happening.
-              if ( connectCallback() == false ) 
+              // keep trying 
+              tries++;
+              if (tries == 3)
               {
                 break;
               }
@@ -109,6 +122,7 @@ void Client::connect()
     htons(m_port),    /* port in network byte order */
     {inet_addr(m_ip)} /* internet address - network byte order */
   };
+
   // is it an ip address?
   std::string serverName(m_ip);
   std::string::const_iterator end = std::find_if(serverName.begin(), serverName.end(), ::isalpha);
@@ -150,7 +164,7 @@ unsigned int Client::write(const void * data, unsigned int length)
       dbg << "About to send " << length << " bytes of data" << endl;
       debug(dbg.str().c_str());
     }
-    writeCallback();
+    //writeCallback();
     fd_set wfds;
     timeval tv;
     int retval;
@@ -178,16 +192,20 @@ unsigned int Client::write(const void * data, unsigned int length)
   return total;
 }
 
-void Client::read()
+int Client::read()
 {
+  /*
   if (!isConnected())
     return;
+  */
   const static int bufferSize(BUFSIZ);
   char buffer[bufferSize];
   int total = 0;
+#if 0
   while ( not finished() )
   {
-    readCallback();
+#endif
+    // readCallback();
     fd_set rfds;
     timeval tv;
     int retval;
@@ -200,31 +218,41 @@ void Client::read()
       stringstream dbg;
       dbg << "select error: " << errno;
       debug(dbg.str().c_str());
-      break;
+      return -1;
     } 
     else if (retval) {
       stringstream dbg;
-      dbg << "Data is now available." << total ;
+      dbg << "Data is now available. Total:" << total << "\n";
       debug(dbg.str().c_str());
     }
     else
     {
       debug("not ready");
-      continue;
+      return -1;
     }
-    int amountRead = ::recv(m_tcp_socket, buffer, bufferSize,MSG_DONTWAIT);
+    int amountRead = ::recv(m_tcp_socket, buffer, bufferSize, 0 /*MSG_DONTWAIT*/);
+    int tmpErrno = errno;
     if (amountRead < 0) {
       debug("Error on recv");
-      break;
+      return -1;
+    }
+    if (tmpErrno == EWOULDBLOCK) {
+      debug("EWOULDBLOCK");
+      return -1;
     }
     if (amountRead == 0) {
-      break;
+      debug("Read 0");
+      // needs to be different!
+      return -1;
     }
     handle(buffer, amountRead);
     total += amountRead;
-  }
+  //}
+#if 1
   stringstream dbg;
   dbg << "Read " << total << " bytes";
   debug(dbg.str().c_str());
-  finish();
+  //finish();
+#endif
+  return amountRead;
 }

@@ -35,7 +35,7 @@ Wifi9 & Wifi9::instance()
 
 bool Wifi9::connected() const
 {
-  return m_connected;
+  return status() == ASSOCIATED;
 }
 
 void Wifi9::initialise()
@@ -81,33 +81,59 @@ void Wifi9::initialise()
   // wifi init complete - wifi lib can now be used!
 }
 
-bool Wifi9::connect()
+
+
+void Wifi9::connect()
 { 
   // if connected, you can use the berkley sockets interface to connect to the internet
-  if (m_connected)
-    return true;
+  if (m_connected) {
+    WifiStatus s = status();
+    switch (s)
+    {
+      case SEARCHING:
+      case AUTHENTICATING:
+      case ASSOCIATING:
+      case ACQUIRINGDHCP:
+      case ASSOCIATED:
+        /* In all these cases, do nothing */
+        return;
 
+      case DISCONNECTED:
+      case CANNOTCONNECT:
+        /* Try to reconnect */
+        break;
+    }
+  }
+  m_connected = true;
   // simple WFC connect: 
-  int i; 
   // request connect - uses the stored data to connect
-  m_connected = false;
   Wifi_AutoConnect();
-  while(1) { 
-    // check status 
-    i=Wifi_AssocStatus(); 
-    if(i==ASSOCSTATUS_ASSOCIATED) { 
-      m_connected = true;
-      return true;
-    } 
-    if(i==ASSOCSTATUS_CANNOTCONNECT) { 
-      return false;
-    } 
-  } 
+}
+
+Wifi9::WifiStatus Wifi9::status() const
+{
+  // check status 
+  if (m_connected)
+  {
+    int s = Wifi_AssocStatus(); 
+    if (s == ASSOCSTATUS_ASSOCIATED)
+    {
+      return ASSOCIATED;
+    }
+    if (s == ASSOCSTATUS_CANNOTCONNECT)
+    {
+      return CANNOTCONNECT;
+    }
+    return ASSOCIATING;
+  }
+  else 
+  {
+    return DISCONNECTED;
+  }
 } 
 
 void Wifi9::disconnect()
 {
   REG_IPC_FIFO_TX=0xDEADFEED;
-  m_connected = false;
   Wifi_DisableWifi();
 }

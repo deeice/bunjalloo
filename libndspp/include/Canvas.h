@@ -16,10 +16,15 @@ namespace nds
       void horizontalLine(int x, int y, int length, int colour);
       int width() const;
       int height() const;
+      void endPaint();
 
     private:
       Background * m_bgMain;
       Background * m_bgSub;
+      unsigned short * m_frontMain;
+      unsigned short * m_backMain;
+      unsigned short * m_frontSub;
+      unsigned short * m_backSub;
 
       Canvas();
       ~Canvas();
