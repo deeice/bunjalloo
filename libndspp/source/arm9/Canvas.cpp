@@ -49,6 +49,9 @@ Canvas::Canvas():
   m_bgSub->update();
 
   main.setToTop();
+  m_clip.x = m_clip.y = 0;
+  m_clip.w = width();
+  m_clip.h = height();
 }
 
 int Canvas::height() const
@@ -64,45 +67,13 @@ int Canvas::width() const
 
 void Canvas::drawPixel(int x, int y, int colour)
 {
-  if (x >= SCREEN_WIDTH or y >= (2*SCREEN_HEIGHT)) {
+  if (not m_clip.hit(x, y))
     return;
-  }
   //uint16 * gfx( (y < 192) ? m_backMain:m_backSub );
   uint16 * gfx( (y < 192) ? m_frontMain:m_frontSub );
   if (y >= 192)
     y -= 192;
   gfx[x+y*256] = colour|BIT(15);
-}
-
-void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
-{
-  for (int j = 0; j < h; j++) {
-    horizontalLine(x, y+j, w, colour);
-  }
-}
-
-void Canvas::verticalLine(int x, int y, int length, int colour)
-{
-  for (int i = 0 ; i < length; ++i)
-  {
-    drawPixel(x, y+i, colour);
-  }
-}
-
-void Canvas::horizontalLine(int x, int y, int length, int colour)
-{
-  for (int i = 0 ; i < length; ++i)
-  {
-    drawPixel(x+i, y, colour);
-  }
-}
-
-void Canvas::drawRectangle(int x, int y, int w, int h, int colour)
-{
-  horizontalLine(x,y,w,colour);
-  horizontalLine(x,y+h,w,colour);
-  verticalLine(x,y,h,colour);
-  verticalLine(x+w,y,h,colour);
 }
 
 void Canvas::endPaint()

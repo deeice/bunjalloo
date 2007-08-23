@@ -36,7 +36,7 @@ export ARM9_VPATH	:=	$(foreach dir,$(ARM9SOURCES),$(BASEDIR)/$(dir))
 export ARM7_VPATH	:=	$(foreach dir,$(ARM7SOURCES),$(BASEDIR)/$(dir))
 
 export ARM9OBJS :=	$(ARM9BINFILES:.bin=.o) $(ARM9CFILES:.c=.o) $(ARM9SFILES:.s=.o) $(ARM9CPPFILES:.cpp=.o)
-export ARM9INC	:=	-I$(BUILDDIR)/arm9 -I$(LIBNDS)/include 
+export ARM9INC	:=	-I$(BASEDIR)/source/arm9 -I$(LIBNDS)/include 
 export ARM7OBJS :=	$(ARM7CFILES:.c=.o) $(ARM7SFILES:.s=.o) $(ARM7CPPFILES:.cpp=.o)
 export ARM7INC	:=	-I$(BUILDDIR)/arm7 -I$(LIBNDS)/include 
 

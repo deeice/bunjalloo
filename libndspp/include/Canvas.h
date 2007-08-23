@@ -1,6 +1,7 @@
 #ifndef Canvas_h_seen
 #define Canvas_h_seen
 
+#include "Rectangle.h"
 namespace nds
 {
   class Background;
@@ -18,6 +19,9 @@ namespace nds
       int height() const;
       void endPaint();
 
+      void setClip(const Rectangle & clip);
+      Rectangle clip() const;
+
     private:
       Background * m_bgMain;
       Background * m_bgSub;
@@ -25,9 +29,12 @@ namespace nds
       unsigned short * m_backMain;
       unsigned short * m_frontSub;
       unsigned short * m_backSub;
+      Rectangle m_clip;
 
       Canvas();
       ~Canvas();
+
+      unsigned short * vram();
 
       Canvas(const Canvas &);
       const Canvas operator=(const Canvas &);

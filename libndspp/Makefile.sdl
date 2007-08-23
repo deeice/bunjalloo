@@ -14,7 +14,7 @@ export PATH		:=	$(PATH)
 export BASEDIR	:=	$(CURDIR)
 export LIBDIR	:=	$(BASEDIR)/lib
 export DEPENDS	:=	$(BASEDIR)/deps
-export INCDIR	:=	$(BASEDIR)/include
+export INCDIR	:=	$(BASEDIR)/include 
 export BUILDDIR	:=	$(BASEDIR)/$(BUILD)
 
 CFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.c)))
@@ -25,12 +25,11 @@ BINFILES	:=	$(foreach dir,$(SOURCES),$(notdir $(wildcard $(dir)/*.bin)))
 export VPATH	:=	$(foreach dir,$(SOURCES),$(BASEDIR)/$(dir))
 
 export OBJS :=	$(BINFILES:.bin=.o) $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
-export INC	:=	-I$(BUILDDIR)/arm9 -I$(LIBNDS)/include 
 
 export ARCH	:=	
 
 export BASEFLAGS	:=	-g -Wall \
-				-I$(INCDIR)
+				-I$(INCDIR) -I$(BASEDIR)/source/pc
 
 
 .PHONY:	all libs dist docs

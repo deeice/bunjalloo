@@ -18,6 +18,9 @@ Canvas::Canvas()
   Video & sub(Video::instance(1));
   sub.setMode(5);
   main.setMode(5);
+  m_clip.x = m_clip.y = 0;
+  m_clip.w = width();
+  m_clip.h = height();
 }
 
 int Canvas::height() const
@@ -31,46 +34,50 @@ int Canvas::width() const
 
 void Canvas::drawPixel(int x, int y, int colour)
 {
+  if (not m_clip.hit(x, y))
+    return;
   int layer = ( (y < 192) ? 0:1 );
   u16 * vram = SDLhandler::instance().vramMain(0);
   if (layer) {
     y-=192;
     vram = SDLhandler::instance().vramSub(0);
   }
-  // SDLhandler::instance().drawPixel(x,y,layer,colour);
   vram[x+y*SCREEN_WIDTH] = colour;
 }
 
+/*
 void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
 {
-  for (int j = 0; j < h; j++) {
-    for (int i = 0; i < w; i++) {
-      drawPixel(x+i, y+j, colour);
+  if (y < 192 and (y+h) >= 192)
+  {
+    // crosses boundary
+  }
+  else if (y < 192)
+  {
+    u16 * vram = SDLhandler::instance().vramMain(0);
+    vram += x + y * SCREEN_WIDTH;
+    if ( (x+w) > (m_clip.x + m_clip.w))
+    {
+      w = m_clip.w - x - m_clip.x;
+    }
+    if ( (y+h) > (m_clip.y + m_clip.h))
+    {
+      h = m_clip.h - y - m_clip.y;
+    }
+    for (int i = 0; i < h ; ++i) {
+      u16 * end = vram+w;
+      while (vram != end)
+      {
+        *vram++ = colour;
+      }
+      vram += width() - w;
     }
   }
-}
-
-void Canvas::verticalLine(int x, int y, int length, int colour)
-{
-  for (int i = 0 ; i < length; ++i)
+  else
   {
-    drawPixel(x, y+i, colour);
   }
 }
-void Canvas::horizontalLine(int x, int y, int length, int colour)
-{
-  for (int i = 0 ; i < length; ++i)
-  {
-    drawPixel(x+i, y, colour);
-  }
-}
-void Canvas::drawRectangle(int x, int y, int w, int h, int colour)
-{
-  horizontalLine(x,y,w,colour);
-  horizontalLine(x,y+h,w,colour);
-  verticalLine(x,y,h,colour);
-  verticalLine(x+w,y,h,colour);
-}
+*/
 
 void Canvas::endPaint()
 {

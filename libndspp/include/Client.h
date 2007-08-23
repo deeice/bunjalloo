@@ -19,6 +19,8 @@ namespace nds {
       /*! @brief Connect to the given IP addres and port.*/
       void connect();
 
+      static const int READ_ERROR;
+      static const int CONNECTION_CLOSED;
       /*! @brief Read bytes from the server address and port.
        * @return the number of bytes read. -1 for an error.
        */
@@ -54,36 +56,13 @@ namespace nds {
        * @param amountRead Number of bytes read.
        */
       virtual void handle(void * buffer, int amountRead) = 0;
-      /*! @brief Pure virtual function to handle the end of the reading. */
-      // virtual void finish() = 0;
 
       /*! @brief debug string 
        * @param c Characters to print (or whatever). */
       virtual void debug(const char * c)=0;
 
-      /*! Called before recv to check if we have all the expected data. The idea
-       * is that the protocol used should specify the amount of data at the
-       * beginning of the recvs, then we should check this against the current
-       * running total.
-       * @return true if we have finished, false if we should try to read more data.
-       *
-       */
-      /*
-       virtual bool finished()=0;
-      */
-
-      /** called during connection every second while waiting.
-       * @return true if should keep trying, false to give up.
-       */
-      //virtual bool connectCallback()=0;
-
-      /*
-      //! called during write every second while waiting.
-      virtual void writeCallback()=0;
-      //! called during read every second while waiting.
-      virtual void readCallback()=0;
-      */
-
+      /** Set the current timeout. */
+      void setTimeout(int timeout);
 
     private:
       //! The IP address
@@ -98,6 +77,7 @@ namespace nds {
       int m_timeout;
 
       bool connect(sockaddr_in & socketAddress);
+      void makeNonBlocking();
 
       Client(const Client &);
       const Client operator=(const Client &);

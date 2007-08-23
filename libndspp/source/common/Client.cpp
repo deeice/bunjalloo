@@ -1,14 +1,13 @@
+#define DEBUG_WITH_SSTREAM 1
 #include "Client.h"
+#include "Client_platform.h"
 #include <sys/socket.h>
-#include <sys/ioctl.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#ifndef ARM9
-#include <arpa/inet.h>
-#endif
 #include <string.h>
-#include <iostream>
+#if DEBUG_WITH_SSTREAM
 #include <sstream>
+#endif
 #include <unistd.h>
 #include <stdio.h>
 #include <algorithm>
@@ -26,35 +25,36 @@ Client::Client(const char * ip, int port):
   m_port(port),
   m_tcp_socket(0),
   m_connected(false),
-  m_timeout(1)
+  m_timeout(TIMEOUT)
 { }
 
 Client::~Client()
 {
   if (isConnected())
   {
-    ::close(m_tcp_socket);
+    ::closesocket_platform(m_tcp_socket);
   }
 }
 
 void Client::disconnect()
 {
-  ::close(m_tcp_socket);
+  if (isConnected())
+    ::closesocket_platform(m_tcp_socket);
   m_connected = false;
 }
 
-static void makeNonBlocking(int socketId) {
+void Client::makeNonBlocking() {
   int i(1);
-  int iotclResult = ::ioctl(socketId, FIONBIO, &i);
+  int iotclResult = ::ioctl(m_tcp_socket, FIONBIO, &i);
   if (iotclResult == -1) {
-    // debug("iotcl non blocking failed");
+    debug("iotcl non blocking failed");
     // never happens on DS...
   }
 }
 
 bool Client::connect(sockaddr_in & socketAddress)
 {
-  makeNonBlocking(m_tcp_socket);
+  makeNonBlocking();
   socklen_t addrlen = sizeof(struct sockaddr_in);
   int result = ::connect(m_tcp_socket, (struct sockaddr*)&socketAddress, addrlen);
   if (result == 0) {
@@ -67,15 +67,15 @@ bool Client::connect(sockaddr_in & socketAddress)
         {
           // select connect for write
           fd_set wfds;
-          timeval tv;
+          timeval timeout;
           int retval;
           FD_ZERO(&wfds);
           FD_SET(m_tcp_socket, &wfds);
           int tries = 0;
           while (not m_connected) {
-            tv.tv_sec = m_timeout;
-            tv.tv_usec = 0;
-            retval = select(m_tcp_socket+1, NULL, &wfds, NULL, &tv);
+            timeout.tv_sec = m_timeout;
+            timeout.tv_usec = 0;
+            retval = select(m_tcp_socket+1, NULL, &wfds, NULL, &timeout);
             if (retval == -1) {
               debug("Select error");
               m_connected = false;
@@ -87,7 +87,7 @@ bool Client::connect(sockaddr_in & socketAddress)
               break;
             }
             else {
-              debug("No data within 1 second.");
+              debug("No data within m_timeout seconds.");
               // keep trying 
               tries++;
               if (tries == 3)
@@ -100,9 +100,11 @@ bool Client::connect(sockaddr_in & socketAddress)
         break;
       default:
         {
+#if DEBUG_WITH_SSTREAM
           stringstream dbg;
           dbg << "Unable to connect to\n" << m_ip << ":" << m_port << "\nError:"<<result;
           debug(dbg.str().c_str());
+#endif
           return false;
         }
         break;
@@ -133,17 +135,22 @@ void Client::connect()
     int i = 0;
     while (host and host->h_addr_list[i] != NULL) {
       memcpy(&socketAddress.sin_addr, host->h_addr_list[i], sizeof(struct in_addr));
+#if DEBUG_WITH_SSTREAM
       stringstream dbg;
-      dbg << "Trying: " << host->h_aliases[i];
+      dbg << "Trying: " << i << " ";
+#ifdef ARM9
+      dbg << "(" << m_ip;
+#else
       dbg << "(" << inet_ntoa( *( struct in_addr*)( host->h_addr_list[i]));
+#endif
       dbg << ":" << m_port << ")" << endl;
       debug(dbg.str().c_str());
+#endif
       if ( this->connect(socketAddress) ) {
         break;
       }
       i++;
     }
-
   } else {
     this->connect(socketAddress);
   }
@@ -155,24 +162,25 @@ unsigned int Client::write(const void * data, unsigned int length)
   // can only send "buffer" amount of data, and when the buffer is full we need to wait
   unsigned int total(0);
   char * cdata = (char*)data;
-  m_timeout = 30;
 #define SEND_SIZE 2048
   do
   {
+#if DEBUG_WITH_SSTREAM
     {
       stringstream dbg;
-      dbg << "About to send " << length << " bytes of data" << endl;
+      dbg << "About to send " << length << " bytes of data";
       debug(dbg.str().c_str());
     }
+#endif
     //writeCallback();
     fd_set wfds;
-    timeval tv;
+    timeval timeout;
     int retval;
     FD_ZERO(&wfds);
     FD_SET(m_tcp_socket, &wfds);
-    tv.tv_sec = m_timeout;
-    tv.tv_usec = 0;
-    retval = select(m_tcp_socket+1, NULL, &wfds, NULL, &tv);
+    timeout.tv_sec = m_timeout;
+    timeout.tv_usec = 0;
+    retval = select(m_tcp_socket+1, NULL, &wfds, NULL, &timeout);
     if (retval < 0) {
       continue;
     }
@@ -182,77 +190,91 @@ unsigned int Client::write(const void * data, unsigned int length)
     cdata += sent;
     length -= sent;
     total += sent;
+    // wait for the cores to sync
+#if DEBUG_WITH_SSTREAM
     {
       stringstream dbg;
-      dbg << "Remaining: " << length << " bytes of data" << endl;
+      dbg << "Remaining: " << length << " bytes of data";
       debug(dbg.str().c_str());
     }
+#endif
   } while (length);
-  debug("Done\n");
+  debug("Done write");
   return total;
 }
 
+const int Client::CONNECTION_CLOSED(0);
+const int Client::READ_ERROR(-1);
+
 int Client::read()
 {
-  /*
-  if (!isConnected())
-    return;
-  */
   const static int bufferSize(BUFSIZ);
   char buffer[bufferSize];
-  int total = 0;
-#if 0
-  while ( not finished() )
-  {
+  fd_set rfds;
+  timeval timeout;
+  int retval;
+  FD_ZERO(&rfds);
+  FD_SET(m_tcp_socket, &rfds);
+  // The problem here is that Linux triggers the select when the 
+  // connection is closed by the peer.
+  // The DS does not, so when all data has been returned, it will wait an extra select
+  // (until timeout) to discover that the peer has shut the connection.
+  //timeout.tv_sec = READ_WAIT_SEC;
+  //timeout.tv_usec = READ_WAIT_USEC;
+  timeout.tv_sec = m_timeout;
+  timeout.tv_usec = 0;
+  retval = select(m_tcp_socket+1, &rfds, NULL, NULL, &timeout);
+  if (retval == -1) {
+#if DEBUG_WITH_SSTREAM
+    stringstream dbg;
+    dbg << "select error: " << errno;
+    debug(dbg.str().c_str());
 #endif
-    // readCallback();
-    fd_set rfds;
-    timeval tv;
-    int retval;
-    FD_ZERO(&rfds);
-    FD_SET(m_tcp_socket, &rfds);
-    tv.tv_sec = 1;
-    tv.tv_usec = 0;
-    retval = select(m_tcp_socket+1, &rfds, NULL, NULL, &tv);
-    if (retval == -1) {
-      stringstream dbg;
-      dbg << "select error: " << errno;
-      debug(dbg.str().c_str());
-      return -1;
-    } 
-    else if (retval) {
-      stringstream dbg;
-      dbg << "Data is now available. Total:" << total << "\n";
-      debug(dbg.str().c_str());
-    }
-    else
-    {
-      debug("not ready");
-      return -1;
-    }
-    int amountRead = ::recv(m_tcp_socket, buffer, bufferSize, 0 /*MSG_DONTWAIT*/);
-    int tmpErrno = errno;
-    if (amountRead < 0) {
-      debug("Error on recv");
-      return -1;
-    }
-    if (tmpErrno == EWOULDBLOCK) {
-      debug("EWOULDBLOCK");
-      return -1;
-    }
-    if (amountRead == 0) {
-      debug("Read 0");
-      // needs to be different!
-      return -1;
-    }
-    handle(buffer, amountRead);
-    total += amountRead;
-  //}
-#if 1
+    return READ_ERROR;
+  } 
+  else if (retval) {
+    debug("Data is readable");
+  }
+  else
+  {
+    debug("not ready");
+    return READ_ERROR;
+  }
+  int amountRead = ::recv(m_tcp_socket, buffer, bufferSize, 0 /*MSG_DONTWAIT*/);
+  int tmpErrno = errno;
+  if (amountRead < 0) {
+    debug("Error on recv");
+    return READ_ERROR;
+  }
+  if (tmpErrno == EWOULDBLOCK) {
+    debug("EWOULDBLOCK");
+    return READ_ERROR;
+  }
+  if (amountRead == 0)
+  {
+    // man recv(2):
+    // The return value will be 0 when the peer has performed an orderly shutdown.
+    debug("Read 0 bytes");
+    return CONNECTION_CLOSED;
+/*
+#ifdef ARM9
+    return amountRead;
+#else
+    // needs to be different!
+    return -1;
+#endif
+*/
+  }
+  handle(buffer, amountRead);
+#if DEBUG_WITH_SSTREAM
   stringstream dbg;
-  dbg << "Read " << total << " bytes";
+  dbg << "Read " << amountRead << " bytes";
   debug(dbg.str().c_str());
-  //finish();
 #endif
   return amountRead;
+}
+
+void Client::setTimeout(int timeout)
+{
+  m_timeout = timeout;
 }
