@@ -36,17 +36,11 @@ class HttpClient: public nds::Client
     /** Has the fetching finished?.
      * @return true if it has, false otherwise.
      */ 
-    bool finished();
+    bool finished() const;
 
   protected:
     void handle(void * bufferIn, int amountRead);
     
-    //bool connectCallback();
-
-    // void writeCallback();
-    // void readCallback();
-
-    void finish();
 
     void debug(const char * s);
 
@@ -64,6 +58,7 @@ class HttpClient: public nds::Client
     void get(const URI & uri);
     void readFirst();
     void readAll();
+    void finish();
 };
 
 #endif

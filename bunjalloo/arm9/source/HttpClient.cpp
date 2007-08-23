@@ -43,16 +43,7 @@ void HttpClient::handle(void * bufferIn, int amountRead)
   //printf("0x0x End of buffer x0x0", buffer);
 }
 
-/*
-bool HttpClient::connectCallback() {
-  //printf("Connect?...\n");
-  swiWaitForVBlank();
-  m_connectAttempts++;
-  return m_connectAttempts < MAX_CONNECT_ATTEMPTS;
-}
-*/
-
-bool HttpClient::finished() 
+bool HttpClient::finished() const
 {
   return m_finished;
 }
@@ -76,12 +67,13 @@ void HttpClient::debug(const char * s)
     nds::File log;
     log.open("bunjalloo.log", "a");
     log.write(s);
+    log.write("\n");
   } 
   else {
     swiWaitForVBlank();
     swiWaitForVBlank();
   }
-  printf("\ndebug:%s\n",s);
+  printf("debug:%s\n",s);
   //m_self->m_document->appendLocalData(s, strlen(s));
 }
 
@@ -136,7 +128,7 @@ void HttpClient::wifiConnection()
   switch (Wifi9::instance().status())
   {
     case Wifi9::CANNOTCONNECT:
-      debug("FAILED Wifi9::CANNOTCONNECT\n");
+      debug("FAILED Wifi9::CANNOTCONNECT");
       m_state = FAILED;
       break;
 
@@ -171,10 +163,11 @@ void HttpClient::handleNextState()
 
     case CONNECT_SOCKET:
       // connect to the socket.
+      setTimeout(5);
       this->connect();
       if (isConnected())
       {
-        debug("Connected, get URL\n");
+        debug("Connected, get URL");
         m_state = GET_URL;
         m_connectAttempts = 0;
         swiWaitForVBlank();
@@ -185,13 +178,14 @@ void HttpClient::handleNextState()
         m_connectAttempts++;
         if (m_connectAttempts == MAX_CONNECT_ATTEMPTS)
         {
-          debug("FAILED m_connectAttempts == MAX_CONNECT_ATTEMPTS\n");
+          debug("FAILED m_connectAttempts == MAX_CONNECT_ATTEMPTS");
           m_state = FAILED;
         }
       }
       break;
 
     case GET_URL:
+      setTimeout(2);
       get(m_uri);
       swiWaitForVBlank();
       swiWaitForVBlank();
@@ -200,11 +194,13 @@ void HttpClient::handleNextState()
 
     case READING_FIRST:
       // read something, anything, to make sure all is well
+      setTimeout(5);
       readFirst();
       break;
 
     case READING_ALL:
       // now we know the server is connected, read the remaining bytes.
+      setTimeout(1);
       readAll();
       break;
 
@@ -228,16 +224,18 @@ bool HttpClient::hasPage() const
 void HttpClient::readFirst()
 {
   int read = this->read();
-  if (read == 0)
+  if (read == CONNECTION_CLOSED)
   {
     // worrying. resend the url request?
-    swiWaitForVBlank();
-    swiWaitForVBlank();
+    //swiWaitForVBlank();
+    //swiWaitForVBlank();
     //m_state = GET_URL;
+    debug("readFirst returned 0 - FINISH or wait?");
+    m_state = FAILED;
   }
-  else if (read == -1)
+  else if (read == READ_ERROR)
   {
-    // might not be ready yet.
+    // not be ready yet. This is the select() returning early.
     m_connectAttempts++;
     if (m_connectAttempts >= MAX_CONNECT_ATTEMPTS)
     {
@@ -248,10 +246,12 @@ void HttpClient::readFirst()
       m_reconnects++;
       if (m_reconnects == 3)
       {
-        debug("FAILED m_reconnects == 3\n");
+        debug("FAILED m_reconnects == 3");
         m_state = FAILED;
       }
     }
+    swiWaitForVBlank();
+    swiWaitForVBlank();
   }
   else
   {
@@ -264,12 +264,13 @@ void HttpClient::readFirst()
 void HttpClient::readAll()
 {
   int read = this->read();
-  if (read < 0)
+  if (read == READ_ERROR)
   {
     m_state = FINISHED;
   }
-  else if (read == 0)
+  else if (read == CONNECTION_CLOSED)
   {
+    debug("readAll returned 0 - FINISH or wait?");
     m_state = FINISHED;
     //swiWaitForVBlank();
     //swiWaitForVBlank();
