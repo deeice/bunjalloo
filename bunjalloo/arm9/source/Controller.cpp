@@ -194,13 +194,18 @@ void Controller::fetchHttp(const URI & uri)
     m_view->tick();
     swiWaitForVBlank();
   }
+
   if (client.hasPage())
   {
+#if 0
+    // redirect:
     URI docUri(m_document->uri());
     if (docUri != uri)
     {
       // redirected
       client.disconnect();
+      swiWaitForVBlank();
+      swiWaitForVBlank();
       m_document->reset();
       doUri(uri.navigateTo(m_document->uri()));
     }
@@ -208,6 +213,8 @@ void Controller::fetchHttp(const URI & uri)
     {
       m_document->setStatus(Document::LOADED);
     }
+#endif
+    m_document->setStatus(Document::LOADED);
   }
   /*
   nds::Wifi9::instance().connect();

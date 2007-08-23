@@ -36,10 +36,13 @@ namespace nds {
       /*! @brief Connect to the given IP addres and port.*/
       void connect();
 
-      static const int READ_ERROR;
-      static const int CONNECTION_CLOSED;
+      enum ReadError {
+        CONNECTION_CLOSED=0,
+        READ_ERROR=-1,
+        RETRY_LATER=-2
+      };
       /*! @brief Read bytes from the server address and port.
-       * @return the number of bytes read. -1 for an error.
+       * @return the number of bytes read. -1 for an error. It may be one of the ReadError codes above.
        */
       int read();
 
@@ -61,11 +64,7 @@ namespace nds {
        * @param ip IP address to connect to.
        * @param port port to connect to.
        */
-      inline void setConnection(const char * ip, int port)
-      {
-        m_ip = ip;
-        m_port = port;
-      }
+      void setConnection(const char * ip, int port);
 
     protected:
       /*! @brief Pure virtual function to handle the bytes read from the server
@@ -83,7 +82,7 @@ namespace nds {
 
     private:
       //! The IP address
-      const char * m_ip;
+      char * m_ip;
       //! The port on the server to connect to
       int m_port;
       //! The socket

@@ -38,12 +38,14 @@ using namespace std;
 using namespace nds;
 
 Client::Client(const char * ip, int port):
-  m_ip(ip),
+  m_ip(0),
   m_port(port),
   m_tcp_socket(0),
   m_connected(false),
   m_timeout(TIMEOUT)
-{ }
+{ 
+  setConnection(ip, port);
+}
 
 Client::~Client()
 {
@@ -51,6 +53,19 @@ Client::~Client()
   {
     ::closesocket_platform(m_tcp_socket);
   }
+  free(m_ip);
+}
+
+void Client::setConnection(const char * ip, int port)
+{
+  if (m_ip)
+    free(m_ip);
+  m_ip = (char*)malloc(strlen(ip)+1);
+  //printf("%s\n",ip);
+  memcpy(m_ip, ip, strlen(ip));
+  m_ip[strlen(ip)] = 0;
+  //printf("%s\n",m_ip);
+  m_port = port;
 }
 
 void Client::disconnect()
@@ -73,15 +88,24 @@ bool Client::connect(sockaddr_in & socketAddress)
 {
   makeNonBlocking();
   socklen_t addrlen = sizeof(struct sockaddr_in);
+  errno = 0;
   int result = ::connect(m_tcp_socket, (struct sockaddr*)&socketAddress, addrlen);
+  int tmperr = errno;
   if (result == 0) {
     // connected immediately
+#if DEBUG_WITH_SSTREAM
+    stringstream dbg;
+    dbg << "immediately connected w/ errno:" << tmperr;
+    debug(dbg.str().c_str());
+#endif
     m_connected = true;
   }
   else {
-    switch (errno) {
+    debug("connect result != 0");
+    switch (tmperr) {
       case EINPROGRESS:
         {
+          debug("connect - EINPROGRESS");
           // select connect for write
           fd_set wfds;
           timeval timeout;
@@ -99,7 +123,7 @@ bool Client::connect(sockaddr_in & socketAddress)
               return m_connected;
             }
             else if (retval) {
-              debug("Data is available now.");
+              debug("connect - Data is available now.");
               m_connected = true;
               break;
             }
@@ -134,6 +158,8 @@ void Client::connect()
 {
   if (!m_ip)
     return;
+  debug("Client ip:");
+  debug(m_ip);
   // DS - must create the socket moments before using it!
   m_tcp_socket = socket(AF_INET, SOCK_STREAM, 0);
   struct sockaddr_in socketAddress = {
@@ -141,6 +167,7 @@ void Client::connect()
     htons(m_port),    /* port in network byte order */
     {inet_addr(m_ip)} /* internet address - network byte order */
   };
+  debug(m_ip);
 
   // is it an ip address?
   std::string serverName(m_ip);
@@ -148,7 +175,15 @@ void Client::connect()
   if (end != serverName.end())
   {
     // it is not an IP address, it contains letters
+    errno = 0;
     struct hostent * host = gethostbyname(m_ip);
+    int tmperrno = errno;
+#if DEBUG_WITH_SSTREAM
+    {
+      stringstream dbg;
+      dbg << "gethostbyname errno: " << tmperrno << " ";
+    }
+#endif
     int i = 0;
     while (host and host->h_addr_list[i] != NULL) {
       memcpy(&socketAddress.sin_addr, host->h_addr_list[i], sizeof(struct in_addr));
@@ -220,8 +255,11 @@ unsigned int Client::write(const void * data, unsigned int length)
   return total;
 }
 
+/*
 const int Client::CONNECTION_CLOSED(0);
 const int Client::READ_ERROR(-1);
+const int Client::RETRY_LATER(-2);
+*/
 
 int Client::read()
 {
@@ -238,13 +276,15 @@ int Client::read()
   // (until timeout) to discover that the peer has shut the connection.
   //timeout.tv_sec = READ_WAIT_SEC;
   //timeout.tv_usec = READ_WAIT_USEC;
+  errno = 0;
   timeout.tv_sec = m_timeout;
   timeout.tv_usec = 0;
   retval = select(m_tcp_socket+1, &rfds, NULL, NULL, &timeout);
+  int tmperr = errno;
   if (retval == -1) {
 #if DEBUG_WITH_SSTREAM
     stringstream dbg;
-    dbg << "select error: " << errno;
+    dbg << "select error: " << tmperr;
     debug(dbg.str().c_str());
 #endif
     return READ_ERROR;
@@ -255,16 +295,30 @@ int Client::read()
   else
   {
     debug("not ready");
-    return READ_ERROR;
+#ifndef ARM9
+    // on the DS this plays tricks with us.
+    return RETRY_LATER;
+#endif
   }
+  errno = 0;
   int amountRead = ::recv(m_tcp_socket, buffer, bufferSize, 0 /*MSG_DONTWAIT*/);
-  int tmpErrno = errno;
+  tmperr = errno;
   if (amountRead < 0) {
     debug("Error on recv");
-    return READ_ERROR;
-  }
-  if (tmpErrno == EWOULDBLOCK) {
-    debug("EWOULDBLOCK");
+#if DEBUG_WITH_SSTREAM
+    stringstream dbg;
+    dbg << "Error on recv errno: " << tmperr;
+    debug(dbg.str().c_str());
+#endif
+    // if we read and there is an error
+    if (tmperr == EAGAIN)
+    {
+      // not ready yet - from man recv:
+      // EAGAIN The socket is marked non-blocking and the receive operation
+      // would block, or a receive timeout had been set and the timeout expired
+      // before data was received.
+      return RETRY_LATER;
+    }
     return READ_ERROR;
   }
   if (amountRead == 0)
@@ -272,7 +326,17 @@ int Client::read()
     // man recv(2):
     // The return value will be 0 when the peer has performed an orderly shutdown.
     debug("Read 0 bytes");
-    return CONNECTION_CLOSED;
+#if DEBUG_WITH_SSTREAM
+    stringstream dbg;
+    dbg << "Read 0 errno: " << tmperr;
+    debug(dbg.str().c_str());
+#endif
+    if (tmperr == EINVAL or tmperr == ESHUTDOWN) {
+      debug("EINVAL or ESHUTDOWN");
+      return READ_ERROR;
+    }
+    return amountRead;
+  }
 /*
 #ifdef ARM9
     return amountRead;
@@ -281,7 +345,6 @@ int Client::read()
     return -1;
 #endif
 */
-  }
   handle(buffer, amountRead);
 #if DEBUG_WITH_SSTREAM
   stringstream dbg;

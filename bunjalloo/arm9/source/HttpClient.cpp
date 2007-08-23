@@ -34,10 +34,13 @@ static const int MAX_CONNECT_ATTEMPTS(10);
 extern const char * VERSION;
 
 HttpClient::HttpClient(const char * ip, int port, const URI & uri) : 
-  nds::Client(ip,port), m_total(0), m_finished(false), m_connectAttempts(0),
+  nds::Client(uri.server().c_str(),port), m_total(0), m_finished(false), m_connectAttempts(0),
   m_uri(uri),
   m_state(WIFI_OFF)
-{}
+{
+  debug("In HttpClient, uri.server.c_str:");
+  debug(uri.server().c_str());
+}
 
 void HttpClient::setController(Controller * c)
 {
@@ -80,7 +83,7 @@ void HttpClient::finish() {
 void HttpClient::debug(const char * s)
 {
   
-  if (0) {
+  if (1) {
     nds::File log;
     log.open("bunjalloo.log", "a");
     log.write(s);
@@ -241,39 +244,54 @@ bool HttpClient::hasPage() const
 void HttpClient::readFirst()
 {
   int read = this->read();
-  if (read == CONNECTION_CLOSED)
+  switch (read)
   {
-    // worrying. resend the url request?
-    //swiWaitForVBlank();
-    //swiWaitForVBlank();
-    //m_state = GET_URL;
-    debug("readFirst returned 0 - FINISH or wait?");
-    m_state = FAILED;
-  }
-  else if (read == READ_ERROR)
-  {
-    // not be ready yet. This is the select() returning early.
-    m_connectAttempts++;
-    if (m_connectAttempts >= MAX_CONNECT_ATTEMPTS)
-    {
-      // once we reach the maximum number, retry the socket.
-      this->disconnect();
-      m_connectAttempts = 0;
-      m_state = CONNECT_SOCKET;
-      m_reconnects++;
-      if (m_reconnects == 3)
+    case CONNECTION_CLOSED:
+      // worrying. resend the url request?
+      //swiWaitForVBlank();
+      //swiWaitForVBlank();
+      //m_state = GET_URL;
+      debug("readFirst returned 0 - FINISH or wait?");
+      m_state = FAILED;
+      break;
+
+    case READ_ERROR:
       {
-        debug("FAILED m_reconnects == 3");
+        // not be ready yet. This is the select() returning early.
+        m_connectAttempts++;
+        if (m_connectAttempts >= MAX_CONNECT_ATTEMPTS)
+        {
+          // once we reach the maximum number, retry the socket.
+          this->disconnect();
+          m_connectAttempts = 0;
+          m_state = CONNECT_SOCKET;
+          m_reconnects++;
+          if (m_reconnects == 3)
+          {
+            debug("FAILED m_reconnects == 3");
+            m_state = FAILED;
+          }
+        }
+        swiWaitForVBlank();
+        swiWaitForVBlank();
+      }
+      break;
+
+    case RETRY_LATER:
+      /* Keep going! */
+      debug("RETRY_LATER readFirst");
+      swiWaitForVBlank();
+      swiWaitForVBlank();
+      m_connectAttempts++;
+      if (m_connectAttempts == MAX_CONNECT_ATTEMPTS) {
         m_state = FAILED;
       }
-    }
-    swiWaitForVBlank();
-    swiWaitForVBlank();
-  }
-  else
-  {
-    m_state = READING_ALL;
-    m_connectAttempts = 0;
+      break;
+
+    default:
+      m_state = READING_ALL;
+      m_connectAttempts = 0;
+      break;
   }
 
 }
@@ -281,20 +299,33 @@ void HttpClient::readFirst()
 void HttpClient::readAll()
 {
   int read = this->read();
-  if (read == READ_ERROR)
+  switch (read)
   {
-    m_state = FINISHED;
-  }
-  else if (read == CONNECTION_CLOSED)
-  {
-    debug("readAll returned 0 - FINISH or wait?");
-    m_state = FINISHED;
-    //swiWaitForVBlank();
-    //swiWaitForVBlank();
-  }
-  else
-  {
-    // ok - there may be more bytes.
-    m_state = READING_ALL;
+    case READ_ERROR:
+      m_state = FINISHED;
+      break;
+    case CONNECTION_CLOSED:
+      debug("readAll returned 0 - FINISH or wait?");
+      m_state = FINISHED;
+      //swiWaitForVBlank();
+      //swiWaitForVBlank();
+      break;
+
+    case RETRY_LATER:
+      /* Keep going */
+      m_connectAttempts++;
+      if (m_connectAttempts == MAX_CONNECT_ATTEMPTS) {
+        m_state = FAILED;
+      }
+      debug("RETRY_LATER readAll");
+      swiWaitForVBlank();
+      swiWaitForVBlank();
+      break;
+
+    default:
+      // ok - there may be more bytes.
+      m_state = READING_ALL;
+      m_connectAttempts = 0;
+      break;
   }
 }
