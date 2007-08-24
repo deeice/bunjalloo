@@ -91,6 +91,13 @@ void UriTest::testNavigate()
   expectedFile = "/index.html";
   CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
   CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+
+  uri = uri.navigateTo("/directory/");
+  expectedFile = "/directory/";
+  expectedServer = "server";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
 }
 
 void UriTest::testToString()

@@ -29,6 +29,7 @@ const std::string Config::s_configFile("/"DATADIR"/config.ini");
 static const char PROXY_STR[] = "proxy";
 static const char FONT_STR[] = "font";
 static const char COOKIE_STR[] = "cookiefile";
+static const char MAX_CONNECT[] = "timeout";
 using namespace std;
 
 std::string Config::font() const
@@ -79,6 +80,11 @@ void Config::parseLine(ParameterSet & set)
     string value;
     set.parameter(COOKIE_STR, value);
     configPathMember(value, m_cookieList);
+  }
+
+  if (set.hasParameter(MAX_CONNECT))
+  {
+    set.parameter(MAX_CONNECT, m_maxConnect);
   }
 }
 
@@ -150,4 +156,9 @@ std::string Config::proxy() const
 bool Config::useProxy() const
 {
   return not m_proxy.empty();
+}
+
+std::string Config::maxConnections() const
+{
+  return m_maxConnect;
 }

@@ -19,9 +19,9 @@
 #define HttpClient_h_seen
 
 #include "Client.h"
+#include "URI.h"
 
 class Controller;
-class URI;
 
 class HttpClient: public nds::Client
 {
@@ -67,9 +67,10 @@ class HttpClient: public nds::Client
     bool m_finished;
     int  m_connectAttempts;
     int  m_reconnects;
-    const URI & m_uri;
+    URI m_uri;
     ConnectionState m_state;
     Controller * m_self;
+    int  m_maxConnectAttempts;
 
     void wifiConnection();
     void get(const URI & uri);

@@ -51,6 +51,11 @@ class Config
      */
     bool useProxy() const;
 
+    /** Get the value for the max connection attempts ("timeout")
+     * @return the value as a string
+     */
+    std::string maxConnections() const;
+
     /** Reload the config file.
      */
     void reload();
@@ -67,6 +72,7 @@ class Config
     std::string m_font;
     std::string m_cookieList;
     std::string m_proxy;
+    std::string m_maxConnect;
 
     void configPathMember(const std::string & value, std::string & member);
     void handleCookies() const;

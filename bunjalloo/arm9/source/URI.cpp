@@ -292,6 +292,11 @@ URI URI::navigateTo(const std::string & newFile ) const
     newURI += *it;
     needSep = true;
   }
+  // Make sure not to lose trailing slash
+  if (newFile[newFile.length()-1] == '/')
+  {
+    newURI += "/";
+  }
   
   tmp.setUri(newURI);
   return tmp;

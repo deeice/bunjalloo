@@ -197,8 +197,6 @@ void Controller::fetchHttp(const URI & uri)
 
   if (client.hasPage())
   {
-#if 0
-    // redirect:
     URI docUri(m_document->uri());
     if (docUri != uri)
     {
@@ -213,37 +211,6 @@ void Controller::fetchHttp(const URI & uri)
     {
       m_document->setStatus(Document::LOADED);
     }
-#endif
-    m_document->setStatus(Document::LOADED);
   }
-  /*
-  nds::Wifi9::instance().connect();
-  if (nds::Wifi9::instance().connected()) {
-    // open a socket to the server.
-    HttpClient client(uri.server().c_str(), uri.port());
-    client.setController(this);
-    client.connect();
-    if (client.isConnected())
-    {
-      client.get(uri);
-      client.read();
-
-      URI docUri(m_document->uri());
-      if (docUri != uri)
-      {
-        // redirected
-        doUri(uri.navigateTo(m_document->uri()));
-      }
-      client.disconnect();
-    }
-    else
-    {
-      loadError();
-    }
-  } else {
-    char * woops = "Woops, wifi not done";
-    m_document->appendData(woops, strlen(woops));
-  }
-  */
 }
 

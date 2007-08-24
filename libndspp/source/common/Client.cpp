@@ -15,7 +15,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#define DEBUG_WITH_SSTREAM 1
+#define DEBUG_WITH_SSTREAM 0
 #include "Client.h"
 #include "Client_platform.h"
 #include <sys/socket.h>
@@ -31,9 +31,7 @@
 #include <functional>
 #include <string>
 #include <errno.h>
-/*
- * Simple TCP/IP client. 
- * */
+
 using namespace std;
 using namespace nds;
 
@@ -177,8 +175,8 @@ void Client::connect()
     // it is not an IP address, it contains letters
     errno = 0;
     struct hostent * host = gethostbyname(m_ip);
-    int tmperrno = errno;
 #if DEBUG_WITH_SSTREAM
+    int tmperrno = errno;
     {
       stringstream dbg;
       dbg << "gethostbyname errno: " << tmperrno << " ";
@@ -255,30 +253,19 @@ unsigned int Client::write(const void * data, unsigned int length)
   return total;
 }
 
-/*
-const int Client::CONNECTION_CLOSED(0);
-const int Client::READ_ERROR(-1);
-const int Client::RETRY_LATER(-2);
-*/
-
 int Client::read()
 {
   const static int bufferSize(BUFSIZ);
-  char buffer[bufferSize];
   fd_set rfds;
   timeval timeout;
   int retval;
   FD_ZERO(&rfds);
   FD_SET(m_tcp_socket, &rfds);
-  // The problem here is that Linux triggers the select when the 
-  // connection is closed by the peer.
-  // The DS does not, so when all data has been returned, it will wait an extra select
-  // (until timeout) to discover that the peer has shut the connection.
-  //timeout.tv_sec = READ_WAIT_SEC;
-  //timeout.tv_usec = READ_WAIT_USEC;
-  errno = 0;
+
   timeout.tv_sec = m_timeout;
   timeout.tv_usec = 0;
+
+  errno = 0;
   retval = select(m_tcp_socket+1, &rfds, NULL, NULL, &timeout);
   int tmperr = errno;
   if (retval == -1) {
@@ -295,11 +282,14 @@ int Client::read()
   else
   {
     debug("not ready");
-#ifndef ARM9
     // on the DS this plays tricks with us.
+    // May return not ready when the socket has actually been closed.
+    // In that case, recv will return -1 with errno == ESHUTDOWN.
+#ifndef ARM9
     return RETRY_LATER;
 #endif
   }
+  char buffer[bufferSize];
   errno = 0;
   int amountRead = ::recv(m_tcp_socket, buffer, bufferSize, 0 /*MSG_DONTWAIT*/);
   tmperr = errno;
@@ -315,8 +305,7 @@ int Client::read()
     {
       // not ready yet - from man recv:
       // EAGAIN The socket is marked non-blocking and the receive operation
-      // would block, or a receive timeout had been set and the timeout expired
-      // before data was received.
+      // would block.
       return RETRY_LATER;
     }
     return READ_ERROR;
@@ -337,14 +326,6 @@ int Client::read()
     }
     return amountRead;
   }
-/*
-#ifdef ARM9
-    return amountRead;
-#else
-    // needs to be different!
-    return -1;
-#endif
-*/
   handle(buffer, amountRead);
 #if DEBUG_WITH_SSTREAM
   stringstream dbg;
