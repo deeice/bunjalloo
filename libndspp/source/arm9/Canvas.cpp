@@ -87,24 +87,30 @@ void Canvas::drawPixel(int x, int y, int colour)
   if (not m_clip.hit(x, y))
     return;
   //uint16 * gfx( (y < 192) ? m_backMain:m_backSub );
-  uint16 * gfx( (y < 192) ? m_frontMain:m_frontSub );
+  uint16 * gfx( vram(y));
   if (y >= 192)
     y -= 192;
   gfx[x+y*256] = colour|BIT(15);
 }
 
+unsigned short * Canvas::vram(int y)
+{
+  return (y < 192) ? m_backMain:m_backSub;
+}
+
 void Canvas::endPaint()
 {
   // swap main screen
-  //unsigned short* temp = m_frontMain;
-  //m_frontMain = m_backMain;
-  //m_backMain = temp;
+  unsigned short* temp = m_frontMain;
+  m_frontMain = m_backMain;
+  m_backMain = temp;
   // flip 
   // base is 16KB and screen size is 256x256x2 (128KB)
-  //BG3_CR ^= BG_BMP_BASE( 128 / 16 );
+  BG3_CR ^= BG_BMP_BASE( 128 / 16 );
 
   // copy sub screen - buffer size * 2 since is 16 bit
   //memcpy(m_frontMain, m_backMain, SCREEN_WIDTH*SCREEN_HEIGHT*2);
-  //memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
+  memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
 
+  memcpy(m_backMain, m_frontMain, SCREEN_WIDTH*SCREEN_HEIGHT*2);
 }

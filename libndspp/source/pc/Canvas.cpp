@@ -62,6 +62,16 @@ void Canvas::drawPixel(int x, int y, int colour)
   vram[x+y*SCREEN_WIDTH] = colour;
 }
 
+unsigned short * Canvas::vram(int y)
+{
+  int layer = ( (y < 192) ? 0:1 );
+  u16 * vram = SDLhandler::instance().vramMain(0);
+  if (layer) {
+    vram = SDLhandler::instance().vramSub(0);
+  }
+  return vram;
+}
+
 /*
 void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
 {

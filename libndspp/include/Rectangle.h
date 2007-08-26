@@ -27,6 +27,10 @@ namespace nds
     int w;
     int h;
     bool hit(int x, int y) const;
+    int right() const;
+    int left() const;
+    int top() const;
+    int bottom() const;
   };
 }
 #endif

@@ -22,3 +22,19 @@ bool nds::Rectangle::hit(int testx, int testy) const
   return ( (testx >= x and testx < (x + w))
       and  (testy >= y and testy < (y + h)));
 }
+int nds::Rectangle::left() const
+{
+  return x; 
+}
+int nds::Rectangle::right() const
+{
+  return x+w; 
+}
+int nds::Rectangle::top() const
+{
+  return y;
+}
+int nds::Rectangle::bottom() const
+{
+  return y+h;
+}

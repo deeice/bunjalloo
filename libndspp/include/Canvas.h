@@ -55,6 +55,7 @@ namespace nds
 
       Canvas(const Canvas &);
       const Canvas operator=(const Canvas &);
+      unsigned short * vram(int y);
       
 
   };
