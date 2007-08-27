@@ -25,7 +25,7 @@ inline void Color::blue(unsigned int c)
 {
   set(red(), green(), c);
 }
-inline Color::operator unsigned short () {
+inline Color::operator unsigned short () const {
   return m_c;
 };
 

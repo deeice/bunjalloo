@@ -507,6 +507,20 @@ void SDLhandler::waitVsync()
         exit(0);
         break;
 
+      case SDL_MOUSEMOTION:
+        {
+          int x,y;
+          Uint8 buttons = SDL_GetMouseState(&x, &y);
+          if ( (buttons & SDL_BUTTON_LMASK) and y > 191) {
+            if (inGap(y)) {
+              break;
+            }
+            y -= GAP.h;
+            y -= 192;
+            Keys::instance().handleMouseMotion(x, y);
+          }
+        }
+        break;
       case SDL_MOUSEBUTTONDOWN:
       case SDL_MOUSEBUTTONUP:
         // offset the y position

@@ -104,9 +104,10 @@ void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
 
   if ( ((y+h) > 0) and (y + h) > (m_clip.y+m_clip.h))
   {
-    h = m_clip.h - y;
+    h = m_clip.y + m_clip.h - y;
+    //printf("clip %d %d %d %d\n", m_clip.x, m_clip.y, m_clip.w, m_clip.h);
+    //printf("fillR %d %d %d %d\n", x, y, w, h);
   }
-  //printf("fillR %d %d %d %d\n", x, y, w, h);
   for (int j = 0; j < h; j++) {
     horizontalLine(x, y+j, w, colour);
   }

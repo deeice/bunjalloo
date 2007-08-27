@@ -61,7 +61,7 @@ namespace nds
       /*! @brief operator to cast to an unsigned short
       * @returns NDS representation of color.
       */
-      inline operator unsigned short ();
+      inline operator unsigned short () const;
       
     private:
       //! NDS format color

@@ -71,6 +71,12 @@ void Keys::handleMouseEvent(SDL_MouseButtonEvent & event)
   }
 }
 
+void Keys::handleMouseMotion(int x, int y)
+{
+  m_touchX = x;
+  m_touchY = y;
+}
+
 void Keys::handleKeyEvent(SDL_KeyboardEvent & event)
 {
   if (event.type == SDL_KEYDOWN)
