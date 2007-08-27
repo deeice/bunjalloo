@@ -17,3 +17,5 @@ Installation
 Bunjalloo uses DLDI for viewing local files (file:// URL). To view remote
 http:// URLs, no patching is required. Bunjalloo can be run using Wireless
 Multiboot, without an attached cartridge.
+
+As of veresion 0.2 DLDI patching is required
