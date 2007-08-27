@@ -1,3 +1,20 @@
+/*
+  Copyright 2007 Richard Quirk
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+ 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+ 
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 #include "ndspp.h"
 #include "libnds.h"
 #include "TextArea.h"
@@ -26,12 +43,24 @@ int main(int argc, char * argv[])
 
   std::string shw("Hello World");
   UnicodeString str = string2unicode(shw);
-  Button * b = new Button(str);
+  Button * b1 = new Button(str);
+  shw = "Another One";
+  str = string2unicode(shw);
+  Button * b2 = new Button(str);
+  shw = "Three";
+  str = string2unicode(shw);
+  Button * b3 = new Button(str);
+  shw = "Another Button";
+  str = string2unicode(shw);
+  Button * b4 = new Button(str);
 
   ScrollPane scrollPane;
   scrollPane.setTopLevel();
   scrollPane.add(t);
-  scrollPane.add(b);
+  scrollPane.add(b1);
+  scrollPane.add(b2);
+  scrollPane.add(b3);
+  scrollPane.add(b4);
   scrollPane.add(subPane);
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
   scrollPane.setScrollIncrement(t->font().height());

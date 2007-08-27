@@ -41,6 +41,7 @@ class Button: public Component
     virtual bool touch(int x, int y);
 
   private:
+    bool m_pressed;
     TextArea * m_label;
 };
 #endif

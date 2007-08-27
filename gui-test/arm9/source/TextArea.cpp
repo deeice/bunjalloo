@@ -1,3 +1,20 @@
+/*
+  Copyright 2007 Richard Quirk
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+ 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+ 
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 #include <assert.h>
 #include "libnds.h"
 #include "ndspp.h"
@@ -131,13 +148,13 @@ void TextArea::setCursor(int x, int y)
 
 void TextArea::incrLine()
 {
-  m_cursorx = m_indentLevel; 
+  m_cursorx = m_initialCursorx; 
   m_cursory += m_font->height();
 }
 
 void TextArea::checkLetter(Font::Glyph & g)
 {
-  if (m_cursorx + g.width > width())
+  if ( (m_cursorx + g.width) > m_bounds.right())
   {
     incrLine();
   }
@@ -164,7 +181,6 @@ const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int 
     word = unicodeString.substr(currPosition,position-currPosition);
     word += ' ';
   }
-  /*
   int size(textSize(unicodeString));
   if (size > width())
   {
@@ -186,7 +202,6 @@ const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int 
       size += g.width;
     }
   }
-  */
   return word;
 }
 
@@ -208,7 +223,7 @@ void TextArea::advanceWord(const UnicodeString & unicodeString, int wordLength,
 void TextArea::printu(const UnicodeString & unicodeString)
 {
   UnicodeString::const_iterator it(unicodeString.begin());
-  for (; it != unicodeString.end() and m_cursory < y()+height(); ++it)
+  for (; it != unicodeString.end() and m_cursory < m_bounds.bottom(); ++it)
   {
     unsigned int value(*it);
     if ( doSingleChar(value) )
@@ -259,11 +274,11 @@ bool TextArea::doSingleChar(unsigned int value)
         g.width, g.height, Color(31,0,0));
     m_cursorx += g.width;
   }
-  if (m_cursorx > width())
+  if (m_cursorx > m_bounds.right())
   {
     incrLine();
   }
-  return (m_cursory > y() + height());
+  return (m_cursory > m_bounds.bottom());
 }
 
 void TextArea::setDefaultColor()
@@ -375,7 +390,6 @@ void TextArea::paint(const nds::Rectangle & clip)
   //
   // Theres "width" which is the possible width (wraps at)
   // then theres clip-width which is where it should draw to.
-  Canvas::instance().setClip(clip);
   setCursor(m_bounds.x, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
   printu(m_document);

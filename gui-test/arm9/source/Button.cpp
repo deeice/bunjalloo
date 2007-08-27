@@ -25,22 +25,26 @@
 using nds::Canvas;
 using nds::Color;
 using nds::Rectangle;
+const static Color BACKGROUND(26,26,30);
+const static Color PRESSED(16,16,20);
+const static Color EDGE(21,21,21);
 
-Button::Button() : Component(), m_label(TextAreaFactory::create())
+Button::Button() : Component(), m_pressed(false), m_label(TextAreaFactory::create())
 {
-  m_label->setBackgroundColor(Color(26,26,30));
+  m_label->setBackgroundColor(BACKGROUND);
 }
 
 Button::Button(const UnicodeString & label) :
-  Component(), 
+  Component(),
+  m_pressed(false),
   m_label(TextAreaFactory::create())
 {
   int textSize = m_label->textSize(label);
-  m_label->setSize(textSize, m_label->font().height());
+  m_label->setSize(textSize+5, m_label->font().height()+5);
   m_label->appendText(label);
-  m_preferredWidth = textSize;
-  m_preferredHeight = m_label->preferredSize().h;
-  m_label->setBackgroundColor(Color(26,26,30));
+  m_preferredWidth = textSize+5;
+  m_preferredHeight = m_label->preferredSize().h+5;
+  m_label->setBackgroundColor(BACKGROUND);
 }
 
 void Button::setSize(unsigned int w, unsigned int h)
@@ -66,17 +70,24 @@ void Button::setText(const UnicodeString & label)
 
 void Button::paint(const nds::Rectangle & clip)
 {
-  Canvas::instance().fillRectangle(m_bounds.x+1, m_bounds.y+1, m_bounds.w-1, m_bounds.h-1, Color(26,26,30));
   // print the button
-  m_label->setLocation(m_bounds.x, m_bounds.y);
+  if (m_pressed) {
+    m_label->setBackgroundColor(PRESSED);
+  }
+  else {
+    m_label->setBackgroundColor(BACKGROUND);
+  }
+  m_label->setLocation(m_bounds.x+2, m_bounds.y);
   m_label->paint(clip);
+  Canvas::instance().drawRectangle(m_bounds.x, m_bounds.y, m_bounds.w-1, m_bounds.h-1, EDGE);
 }
 
 bool Button::touch(int x, int y)
 {
+  m_pressed = false;
   if (m_bounds.hit(x,y))
   {
-    printf("Click!\n");
-  }
-  return false;
+    m_pressed = true;
+  } 
+  return m_pressed;
 }

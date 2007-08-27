@@ -1,3 +1,20 @@
+/*
+  Copyright 2007 Richard Quirk
+  
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+ 
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+ 
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+*/
 #include "Canvas.h"
 #include "Palette.h"
 #include "ScrollPane.h"
@@ -6,6 +23,7 @@
 
 // TODO: make configurable.
 const static int SCROLLER_WIDTH(6);
+const static int MIN_PADDING(6);
 using std::min;
 using std::max;
 using nds::Rectangle;
@@ -53,13 +71,24 @@ void ScrollPane::setSize(unsigned int w, unsigned int h)
   int childWidth = w - SCROLLER_WIDTH;
   std::vector<Component*>::iterator it(m_children.begin());
   int yPos = (*it)->y();
+  int lastXPos = 0;
+  int lastYPos = 0;
   for (; it != m_children.end(); ++it)
   {
     Component * c(*it);
     Rectangle r(c->preferredSize());
+    if ( (r.w + lastXPos) < m_bounds.w )
+    {
+      c->setLocation(lastXPos, lastYPos);
+      r.x = lastXPos;
+    }
+    else {
+      c->setLocation(r.x, yPos);
+      lastYPos = yPos;
+      yPos += r.h;
+    }
     c->setSize(min(childWidth, r.w), r.h);
-    c->setLocation(r.x, yPos);
-    yPos += r.h;
+    lastXPos = r.x+c->width()+MIN_PADDING;
   }
   int topY = m_children.front()->bounds().top();
   // Set the total coverage of the scrollBar
@@ -211,12 +240,9 @@ bool ScrollPane::touch(int x, int y)
   {
     Component * c(*it);
     Rectangle bounds(c->bounds());
-    if (bounds.hit(x,y))
+    if (c->touch(x, y))
     {
-      if (c->touch(x, y))
-      {
-        handled = true;
-      }
+      handled = true;
     }
   }
   // whatever happens, stop touching.
@@ -251,6 +277,9 @@ void ScrollPane::scrollToPercent(int i)
   int total = m_scrollBar->total() - (m_topLevel?192:m_bounds.h);
 
   int y = topLimit - ( (total * i) / 100 );
+  // find difference and move by it
+  int currentTop = m_children.front()->bounds().top();
+  int dy = currentTop - y;
 
   m_scrollBar->setValue((m_topLevel?192:m_bounds.top())-y);
   // move all up one unit...
@@ -258,8 +287,8 @@ void ScrollPane::scrollToPercent(int i)
   for (; it != m_children.end(); ++it)
   {
     Component * c(*it);
-    c->setLocation(c->x(), y);
-    y += c->height();
+    c->setLocation(c->x(), c->y() - dy);
+    //y += c->height();
   }
 
 
