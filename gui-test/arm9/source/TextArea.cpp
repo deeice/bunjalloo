@@ -33,19 +33,10 @@ TextArea::TextArea(Font * font) :
 {
   setFont(font);
   m_document.clear();
+  m_preferredHeight = m_font->height();
+  m_preferredWidth = Canvas::instance().width();
 }
 
-#if 0
-void TextArea::setStartLine(int line, bool rmclicks)
-{
-  m_startLine = line;
-  m_foundPosition = false;
-  if (rmclicks)
-  {
-    removeClickables();
-  }
-}
-#endif
 static void deleteLink(Link * link)
 {
   delete link;
@@ -56,13 +47,6 @@ void TextArea::removeClickables()
   for_each(m_links.begin(), m_links.end(), deleteLink);
   m_links.clear();
 }
-
-#if 0 
-int TextArea::startLine() const
-{
-  return m_startLine;
-}
-#endif
 
 void TextArea::setFont(Font * font)
 {
@@ -100,17 +84,40 @@ void TextArea::appendText(const UnicodeString & unicodeString)
   {
     const UnicodeString word(nextWord(unicodeString, currPosition));
     int size = textSize(word);
-    if (m_appendPosition + size > width())
+    
+    // if the word ends with a new line, then increment the height.
+    // otherwise, if we go off the end of the line, increment the height.
+    if (word[word.length()-1] == '\n')
+    {
+      m_appendPosition = 0;
+      m_preferredHeight += m_font->height();
+    }
+    else if (m_appendPosition + size > width())
     {
       // this word overflows the line
       m_document += '\n';
       m_appendPosition = 0;
       m_preferredHeight += m_font->height();
-      printf("Preferred height %d\n", m_preferredHeight);
     }
     m_document += word;
     m_appendPosition += size;
     advanceWord(unicodeString, word.length(), currPosition, it);
+  }
+}
+
+void TextArea::setSize(unsigned int w, unsigned int h)
+{
+  if (m_bounds.w != (int)w) {
+    Component::setSize(w, h);
+    UnicodeString tmp(m_document);
+    m_document.clear();
+    m_preferredHeight = 0;
+    if (not tmp.empty())
+      appendText(tmp);
+    if (m_preferredHeight == 0)
+      m_preferredHeight = m_font->height();
+  } else {
+    Component::setSize(w, h);
   }
 }
 
@@ -135,17 +142,6 @@ void TextArea::checkLetter(Font::Glyph & g)
     incrLine();
   }
 }
-
-#if 0
-void TextArea::insertNewline(int count)
-{
-  bool parseNewline = m_parseNewline;
-  setParseNewline(true);
-  UnicodeString newlines(count, '\n');
-  printu(newlines);
-  setParseNewline(parseNewline);
-}
-#endif
 
 const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int currPosition) const
 {
@@ -209,19 +205,6 @@ void TextArea::advanceWord(const UnicodeString & unicodeString, int wordLength,
   }
 }
 
-#if 0
-void TextArea::increaseIndent()
-{
-  m_indentLevel += INDENT;
-  m_cursorx = m_indentLevel;
-}
-void TextArea::decreaseIndent()
-{
-  m_indentLevel -= INDENT;
-  m_cursorx = m_indentLevel;
-}
-#endif
-
 void TextArea::printu(const UnicodeString & unicodeString)
 {
   UnicodeString::const_iterator it(unicodeString.begin());
@@ -234,68 +217,6 @@ void TextArea::printu(const UnicodeString & unicodeString)
     }
   }
 }
-
-#if 0
-void TextArea::printu(const UnicodeString & unicodeString)
-{
-  // skip until we reach startLine
-  int currPosition(0);
-  if (not m_foundPosition) {
-    UnicodeString::const_iterator it(unicodeString.begin());
-    int finalLine(m_font->height()*m_startLine);
-    if (finalLine < 0)
-    {
-      m_cursory = -finalLine;
-      m_initialCursory = m_cursory;
-      finalLine = 0;
-    }
-    for (; it != unicodeString.end() and m_cursory < finalLine;)
-    {
-      // find the next space character
-      const UnicodeString word(nextWord(unicodeString, currPosition));
-      int size = textSize(word);
-      if (m_cursorx + size > Canvas::instance().width())
-      {
-        incrLine();
-      }
-      if ( m_cursory >= finalLine)
-        break;
-
-      UnicodeString::const_iterator wordIt(word.begin());
-      for (; wordIt != word.end() and m_cursory < finalLine; ++wordIt)
-      {
-        unsigned int value(*wordIt);
-        if (value == UTF8::MALFORMED) {
-          value = '?';
-        }
-        //assert(value != '\n');
-        Font::Glyph g;
-        m_font->glyph(value, g);
-        if (m_parseNewline and value == '\n') {
-          incrLine();
-        } else if (value != '\n') {
-          checkLetter(g);
-        }
-        if ( m_cursory >= finalLine)
-          break;
-        m_cursorx += g.width;
-      }
-      advanceWord(unicodeString, word.length(), currPosition, it);
-    }
-    if (m_cursory < finalLine) {
-      return;
-    }
-    m_foundPosition = true;
-    m_cursorx = m_initialCursorx+m_indentLevel;
-    m_cursory = m_initialCursory;
-  }
-  if ( m_cursory < height())
-  {
-    UnicodeString printString = unicodeString.substr(currPosition , unicodeString.length()-currPosition);
-    printuImpl(printString);
-  }
-}
-#endif
 
 int TextArea::textSize(const UnicodeString & unicodeString) const
 {
@@ -312,81 +233,6 @@ int TextArea::textSize(const UnicodeString & unicodeString) const
   }
   return size;
 }
-
-#if 0
-void TextArea::printuWord(const UnicodeString & word)
-{
-  UnicodeString::const_iterator it(word.begin());
-  for (; it != word.end(); ++it)
-  {
-    unsigned int value(*it);
-    if ( doSingleChar(value) )
-    {
-      break;
-    }
-  }
-}
-
-
-void TextArea::printuImpl(const UnicodeString & unicodeString)
-{
-
-  UnicodeString::const_iterator it(unicodeString.begin());
-  int currPosition(0);
-  for (; it != unicodeString.end(); )
-  {
-    // find the next space character
-    const UnicodeString word(nextWord(unicodeString, currPosition));
-    int size = textSize(word);
-    if (m_cursorx + size > width())
-    {
-      incrLine();
-    }
-    if (m_cursory > height()) {
-      break;
-    }
-    switch (m_currentControl)
-    {
-      case LINK:
-        {
-          assert(not m_links.empty());
-          Link * link = m_links.front();
-          link->appendClickZone(m_cursorx, m_cursory, 
-              size, m_font->height());
-        }
-        break;
-      case TEXT:
-        break;
-      case FORM:
-        break;
-    }
-    printuWord(word);
-    advanceWord(unicodeString, word.length(), currPosition, it);
-  }
-}
-#endif
-
-#if 0
-Link * TextArea::clickLink(int x, int y) const
-{
-  LinkList::const_iterator it = m_links.begin();
-  for (; it != m_links.end(); ++it)
-  {
-    Link * link = *it;
-    if ( link->hitTest(x, y))
-    {
-      return link;
-    }
-  }
-  return 0;
-}
-
-void TextArea::addLink(const std::string & href)
-{
-  m_links.push_front(new Link(href));
-  setLink(true);
-}
-#endif
 
 bool TextArea::doSingleChar(unsigned int value)
 {
@@ -419,29 +265,6 @@ bool TextArea::doSingleChar(unsigned int value)
   }
   return (m_cursory > y() + height());
 }
-
-#if 0
-void TextArea::print(const char * text, int amount)
-{
-  int total = 0;
-  while (total < amount)
-  {
-    unsigned int value;
-    unsigned int read(1);
-    if (m_encoding == "utf-8") {
-      read = UTF8::decode(text, value);
-    } else {
-      value = (int)(text[0]&0xff);
-    }
-    if ( doSingleChar(value) )
-    {
-      break;
-    }
-    text += read;
-    total += read;
-  }
-}
-#endif
 
 void TextArea::setDefaultColor()
 {
@@ -552,7 +375,6 @@ void TextArea::paint(const nds::Rectangle & clip)
   //
   // Theres "width" which is the possible width (wraps at)
   // then theres clip-width which is where it should draw to.
-  //printf("paint text at %d %d %d %d\n", m_bounds.x, m_bounds.y, clip.w, clip.h);
   Canvas::instance().setClip(clip);
   setCursor(m_bounds.x, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);

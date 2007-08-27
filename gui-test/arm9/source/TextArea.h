@@ -85,6 +85,8 @@ class TextArea : public Component
     void setDefaultColor();
     void clear();
 
+    virtual void setSize(unsigned int w, unsigned int h);
+
 #if 0
     /** Set the start line to draw the text from. All text before the line is
      * reached is skipped. This can be used to "scroll" text up and down.

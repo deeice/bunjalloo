@@ -1,5 +1,11 @@
 #include "UnicodeString.h"
 #include "UTF8.h"
+#ifdef ARM9
+#define sprintf_platform siprintf
+#else
+#define sprintf_platform sprintf
+#endif
+
 std::string unicode2string(const UnicodeString & ustr)
 {
   std::string str;
@@ -18,7 +24,7 @@ std::string unicode2string(const UnicodeString & ustr)
       {
         // convert to %hex
         str += '%';
-        sprintf(buffer, "%02X", encoded[i]);
+        sprintf_platform(buffer, "%02X", encoded[i]);
         str += buffer;
       }
     }

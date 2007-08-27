@@ -24,6 +24,8 @@ class Component
     inline int x() const;
     inline int y() const;
 
+    virtual bool touch(int x, int y);
+
   protected:
     nds::Rectangle m_bounds;
     

@@ -34,6 +34,16 @@ void Component::add(Component * child)
   }
 }
 
+/** Handle a touch event. 
+ * @param x the x position.
+ * @param y the y position.
+ * @return true to consume the event. Component touch returns true.
+ */
+bool Component::touch(int x, int y)
+{
+  return true;
+}
+
 void Component::paint(const nds::Rectangle & area)
 {
   std::vector<Component*>::iterator it(m_children.begin());
