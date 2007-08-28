@@ -20,7 +20,7 @@
 
 #include "Component.h"
 
-class Scrollable;
+class ScrollPane;
 
 class ScrollBar: public Component
 {
@@ -33,20 +33,23 @@ class ScrollBar: public Component
 
     int total() const;
     int value() const;
+    /** The visible range in which the scrolling handle may move.
+     * @return the visible range in pixels.
+     */
+    int visibleRange() const;
 
-    void setScrollable(Scrollable * scrollable);
+    void setScrollable(ScrollPane * scrollPane);
 
     bool touch(int x, int y);
 
     void paint(const nds::Rectangle & clip);
-    void setLocation(int x, int y);
 
   private:
     int m_total;
     int m_value;
     int m_handleSize;
     int m_handlePosition;
-    Scrollable * m_scrollable;
+    ScrollPane * m_scrollPane;
     int m_handleHeld;
 
     void calculateHandle();

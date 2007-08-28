@@ -65,6 +65,10 @@ class TextArea : public Component
      */
     void appendText(const UnicodeString & unicodeString);
 
+    /** Clear the text.
+     */
+    void clearText();
+
     /** Print a unicode string starting at the current cursor position. The
      * values are not decoded from the string.
      * @param unicodeString a string containing unicode values.
@@ -104,38 +108,9 @@ class TextArea : public Component
 
     virtual void setSize(unsigned int w, unsigned int h);
 
-#if 0
-    /** Set the start line to draw the text from. All text before the line is
-     * reached is skipped. This can be used to "scroll" text up and down.
-     * @param line the line of text at which to start the printing.
-     */
-    void setStartLine(int line, bool removeClickables=true);
-
-    /** Get the current start line value.
-     * @return the line to start the text printing at.
-     */
-    int startLine() const;
-
-    inline bool parseNewline() const;
-    inline void setParseNewline(bool parse=true);
-    void insertNewline(int count=1);
-    inline void setLink(bool isLink=true);
-    inline void setForm(bool isForm=true);
-
-    void addLink(const std::string & href);
-    /*
-    void addFormControl(FormControl * formCtrl);
-    */
-    Link * clickLink(int x, int y) const;
-    /*
-    FormControl * clickForm(int x, int y) const;
-    */
-
-    void increaseIndent();
-    void decreaseIndent();
-#endif
-
     int textSize(const UnicodeString & unicodeString) const;
+
+    std::string asString() const;
   private:
     Font * m_font;
     unsigned short * m_palette;
@@ -160,11 +135,8 @@ class TextArea : public Component
     int m_initialCursorx;
     int m_initialCursory;
     typedef std::list<Link*> LinkList;
-    /*
-    typedef std::list<FormControl*> FormList;
-    */
     LinkList m_links;
-    //FormList m_formControls;
+
     unsigned short m_bgCol;
     unsigned short m_fgCol;
     int m_indentLevel;
@@ -176,10 +148,6 @@ class TextArea : public Component
     void incrLine();
     void checkLetter(Font::Glyph & g);
     bool doSingleChar(unsigned int value);
-#if 0
-    void printuImpl(const UnicodeString & unicodeString);
-    void printuWord(const UnicodeString & word);
-#endif
     
     void removeClickables();
 
@@ -191,26 +159,7 @@ class TextArea : public Component
 };
 
 // inline implementations
-
 const Font & TextArea::font() const {
   return *m_font;
 }
-#if 0
-bool TextArea::parseNewline() const
-{
-  return m_parseNewline;
-}
-void TextArea::setParseNewline(bool parse)
-{
-  m_parseNewline = parse;
-}
-void TextArea::setLink(bool isLink)
-{
-  m_currentControl = isLink?LINK:TEXT;
-}
-void TextArea::setForm(bool isForm)
-{
-  m_currentControl = isForm?FORM:TEXT;
-}
-#endif
 #endif

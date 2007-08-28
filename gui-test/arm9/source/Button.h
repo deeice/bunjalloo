@@ -27,9 +27,8 @@ class Button: public Component
 {
   public:
     Button();
+    virtual ~Button();
     Button(const UnicodeString & label);
-
-    void setText(const UnicodeString & label);
 
     /*
     void setListener(ButtonListener * listener);

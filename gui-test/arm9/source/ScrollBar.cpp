@@ -17,26 +17,28 @@
 */
 #include "Canvas.h"
 #include "Palette.h"
-#include "Scrollable.h"
 #include "ScrollBar.h"
+#include "ScrollPane.h"
 using nds::Canvas;
 
 const static int ARROW_HEIGHT(10);
 const static int MIN_HANDLE_SIZE(5);
 const static int HANDLE_NOT_HELD(-1);
 
-// FIXME: have this configurable.
-const static nds::Color BACKGROUND(19,19,31);
-const static nds::Color BORDER(0,0,30);
-const static nds::Color ARROW(0,0,31);
-const static nds::Color ARROW_HEAD(31,31, 1);
+// FIXME: have this configurable?
+const static nds::Color BACKGROUND(21,21,21);
+const static nds::Color BORDER(12,12,12);
+const static nds::Color ARROW(27,27,27);
+const static nds::Color ARROW_HEAD(16,16,16);
+const static nds::Color HANDLE_NOT_HELD_COLOR(25,25,25);
+const static nds::Color HANDLE_HELD_COLOR(31,31,31);
 
 ScrollBar::ScrollBar():Component(),
   m_total(0),
   m_value(0),
   m_handleSize(0),
   m_handlePosition(0),
-  m_scrollable(0),
+  m_scrollPane(0),
   m_handleHeld(HANDLE_NOT_HELD)
 {
 }
@@ -61,26 +63,26 @@ int ScrollBar::value() const
   return m_value;
 }
 
-void ScrollBar::setScrollable(Scrollable * scrollable)
+void ScrollBar::setScrollable(ScrollPane * scrollPane)
 {
-  m_scrollable = scrollable;
+  m_scrollPane = scrollPane;
 }
 
 bool ScrollBar::touch(int x, int y)
 {
-  if (m_scrollable and m_bounds.hit(x, y))
+  if (m_scrollPane and m_bounds.hit(x, y))
   {
 
     // Check if clicking in the arrows:
     if (y < (m_bounds.y + ARROW_HEIGHT))
     {
-      m_scrollable->up();
+      m_scrollPane->up();
       m_handleHeld = HANDLE_NOT_HELD;
       return true;
     }
     if (y > (m_bounds.y + m_bounds.h - ARROW_HEIGHT))
     {
-      m_scrollable->down();
+      m_scrollPane->down();
       m_handleHeld = HANDLE_NOT_HELD;
       return true;
     }
@@ -97,20 +99,20 @@ bool ScrollBar::touch(int x, int y)
     else if (m_handleHeld != HANDLE_NOT_HELD)
     {
       // scroll to y...
-      m_scrollable->scrollToPercent( ((y - ARROW_HEIGHT - m_bounds.top()) * 100 ) / (m_bounds.h - ARROW_HEIGHT*2));
+      m_scrollPane->scrollToPercent( ((y - ARROW_HEIGHT - m_bounds.top()) * 256 ) / visibleRange());
       m_handleHeld = y;
       return true;
     }
     // check if above or below the bounds
     if (y < m_handlePosition)
     {
-      m_scrollable->upBlock();
+      m_scrollPane->upBlock();
       m_handleHeld = HANDLE_NOT_HELD;
       return true;
     }
     if (y > m_handlePosition)
     {
-      m_scrollable->downBlock();
+      m_scrollPane->downBlock();
       m_handleHeld = HANDLE_NOT_HELD;
       return true;
     }
@@ -132,9 +134,9 @@ void ScrollBar::paint(const nds::Rectangle & clip)
                                         BACKGROUND);
 
   Canvas::instance().drawRectangle(m_bounds.x,
-                                        m_bounds.y,
+                                        m_bounds.y+ARROW_HEIGHT,
                                         m_bounds.w,
-                                        m_bounds.h,
+                                        m_bounds.h-2*ARROW_HEIGHT,
                                         BORDER);
   // up arrow
   Canvas::instance().fillRectangle(m_bounds.x,
@@ -163,10 +165,10 @@ void ScrollBar::paint(const nds::Rectangle & clip)
   Canvas::instance().drawPixel(headX+1, headY, ARROW_HEAD);
 
   calculateHandle();
-  nds::Color c(31,31,31);
+  unsigned short c(HANDLE_NOT_HELD_COLOR);
   if (m_handleHeld != HANDLE_NOT_HELD)
   {
-    c.red(0);
+    c = HANDLE_HELD_COLOR;
   }
 
   Canvas::instance().fillRectangle(m_bounds.x+1,
@@ -176,21 +178,20 @@ void ScrollBar::paint(const nds::Rectangle & clip)
                                    c);
 }
 
-void ScrollBar::setLocation(int x, int y)
-{
-  Component::setLocation(x, y);
-}
-
 void ScrollBar::calculateHandle()
 {
   if (m_total <= 0) {
     return;
   }
 
-  m_handleSize = m_bounds.h / m_scrollable->scrollIncrement();
+  m_handleSize = m_bounds.h / m_scrollPane->scrollIncrement();
+  if (m_scrollPane->topLevel())
+  {
+    m_handleSize *= 2;
+  }
   if (m_handleSize < MIN_HANDLE_SIZE)
     m_handleSize = MIN_HANDLE_SIZE;
-  int scrollerHeight = m_bounds.h - (m_handleSize + ARROW_HEIGHT*2);
+  int scrollerHeight = visibleRange() - m_handleSize;
 
   m_handlePosition = ((m_value * scrollerHeight) / (m_total-m_bounds.h) );
   if (m_handlePosition < 0)
@@ -200,4 +201,9 @@ void ScrollBar::calculateHandle()
   {
     m_handlePosition = m_bounds.bottom() - ARROW_HEIGHT - m_handleSize;
   }
+}
+
+int ScrollBar::visibleRange() const
+{
+  return m_bounds.h - ARROW_HEIGHT*2;
 }

@@ -23,7 +23,8 @@
 
 // TODO: make configurable.
 const static int SCROLLER_WIDTH(6);
-const static int MIN_PADDING(6);
+const static int MIN_PADDING(2);
+const static int TOP_LEVEL_SIZE(192);
 using std::min;
 using std::max;
 using nds::Rectangle;
@@ -37,7 +38,7 @@ ScrollPane::ScrollPane()
   m_scrollBar(new ScrollBar)
 { 
   m_scrollBar->setScrollable(this);
-  m_preferredWidth = nds::Canvas::instance().width();
+  m_preferredWidth = nds::Canvas::instance().width()-1;
 }
 
 void ScrollPane::setLocation(unsigned int x, unsigned int y)
@@ -59,20 +60,14 @@ void ScrollPane::setLocation(unsigned int x, unsigned int y)
   }
 }
 
-void ScrollPane::setSize(unsigned int w, unsigned int h)
+void ScrollPane::layoutChildren()
 {
-  Component::setSize(w,h);
-  if (m_children.empty()) {
-    return;
-  }
-
-  // resize the scrolling pane
-  // resize children too
-  int childWidth = w - SCROLLER_WIDTH;
+  int childWidth = m_bounds.w - SCROLLER_WIDTH;
   std::vector<Component*>::iterator it(m_children.begin());
   int yPos = (*it)->y();
   int lastXPos = 0;
   int lastYPos = 0;
+  int rowHeight = 0;
   for (; it != m_children.end(); ++it)
   {
     Component * c(*it);
@@ -80,73 +75,98 @@ void ScrollPane::setSize(unsigned int w, unsigned int h)
     if ( (r.w + lastXPos) < m_bounds.w )
     {
       c->setLocation(lastXPos, lastYPos);
+      if (r.h > rowHeight)
+      {
+        rowHeight = r.h;
+      }
       r.x = lastXPos;
+      yPos = lastYPos+rowHeight+MIN_PADDING;
     }
     else {
       c->setLocation(r.x, yPos);
       lastYPos = yPos;
-      yPos += r.h;
+      yPos += r.h+MIN_PADDING;
+      rowHeight = r.h;
     }
     c->setSize(min(childWidth, r.w), r.h);
     lastXPos = r.x+c->width()+MIN_PADDING;
   }
+}
+
+void ScrollPane::calculateScrollBar()
+{
   int topY = m_children.front()->bounds().top();
+  int botY = m_children.back()->bounds().bottom();
   // Set the total coverage of the scrollBar
-  m_scrollBar->setTotal(yPos-topY);
-  m_scrollBar->setSize(SCROLLER_WIDTH, m_topLevel? 192: m_bounds.h);
-  m_scrollBar->setLocation(m_bounds.right() - SCROLLER_WIDTH, m_topLevel? 192: m_bounds.top());
-  m_scrollBar->setValue((m_topLevel?192:m_bounds.top())-topY);
+  m_scrollBar->setTotal(botY-topY);
+  m_scrollBar->setSize(SCROLLER_WIDTH, m_topLevel? TOP_LEVEL_SIZE: m_bounds.h);
+  m_scrollBar->setLocation(m_bounds.right() - SCROLLER_WIDTH, m_topLevel? TOP_LEVEL_SIZE: m_bounds.top());
+  m_scrollBar->setValue((m_topLevel?TOP_LEVEL_SIZE:m_bounds.top())-topY);
 
   // Recalculate the scrolling.
   m_canScrollUp = false;
   m_canScrollDown = false;
-  int topLimit = m_topLevel?192:m_bounds.y;
+  int topLimit = m_scrollBar->y();
   int botLimit = m_bounds.bottom();
-  nds::Rectangle bound(m_children[0]->bounds());
+  nds::Rectangle bound(m_children.front()->bounds());
   if (bound.y < topLimit)
   {
     m_canScrollUp = true;
   }
-  if (m_children.size() > 1)
-  {
-    bound = m_children.back()->bounds();
-  }
+  bound = m_children.back()->bounds();
   if ( (bound.bottom()) > botLimit)
   {
     m_canScrollDown = true;
   } 
+}
+
+void ScrollPane::setSize(unsigned int w, unsigned int h)
+{
+  Component::setSize(w,h);
+  if (m_children.empty()) {
+    return;
+  }
+
+  layoutChildren();
+  calculateScrollBar();
 
 }
 
 void ScrollPane::up()
 {
-  setSize(m_bounds.w, m_bounds.h);
   if (not m_canScrollUp)
     return;
+  int scrollIncrement = m_scrollIncrement;
+  adjustScrollUp(scrollIncrement);
   // move all up one unit...
   std::vector<Component*>::iterator it(m_children.begin());
   for (; it != m_children.end(); ++it)
   {
     Component * c(*it);
-    int newY = c->y() + m_scrollIncrement;
+    int newY = c->y() + scrollIncrement;
     c->setLocation(c->x(), newY);
   }
+  calculateScrollBar();
 }
 
 void ScrollPane::down()
 {
-  setSize(m_bounds.w, m_bounds.h);
   if (not m_canScrollDown) {
     return;
   }
+
+  int scrollIncrement = m_scrollIncrement;
+  adjustScroll(scrollIncrement);
+
   // move all up one unit...
   std::vector<Component*>::iterator it(m_children.begin());
   for (; it != m_children.end(); ++it)
   {
     Component * c(*it);
-    int newY = c->y() - m_scrollIncrement;
+    int newY = c->y() - scrollIncrement;
     c->setLocation(c->x(), newY);
   }
+  calculateScrollBar();
 }
 
 static nds::Rectangle intersect(const nds::Rectangle & r1, const nds::Rectangle & r2)
@@ -187,7 +207,7 @@ void ScrollPane::paint(const nds::Rectangle & clip)
 {
   nds::Canvas::instance().setClip(clip);
   if (m_topLevel) {
-    nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, 0);
+    nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, nds::Color(31,31,31));
   }
 
   // work out the total size of the scroll pane
@@ -252,7 +272,11 @@ bool ScrollPane::touch(int x, int y)
 void ScrollPane::upBlock()
 {
   int scrollIncrement = m_scrollIncrement;
-  m_scrollIncrement = scrollIncrement * 4;
+  m_scrollIncrement = m_bounds.h/2;
+  if (m_scrollIncrement < scrollIncrement)
+  {
+    m_scrollIncrement = scrollIncrement;
+  }
   up();
   m_scrollIncrement = scrollIncrement;
 
@@ -261,7 +285,11 @@ void ScrollPane::upBlock()
 void ScrollPane::downBlock()
 {
   int scrollIncrement = m_scrollIncrement;
-  m_scrollIncrement = scrollIncrement * 4;
+  m_scrollIncrement = m_bounds.h/2;
+  if (m_scrollIncrement < scrollIncrement)
+  {
+    m_scrollIncrement = scrollIncrement;
+  }
   down();
   m_scrollIncrement = scrollIncrement;
 }
@@ -273,15 +301,16 @@ void ScrollPane::scrollToPercent(int i)
   // 100 is the bottom ( y of last child is at view height ).
   // 50 is in the middle 
 
-  int topLimit = m_topLevel?192:m_bounds.top();
-  int total = m_scrollBar->total() - (m_topLevel?192:m_bounds.h);
+  int topLimit = m_scrollBar->y();
+  int total = m_scrollBar->total() - m_scrollBar->visibleRange();
 
-  int y = topLimit - ( (total * i) / 100 );
+  int y = (total * i) / 256;
   // find difference and move by it
   int currentTop = m_children.front()->bounds().top();
-  int dy = currentTop - y;
+  int dy = currentTop - topLimit + y;
 
-  m_scrollBar->setValue((m_topLevel?192:m_bounds.top())-y);
+  m_scrollBar->setValue(y);
+  adjustScroll(dy);
   // move all up one unit...
   std::vector<Component*>::iterator it(m_children.begin());
   for (; it != m_children.end(); ++it)
@@ -290,10 +319,39 @@ void ScrollPane::scrollToPercent(int i)
     c->setLocation(c->x(), c->y() - dy);
     //y += c->height();
   }
+  calculateScrollBar();
 
 
 }
 
+void ScrollPane::adjustScroll(int & scrollIncrement)
+{
+  if (m_children.empty())
+  {
+    scrollIncrement = 0;
+    return;
+  }
 
+  int offSet = (m_children.back()->bounds().bottom() - scrollIncrement) - m_bounds.bottom();
+  if (offSet < 0)
+  {
+    // scrolled too far.
+    // rejig m_scrollIncrement so that offset == 0
+    scrollIncrement += offSet;
+  }
+}
 
-
+void ScrollPane::adjustScrollUp(int & scrollIncrement)
+{
+  if (m_children.empty())
+  {
+    scrollIncrement = 0;
+    return;
+  }
+  int top = m_children.front()->bounds().top();
+  int scrollY = m_scrollBar->y();
+  if ((top + scrollIncrement) > scrollY)
+  {
+    scrollIncrement = scrollY - top;
+  }
+}

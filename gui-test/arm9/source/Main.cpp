@@ -22,6 +22,7 @@
 #include "Font.h"
 #include "ScrollPane.h"
 #include "TextAreaFactory.h"
+#include "TextField.h"
 #include "Button.h"
 
 extern const char _binary_test_map_bin_start[];
@@ -53,6 +54,11 @@ int main(int argc, char * argv[])
   shw = "Another Button";
   str = string2unicode(shw);
   Button * b4 = new Button(str);
+  
+  shw = "A text field that has a very, very long and pointless string";
+  str = string2unicode(shw);
+  TextField * tf1 = new TextField(str);
+  tf1->setSize(120, 18);
 
   ScrollPane scrollPane;
   scrollPane.setTopLevel();
@@ -60,6 +66,7 @@ int main(int argc, char * argv[])
   scrollPane.add(b1);
   scrollPane.add(b2);
   scrollPane.add(b3);
+  scrollPane.add(tf1);
   scrollPane.add(b4);
   scrollPane.add(subPane);
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
@@ -80,8 +87,8 @@ int main(int argc, char * argv[])
   {
     swiWaitForVBlank();
     scanKeys();
-    //u16 keys = keysDownRepeat();
-    u16 keys = keysHeld();
+    u16 keys = keysDownRepeat();
+    //u16 keys = keysHeld();
     if (keys & KEY_UP) 
     {
       scrollPane.up();

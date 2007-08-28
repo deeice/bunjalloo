@@ -25,9 +25,12 @@
 using nds::Canvas;
 using nds::Color;
 using nds::Rectangle;
-const static Color BACKGROUND(26,26,30);
-const static Color PRESSED(16,16,20);
+const static Color BACKGROUND(26,26,26);
+const static Color PRESSED(23,23,23);
 const static Color EDGE(21,21,21);
+const static Color SHINE(30,30,30);
+static const int BORDER_WIDTH(5);
+static const int BORDER_HEIGHT(5);
 
 Button::Button() : Component(), m_pressed(false), m_label(TextAreaFactory::create())
 {
@@ -40,46 +43,44 @@ Button::Button(const UnicodeString & label) :
   m_label(TextAreaFactory::create())
 {
   int textSize = m_label->textSize(label);
-  m_label->setSize(textSize+5, m_label->font().height()+5);
+  m_label->setSize(textSize+BORDER_WIDTH, m_label->font().height()+BORDER_HEIGHT);
   m_label->appendText(label);
-  m_preferredWidth = textSize+5;
-  m_preferredHeight = m_label->preferredSize().h+5;
+  m_preferredWidth = textSize+BORDER_WIDTH;
+  m_preferredHeight = m_label->preferredSize().h+BORDER_HEIGHT;
   m_label->setBackgroundColor(BACKGROUND);
+}
+Button::~Button()
+{
+  delete m_label;
 }
 
 void Button::setSize(unsigned int w, unsigned int h)
 {
-  if (m_bounds.w != (int)w and m_bounds.h != (int)h)
-  {
-    Component::setSize(w, h);
-    m_label->setSize(w, h);
-    m_preferredHeight = m_label->preferredSize().h;
-  }
-  else
-  {
-    Component::setSize(w, h);
-    m_label->setSize(w, h);
-    m_preferredHeight = m_label->preferredSize().h;
-  }
-}
-
-void Button::setText(const UnicodeString & label)
-{
-  m_label->appendText(label);
+  Component::setSize(w, h);
+  m_label->setSize(w, h);
+  m_preferredHeight = m_label->preferredSize().h+BORDER_HEIGHT;
 }
 
 void Button::paint(const nds::Rectangle & clip)
 {
   // print the button
+  unsigned short hilight(SHINE);
+  unsigned short lowlight(EDGE);
+
   if (m_pressed) {
     m_label->setBackgroundColor(PRESSED);
+    hilight = EDGE;
+    lowlight = SHINE;
   }
   else {
     m_label->setBackgroundColor(BACKGROUND);
   }
-  m_label->setLocation(m_bounds.x+2, m_bounds.y);
+  m_label->setLocation(m_bounds.x+BORDER_WIDTH/2, m_bounds.y+BORDER_HEIGHT/2);
   m_label->paint(clip);
-  Canvas::instance().drawRectangle(m_bounds.x, m_bounds.y, m_bounds.w-1, m_bounds.h-1, EDGE);
+  Canvas::instance().horizontalLine(m_bounds.x, m_bounds.top(), m_bounds.w, hilight);
+  Canvas::instance().verticalLine(m_bounds.left(), m_bounds.top(), m_bounds.h, hilight);
+  Canvas::instance().horizontalLine(m_bounds.x, m_bounds.bottom()-1, m_bounds.w, lowlight);
+  Canvas::instance().verticalLine(m_bounds.right(), m_bounds.top(), m_bounds.h, lowlight);
 }
 
 bool Button::touch(int x, int y)

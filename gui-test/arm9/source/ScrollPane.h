@@ -19,11 +19,10 @@
 #define ScrollPane_h_seen
 
 #include "Component.h"
-#include "Scrollable.h"
 
 class ScrollBar;
 
-class ScrollPane: public Component, Scrollable
+class ScrollPane: public Component
 {
 
   public:
@@ -37,6 +36,10 @@ class ScrollPane: public Component, Scrollable
     void down();
     void upBlock();
     void downBlock();
+
+    /** Scroll to a "percentage" (0 = 0%, 256 = 100%) of the screen.
+     * @param value the percentage of the screen to scroll to, represented in fixed point.
+     */
     void scrollToPercent(int value);
 
     /** Set this to be the top level scroll pane. */
@@ -54,7 +57,12 @@ class ScrollPane: public Component, Scrollable
     bool m_canScrollDown;
     ScrollBar * m_scrollBar;
 
+    void layoutChildren();
+    void calculateScrollBar();
+
     void showScrollBar(const nds::Rectangle & clip);
+    void adjustScroll(int & scrollIncrement);
+    void adjustScrollUp(int & scrollIncrement);
 };
 
 #endif

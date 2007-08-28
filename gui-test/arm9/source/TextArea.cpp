@@ -91,6 +91,12 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
   }
 }
 
+void TextArea::clearText()
+{
+  m_document.clear();
+  m_appendPosition = 0;
+  m_preferredHeight = m_font->height();
+}
 void TextArea::appendText(const UnicodeString & unicodeString)
 {
   // append text, adding in new lines as needed to wrap.
@@ -290,8 +296,11 @@ void TextArea::setDefaultColor()
 
 void TextArea::setBackgroundColor(unsigned short color)
 {
-  m_bgCol = color;
-  setTextColor(m_fgCol);
+  if (color != m_bgCol)
+  {
+    m_bgCol = color;
+    setTextColor(m_fgCol);
+  }
 }
 
 void TextArea::setTextColor(unsigned short color)
@@ -395,3 +404,7 @@ void TextArea::paint(const nds::Rectangle & clip)
   printu(m_document);
 }
 
+std::string TextArea::asString() const
+{
+  return unicode2string(m_document);
+}
