@@ -21,9 +21,9 @@ void ComboBox::addItem(const UnicodeString & item)
     m_button->setLabel(item);
     printf("Set label: %s\n", unicode2string(item).c_str());
   }
-  Button * b = new Button;
+  Button * b = new Button(item);
+  // need to add callbacks to button so that the combobox is updated.
   b->setSize(m_bounds.w, m_bounds.h);
-  b->setLabel(item);
   m_items++;
   m_scrollPane->add(b);
   m_scrollPane->setTopLevel(false);
@@ -39,11 +39,13 @@ bool ComboBox::touch(int x, int y)
   if (m_button->touch(x, y))
   {
     m_open = not m_open;
+    m_button->setPressed(m_open);
     return true;
   }
   if (m_open and m_scrollPane->touch(x, y))
   {
-      return true;
+    m_button->setPressed(true);
+    return true;
   }
 
   m_open = false;
@@ -54,23 +56,26 @@ void ComboBox::setLocation(unsigned int x, unsigned int y)
 {
   Component::setLocation(x, y);
   m_button->setLocation(x, y);
-  m_scrollPane->setLocation(x, y+ m_bounds.h);
+  m_scrollPane->setLocation(x, y + m_bounds.h);
 }
 
 void ComboBox::setSize(unsigned int w, unsigned int h)
 {
   Component::setSize(w, h);
   m_button->setSize(w, h);
-  m_scrollPane->setSize(m_bounds.w, m_bounds.h*4);
+  
+  m_scrollPane->setSize(m_bounds.w, m_scrollPane->preferredSize().h);
   m_preferredHeight = m_button->preferredSize().h;
 }
 
 void ComboBox::paint(const nds::Rectangle & clip)
 {
+  // TODO: add the drop down triangle.
   m_button->paint(clip);
   if (m_open)
   {
     ScrollPane::s_popup = m_scrollPane;
+    m_scrollPane->setLocation(m_bounds.x, m_bounds.bottom());
     // paint the scrollpane too.
     //nds::Rectangle thisClip = {clip.x, clip.y+m_bounds.h, m_bounds.w, m_bounds.h};
     //m_scrollPane->paint(clip);

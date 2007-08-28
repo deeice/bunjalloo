@@ -42,6 +42,8 @@ class Button: public Component
     void setLabel(const UnicodeString & label);
     const UnicodeString & label() const;
 
+    void setPressed(bool pressed=true);
+
   private:
     bool m_pressed;
     TextArea * m_label;

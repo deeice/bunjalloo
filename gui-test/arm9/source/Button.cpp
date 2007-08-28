@@ -87,9 +87,15 @@ void Button::paint(const nds::Rectangle & clip)
   }
   m_label->setLocation(m_bounds.x+BORDER_WIDTH/2, m_bounds.y+BORDER_HEIGHT/2);
   m_label->paint(clip);
-  Canvas::instance().horizontalLine(m_bounds.x, m_bounds.top(), m_bounds.w, hilight);
+  if (clip.hit(m_bounds.x, m_bounds.top()))
+  {
+    Canvas::instance().horizontalLine(m_bounds.x, m_bounds.top(), m_bounds.w, hilight);
+  }
   Canvas::instance().verticalLine(m_bounds.left(), m_bounds.top(), m_bounds.h, hilight);
-  Canvas::instance().horizontalLine(m_bounds.x, m_bounds.bottom()-1, m_bounds.w, lowlight);
+  if (clip.hit(m_bounds.x, m_bounds.bottom()))
+  {
+    Canvas::instance().horizontalLine(m_bounds.x, m_bounds.bottom()-1, m_bounds.w, lowlight);
+  }
   Canvas::instance().verticalLine(m_bounds.right(), m_bounds.top(), m_bounds.h, lowlight);
 }
 
@@ -141,4 +147,8 @@ void Button::setLabel(const UnicodeString & label)
 const UnicodeString & Button::label() const
 {
   return m_label->text();
+}
+void Button::setPressed(bool pressed)
+{
+  m_pressed = pressed;
 }
