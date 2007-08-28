@@ -22,6 +22,7 @@
 #include <algorithm>
 
 // TODO: make configurable.
+Component * ScrollPane::s_popup(0);
 const static int SCROLLER_WIDTH(6);
 const static int MIN_PADDING(2);
 const static int TOP_LEVEL_SIZE(192);
@@ -65,7 +66,7 @@ void ScrollPane::layoutChildren()
   int childWidth = m_bounds.w - SCROLLER_WIDTH;
   std::vector<Component*>::iterator it(m_children.begin());
   int yPos = (*it)->y();
-  int lastXPos = 0;
+  int lastXPos = m_bounds.x;
   int lastYPos = 0;
   int rowHeight = 0;
   int i = 0;
@@ -84,14 +85,14 @@ void ScrollPane::layoutChildren()
       yPos = lastYPos+rowHeight+MIN_PADDING;
     }
     else {
-      c->setLocation(r.x, yPos);
+      c->setLocation(x()+r.x, yPos);
       lastYPos = yPos;
       yPos += r.h+MIN_PADDING;
       rowHeight = r.h;
     }
     i++;
     c->setSize(min(childWidth, r.w), r.h);
-    lastXPos = r.x+c->width()+MIN_PADDING;
+    lastXPos = x()+r.x+c->width()+MIN_PADDING;
   }
 }
 
@@ -214,6 +215,8 @@ void ScrollPane::paint(const nds::Rectangle & clip)
 
   // work out the total size of the scroll pane
   showScrollBar(clip);
+  nds::Rectangle realClip = clip;
+  realClip.w -= m_scrollBar->width();
 
   // paint the child components
   std::vector<Component*>::iterator it(m_children.begin());
@@ -221,12 +224,19 @@ void ScrollPane::paint(const nds::Rectangle & clip)
   {
     Component * c(*it);
     Rectangle bounds(c->bounds());
-    Rectangle thisClip(intersect(clip, bounds));
+    Rectangle thisClip(intersect(realClip, bounds));
     // if the bounds of the component are smaller than the scrollpane, clip to the component.
     if (thisClip.w == 0 and thisClip.h == 0)
       continue;
     c->paint(thisClip);
-    nds::Canvas::instance().setClip(clip);
+    nds::Canvas::instance().setClip(realClip);
+  }
+  if (m_topLevel and s_popup != 0) {
+    printf("Paint popup!\n");
+    Rectangle bounds(s_popup->bounds());
+    Rectangle thisClip(intersect(realClip, bounds));
+    nds::Canvas::instance().fillRectangle(thisClip.x, thisClip.y, thisClip.w, thisClip.h, nds::Color(31,31,31));
+    s_popup->paint(thisClip);
   }
 }
 

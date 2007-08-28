@@ -26,6 +26,7 @@ class ScrollPane: public Component
 {
 
   public:
+    static Component * s_popup;
     ScrollPane();
     void setSize(unsigned int w, unsigned int h);
     void setLocation(unsigned int x, unsigned int y);

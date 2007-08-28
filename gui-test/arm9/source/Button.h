@@ -39,6 +39,9 @@ class Button: public Component
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);
 
+    void setLabel(const UnicodeString & label);
+    const UnicodeString & label() const;
+
   private:
     bool m_pressed;
     TextArea * m_label;

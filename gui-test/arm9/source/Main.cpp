@@ -24,6 +24,7 @@
 #include "TextAreaFactory.h"
 #include "TextField.h"
 #include "Button.h"
+#include "ComboBox.h"
 
 extern const char _binary_test_map_bin_start[];
 
@@ -42,22 +43,30 @@ int main(int argc, char * argv[])
   subPane->setTopLevel(false);
   subPane->setSize(Canvas::instance().width(),Canvas::instance().height());
   subPane->setScrollIncrement(t2->font().height());
-
+  ComboBox * combo = new ComboBox();
+  combo->setSize(60, 18);
   std::string shw("Hello World");
   UnicodeString str = string2unicode(shw);
   Button * b1 = new Button(str);
-  shw = "Another One";
+
+  shw = "Combo box!";
+  str = string2unicode(shw);
+  combo->addItem(str);
+  shw = "Another One - with very wide text";
   str = string2unicode(shw);
   Button * b2 = new Button(str);
-  shw = "Three";
+  combo->addItem(str);
+  shw = "Three- wide, but fixed width";
   str = string2unicode(shw);
   Button * b3 = new Button(str);
+  b3->setSize(60, 18);
   shw = "Another Button";
   str = string2unicode(shw);
   Button * b4 = new Button(str);
   shw = "Last one!";
   str = string2unicode(shw);
   Button * b5 = new Button(str);
+  combo->addItem(str);
   
   shw = "A text field that has a very, very long and pointless string";
   str = string2unicode(shw);
@@ -72,6 +81,7 @@ int main(int argc, char * argv[])
   scrollPane.add(b3);
   scrollPane.add(tf1);
   scrollPane.add(b4);
+  scrollPane.add(combo);
   scrollPane.add(subPane);
   scrollPane.add(b5);
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());

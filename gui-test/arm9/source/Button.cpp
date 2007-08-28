@@ -42,12 +42,15 @@ Button::Button(const UnicodeString & label) :
   m_pressed(false),
   m_label(TextAreaFactory::create())
 {
+  setLabel(label);
+  /*
   int textSize = m_label->textSize(label);
   m_label->setSize(textSize+BORDER_WIDTH, m_label->font().height()+BORDER_HEIGHT);
   m_label->appendText(label);
   m_preferredWidth = textSize+BORDER_WIDTH;
   m_preferredHeight = m_label->preferredSize().h+BORDER_HEIGHT;
   m_label->setBackgroundColor(BACKGROUND);
+  */
 }
 Button::~Button()
 {
@@ -56,8 +59,13 @@ Button::~Button()
 
 void Button::setSize(unsigned int w, unsigned int h)
 {
-  Component::setSize(w, h);
   m_label->setSize(w, h);
+  if ((int)w != m_preferredWidth)
+  {
+    // need to layout the text area again.
+    m_preferredWidth = w;
+  }
+  Component::setSize(w, h);
   m_preferredHeight = m_label->preferredSize().h+BORDER_HEIGHT;
 }
 
@@ -93,4 +101,44 @@ bool Button::touch(int x, int y)
     m_pressed = true;
   } 
   return m_pressed;
+}
+
+void Button::setLabel(const UnicodeString & label)
+{
+  if (width() == 0)
+  {
+    m_label->clearText();
+    int textSize = m_label->textSize(label);
+    m_label->setSize(textSize+BORDER_WIDTH, m_label->font().height()+BORDER_HEIGHT);
+    m_label->appendText(label);
+    m_preferredWidth = textSize+BORDER_WIDTH;
+    m_preferredHeight = m_label->preferredSize().h+BORDER_HEIGHT;
+    m_label->setBackgroundColor(BACKGROUND);
+  }
+  else
+  {
+
+    UnicodeString appendText;
+    appendText.clear();
+    UnicodeString::const_iterator it(label.begin());
+    int size(0);
+    for (; it != label.end() and size < width(); ++it)
+    {
+      Font::Glyph g;
+      m_label->font().glyph(*it, g);
+      if ((size + g.width) < m_bounds.w) {
+        size += g.width;
+        appendText += *it;
+      } else {
+        break;
+      }
+    }
+    m_label->clearText();
+    m_label->appendText(appendText);
+    m_label->setBackgroundColor(BACKGROUND);
+  }
+}
+const UnicodeString & Button::label() const
+{
+  return m_label->text();
 }

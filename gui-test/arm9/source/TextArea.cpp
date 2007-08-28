@@ -131,6 +131,7 @@ void TextArea::clearText()
   m_appendPosition = 0;
   m_preferredHeight = m_font->height();
 }
+
 void TextArea::appendText(const UnicodeString & unicodeString)
 {
   // append text, adding in new lines as needed to wrap.
@@ -149,7 +150,7 @@ void TextArea::appendText(const UnicodeString & unicodeString)
       m_appendPosition = 0;
       m_preferredHeight += m_font->height();
     }
-    else if (m_appendPosition + size > width())
+    else if ((m_appendPosition + size) > width())
     {
       // this word overflows the line
       m_document += '\n';
@@ -167,8 +168,8 @@ void TextArea::setSize(unsigned int w, unsigned int h)
   if (m_bounds.w != (int)w) {
     Component::setSize(w, h);
     UnicodeString tmp(m_document);
-    m_document.clear();
-    m_preferredHeight = 0;
+    clearText();
+    //m_preferredHeight = 0;
     if (not tmp.empty())
       appendText(tmp);
     if (m_preferredHeight == 0)
