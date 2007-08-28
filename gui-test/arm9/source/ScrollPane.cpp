@@ -68,6 +68,7 @@ void ScrollPane::layoutChildren()
   int lastXPos = 0;
   int lastYPos = 0;
   int rowHeight = 0;
+  int i = 0;
   for (; it != m_children.end(); ++it)
   {
     Component * c(*it);
@@ -88,6 +89,7 @@ void ScrollPane::layoutChildren()
       yPos += r.h+MIN_PADDING;
       rowHeight = r.h;
     }
+    i++;
     c->setSize(min(childWidth, r.w), r.h);
     lastXPos = r.x+c->width()+MIN_PADDING;
   }
@@ -224,6 +226,7 @@ void ScrollPane::paint(const nds::Rectangle & clip)
     if (thisClip.w == 0 and thisClip.h == 0)
       continue;
     c->paint(thisClip);
+    nds::Canvas::instance().setClip(clip);
   }
 }
 

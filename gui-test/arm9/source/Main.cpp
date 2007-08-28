@@ -35,7 +35,8 @@ int main(int argc, char * argv[])
 
   TextArea * t = TextAreaFactory::create();
   TextArea * t2 = TextAreaFactory::create();
-  t2->setBackgroundColor(Color(31,31,0));
+  // t2->setBackgroundColor(Color(31,31,0));
+  t2->setEditable();
   ScrollPane * subPane = new ScrollPane;
   subPane->add(t2);
   subPane->setTopLevel(false);
@@ -54,6 +55,9 @@ int main(int argc, char * argv[])
   shw = "Another Button";
   str = string2unicode(shw);
   Button * b4 = new Button(str);
+  shw = "Last one!";
+  str = string2unicode(shw);
+  Button * b5 = new Button(str);
   
   shw = "A text field that has a very, very long and pointless string";
   str = string2unicode(shw);
@@ -69,6 +73,7 @@ int main(int argc, char * argv[])
   scrollPane.add(tf1);
   scrollPane.add(b4);
   scrollPane.add(subPane);
+  scrollPane.add(b5);
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
   scrollPane.setScrollIncrement(t->font().height());
 

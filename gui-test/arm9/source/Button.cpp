@@ -67,12 +67,14 @@ void Button::paint(const nds::Rectangle & clip)
   unsigned short hilight(SHINE);
   unsigned short lowlight(EDGE);
 
-  if (m_pressed) {
+  if (m_pressed)
+  {
     m_label->setBackgroundColor(PRESSED);
     hilight = EDGE;
     lowlight = SHINE;
   }
-  else {
+  else
+  {
     m_label->setBackgroundColor(BACKGROUND);
   }
   m_label->setLocation(m_bounds.x+BORDER_WIDTH/2, m_bounds.y+BORDER_HEIGHT/2);

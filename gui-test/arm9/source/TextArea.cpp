@@ -29,6 +29,9 @@
 
 using namespace nds;
 using namespace std;
+const static nds::Color EDGE(20,20,20);
+const static nds::Color SHADOW(28,28,28);
+
 static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
 static const UnicodeString s_delimiters(intDelimiters,6);
 static const int INDENT(16);
@@ -45,8 +48,8 @@ TextArea::TextArea(Font * font) :
   m_currentControl(TEXT),
   m_bgCol(0),
   m_fgCol(0),
-  m_indentLevel(0),
-  m_appendPosition(0)
+  m_appendPosition(0),
+  m_editable(false)
 {
   setFont(font);
   m_document.clear();
@@ -88,6 +91,37 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
         Canvas::instance().drawPixel(xPosition+(x*2)+1, yPosition+y, m_palette[pix2]);
     }
     data += dataInc;
+  }
+}
+
+UnicodeString & TextArea::text()
+{
+  return m_document;
+}
+
+bool TextArea::isEditable() const
+{
+  return m_editable;
+}
+void TextArea::setEditable(bool edit)
+{
+  m_editable = edit;
+}
+
+bool TextArea::touch(int x, int y)
+{
+  if (not m_editable)
+  {
+    return Component::touch(x, y);
+  }
+  else
+  {
+    // touch...
+    if (m_bounds.hit(x, y))
+    {
+      return true;
+    }
+    return false;
   }
 }
 
@@ -401,6 +435,12 @@ void TextArea::paint(const nds::Rectangle & clip)
   // then theres clip-width which is where it should draw to.
   setCursor(m_bounds.x, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
+  if (m_editable) {
+    Canvas::instance().horizontalLine(clip.x, clip.top(), clip.w, EDGE);
+    Canvas::instance().verticalLine(clip.left(), clip.top(), clip.h, EDGE);
+    Canvas::instance().horizontalLine(clip.x, clip.bottom()-1, clip.w, SHADOW);
+    Canvas::instance().verticalLine(clip.right(), clip.top(), clip.h, SHADOW);
+  }
   printu(m_document);
 }
 

@@ -65,9 +65,14 @@ class TextArea : public Component
      */
     void appendText(const UnicodeString & unicodeString);
 
-    /** Clear the text.
+    /** Clear the text (empty the document model).
      */
     void clearText();
+
+    /** Get the text that is held internally.
+     */
+    UnicodeString & text();
+
 
     /** Print a unicode string starting at the current cursor position. The
      * values are not decoded from the string.
@@ -110,7 +115,21 @@ class TextArea : public Component
 
     int textSize(const UnicodeString & unicodeString) const;
 
+    // debugging hack...
     std::string asString() const;
+
+    /** Get the editable status.
+     * @return true if we can edit, false otherwise.
+     */
+    bool isEditable() const;
+
+    /** Set the editable flag.
+     * @param edit true if this is an editable text area.
+     */
+    void setEditable(bool edit=true);
+
+    bool touch(int x, int y);
+
   private:
     Font * m_font;
     unsigned short * m_palette;
@@ -139,10 +158,12 @@ class TextArea : public Component
 
     unsigned short m_bgCol;
     unsigned short m_fgCol;
-    int m_indentLevel;
 
-    //! Position that the current line cursor is at.
+    //! Position that the current line is at.
     int m_appendPosition;
+
+    //! the edit flag.
+    bool m_editable;
 
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
     void incrLine();
