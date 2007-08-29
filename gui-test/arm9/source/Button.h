@@ -18,34 +18,31 @@
 #ifndef Button_h_seen
 #define Button_h_seen
 
-#include "Component.h"
+#include "TextContainer.h"
 #include "UnicodeString.h"
 
 class TextArea;
+class ButtonListener;
 
-class Button: public Component
+class Button: public TextContainer
 {
   public:
     Button();
-    virtual ~Button();
     Button(const UnicodeString & label);
 
-    /*
     void setListener(ButtonListener * listener);
     void removeListener(ButtonListener * listener);
-    */
 
-    virtual void setSize(unsigned int w, unsigned int h);
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);
 
-    void setLabel(const UnicodeString & label);
-    const UnicodeString & label() const;
-
     void setPressed(bool pressed=true);
+
+    void setDecoration(bool decorate=true);
 
   private:
     bool m_pressed;
-    TextArea * m_label;
+    bool m_decoration;
+    ButtonListener * m_listener;
 };
 #endif

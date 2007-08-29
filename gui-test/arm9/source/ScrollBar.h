@@ -26,6 +26,8 @@ class ScrollBar: public Component
 {
 
   public:
+    static void drawDownArrow(int x, int y);
+    static void drawUpArrow(int x, int y);
     ScrollBar();
 
     void setTotal(int total);

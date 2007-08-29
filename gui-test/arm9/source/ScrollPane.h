@@ -26,7 +26,8 @@ class ScrollPane: public Component
 {
 
   public:
-    static Component * s_popup;
+    static void setPopup(Component * popup);
+    static void removePopup(Component * popup);
     ScrollPane();
     void setSize(unsigned int w, unsigned int h);
     void setLocation(unsigned int x, unsigned int y);
@@ -51,12 +52,18 @@ class ScrollPane: public Component
 
     bool touch(int x, int y);
 
+    void setBackgroundColor(unsigned short color);
+
+
+
   private:
+    static Component * s_popup;
     int m_scrollIncrement;
     bool m_topLevel;
     bool m_canScrollUp;
     bool m_canScrollDown;
     ScrollBar * m_scrollBar;
+    unsigned short m_backgroundColour;
 
     void layoutChildren();
     void calculateScrollBar();

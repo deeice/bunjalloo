@@ -2,10 +2,11 @@
 #define ComboBox_h_seen
 #include "Component.h"
 #include "UnicodeString.h"
+#include "ButtonListener.h"
 
 class ScrollPane;
 class Button;
-class ComboBox: public Component
+class ComboBox: public Component, ButtonListener
 {
   public:
     ComboBox();
@@ -15,6 +16,8 @@ class ComboBox: public Component
     void paint(const nds::Rectangle & clip);
     virtual void setLocation(unsigned int x, unsigned int y);
     void setSize(unsigned int w, unsigned int h);
+
+    void pressed(Button * button);
 
   private:
     int m_items;

@@ -45,6 +45,8 @@ int main(int argc, char * argv[])
   subPane->setScrollIncrement(t2->font().height());
   ComboBox * combo = new ComboBox();
   combo->setSize(60, 18);
+  ComboBox * combo2 = new ComboBox();
+  combo2->setSize(90, 18);
   std::string shw("Hello World");
   UnicodeString str = string2unicode(shw);
   Button * b1 = new Button(str);
@@ -52,14 +54,20 @@ int main(int argc, char * argv[])
   shw = "Combo box!";
   str = string2unicode(shw);
   combo->addItem(str);
+  combo2->addItem(str);
+  combo2->addItem(str);
   shw = "Another One - with very wide text";
   str = string2unicode(shw);
   Button * b2 = new Button(str);
   combo->addItem(str);
+  combo2->addItem(str);
+  combo2->addItem(str);
   shw = "Three- wide, but fixed width";
   str = string2unicode(shw);
   Button * b3 = new Button(str);
   b3->setSize(60, 18);
+  combo2->addItem(str);
+  combo2->addItem(str);
   shw = "Another Button";
   str = string2unicode(shw);
   Button * b4 = new Button(str);
@@ -67,11 +75,14 @@ int main(int argc, char * argv[])
   str = string2unicode(shw);
   Button * b5 = new Button(str);
   combo->addItem(str);
+  combo2->addItem(str);
+  combo2->addItem(str);
   
   shw = "A text field that has a very, very long and pointless string";
   str = string2unicode(shw);
   TextField * tf1 = new TextField(str);
   tf1->setSize(120, 18);
+  combo2->addItem(str);
 
   ScrollPane scrollPane;
   scrollPane.setTopLevel();
@@ -81,8 +92,9 @@ int main(int argc, char * argv[])
   scrollPane.add(b3);
   scrollPane.add(tf1);
   scrollPane.add(b4);
-  scrollPane.add(combo);
+  scrollPane.add(combo2);
   scrollPane.add(subPane);
+  scrollPane.add(combo);
   scrollPane.add(b5);
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
   scrollPane.setScrollIncrement(t->font().height());
@@ -117,7 +129,6 @@ int main(int argc, char * argv[])
     if (keys & KEY_TOUCH)
     {
       touchPosition tp = touchReadXY();
-      //printf("tp x %d tp y %d\n", tp.px, tp.py);
       needsPainting = scrollPane.touch(tp.px, tp.py+SCREEN_HEIGHT) ;
     }
 

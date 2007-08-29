@@ -36,7 +36,8 @@ ScrollPane::ScrollPane()
   m_topLevel(false),
   m_canScrollUp(false),
   m_canScrollDown(false),
-  m_scrollBar(new ScrollBar)
+  m_scrollBar(new ScrollBar),
+  m_backgroundColour(nds::Color(31,31,31))
 { 
   m_scrollBar->setScrollable(this);
   m_preferredWidth = nds::Canvas::instance().width()-1;
@@ -210,7 +211,12 @@ void ScrollPane::paint(const nds::Rectangle & clip)
 {
   nds::Canvas::instance().setClip(clip);
   if (m_topLevel) {
-    nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, nds::Color(31,31,31));
+    nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
+  }
+
+  if (s_popup != 0 and this == s_popup)
+  {
+    nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
   }
 
   // work out the total size of the scroll pane
@@ -231,11 +237,10 @@ void ScrollPane::paint(const nds::Rectangle & clip)
     c->paint(thisClip);
     nds::Canvas::instance().setClip(realClip);
   }
+
   if (m_topLevel and s_popup != 0) {
-    printf("Paint popup!\n");
     Rectangle bounds(s_popup->bounds());
     Rectangle thisClip(intersect(realClip, bounds));
-    nds::Canvas::instance().fillRectangle(thisClip.x, thisClip.y, thisClip.w, thisClip.h, nds::Color(31,31,31));
     s_popup->paint(thisClip);
   }
 }
@@ -262,12 +267,19 @@ bool ScrollPane::topLevel() const
 
 bool ScrollPane::touch(int x, int y)
 {
-  if (m_scrollBar->touch(x, y))
+  if (m_topLevel and s_popup and s_popup->bounds().hit(x, y))
   {
+    // do not process other events if we hit the popup menu.
+    s_popup->touch(x, y);
     return true;
   }
 
   bool handled(false);
+  if (m_scrollBar->touch(x, y))
+  {
+    handled = true;
+  }
+
   std::vector<Component*>::iterator it(m_children.begin());
   for (; it != m_children.end(); ++it)
   {
@@ -366,5 +378,22 @@ void ScrollPane::adjustScrollUp(int & scrollIncrement)
   if ((top + scrollIncrement) > scrollY)
   {
     scrollIncrement = scrollY - top;
+  }
+}
+
+void ScrollPane::setBackgroundColor(unsigned short color)
+{
+  m_backgroundColour = color;
+}
+
+void ScrollPane::setPopup(Component * popup)
+{
+  s_popup = popup;
+}
+void ScrollPane::removePopup(Component * popup)
+{
+  if (s_popup == popup)
+  {
+    s_popup = 0;
   }
 }

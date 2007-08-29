@@ -147,10 +147,7 @@ void ScrollBar::paint(const nds::Rectangle & clip)
   // head.
   int headX = m_bounds.x + (m_bounds.w/2);
   int headY = m_bounds.y + (ARROW_HEIGHT/2) - 1;
-  Canvas::instance().drawPixel(headX, headY, ARROW_HEAD);
-  Canvas::instance().drawPixel(headX-1, headY+1, ARROW_HEAD);
-  Canvas::instance().drawPixel(headX, headY+1, ARROW_HEAD);
-  Canvas::instance().drawPixel(headX+1, headY+1, ARROW_HEAD);
+  drawUpArrow(headX, headY);
 
   // down arrow
   Canvas::instance().fillRectangle(m_bounds.x,
@@ -159,10 +156,7 @@ void ScrollBar::paint(const nds::Rectangle & clip)
                                         ARROW_HEIGHT,
                                         ARROW);
   headY = m_bounds.bottom() - (ARROW_HEIGHT/2);
-  Canvas::instance().drawPixel(headX, headY+1, ARROW_HEAD);
-  Canvas::instance().drawPixel(headX-1, headY, ARROW_HEAD);
-  Canvas::instance().drawPixel(headX, headY, ARROW_HEAD);
-  Canvas::instance().drawPixel(headX+1, headY, ARROW_HEAD);
+  drawDownArrow(headX, headY);
 
   calculateHandle();
   unsigned short c(HANDLE_NOT_HELD_COLOR);
@@ -206,4 +200,19 @@ void ScrollBar::calculateHandle()
 int ScrollBar::visibleRange() const
 {
   return m_bounds.h - ARROW_HEIGHT*2;
+}
+
+void ScrollBar::drawDownArrow(int x, int y)
+{
+  Canvas::instance().drawPixel(x, y+1, ARROW_HEAD);
+  Canvas::instance().drawPixel(x-1, y, ARROW_HEAD);
+  Canvas::instance().drawPixel(x, y, ARROW_HEAD);
+  Canvas::instance().drawPixel(x+1, y, ARROW_HEAD);
+}
+void ScrollBar::drawUpArrow(int x, int y)
+{
+  Canvas::instance().drawPixel(x, y, ARROW_HEAD);
+  Canvas::instance().drawPixel(x-1, y+1, ARROW_HEAD);
+  Canvas::instance().drawPixel(x, y+1, ARROW_HEAD);
+  Canvas::instance().drawPixel(x+1, y+1, ARROW_HEAD);
 }
