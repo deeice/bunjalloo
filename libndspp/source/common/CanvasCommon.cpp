@@ -85,7 +85,7 @@ void Canvas::drawRectangle(int x, int y, int w, int h, int colour)
   horizontalLine(x,y,w,colour);
   horizontalLine(x,y+h,w,colour);
   verticalLine(x,y,h,colour);
-  verticalLine(x+w,y,h,colour);
+  verticalLine(x+w,y,h+1,colour);
 }
 
 void Canvas::fillRectangle(int x, int y, int w, int h, int colour)

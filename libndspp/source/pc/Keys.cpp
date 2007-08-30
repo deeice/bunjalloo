@@ -148,6 +148,7 @@ int Keys::repeat()
 {
   int tmp = m_heldRepeat;
   m_heldRepeat = 0;
+  m_keys[12] = false;
   return tmp;
 }
 
