@@ -19,30 +19,24 @@
 #define Button_h_seen
 
 #include "TextContainer.h"
+#include "ButtonI.h"
 #include "UnicodeString.h"
 
 class TextArea;
 class ButtonListener;
 
-class Button: public TextContainer
+class Button: public TextContainer, public ButtonI
 {
   public:
     Button();
     Button(const UnicodeString & label);
 
-    void setListener(ButtonListener * listener);
-    void removeListener(ButtonListener * listener);
-
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);
-
-    void setPressed(bool pressed=true);
 
     void setDecoration(bool decorate=true);
 
   private:
-    bool m_pressed;
     bool m_decoration;
-    ButtonListener * m_listener;
 };
 #endif

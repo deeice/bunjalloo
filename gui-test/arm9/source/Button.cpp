@@ -23,29 +23,28 @@
 #include "TextAreaFactory.h"
 #include "TextArea.h"
 #include "TextContainer.h"
+#include "WidgetColors.h"
 
 using nds::Canvas;
 using nds::Color;
 using nds::Rectangle;
-const static Color BACKGROUND(26,26,26);
-const static Color PRESSED(23,23,23);
+/*
+const static Color BACKGROUND(27,27,27);
+const static Color PRESSED(25,25,25);
 const static Color EDGE(21,21,21);
 const static Color SHINE(30,30,30);
+*/
 
 Button::Button() :
   TextContainer(),
-  m_pressed(false),
-  m_decoration(true),
-  m_listener(0)
+  m_decoration(true)
 {
-  setBackgroundColor(BACKGROUND);
+  setBackgroundColor(WidgetColors::BUTTON_FOREGROUND);
 }
 
 Button::Button(const UnicodeString & label) :
   TextContainer(label),
-  m_pressed(false),
-  m_decoration(true),
-  m_listener(0)
+  m_decoration(true)
 {
 
 }
@@ -53,19 +52,19 @@ Button::Button(const UnicodeString & label) :
 void Button::paint(const nds::Rectangle & clip)
 {
   // print the button
-  unsigned short hilight(SHINE);
-  unsigned short lowlight(EDGE);
+  unsigned short hilight(WidgetColors::BUTTON_SHINE);
+  unsigned short lowlight(WidgetColors::BUTTON_SHADOW);
 
   if (m_decoration) {
-    if (m_pressed)
+    if (selected())
     {
-      setBackgroundColor(PRESSED);
-      hilight = EDGE;
-      lowlight = SHINE;
+      setBackgroundColor(WidgetColors::BUTTON_PRESSED);
+      hilight = WidgetColors::BUTTON_SHADOW;
+      lowlight = WidgetColors::BUTTON_SHINE;
     }
     else
     {
-      setBackgroundColor(BACKGROUND);
+      setBackgroundColor(WidgetColors::BUTTON_FOREGROUND);
     }
   }
   TextContainer::paint(clip);
@@ -87,32 +86,19 @@ void Button::paint(const nds::Rectangle & clip)
 
 bool Button::touch(int x, int y)
 {
-  m_pressed = false;
   if (m_bounds.hit(x,y))
   {
-    m_pressed = true;
-    if (m_listener)
+    setSelected(true);
+    if (listener())
     {
-      m_listener->pressed(this);
+      listener()->pressed(this);
     }
+    return true;
   } 
-  return m_pressed;
+  setSelected(false);
+  return false;
 }
 
-void Button::setPressed(bool pressed)
-{
-  m_pressed = pressed;
-}
-
-void Button::setListener(ButtonListener * listener)
-{
-  m_listener = listener;
-}
-
-void Button::removeListener(ButtonListener * listener)
-{
-  m_listener = 0;
-}
 
 void Button::setDecoration(bool decorate)
 {

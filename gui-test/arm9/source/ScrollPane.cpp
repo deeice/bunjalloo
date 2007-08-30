@@ -37,10 +37,21 @@ ScrollPane::ScrollPane()
   m_canScrollUp(false),
   m_canScrollDown(false),
   m_scrollBar(new ScrollBar),
-  m_backgroundColour(nds::Color(31,31,31))
+  m_backgroundColour(nds::Color(31,31,31)),
+  m_stretchChildren(false)
 { 
   m_scrollBar->setScrollable(this);
   m_preferredWidth = nds::Canvas::instance().width()-1;
+}
+
+void ScrollPane::setStretchChildren(bool s)
+{
+  m_stretchChildren = s;
+}
+
+ScrollPane::~ScrollPane()
+{
+  delete m_scrollBar;
 }
 
 void ScrollPane::setLocation(unsigned int x, unsigned int y)
@@ -66,11 +77,10 @@ void ScrollPane::layoutChildren()
 {
   int childWidth = m_bounds.w - SCROLLER_WIDTH;
   std::vector<Component*>::iterator it(m_children.begin());
-  int yPos = (*it)->y();
+  int yPos = m_bounds.y + (*it)->y();
   int lastXPos = m_bounds.x;
-  int lastYPos = 0;
+  int lastYPos = m_bounds.y;
   int rowHeight = 0;
-  int i = 0;
   for (; it != m_children.end(); ++it)
   {
     Component * c(*it);
@@ -91,8 +101,14 @@ void ScrollPane::layoutChildren()
       yPos += r.h+MIN_PADDING;
       rowHeight = r.h;
     }
-    i++;
-    c->setSize(min(childWidth, r.w), r.h);
+    //c->setSize(min(childWidth, r.w), r.h);
+    if (childWidth <= r.w)
+      c->setSize(childWidth, r.h);
+    else if (m_stretchChildren)
+      c->setSize(childWidth, r.h);
+    else
+      c->setSize(r.w, r.h);
+    
     lastXPos = x()+r.x+c->width()+MIN_PADDING;
   }
 }

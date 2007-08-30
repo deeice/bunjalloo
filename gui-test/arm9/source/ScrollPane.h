@@ -29,6 +29,7 @@ class ScrollPane: public Component
     static void setPopup(Component * popup);
     static void removePopup(Component * popup);
     ScrollPane();
+    ~ScrollPane();
     void setSize(unsigned int w, unsigned int h);
     void setLocation(unsigned int x, unsigned int y);
     void setScrollIncrement(int scrollIncrement);
@@ -54,7 +55,7 @@ class ScrollPane: public Component
 
     void setBackgroundColor(unsigned short color);
 
-
+    void setStretchChildren(bool s=true);
 
   private:
     static Component * s_popup;
@@ -64,6 +65,7 @@ class ScrollPane: public Component
     bool m_canScrollDown;
     ScrollBar * m_scrollBar;
     unsigned short m_backgroundColour;
+    bool m_stretchChildren;
 
     void layoutChildren();
     void calculateScrollBar();

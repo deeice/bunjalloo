@@ -43,8 +43,8 @@ void TextContainer::setSize(unsigned int w, unsigned int h)
 
   if ((int)w < (m_preferredWidth+BORDER_WIDTH))
   {
-    m_preferredWidth = w;
-    w -= BORDER_WIDTH;
+    m_preferredWidth = w+BORDER_WIDTH;
+    //w -= BORDER_WIDTH;
   }
   else
   {

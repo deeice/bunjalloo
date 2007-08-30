@@ -19,6 +19,7 @@
 #include "Palette.h"
 #include "ScrollBar.h"
 #include "ScrollPane.h"
+#include "WidgetColors.h"
 using nds::Canvas;
 
 const static int ARROW_HEIGHT(10);
@@ -26,12 +27,14 @@ const static int MIN_HANDLE_SIZE(5);
 const static int HANDLE_NOT_HELD(-1);
 
 // FIXME: have this configurable?
+/*
 const static nds::Color BACKGROUND(21,21,21);
 const static nds::Color BORDER(12,12,12);
 const static nds::Color ARROW(27,27,27);
 const static nds::Color ARROW_HEAD(16,16,16);
 const static nds::Color HANDLE_NOT_HELD_COLOR(25,25,25);
 const static nds::Color HANDLE_HELD_COLOR(31,31,31);
+*/
 
 ScrollBar::ScrollBar():Component(),
   m_total(0),
@@ -131,45 +134,46 @@ void ScrollBar::paint(const nds::Rectangle & clip)
                                         m_bounds.y+1,
                                         m_bounds.w-1,
                                         m_bounds.h-1,
-                                        BACKGROUND);
+                                        WidgetColors::SCROLLBAR_BACKGROUND);
 
-  Canvas::instance().drawRectangle(m_bounds.x,
-                                        m_bounds.y+ARROW_HEIGHT,
-                                        m_bounds.w,
-                                        m_bounds.h-2*ARROW_HEIGHT,
-                                        BORDER);
   // up arrow
   Canvas::instance().fillRectangle(m_bounds.x,
                                         m_bounds.y,
                                         m_bounds.w,
                                         ARROW_HEIGHT,
-                                        ARROW);
+                                        WidgetColors::SCROLLBAR_ARROW);
   // head.
   int headX = m_bounds.x + (m_bounds.w/2);
   int headY = m_bounds.y + (ARROW_HEIGHT/2) - 1;
-  drawUpArrow(headX, headY);
+  drawUpArrow(headX-1, headY);
 
   // down arrow
   Canvas::instance().fillRectangle(m_bounds.x,
                                         m_bounds.bottom()-ARROW_HEIGHT,
                                         m_bounds.w,
                                         ARROW_HEIGHT,
-                                        ARROW);
+                                        WidgetColors::SCROLLBAR_ARROW);
   headY = m_bounds.bottom() - (ARROW_HEIGHT/2);
-  drawDownArrow(headX, headY);
+  drawDownArrow(headX-1, headY);
 
   calculateHandle();
-  unsigned short c(HANDLE_NOT_HELD_COLOR);
+  unsigned short c(WidgetColors::SCROLLBAR_HANDLE_NOT_HELD);
   if (m_handleHeld != HANDLE_NOT_HELD)
   {
-    c = HANDLE_HELD_COLOR;
+    c = WidgetColors::SCROLLBAR_HANDLE_HELD;
   }
 
   Canvas::instance().fillRectangle(m_bounds.x+1,
                                    m_handlePosition,
-                                   m_bounds.w-1,
+                                   m_bounds.w-3,
                                    m_handleSize,
                                    c);
+
+  Canvas::instance().drawRectangle(m_bounds.x,
+                                        m_bounds.y+ARROW_HEIGHT,
+                                        m_bounds.w-2,
+                                        m_bounds.h-1-2*ARROW_HEIGHT,
+                                        WidgetColors::SCROLLBAR_BORDER);
 }
 
 void ScrollBar::calculateHandle()
@@ -204,15 +208,15 @@ int ScrollBar::visibleRange() const
 
 void ScrollBar::drawDownArrow(int x, int y)
 {
-  Canvas::instance().drawPixel(x, y+1, ARROW_HEAD);
-  Canvas::instance().drawPixel(x-1, y, ARROW_HEAD);
-  Canvas::instance().drawPixel(x, y, ARROW_HEAD);
-  Canvas::instance().drawPixel(x+1, y, ARROW_HEAD);
+  Canvas::instance().drawPixel(x, y+1, WidgetColors::SCROLLBAR_ARROW_HEAD);
+  Canvas::instance().drawPixel(x-1, y, WidgetColors::SCROLLBAR_ARROW_HEAD);
+  Canvas::instance().drawPixel(x, y, WidgetColors::SCROLLBAR_ARROW_HEAD);
+  Canvas::instance().drawPixel(x+1, y, WidgetColors::SCROLLBAR_ARROW_HEAD);
 }
 void ScrollBar::drawUpArrow(int x, int y)
 {
-  Canvas::instance().drawPixel(x, y, ARROW_HEAD);
-  Canvas::instance().drawPixel(x-1, y+1, ARROW_HEAD);
-  Canvas::instance().drawPixel(x, y+1, ARROW_HEAD);
-  Canvas::instance().drawPixel(x+1, y+1, ARROW_HEAD);
+  Canvas::instance().drawPixel(x, y, WidgetColors::SCROLLBAR_ARROW_HEAD);
+  Canvas::instance().drawPixel(x-1, y+1, WidgetColors::SCROLLBAR_ARROW_HEAD);
+  Canvas::instance().drawPixel(x, y+1, WidgetColors::SCROLLBAR_ARROW_HEAD);
+  Canvas::instance().drawPixel(x+1, y+1, WidgetColors::SCROLLBAR_ARROW_HEAD);
 }

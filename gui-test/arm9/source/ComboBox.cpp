@@ -4,9 +4,12 @@
 #include "ScrollPane.h"
 #include "ScrollBar.h"
 #include "Button.h"
+#include "WidgetColors.h"
+/*
 static const nds::Color DROP_DOWN_COLOR(28,28,28);
 static const nds::Color COMBOBOX_COLOR(26,26,26);
 static const nds::Color COMBOBOX_COLOR_SELECTED(23,23,23);
+*/
 
 ComboBox::ComboBox():
   m_items(0),
@@ -15,13 +18,16 @@ ComboBox::ComboBox():
   m_button(new Button(string2unicode("")))
 {
   // implement as a scroll bar + buttons?
-  m_scrollPane->setBackgroundColor(DROP_DOWN_COLOR);
+  m_scrollPane->setBackgroundColor(WidgetColors::COMBOBOX_DROP_DOWN);
   m_button->setDecoration(false);
-  m_button->setBackgroundColor(COMBOBOX_COLOR);
+  m_button->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
 }
 
 ComboBox::~ComboBox()
-{}
+{
+  delete m_scrollPane;
+  delete m_button;
+}
 
 void ComboBox::addItem(const UnicodeString & item)
 {
@@ -34,7 +40,7 @@ void ComboBox::addItem(const UnicodeString & item)
   // need to add callbacks to button so that the combobox is updated.
   b->setSize(m_bounds.w, m_bounds.h);
   b->setDecoration(false);
-  b->setBackgroundColor(DROP_DOWN_COLOR);
+  b->setBackgroundColor(WidgetColors::COMBOBOX_DROP_DOWN);
   m_items++;
   m_scrollPane->add(b);
   m_scrollPane->setTopLevel(false);
@@ -57,9 +63,9 @@ bool ComboBox::touch(int x, int y)
   {
     m_open = not m_open;
     if (not m_open)
-      m_button->setBackgroundColor(COMBOBOX_COLOR);
+      m_button->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
     else
-      m_button->setBackgroundColor(COMBOBOX_COLOR_SELECTED);
+      m_button->setBackgroundColor(WidgetColors::COMBOBOX_SELECTED);
 
     return true;
   }
@@ -69,7 +75,7 @@ bool ComboBox::touch(int x, int y)
     return true;
   }
   m_open = false;
-  m_button->setBackgroundColor(COMBOBOX_COLOR);
+  m_button->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
   return true;
 }
 
@@ -82,7 +88,7 @@ void ComboBox::setLocation(unsigned int x, unsigned int y)
 void ComboBox::setSize(unsigned int w, unsigned int h)
 {
   Component::setSize(w, h);
-  m_button->setSize(w, h);
+  m_button->setSize(w-4, h);
   
   m_scrollPane->setSize(m_bounds.w, m_scrollPane->preferredSize().h);
   m_preferredHeight = m_button->preferredSize().h;
@@ -108,18 +114,20 @@ void ComboBox::paint(const nds::Rectangle & clip)
     ScrollPane::removePopup(m_scrollPane);
   }
   // draw the little drop down box thing.
-  int headX = m_bounds.right() - 4;
+  int headX = m_bounds.right() - 3;
   int headY = m_bounds.top() + m_bounds.h/2-1;
   if (down)
     ScrollBar::drawDownArrow(headX, headY);
   else
     ScrollBar::drawUpArrow(headX, headY);
+  nds::Canvas::instance().verticalLine(headX-3, m_bounds.top(), m_bounds.h, WidgetColors::BUTTON_SHADOW);
 }
 
-void ComboBox::pressed(Button * pressed)
+void ComboBox::pressed(ButtonI * pressed)
 {
-  m_button->setText(pressed->text());
-  pressed->setPressed(false);
+  Button * button = (Button*)pressed;
+  m_button->setText(button->text());
+  button->setSelected(false);
   m_open = false;
-  m_button->setBackgroundColor(COMBOBOX_COLOR);
+  m_button->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
 }

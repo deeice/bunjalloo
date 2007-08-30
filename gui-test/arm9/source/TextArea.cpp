@@ -55,6 +55,7 @@ TextArea::TextArea(Font * font) :
   m_document.clear();
   m_preferredHeight = m_font->height();
   m_preferredWidth = Canvas::instance().width();
+  m_bounds.w = Canvas::instance().width();
 }
 
 static void deleteLink(Link * link)
@@ -70,7 +71,7 @@ void TextArea::removeClickables()
 
 void TextArea::setFont(Font * font)
 {
-  delete m_font;
+  //delete m_font;
   m_font = font;
 }
 
@@ -129,6 +130,7 @@ void TextArea::clearText()
 {
   m_document.clear();
   m_appendPosition = 0;
+  m_preferredWidth = -1;
   m_preferredHeight = m_font->height();
 }
 
@@ -157,6 +159,7 @@ void TextArea::appendText(const UnicodeString & unicodeString)
       m_appendPosition = 0;
       m_preferredHeight += m_font->height();
     }
+    m_preferredWidth += size;
     m_document += word;
     m_appendPosition += size;
     advanceWord(unicodeString, word.length(), currPosition, it);
@@ -174,6 +177,15 @@ void TextArea::setSize(unsigned int w, unsigned int h)
       appendText(tmp);
     if (m_preferredHeight == 0)
       m_preferredHeight = m_font->height();
+    int wInt = static_cast<int>(w);
+    /*printf("uint: %d int: %d val: %d, %s %s\n", w, wInt, m_preferredWidth, (w <= m_preferredWidth)?"ui is less":"ui is more",
+        (wInt<=m_preferredWidth)?"int is less":"int is more");*/
+    if ( m_preferredWidth < 0 or (wInt <= m_preferredWidth)) {
+      m_preferredWidth = w;
+    }
+    else {
+      m_preferredWidth += 1;
+    }
   } else {
     Component::setSize(w, h);
   }
@@ -415,7 +427,8 @@ void TextArea::setPalette(const char * data, unsigned int size)
 
 TextArea::~TextArea()
 {
-  delete m_font;
+  //delete m_font;
+  delete [] m_basePalette;
   delete [] m_palette;
 }
 

@@ -25,6 +25,9 @@
 #include "TextField.h"
 #include "Button.h"
 #include "ComboBox.h"
+#include "RadioButton.h"
+#include "ButtonGroup.h"
+#include "CheckBox.h"
 
 extern const char _binary_test_map_bin_start[];
 
@@ -43,6 +46,7 @@ int main(int argc, char * argv[])
   subPane->setTopLevel(false);
   subPane->setSize(Canvas::instance().width(),Canvas::instance().height());
   subPane->setScrollIncrement(t2->font().height());
+  subPane->setStretchChildren(true);
   ComboBox * combo = new ComboBox();
   combo->setSize(60, 18);
   ComboBox * combo2 = new ComboBox();
@@ -84,6 +88,25 @@ int main(int argc, char * argv[])
   tf1->setSize(120, 18);
   combo2->addItem(str);
 
+  TextArea * rbLabel = TextAreaFactory::create();
+  shw = "Radio button label.";
+  str = string2unicode(shw);
+  rbLabel->appendText(str);
+
+  TextArea * cbLabel = TextAreaFactory::create();
+  shw = "CheckBox label.";
+  str = string2unicode(shw);
+  cbLabel->appendText(str);
+
+  RadioButton * rb = new RadioButton();
+  RadioButton * rb2 = new RadioButton();
+  RadioButton * rb3 = new RadioButton();
+  CheckBox * cb = new CheckBox();
+  ButtonGroup bg;
+  bg.add(rb);
+  bg.add(rb2);
+  bg.add(rb3);
+
   ScrollPane scrollPane;
   scrollPane.setTopLevel();
   scrollPane.add(t);
@@ -93,6 +116,12 @@ int main(int argc, char * argv[])
   scrollPane.add(tf1);
   scrollPane.add(b4);
   scrollPane.add(combo2);
+  scrollPane.add(rb);
+  scrollPane.add(rb2);
+  scrollPane.add(rb3);
+  scrollPane.add(rbLabel);
+  scrollPane.add(cb);
+  scrollPane.add(cbLabel);
   scrollPane.add(subPane);
   scrollPane.add(combo);
   scrollPane.add(b5);
@@ -121,6 +150,8 @@ int main(int argc, char * argv[])
       scrollPane.up();
       needsPainting = true;
     }
+    if (keys & KEY_X)
+      break;
     if (keys & KEY_DOWN) 
     {
       scrollPane.down();

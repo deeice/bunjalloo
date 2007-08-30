@@ -141,7 +141,7 @@ Font::Font(const std::string & fileName):
 Font::~Font()
 {
   for_each(m_range.begin(), m_range.end(), Range::remove);
-  delete [] m_glyphData;
+  //delete [] m_glyphData;
   delete [] m_glyphSize;
   delete [] m_glyphPosition;
 }

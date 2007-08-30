@@ -6,7 +6,8 @@
 
 class ScrollPane;
 class Button;
-class ComboBox: public Component, ButtonListener
+class ComboBox: public Component, 
+                private ButtonListener
 {
   public:
     ComboBox();
@@ -17,7 +18,7 @@ class ComboBox: public Component, ButtonListener
     virtual void setLocation(unsigned int x, unsigned int y);
     void setSize(unsigned int w, unsigned int h);
 
-    void pressed(Button * button);
+    void pressed(ButtonI * button);
 
   private:
     int m_items;

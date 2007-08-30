@@ -24,7 +24,8 @@
 
 TextArea * TextAreaFactory::create()
 {
-  TextArea * t = new TextArea(new Font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start));
+  static Font * font(new Font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start));
+  TextArea * t = new TextArea(font);
   t->setPalette((const char*)_binary_vera_pal_bin_start, 32);
   return t;
 }
