@@ -41,8 +41,8 @@ ScrollBar::ScrollBar():Component(),
   m_value(0),
   m_handleSize(0),
   m_handlePosition(0),
-  m_scrollPane(0),
-  m_handleHeld(HANDLE_NOT_HELD)
+  m_handleHeld(HANDLE_NOT_HELD),
+  m_scrollPane(0)
 {
 }
 

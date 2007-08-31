@@ -29,17 +29,18 @@ class FormControl;
 class TextArea : public Component
 {
   public:
-    /** Constructor.*/
+    /** Sets the initial state of the TextArea.
+     * @param font the font to use. This is not deleted.
+     */
     TextArea(Font * font);
-    /** Destructor.*/
+
+    /** Destructor. Deletes the palette data. */
     ~TextArea();
 
     /** Set the palette.
      * @param fileName the name of the font palette.
      */
     void setPalette(const std::string & fileName);
-
-    virtual void paint(const nds::Rectangle & clip);
 
     /** Set the palette.
      * @param data the palette data
@@ -54,12 +55,6 @@ class TextArea : public Component
      */
     void setCursor(int x, int y);
 
-    /** Print encoded text using the current encoding.
-     * @param data the encoded text data.
-     * @param amount the number of bytes of encoded data.
-     */
-    void print(const char * data, int amount);
-
     /** Append text to the text area.
      * @param unicodeString the text to append.
      */
@@ -71,14 +66,7 @@ class TextArea : public Component
 
     /** Get the text that is held internally.
      */
-    UnicodeString & text();
-
-
-    /** Print a unicode string starting at the current cursor position. The
-     * values are not decoded from the string.
-     * @param unicodeString a string containing unicode values.
-     */
-    //void printu(const UnicodeString & unicodeString);
+    const UnicodeString & document() const;
 
     /** Get the current font.
      * @return the current font.
@@ -90,11 +78,6 @@ class TextArea : public Component
      * @param font the font to use from now on.
      */
     void setFont(Font * font);
-
-    /** Set the current encoding. @see print().
-     * @param encoding the encoding to use for all encoded text.
-     */
-    void setEncoding(const std::string & encoding="utf-8");
 
     /** Set the text colour. Since the text is antialiased, this creates a coloured
      * scale palette based on the original grey-scale palette.
@@ -108,15 +91,14 @@ class TextArea : public Component
      */
     void setBackgroundColor(unsigned short color);
 
+    /** Return the text colour to the default, initial value. */
     void setDefaultColor();
-    void clear();
 
-    virtual void setSize(unsigned int w, unsigned int h);
-
+    /** Get the size of the text in pixels using the current font.
+     * @param unicodeString the string to check the size of.
+     * @return the size of the string in pixels.
+     */
     int textSize(const UnicodeString & unicodeString) const;
-
-    // debugging hack...
-    std::string asString() const;
 
     /** Get the editable status.
      * @return true if we can edit, false otherwise.
@@ -128,42 +110,38 @@ class TextArea : public Component
      */
     void setEditable(bool edit=true);
 
-    bool touch(int x, int y);
+    /** A hack for debugging.
+     * @return the current document converted to a char string.
+     */
+    std::string asString() const;
+
+    // Component method reimplementation.
+    virtual void setSize(unsigned int w, unsigned int h);
+    virtual void paint(const nds::Rectangle & clip);
 
   private:
-    Font * m_font;
-    unsigned short * m_palette;
-    unsigned short * m_basePalette;
-    int m_paletteLength;
-    std::string m_encoding;
-    int m_startLine;
-    bool m_foundPosition;
-    bool m_parseNewline;
     enum ControlState {
       TEXT,
       LINK,
       FORM
     };
-    ControlState m_currentControl;
-    UnicodeString m_document;
-    UnicodeString m_textLine;
+    typedef std::list<Link*> LinkList;
 
-
+    Font * m_font;
+    unsigned short * m_palette;
+    unsigned short * m_basePalette;
+    int m_paletteLength;
+    bool m_parseNewline;
     int m_cursorx;
     int m_cursory;
     int m_initialCursorx;
-    int m_initialCursory;
-    typedef std::list<Link*> LinkList;
-    LinkList m_links;
-
     unsigned short m_bgCol;
     unsigned short m_fgCol;
-
     //! Position that the current line is at.
     int m_appendPosition;
+    UnicodeString m_document;
 
-    //! the edit flag.
-    bool m_editable;
+    //LinkList m_links;
 
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
     void incrLine();

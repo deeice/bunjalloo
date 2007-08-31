@@ -15,23 +15,34 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "ndspp.h"
-#include "libnds.h"
-#include "TextAreaFactory.h"
-#include "TextArea.h"
-#include "EditableTextArea.h"
-#include "Font.h"
-#include "vera.h"
+#include "Keyboard.h"
+#include "TextEntryI.h"
 
-TextArea * TextAreaFactory::create(bool editable)
+static const char * s_basicKeys[] = { "1234567890", "qweryuiop", "asdfghijkl","zxcvbnm,.-" };
+static const char * s_shiftedKeys[] = { "!\"#$%&/()=?*", "QWERYUIOP", "ASDFGHIJKL","ZXCVBNM;:_" };
+static const char * s_altKeys[] = { "^+[]{}<>'¡¿\\|@", "QWERYUIOP", "ASDFGHIJKL","ZXCVBNM;:_" };
+
+Keyboard::Keyboard()
 {
-  static Font * font(new Font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start));
-
-  TextArea * t;
-  if (editable)
-    t = new EditableTextArea(font);
-  else
-    t = new TextArea(font);
-  t->setPalette((const char*)_binary_vera_pal_bin_start, 32);
-  return t;
 }
+
+void Keyboard::handleInput()
+{
+}
+
+UnicodeString Keyboard::result() const
+{
+  return m_result;
+}
+
+void Keyboard::paint(const nds::Rectangle & clip)
+{
+}
+
+void Keyboard::editText(TextEntryI * entry)
+{
+  printf("Edit the text: %s\n", unicode2string(entry->text()).c_str());
+}
+
+
+

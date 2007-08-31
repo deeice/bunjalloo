@@ -15,37 +15,41 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef Button_h_seen
-#define Button_h_seen
+#ifndef Keyboard_h_seen
+#define Keyboard_h_seen
 
-#include "TextContainer.h"
-#include "ButtonI.h"
+#include "Component.h"
+#include "TextListener.h"
 #include "UnicodeString.h"
 
+class Button;
 class TextArea;
-class ButtonListener;
-
-/** A press-style button with a textual label. */
-class Button: public TextContainer, public ButtonI
+/** Show a virtual keyboard. Accepts touch input and keypad input. */
+class Keyboard : public Component, public TextListener
 {
   public:
-    /** Creates a new empty Button. */
-    Button();
-    /** Creates a new Button with the given label. 
-     * @param label the text label that is to be shown.
-     */ 
-    Button(const UnicodeString & label);
 
-    /** Set whether to paint decoration - the shadow and highlight, plus
-     * pressed/depressed colours - or not.
-     * @param decorate flag that is used to set decoration.
+    /** Construct a keyboard for the given TextArea.
+     * @param textArea the thing that draws text.
      */
-    void setDecoration(bool decorate=true);
+    Keyboard();
+
+    /** Call this each frame to handle keyboard input.*/
+    void handleInput();
+
+    /** Get the result of the last string entered (after Enter is "pressed").
+     * @return the last string entered.
+     */
+    UnicodeString result() const;
 
     virtual void paint(const nds::Rectangle & clip);
-    virtual bool touch(int x, int y);
+    virtual void editText(TextEntryI * entry);
 
   private:
-    bool m_decoration;
+    int m_shift;
+    TextArea * m_textArea;
+    std::vector<Button*> m_keys;
+    UnicodeString m_result;
+
 };
 #endif

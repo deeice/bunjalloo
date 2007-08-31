@@ -229,6 +229,10 @@ void ScrollPane::paint(const nds::Rectangle & clip)
   if (m_topLevel) {
     nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
   }
+  if (not visible()) {
+    return;
+  }
+
 
   if (s_popup != 0 and this == s_popup)
   {
@@ -283,6 +287,8 @@ bool ScrollPane::topLevel() const
 
 bool ScrollPane::touch(int x, int y)
 {
+  if (not visible())
+    return false;
   if (m_topLevel and s_popup and s_popup->bounds().hit(x, y))
   {
     // do not process other events if we hit the popup menu.

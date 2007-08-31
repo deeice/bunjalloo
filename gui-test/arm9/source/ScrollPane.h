@@ -22,40 +22,81 @@
 
 class ScrollBar;
 
+/** A scrollable view of many Components. The view may be larger than the
+ * screen and this class handles the positioning of all the child widgets. */
 class ScrollPane: public Component
 {
 
   public:
+    /** Set a pop up menu that will override the display and input handling.
+     * @param popup the menu item to show.
+     */
     static void setPopup(Component * popup);
+
+    /** Remove a pop up menu.
+     * @param popup the menu item to show, if the current menu is not this one,
+     * then nothing is done.
+     */
     static void removePopup(Component * popup);
+    
+    /** Initialise the ScrollPane.*/
     ScrollPane();
+    
+    /** Delete the ScrollPanes child components.*/
     ~ScrollPane();
-    void setSize(unsigned int w, unsigned int h);
-    void setLocation(unsigned int x, unsigned int y);
+
+    /** Set the incemental amount that each up/down press moves.
+     * @param scrollIncrement the amount to scroll in pixels.
+     */
     void setScrollIncrement(int scrollIncrement);
+
+    /** Get the current scroll increment.
+     * @return the scroll increment in pixels.
+     */
     int scrollIncrement() const;
 
+    /** Scroll the view up one amount.  */
     void up();
+    /** Scroll the view down one amount.  */
     void down();
+    /** Scroll the view up one block (half screen/bounds size).  */
     void upBlock();
+    /** Scroll the view down one block (half screen/bounds size).  */
     void downBlock();
+
+    /** Set if the child layout should be stretched horizontally to fill the space available.
+     * @param s the flag to use for setting the stretchiness.
+     */
+    void setStretchChildren(bool s=true);
 
     /** Scroll to a "percentage" (0 = 0%, 256 = 100%) of the screen.
      * @param value the percentage of the screen to scroll to, represented in fixed point.
      */
     void scrollToPercent(int value);
 
-    /** Set this to be the top level scroll pane. */
+    /** Set this to be the top level scroll pane. The top level pane is special
+     * as its scroll bar does not fill the whole height, but is shown only on
+     * the bottom screen. The top level scroller also handles the popup menu.
+     * @param topLevel true if this is the top level scroll pane. false
+     * otherwise. ScrollPanes are initialised to not be the top level one.
+     */
     void setTopLevel(bool topLevel=true);
+
+    /** Get the current top level state.
+     * @return true if this is the top level ScrollPane.
+     */
     bool topLevel() const;
 
-    void paint(const nds::Rectangle & clip);
-
-    bool touch(int x, int y);
-
+    /** Set the background fill colour shown between child Components.
+     * @param color the color to use.
+     */
     void setBackgroundColor(unsigned short color);
 
-    void setStretchChildren(bool s=true);
+    // From Component
+    virtual void paint(const nds::Rectangle & clip);
+    virtual bool touch(int x, int y);
+    virtual void setSize(unsigned int w, unsigned int h);
+    virtual void setLocation(unsigned int x, unsigned int y);
 
   private:
     static Component * s_popup;

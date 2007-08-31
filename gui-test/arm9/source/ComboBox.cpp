@@ -13,27 +13,26 @@ static const nds::Color COMBOBOX_COLOR_SELECTED(23,23,23);
 
 ComboBox::ComboBox():
   m_items(0),
-  m_open(false),
-  m_scrollPane(new ScrollPane),
-  m_button(new Button(string2unicode("")))
+  m_open(false)
 {
-  // implement as a scroll bar + buttons?
-  m_scrollPane->setBackgroundColor(WidgetColors::COMBOBOX_DROP_DOWN);
-  m_button->setDecoration(false);
-  m_button->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
-}
-
-ComboBox::~ComboBox()
-{
-  delete m_scrollPane;
-  delete m_button;
+  // implemented as a scroll bar + buttons.
+  add(new ScrollPane);
+  add(new Button);
+  scrollPane()->setBackgroundColor(WidgetColors::COMBOBOX_DROP_DOWN);
+  button()->setDecoration(false);
+  button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
 }
 
 void ComboBox::addItem(const UnicodeString & item)
 {
-  if (m_button->text().empty())
+  if (button()->text().empty())
   {
-    m_button->setText(item);
+    button()->setText(item);
+    if (m_bounds.w == 0)
+    {
+      m_bounds.w = button()->width();
+      m_bounds.h = button()->height();
+    }
   }
   Button * b = new Button(item);
   b->setListener(this);
@@ -42,16 +41,16 @@ void ComboBox::addItem(const UnicodeString & item)
   b->setDecoration(false);
   b->setBackgroundColor(WidgetColors::COMBOBOX_DROP_DOWN);
   m_items++;
-  m_scrollPane->add(b);
-  m_scrollPane->setTopLevel(false);
+  scrollPane()->add(b);
+  scrollPane()->setTopLevel(false);
   int idealHeight = (m_bounds.h+2)*m_items;
   if (idealHeight > (192/2))
   {
     idealHeight = 192/2;
   }
 
-  m_scrollPane->setSize(m_bounds.w, idealHeight);
-  m_scrollPane->setScrollIncrement(m_bounds.h);
+  scrollPane()->setSize(m_bounds.w, idealHeight);
+  scrollPane()->setScrollIncrement(m_bounds.h);
 }
 
 bool ComboBox::touch(int x, int y)
@@ -63,55 +62,58 @@ bool ComboBox::touch(int x, int y)
   {
     m_open = not m_open;
     if (not m_open)
-      m_button->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
+      button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
     else
-      m_button->setBackgroundColor(WidgetColors::COMBOBOX_SELECTED);
+      button()->setBackgroundColor(WidgetColors::COMBOBOX_SELECTED);
 
     return true;
   }
-  if (m_open and m_scrollPane->touch(x, y))
+  if (m_open and scrollPane()->touch(x, y))
   {
-    //m_button->setPressed(true);
+    //button()->setPressed(true);
     return true;
   }
   m_open = false;
-  m_button->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
+  button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
   return true;
 }
 
 void ComboBox::setLocation(unsigned int x, unsigned int y)
 {
   Component::setLocation(x, y);
-  m_button->setLocation(x, y);
+  button()->setLocation(x, y);
 }
 
 void ComboBox::setSize(unsigned int w, unsigned int h)
 {
   Component::setSize(w, h);
-  m_button->setSize(w-4, h);
+  button()->setSize(w-4, h);
   
-  m_scrollPane->setSize(m_bounds.w, m_scrollPane->preferredSize().h);
-  m_preferredHeight = m_button->preferredSize().h;
+  scrollPane()->setSize(m_bounds.w, scrollPane()->preferredSize().h);
+  m_preferredHeight = button()->preferredSize().h;
 }
 
 void ComboBox::paint(const nds::Rectangle & clip)
 {
+  if (not m_items)
+    return;
+
   // TODO: add the drop down triangle.
-  m_button->paint(clip);
+  button()->paint(clip);
   bool down(true);
   if (m_open)
   {
-    m_scrollPane->setLocation(m_bounds.x, m_bounds.bottom());
-    if (m_scrollPane->bounds().bottom() > nds::Canvas::instance().height())
+    scrollPane()->setLocation(m_bounds.x, m_bounds.bottom());
+    if (scrollPane()->bounds().bottom() > nds::Canvas::instance().height())
     {
-      m_scrollPane->setLocation(m_bounds.x, m_bounds.top() - m_scrollPane->height());
+      scrollPane()->setLocation(m_bounds.x, m_bounds.top() - scrollPane()->height());
       down = false;
     }
-    ScrollPane::setPopup(m_scrollPane);
+    ScrollPane::setPopup(scrollPane());
   }
   else
   {
-    ScrollPane::removePopup(m_scrollPane);
+    ScrollPane::removePopup(scrollPane());
   }
   // draw the little drop down box thing.
   int headX = m_bounds.right() - 3;
@@ -126,8 +128,8 @@ void ComboBox::paint(const nds::Rectangle & clip)
 void ComboBox::pressed(ButtonI * pressed)
 {
   Button * button = (Button*)pressed;
-  m_button->setText(button->text());
+  this->button()->setText(button->text());
   button->setSelected(false);
   m_open = false;
-  m_button->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
+  this->button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
 }

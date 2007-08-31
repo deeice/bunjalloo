@@ -32,7 +32,7 @@ using namespace std;
 const static nds::Color EDGE(20,20,20);
 const static nds::Color SHADOW(28,28,28);
 
-static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
+static const unsigned short intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
 static const UnicodeString s_delimiters(intDelimiters,6);
 static const int INDENT(16);
 
@@ -41,15 +41,10 @@ TextArea::TextArea(Font * font) :
   m_palette(0),
   m_basePalette(0),
   m_paletteLength(0),
-  m_encoding("utf-8"),
-  m_startLine(0),
-  m_foundPosition(false),
   m_parseNewline(true),
-  m_currentControl(TEXT),
   m_bgCol(0),
   m_fgCol(0),
-  m_appendPosition(0),
-  m_editable(false)
+  m_appendPosition(0)
 {
   setFont(font);
   m_document.clear();
@@ -58,6 +53,7 @@ TextArea::TextArea(Font * font) :
   m_bounds.w = Canvas::instance().width();
 }
 
+/*
 static void deleteLink(Link * link)
 {
   delete link;
@@ -68,6 +64,7 @@ void TextArea::removeClickables()
   for_each(m_links.begin(), m_links.end(), deleteLink);
   m_links.clear();
 }
+*/
 
 void TextArea::setFont(Font * font)
 {
@@ -95,35 +92,9 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
   }
 }
 
-UnicodeString & TextArea::text()
+const UnicodeString & TextArea::document() const
 {
   return m_document;
-}
-
-bool TextArea::isEditable() const
-{
-  return m_editable;
-}
-void TextArea::setEditable(bool edit)
-{
-  m_editable = edit;
-}
-
-bool TextArea::touch(int x, int y)
-{
-  if (not m_editable)
-  {
-    return Component::touch(x, y);
-  }
-  else
-  {
-    // touch...
-    if (m_bounds.hit(x, y))
-    {
-      return true;
-    }
-    return false;
-  }
 }
 
 void TextArea::clearText()
@@ -196,7 +167,6 @@ void TextArea::setCursor(int x, int y)
   m_cursorx = x;
   m_cursory = y;
   m_initialCursorx = x;
-  m_initialCursory = y;
 }
 
 void TextArea::incrLine()
@@ -385,10 +355,12 @@ void TextArea::setTextColor(unsigned short color)
   }
 }
 
+/*
 void TextArea::clear()
 {
   Canvas::instance().fillRectangle(x(),y(),width(), height(), m_bgCol);
 }
+*/
 
 void TextArea::setPalette(const std::string & fileName)
 {
@@ -432,11 +404,6 @@ TextArea::~TextArea()
   delete [] m_palette;
 }
 
-void TextArea::setEncoding(const std::string & encoding)
-{
-  m_encoding = encoding;
-}
-
 /** Paint the text area. */
 void TextArea::paint(const nds::Rectangle & clip)
 {
@@ -449,12 +416,6 @@ void TextArea::paint(const nds::Rectangle & clip)
   // then theres clip-width which is where it should draw to.
   setCursor(m_bounds.x, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
-  if (m_editable) {
-    Canvas::instance().horizontalLine(clip.x, clip.top(), clip.w, EDGE);
-    Canvas::instance().verticalLine(clip.left(), clip.top(), clip.h, EDGE);
-    Canvas::instance().horizontalLine(clip.x, clip.bottom()-1, clip.w, SHADOW);
-    Canvas::instance().verticalLine(clip.right(), clip.top(), clip.h, SHADOW);
-  }
   printu(m_document);
 }
 

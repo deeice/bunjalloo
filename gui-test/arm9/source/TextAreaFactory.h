@@ -19,6 +19,7 @@
 #define TextAreaFactory_h_seen
 
 class TextArea;
+/** A factory that generates TextArea instances. */
 class TextAreaFactory
 {
 
@@ -26,7 +27,7 @@ class TextAreaFactory
     /** The user is responsible for calling delete on each TextArea created.
      * @return a new TextArea.
      */
-    static TextArea * create();
+    static TextArea * create(bool editable=false);
 
   private:
     TextAreaFactory();

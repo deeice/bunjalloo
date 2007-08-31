@@ -6,23 +6,22 @@ static const int BORDER_WIDTH(5);
 static const int BORDER_HEIGHT(5);
 
 TextContainer::TextContainer(const UnicodeString & text) :
-  Component(),
-  m_textArea(TextAreaFactory::create())
+  Component()
 {
-  m_textArea->setSize(m_textArea->textSize(text), m_textArea->font().height());
-  nds::Rectangle textSize = m_textArea->preferredSize();
+  add(TextAreaFactory::create());
+
+  textArea()->setSize(textArea()->textSize(text), textArea()->font().height());
+  nds::Rectangle textSize = textArea()->preferredSize();
   m_preferredWidth = textSize.w+BORDER_WIDTH;
   m_preferredHeight = textSize.h+BORDER_HEIGHT;
   setText(text);
 }
 
 
-TextContainer::TextContainer()
-{}
-
-TextContainer::~TextContainer()
+TextContainer::TextContainer():
+  Component()
 {
-  delete m_textArea;
+  add(TextAreaFactory::create());
 }
 
 void TextContainer::setText(const UnicodeString & text)
@@ -49,45 +48,52 @@ void TextContainer::setSize(unsigned int w, unsigned int h)
   else
   {
   }
-  m_textArea->setSize(w, h);
-  m_preferredHeight = m_textArea->preferredSize().h+BORDER_HEIGHT;
+  textArea()->setSize(w, h);
+  m_preferredHeight = textArea()->preferredSize().h+BORDER_HEIGHT;
   layout();
 }
 
 void TextContainer::layout()
 {
+  if (textArea()->width() == 0)
+  {
+    textArea()->setSize(textArea()->textSize(m_text), textArea()->font().height());
+  }
   UnicodeString appendText;
   appendText.clear();
   UnicodeString::const_iterator it(m_text.begin());
   int size(0);
-  for (; it != m_text.end() and size < m_textArea->width(); ++it)
+  for (; it != m_text.end() and size < textArea()->width(); ++it)
   {
     Font::Glyph g;
-    m_textArea->font().glyph(*it, g);
-    if ((size + g.width) < m_textArea->width()) {
+    textArea()->font().glyph(*it, g);
+    if ((size + g.width) < textArea()->width()) {
       size += g.width;
       appendText += *it;
     } else {
       break;
     }
   }
-  m_textArea->clearText();
-  m_textArea->appendText(appendText);
-  if (size < m_bounds.w)
+  textArea()->clearText();
+  textArea()->appendText(appendText);
+  if (width() == 0)
   {
     m_bounds.w = size + BORDER_WIDTH;
+    m_preferredWidth = m_bounds.w;
+    m_bounds.h = textArea()->font().height() + BORDER_HEIGHT;
+    m_preferredHeight = m_bounds.h;
   }
 }
 
 void TextContainer::paint(const nds::Rectangle & clip)
 {
-  m_textArea->setLocation(m_bounds.x+BORDER_WIDTH/2, m_bounds.y+BORDER_HEIGHT/2);
-  m_textArea->paint(clip);
+  textArea()->setLocation(m_bounds.x+BORDER_WIDTH/2, m_bounds.y+BORDER_HEIGHT/2);
+  textArea()->paint(clip);
 }
 
 void TextContainer::setBackgroundColor(unsigned short color)
 {
-  m_textArea->setBackgroundColor(color);
+  textArea()->setBackgroundColor(color);
 }
 
 const UnicodeString & TextContainer::text() const

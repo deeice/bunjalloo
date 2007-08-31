@@ -2,10 +2,12 @@
 #include "TextAreaFactory.h"
 #include "TextArea.h"
 #include "TextField.h"
+#include "TextListener.h"
 #include "Palette.h"
 
 const static nds::Color EDGE(20,20,20);
 const static nds::Color SHADOW(28,28,28);
+// UnicodeString s = L"\u1234";
 
 TextField::TextField(const UnicodeString & text) :
   TextContainer(text)
@@ -26,7 +28,10 @@ bool TextField::touch(int x, int y)
 {
   if (m_bounds.hit(x, y))
   {
-    setText(string2unicode("I've been hit!"));
+    if (listener())
+    {
+      listener()->editText(this);
+    }
     return true;
   }
   return false;

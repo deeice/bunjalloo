@@ -28,7 +28,8 @@ static void deleteChild(Component * child)
 Component::Component() : 
   m_bounds(),
   m_preferredWidth(NO_PREFERRED_SIZE),
-  m_preferredHeight(NO_PREFERRED_SIZE) 
+  m_preferredHeight(NO_PREFERRED_SIZE),
+  m_visible(true)
 {
   m_bounds.x = 0;
   m_bounds.y = 0;
@@ -63,15 +64,6 @@ void Component::add(Component * child)
 bool Component::touch(int x, int y)
 {
   return true;
-}
-
-void Component::paint(const nds::Rectangle & area)
-{
-  std::vector<Component*>::iterator it(m_children.begin());
-  for (; it != m_children.end(); ++it)
-  {
-    (*it)->paint(area);
-  }
 }
 
 void Component::setSize(unsigned int w, unsigned int h)
