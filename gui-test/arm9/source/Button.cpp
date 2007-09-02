@@ -28,12 +28,6 @@
 using nds::Canvas;
 using nds::Color;
 using nds::Rectangle;
-/*
-const static Color BACKGROUND(27,27,27);
-const static Color PRESSED(25,25,25);
-const static Color EDGE(21,21,21);
-const static Color SHINE(30,30,30);
-*/
 
 Button::Button() :
   TextContainer(),
@@ -76,7 +70,7 @@ void Button::paint(const nds::Rectangle & clip)
       Canvas::instance().horizontalLine(m_bounds.x, m_bounds.top(), m_bounds.w, hilight);
     }
     Canvas::instance().verticalLine(m_bounds.left(), m_bounds.top(), m_bounds.h, hilight);
-    if (clip.hit(m_bounds.x, m_bounds.bottom()))
+    if (clip.hit(m_bounds.x, m_bounds.bottom()-1))
     {
       Canvas::instance().horizontalLine(m_bounds.x, m_bounds.bottom()-1, m_bounds.w, lowlight);
     }
@@ -95,7 +89,10 @@ bool Button::touch(int x, int y)
     }
     return true;
   } 
-  setSelected(false);
+  else if (listener() == 0)
+  {
+    setSelected(false);
+  }
   return false;
 }
 

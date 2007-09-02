@@ -22,7 +22,7 @@
 /** This typedef is used to represent unicode strings. Unicode character
  * values are up to 32 bit so an unsigned int is used.
  */
-typedef std::basic_string<unsigned short> UnicodeString;
+typedef std::basic_string<unsigned int> UnicodeString;
 
 /** Convert a unicode string to a regular char string, by "escaping" unicode characters.
  * @param ustr the unicode string to convert.

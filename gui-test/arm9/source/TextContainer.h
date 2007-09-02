@@ -9,6 +9,12 @@ class TextArea;
 class TextContainer: public Component
 {
   public:
+
+    /** The width of the decoration used. */
+    static const int BORDER_WIDTH;
+    /** The height of the decoration used. */
+    static const int BORDER_HEIGHT;
+
     /** Create an empty container.*/
     TextContainer();
     

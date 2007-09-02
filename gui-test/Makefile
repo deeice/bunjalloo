@@ -1,9 +1,10 @@
 .PHONY: all clean docs arm9/source/version.c
 
+headers=$(wildcard arm9/source/*.h)
 target=$(shell basename $(CURDIR))
 export DATADIR:="\"data/$(target)\""
 
-all:  ctags arm9/source/version.c
+all:  tags arm9/source/version.c
 	$(MAKE) -f Makefile.ds
 	$(MAKE) -f Makefile.sdl
 
@@ -14,7 +15,7 @@ clean:
 docs:
 	@-doxygen doxygen.cfg
 
-ctags:
+tags: $(headers)
 	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
 
 arm9/source/version.c:

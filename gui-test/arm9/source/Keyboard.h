@@ -19,37 +19,78 @@
 #define Keyboard_h_seen
 
 #include "Component.h"
+#include "ButtonListener.h"
 #include "TextListener.h"
 #include "UnicodeString.h"
 
 class Button;
 class TextArea;
+class ScrollPane;
 /** Show a virtual keyboard. Accepts touch input and keypad input. */
-class Keyboard : public Component, public TextListener
+class Keyboard : public Component, public TextListener, public ButtonListener
 {
   public:
 
-    /** Construct a keyboard for the given TextArea.
-     * @param textArea the thing that draws text.
-     */
+    /** Construct a keyboard.  */
     Keyboard();
 
     /** Call this each frame to handle keyboard input.*/
-    void handleInput();
+    //void handleInput();
 
     /** Get the result of the last string entered (after Enter is "pressed").
      * @return the last string entered.
      */
     UnicodeString result() const;
 
+    void setTopLevel(Component * topLevel);
+
+    bool tick();
+
+    virtual bool touch(int x, int y);
     virtual void paint(const nds::Rectangle & clip);
     virtual void editText(TextEntryI * entry);
+    virtual void pressed(ButtonI * button);
 
   private:
-    int m_shift;
+    bool m_extra;
+    bool m_shift;
+    bool m_capsLock;
+    int  m_ticks;
+
+    ScrollPane * m_scrollPane;
     TextArea * m_textArea;
-    std::vector<Button*> m_keys;
+    Button * m_shiftKey;
+    Button * m_capsLockKey;
+    // Button * m_tabKey;
+    Button * m_enterKey;
+    Button * m_backspaceKey;
+    // Button * m_deleteKey;
+    Button * m_spaceKey;
+    Button * m_extraKey;
+    enum SpecialKey
+    {
+      SPKY_SHIFT,
+      SPKY_CAPS,
+      SPKY_ENTER,
+      SPKY_BACKSPACE,
+      SPKY_SPACE,
+      SPKY_EXTRA,
+      SPKY_UNKNOWN
+    };
+    SpecialKey buttonToSpecialKey(const ButtonI * button);
+
     UnicodeString m_result;
+    Component * m_topLevel;
+
+    void initUI();
+
+    void createRow(int x, int y, const char * text, int keys);
+    void createSpecialKey(int x, int y, int w, int h,
+                          const UnicodeString & text, Button * button);
+    void updateRow(const char * newText, int keys, int offset);
+    void updateModifierKeys();
+    void updateLayout(const char * text, const char * numbers);
+    void updateTicksForUI(ButtonI * button);
 
 };
 #endif

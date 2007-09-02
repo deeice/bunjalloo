@@ -32,7 +32,7 @@ using namespace std;
 const static nds::Color EDGE(20,20,20);
 const static nds::Color SHADOW(28,28,28);
 
-static const unsigned short intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
+static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
 static const UnicodeString s_delimiters(intDelimiters,6);
 static const int INDENT(16);
 
@@ -155,7 +155,7 @@ void TextArea::setSize(unsigned int w, unsigned int h)
       m_preferredWidth = w;
     }
     else {
-      m_preferredWidth += 1;
+      //m_preferredWidth += 1;
     }
   } else {
     Component::setSize(w, h);

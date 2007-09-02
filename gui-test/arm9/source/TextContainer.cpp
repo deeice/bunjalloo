@@ -2,8 +2,8 @@
 #include "TextArea.h"
 #include "TextContainer.h"
 
-static const int BORDER_WIDTH(5);
-static const int BORDER_HEIGHT(5);
+const int TextContainer::BORDER_WIDTH(5);
+const int TextContainer::BORDER_HEIGHT(5);
 
 TextContainer::TextContainer(const UnicodeString & text) :
   Component()
@@ -100,3 +100,4 @@ const UnicodeString & TextContainer::text() const
 {
   return m_text;
 }
+
