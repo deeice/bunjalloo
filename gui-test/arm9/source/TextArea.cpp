@@ -69,7 +69,6 @@ void TextArea::removeClickables()
 
 void TextArea::setFont(Font * font)
 {
-  //delete m_font;
   m_font = font;
 }
 
@@ -197,7 +196,6 @@ void TextArea::checkLetter(Font::Glyph & g)
 
 const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int currPosition) const
 {
-  // TODO: words that are longer than Canvas::width() break everything.
   UnicodeString word;
   if (m_parseNewline)
   {
@@ -284,39 +282,6 @@ int TextArea::textSize(const UnicodeString & unicodeString) const
   return size;
 }
 
-#if 0
-bool TextArea::doSingleChar(unsigned int value)
-{
-  if (m_palette) {
-    if (value == UTF8::MALFORMED) {
-      value = '?';
-    }
-    Font::Glyph g;
-    m_font->glyph(value, g);
-    if (m_parseNewline and value == NEWLINE) {
-      incrLine();
-    } else if (value != NEWLINE) {
-      checkLetter(g);
-      if (g.data) {
-        printAt(g, m_cursorx, m_cursory);
-      }
-      m_cursorx += g.width;
-    }
-  } else {
-    // could not load the font?
-    Font::Glyph g;
-    m_font->glyph(' ', g);
-    Canvas::instance().fillRectangle(m_cursorx, m_cursory, 
-        g.width, g.height, Color(31,0,0));
-    m_cursorx += g.width;
-  }
-  if (m_cursorx > m_bounds.right())
-  {
-    incrLine();
-  }
-  return (m_cursory > m_bounds.bottom());
-}
-#endif
 bool TextArea::doSingleChar(unsigned int value)
 {
   if (value == UTF8::MALFORMED) {
@@ -385,13 +350,6 @@ void TextArea::setTextColor(unsigned short color)
 
   }
 }
-
-/*
-void TextArea::clear()
-{
-  Canvas::instance().fillRectangle(x(),y(),width(), height(), m_bgCol);
-}
-*/
 
 void TextArea::setPalette(const std::string & fileName)
 {

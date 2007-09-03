@@ -21,8 +21,8 @@
 #include "ScrollBar.h"
 #include <algorithm>
 
-// TODO: make configurable.
 Component * ScrollPane::s_popup(0);
+// TODO: make configurable.
 const static int SCROLLER_WIDTH(6);
 const static int MIN_PADDING(2);
 const static int TOP_LEVEL_SIZE(192);
@@ -41,7 +41,7 @@ ScrollPane::ScrollPane()
   m_stretchChildren(false)
 { 
   m_scrollBar->setScrollable(this);
-  m_preferredWidth = nds::Canvas::instance().width()-1;
+  m_preferredWidth = nds::Canvas::instance().width();
 }
 
 void ScrollPane::setStretchChildren(bool s)
@@ -75,11 +75,9 @@ void ScrollPane::setLocation(unsigned int x, unsigned int y)
 
 void ScrollPane::layoutChildren()
 {
-  int childWidth = m_bounds.w - SCROLLER_WIDTH;
+  int childWidth = m_bounds.w - SCROLLER_WIDTH - 1;
   std::vector<Component*>::iterator it(m_children.begin());
-  //int yPos = m_bounds.top() + (*it)->y();
   int yPos = m_bounds.top();
-
   int lastXPos = m_bounds.x;
   int lastYPos = m_bounds.y;
   int rowHeight = 0;
@@ -103,7 +101,6 @@ void ScrollPane::layoutChildren()
       yPos += r.h+MIN_PADDING;
       rowHeight = r.h;
     }
-    //c->setSize(min(childWidth, r.w), r.h);
     if (childWidth <= r.w)
       c->setSize(childWidth, r.h);
     else if (m_stretchChildren) {

@@ -24,7 +24,7 @@
 #include "Canvas.h"
 #include "TextEntryI.h"
 
-// TODO: use config for this
+// TODO: use config for this?
 // Based on http://en.wikipedia.org/wiki/Image:KB_US-International.svg
 static const char * NUMBERS          = "1234567890-=";
 static const char * NUMBERS_SHIFT    = "!@#$%^&*()_+";
@@ -283,7 +283,6 @@ Keyboard::SpecialKey Keyboard::buttonToSpecialKey(const ButtonI * button)
 
 void Keyboard::pressed(ButtonI * button)
 {
-  // a button press...
   SpecialKey key = buttonToSpecialKey(button);
   switch (key)
   {
@@ -329,7 +328,7 @@ void Keyboard::pressed(ButtonI * button)
       layoutViewer();
       break;
     case SPKY_UNKNOWN:
-      /* anything else */
+      // anything else
       updateTicksForUI(button);
       appendText(((Button*)button)->text());
       m_shift = false;
@@ -346,8 +345,6 @@ void Keyboard::appendText(const UnicodeString & text)
 
 void Keyboard::layoutViewer()
 {
-  
-  // m_textArea->setSize(m_scrollPane->width()-SCROLLBAR_DECOR, m_textArea->preferredSize().h+4);
   // should scroll to caret line - only if it is not already visible
   // otherwise the scrolling is not very stable.
   if (not m_textArea->caretVisible())

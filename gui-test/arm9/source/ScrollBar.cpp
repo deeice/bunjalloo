@@ -26,16 +26,6 @@ const static int ARROW_HEIGHT(10);
 const static int MIN_HANDLE_SIZE(5);
 const static int HANDLE_NOT_HELD(-1);
 
-// FIXME: have this configurable?
-/*
-const static nds::Color BACKGROUND(21,21,21);
-const static nds::Color BORDER(12,12,12);
-const static nds::Color ARROW(27,27,27);
-const static nds::Color ARROW_HEAD(16,16,16);
-const static nds::Color HANDLE_NOT_HELD_COLOR(25,25,25);
-const static nds::Color HANDLE_HELD_COLOR(31,31,31);
-*/
-
 ScrollBar::ScrollBar():Component(),
   m_total(0),
   m_value(0),
@@ -165,13 +155,13 @@ void ScrollBar::paint(const nds::Rectangle & clip)
 
   Canvas::instance().fillRectangle(m_bounds.x+1,
                                    m_handlePosition,
-                                   m_bounds.w-3,
+                                   m_bounds.w-2,
                                    m_handleSize,
                                    c);
 
   Canvas::instance().drawRectangle(m_bounds.x,
                                         m_bounds.y+ARROW_HEIGHT,
-                                        m_bounds.w-2,
+                                        m_bounds.w-1,
                                         m_bounds.h-1-2*ARROW_HEIGHT,
                                         WidgetColors::SCROLLBAR_BORDER);
 }
@@ -182,7 +172,6 @@ void ScrollBar::calculateHandle()
     return;
   }
 
-  //m_handleSize = m_bounds.h / m_scrollPane->scrollIncrement();
   m_handleSize = (visibleRange() * visibleRange())/total();
   if (m_scrollPane->topLevel())
   {

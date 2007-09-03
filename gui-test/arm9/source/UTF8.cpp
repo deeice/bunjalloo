@@ -16,7 +16,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "UTF8.h"
-/*#include "SDLhandler.h"*/
+
 unsigned int UTF8::MALFORMED((unsigned int)0xfffd);
 
 bool continuation(const unsigned char * data, int count)
