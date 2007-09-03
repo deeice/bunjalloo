@@ -24,9 +24,27 @@
  */
 typedef std::basic_string<unsigned int> UnicodeString;
 
+/** Convert a unicode string to a regular char string, by "escaping" unicode characters.
+ * @param ustr the unicode string to convert.
+ * @return the char string with any unicode characters escaped to hex values.
+ */
 std::string unicode2string(const UnicodeString & ustr);
+
+/** Convert a char string to a unicode one.
+ * @param str the char string to convert.
+ * @return the equivalent unicode string.
+ */
 UnicodeString string2unicode(const std::string & str);
+
+/** Check if the value is white space.
+ * @param value the character value to check.
+ * @return true if @a value is whitespace, false otherwise.
+ */
 bool isWhitespace(unsigned int value);
+
+/** Strip the whitespace from the front and back of the given string.
+ * @param modify the string that is stripped in place.
+ */
 void stripWhitespace(std::string & modify);
 
 #endif
