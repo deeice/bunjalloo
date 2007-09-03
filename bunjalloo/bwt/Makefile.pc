@@ -3,7 +3,7 @@ CXXFLAGS       :=     -g $(CFLAGS) -fno-exceptions -Wno-strict-aliasing
 ASFLAGS :=	$(FLAGS)
 DEPSDIR	:=	$(DEPENDS)
 
-$(LIBDIR)/libpcnds.a:	$(OBJS)
+$(LIBDIR)/libbwtpc.a:	$(OBJS)
 	@echo $(notdir $@)
 	@rm -f $@
 	$(AR) -rc $@ $^
