@@ -25,13 +25,13 @@
 
 TextArea * TextAreaFactory::create(bool editable)
 {
-  static Font * font(new Font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start));
+  static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
 
   TextArea * t;
   if (editable)
-    t = new EditableTextArea(font);
+    t = new EditableTextArea(&font);
   else
-    t = new TextArea(font);
+    t = new TextArea(&font);
   t->setPalette((const char*)_binary_vera_pal_bin_start, 32);
   return t;
 }

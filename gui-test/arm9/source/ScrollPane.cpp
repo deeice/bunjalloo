@@ -77,7 +77,9 @@ void ScrollPane::layoutChildren()
 {
   int childWidth = m_bounds.w - SCROLLER_WIDTH;
   std::vector<Component*>::iterator it(m_children.begin());
-  int yPos = m_bounds.y + (*it)->y();
+  //int yPos = m_bounds.top() + (*it)->y();
+  int yPos = m_bounds.top();
+
   int lastXPos = m_bounds.x;
   int lastYPos = m_bounds.y;
   int rowHeight = 0;
@@ -104,8 +106,9 @@ void ScrollPane::layoutChildren()
     //c->setSize(min(childWidth, r.w), r.h);
     if (childWidth <= r.w)
       c->setSize(childWidth, r.h);
-    else if (m_stretchChildren)
+    else if (m_stretchChildren) {
       c->setSize(childWidth, r.h);
+    }
     else
       c->setSize(r.w, r.h);
     
@@ -297,9 +300,11 @@ bool ScrollPane::touch(int x, int y)
   }
 
   bool handled(false);
+  bool scrollBarHit = false;
   if (m_scrollBar->touch(x, y))
   {
     handled = true;
+    scrollBarHit = true;
   }
 
   std::vector<Component*>::iterator it(m_children.begin());
@@ -307,12 +312,14 @@ bool ScrollPane::touch(int x, int y)
   {
     Component * c(*it);
     Rectangle bounds(c->bounds());
-    if (c->touch(x, y))
+    if (not scrollBarHit or (scrollBarHit and not bounds.hit(x, y)))
     {
-      handled = true;
+      if (c->touch(x, y))
+      {
+        handled = true;
+      }
     }
   }
-  // whatever happens, stop touching.
   return handled;
 }
 

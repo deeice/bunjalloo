@@ -48,13 +48,6 @@ class TextArea : public Component
      */
     void setPalette(const char * data, unsigned int size);
 
-    /** Set the cursor position. This is where the text will be "drawn" the
-     * next time a print routine is called.
-     * @param x the cursor x position in pixels.
-     * @param y the cursor y position in pixels.
-     */
-    void setCursor(int x, int y);
-
     /** Append text to the text area.
      * @param unicodeString the text to append.
      */
@@ -65,8 +58,9 @@ class TextArea : public Component
     void clearText();
 
     /** Get the text that is held internally.
+     * @param returnString the return value.
      */
-    const UnicodeString & document() const;
+    void document(UnicodeString & returnString) const;
 
     /** Get the current font.
      * @return the current font.
@@ -100,16 +94,6 @@ class TextArea : public Component
      */
     int textSize(const UnicodeString & unicodeString) const;
 
-    /** Get the editable status.
-     * @return true if we can edit, false otherwise.
-     */
-    bool isEditable() const;
-
-    /** Set the editable flag.
-     * @param edit true if this is an editable text area.
-     */
-    void setEditable(bool edit=true);
-
     /** A hack for debugging.
      * @return the current document converted to a char string.
      */
@@ -118,6 +102,20 @@ class TextArea : public Component
     // Component method reimplementation.
     virtual void setSize(unsigned int w, unsigned int h);
     virtual void paint(const nds::Rectangle & clip);
+
+  protected:
+    /** The document model contains one UnicodeString per line of text.*/
+    std::vector<UnicodeString> m_document;
+
+    /** Perform layout of the text. This is a pretty costly procedure in terms
+     * of memory and cpu.
+     */
+    void layoutText();
+
+    /** Get the current (last) line of text.
+     * @return the last line of text in the m_document vector.
+     */
+    inline UnicodeString & currentLine();
 
   private:
     enum ControlState {
@@ -139,7 +137,6 @@ class TextArea : public Component
     unsigned short m_fgCol;
     //! Position that the current line is at.
     int m_appendPosition;
-    UnicodeString m_document;
 
     //LinkList m_links;
 
@@ -155,10 +152,25 @@ class TextArea : public Component
     void advanceWord(const UnicodeString & unicodeString, int wordLength,
         int & currPosition, UnicodeString::const_iterator & it) const;
     void printu(const UnicodeString & unicodeString);
+
+    /** Set the cursor position. This is where the text will be "drawn" the
+     * next time a print routine is called.
+     * @param x the cursor x position in pixels.
+     * @param y the cursor y position in pixels.
+     */
+    void setCursor(int x, int y);
 };
 
 // inline implementations
 const Font & TextArea::font() const {
   return *m_font;
 }
+
+UnicodeString & TextArea::currentLine()
+{
+  if (m_document.empty())
+    m_document.push_back(UnicodeString());
+  return m_document.back();
+}
+
 #endif

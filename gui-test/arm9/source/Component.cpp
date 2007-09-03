@@ -50,10 +50,6 @@ void Component::add(Component * child)
   {
     m_children.push_back(child);
   }
-  else
-  {
-    printf("D'oh\n");
-  }
 }
 
 /** Handle a touch event. 

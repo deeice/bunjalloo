@@ -15,9 +15,10 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+#include "libnds.h"
 #include "Keyboard.h"
 #include "TextAreaFactory.h"
-#include "TextArea.h"
+#include "EditableTextArea.h"
 #include "ScrollPane.h"
 #include "Button.h"
 #include "Canvas.h"
@@ -44,23 +45,34 @@ static const UnicodeString ENTER_STR(string2unicode(" Enter"));
 static const UnicodeString SHIFT_STR(string2unicode("Shift"));
 static const UnicodeString SPACE_STR(string2unicode(" "));
 static const UnicodeString EXTRA_STR(string2unicode(" Alt"));
+static const UnicodeString OK_STR(string2unicode("   OK"));
+static const UnicodeString CANCEL_STR(string2unicode(" Cancel"));
+static const UnicodeString CLEAR_STR(string2unicode(" Clr"));
 
 const static int KEY_HEIGHT = 18;
 const static int KEY_WIDTH = 18;
-const static int INITIAL_Y = 192/2 + 192;
+const static int GAP = 10;
+const static int SCROLLPANE_POS_Y = 4;
+const static int SCROLLPANE_SIZE = SCREEN_HEIGHT*2/5 - GAP;
+const static int INITIAL_Y = SCROLLPANE_SIZE + GAP + SCREEN_HEIGHT;
 const static int INITIAL_X = 22;
 
 const static int ROW1_LENGTH = 10;
 const static int ROW2_LENGTH = 9;
 const static int ROW3_LENGTH = 10;
+const static int ROW4_LENGTH = 4;
+
+const static int TICK_COUNT = 20;
+const static int SCROLLBAR_DECOR = 7;
 
 Keyboard::Keyboard():
   Component(),
   m_extra(false),
   m_shift(false),
   m_capsLock(false),
+  m_ticks(0),
   m_scrollPane(new ScrollPane),
-  m_textArea(TextAreaFactory::create(true)),
+  m_textArea((EditableTextArea*)TextAreaFactory::create(true)),
   m_shiftKey(new Button),
   m_capsLockKey(new Button),
   // m_tabKey(new Button),
@@ -68,7 +80,10 @@ Keyboard::Keyboard():
   m_backspaceKey(new Button),
   //m_deleteKey(new Button),
   m_spaceKey(new Button),
-  m_extraKey(new Button)
+  m_extraKey(new Button),
+  m_ok(new Button),
+  m_cancel(new Button),
+  m_clearKey(new Button)
 {
   setVisible(false);
   initUI();
@@ -111,17 +126,41 @@ Keyboard::Keyboard():
       BACKSPACE_STR, 
       m_backspaceKey);
 
-  // caps - at the start of the a-l row. 1.5 keys wide
-  createSpecialKey(INITIAL_X-KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*2),
-      KEY_WIDTH*3/2-1, KEY_HEIGHT, 
-      CAPS_STR, 
-      m_capsLockKey);
-
   // enter - at the end of the a-l row, 2.5 keys wide.
   createSpecialKey(INITIAL_X+(ROW2_LENGTH)*(KEY_WIDTH+1)+KEY_WIDTH/2, INITIAL_Y+(KEY_HEIGHT*2),
       KEY_WIDTH*5/2 + 2, KEY_HEIGHT, 
       ENTER_STR, 
       m_enterKey);
+  
+  // m_clearKey - at the end of the space and final row
+  createSpecialKey(INITIAL_X+KEY_WIDTH/2+(KEY_WIDTH+1)*ROW3_LENGTH-1, INITIAL_Y+(KEY_HEIGHT*4),
+      (KEY_WIDTH*3/2)+2, KEY_HEIGHT, 
+      CLEAR_STR, 
+      m_clearKey);
+
+  // spaceKey - in between the final 4 chars on the final row
+  createSpecialKey(INITIAL_X+(KEY_WIDTH*3/2)+(KEY_WIDTH+1)*2, INITIAL_Y+(KEY_HEIGHT*4),
+      (KEY_WIDTH)*5+4, KEY_HEIGHT, 
+      SPACE_STR, 
+      m_spaceKey);
+
+  // ok key - floating after the keyboard
+  createSpecialKey(INITIAL_X+KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*5)+KEY_HEIGHT/3,
+      (KEY_WIDTH)*3, KEY_HEIGHT, 
+      OK_STR, 
+      m_ok);
+
+  // cancel key - floating after the keyboard
+  createSpecialKey(INITIAL_X+KEY_WIDTH*8, INITIAL_Y+(KEY_HEIGHT*5)+KEY_HEIGHT/3,
+      (KEY_WIDTH)*3, KEY_HEIGHT, 
+      CANCEL_STR, 
+      m_cancel);
+
+  // caps - at the start of the a-l row. 1.5 keys wide
+  createSpecialKey(INITIAL_X-KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*2),
+      (KEY_WIDTH*3/2)-1, KEY_HEIGHT, 
+      CAPS_STR, 
+      m_capsLockKey);
 
   // shift - at the start of the z-m row, 2 keys wide.
   createSpecialKey(INITIAL_X-KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*3),
@@ -129,24 +168,23 @@ Keyboard::Keyboard():
       SHIFT_STR, 
       m_shiftKey);
 
-  // spaceKey - in between the final 4 chars on the final row
-  createSpecialKey(INITIAL_X+(KEY_WIDTH*3/2)+(KEY_WIDTH+1)*2, INITIAL_Y+(KEY_HEIGHT*4),
-      (KEY_WIDTH)*5+4, KEY_HEIGHT, 
-      SPACE_STR, 
-      m_spaceKey);
   // m_extraKey
   createSpecialKey(INITIAL_X-(KEY_WIDTH/2), INITIAL_Y+(KEY_HEIGHT*4),
       (KEY_WIDTH*2)-1, KEY_HEIGHT, 
       EXTRA_STR, 
       m_extraKey);
-  
+
+  // By adding the m_scrollPane to the Component::m_children it gets deleted
+  // in the destructor.
+  add(m_scrollPane);
 }
 void Keyboard::initUI()
 {
+  m_textArea->setParentScroller(m_scrollPane);
   m_scrollPane->add(m_textArea);
   m_scrollPane->setTopLevel(false);
-  m_scrollPane->setSize(nds::Canvas::instance().width(),192/2-10);
-  m_scrollPane->setLocation(0, 194);
+  m_scrollPane->setSize(nds::Canvas::instance().width(),SCROLLPANE_SIZE);
+  m_scrollPane->setLocation(0, SCREEN_HEIGHT+SCROLLPANE_POS_Y);
   m_scrollPane->setScrollIncrement(m_textArea->font().height());
   m_scrollPane->setStretchChildren(true);
   m_scrollPane->setVisible(true);
@@ -187,7 +225,16 @@ void Keyboard::createRow(int x, int y, const char * text, int keys)
 
 UnicodeString Keyboard::result() const
 {
-  return m_result;
+  UnicodeString tmp;
+  m_textArea->text(tmp);
+  return tmp;
+}
+
+void Keyboard::applyResult()
+{
+  UnicodeString tmp;
+  m_textArea->text(tmp);
+  m_entry->setText(tmp);
 }
 
 void Keyboard::paint(const nds::Rectangle & clip)
@@ -200,28 +247,37 @@ void Keyboard::paint(const nds::Rectangle & clip)
       Component * c(*it);
       c->paint(c->bounds());
     }
-    m_textArea->setSize(m_scrollPane->width(), m_textArea->preferredSize().h);
-    //m_scrollPane->setSize(m_scrollPane->width(), m_scrollPane->height());
     m_scrollPane->paint(m_scrollPane->bounds());
   }
 }
 
 void Keyboard::editText(TextEntryI * entry)
 {
-  printf("Edit the text: %s\n", unicode2string(entry->text()).c_str());
   m_topLevel->setVisible(false);
   this->setVisible();
-  m_textArea->appendText(entry->text());
+  m_initialText.clear();
+  entry->text(m_initialText);
+  //m_textArea->clearText();
+  m_textArea->setText(m_initialText);
+  m_entry = entry;
 }
 
 Keyboard::SpecialKey Keyboard::buttonToSpecialKey(const ButtonI * button)
 {
   if (button == m_shiftKey) return SPKY_SHIFT;
   if (button == m_capsLockKey) return SPKY_CAPS;
-  if (button == m_enterKey) return SPKY_ENTER;
+  if (button == m_enterKey) {
+    if (multiLine()) {
+      return SPKY_ENTER;
+    }
+    return SPKY_OK;
+  }
   if (button == m_backspaceKey) return SPKY_BACKSPACE;
   if (button == m_spaceKey) return SPKY_SPACE;
   if (button == m_extraKey) return SPKY_EXTRA;
+  if (button == m_ok) return SPKY_OK;
+  if (button == m_cancel) return SPKY_CANCEL;
+  if (button == m_clearKey) return SPKY_CLEAR;
   return SPKY_UNKNOWN;
 }
 
@@ -240,27 +296,64 @@ void Keyboard::pressed(ButtonI * button)
       updateModifierKeys();
       break;
     case SPKY_ENTER:
+      appendText(string2unicode("\n"));
       updateTicksForUI(button);
-      m_textArea->appendText(string2unicode("\n"));
       break;
     case SPKY_BACKSPACE:
+      m_textArea->deleteChar();
+      layoutViewer();
       updateTicksForUI(button);
       break;
     case SPKY_SPACE:
+      appendText(((Button*)button)->text());
       updateTicksForUI(button);
       break;
     case SPKY_EXTRA:
       m_extra = not m_extra;
       updateModifierKeys();
       break;
+    case SPKY_CANCEL:
+      m_textArea->clearText();
+      m_textArea->appendText(m_initialText);
+      /* FALL THROGH */
+    case SPKY_OK:
+      m_ticks = 1;
+      tick();
+      m_topLevel->setVisible();
+      this->setVisible(false);
+      applyResult();
+      break;
+    case SPKY_CLEAR:
+      m_textArea->clearText();
+      updateTicksForUI(button);
+      layoutViewer();
+      break;
     case SPKY_UNKNOWN:
       /* anything else */
       updateTicksForUI(button);
-      m_textArea->appendText(((Button*)button)->text());
-      printf("%s\n", m_textArea->asString().c_str());
+      appendText(((Button*)button)->text());
       m_shift = false;
       m_extra = false;
       break;
+  }
+}
+
+void Keyboard::appendText(const UnicodeString & text)
+{
+  m_textArea->appendText(text);
+  layoutViewer();
+}
+
+void Keyboard::layoutViewer()
+{
+  
+  // m_textArea->setSize(m_scrollPane->width()-SCROLLBAR_DECOR, m_textArea->preferredSize().h+4);
+  // should scroll to caret line - only if it is not already visible
+  // otherwise the scrolling is not very stable.
+  if (not m_textArea->caretVisible())
+  {
+    int scrollTo(m_textArea->caretLine() * m_textArea->font().height() * 256 / m_textArea->preferredSize().h);
+    m_scrollPane->scrollToPercent(scrollTo);
   }
 }
 
@@ -269,13 +362,7 @@ void Keyboard::updateTicksForUI(ButtonI * button)
   m_ticks = 1;
   tick();
   button->setSelected(true);
-  if (m_shift or m_extra)
-  {
-    m_ticks = 20;
-  }
-  else {
-    m_ticks = 40;
-  }
+  m_ticks = TICK_COUNT;
 }
 
 
@@ -330,7 +417,7 @@ void Keyboard::updateLayout(const char * text, const char * numbers)
   // special, end of chars. [] and /"
   text += size;
   start += size;
-  updateRow(text, 4, start);
+  updateRow(text, ROW4_LENGTH, start);
 
 }
 
@@ -343,7 +430,8 @@ bool Keyboard::touch(int x, int y)
     for (; it != m_children.end(); ++it)
     {
       Component * c(*it);
-      if ( c->touch(x, y) ) {
+      if ( c->touch(x, y) )
+      {
         repaint = true;
       }
     }
@@ -369,17 +457,19 @@ bool Keyboard::tick()
     if (m_ticks == 0)
     {
       std::vector<Component*>::iterator it(m_children.begin());
-      for (; *it != m_backspaceKey; ++it)
+      for (; *it != m_capsLockKey; ++it)
       {
         Button * c((Button*)*it);
         c->setSelected(false);
       }
-      m_spaceKey->setSelected(false);
-      m_backspaceKey->setSelected(false);
-      m_enterKey->setSelected(false);
       updateModifierKeys();
       return true;
     }
   }
   return false;
+}
+
+bool Keyboard::multiLine() const
+{
+  return m_entry->isMultiLine();
 }

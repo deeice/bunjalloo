@@ -43,18 +43,22 @@ int main(int argc, char * argv[])
   EditableTextArea * t2 = (EditableTextArea*)TextAreaFactory::create(true);
   // t2->setBackgroundColor(Color(31,31,0));
 
+  
   ScrollPane * subPane = new ScrollPane;
   subPane->add(t2);
   subPane->setTopLevel(false);
   subPane->setSize(Canvas::instance().width(),Canvas::instance().height());
   subPane->setScrollIncrement(t2->font().height());
   subPane->setStretchChildren(true);
+  
+  
   ComboBox * emptyCombo = new ComboBox();
   ComboBox * oneValCombo = new ComboBox();
   ComboBox * combo = new ComboBox();
   combo->setSize(60, 18);
   ComboBox * combo2 = new ComboBox();
   combo2->setSize(90, 18);
+  
   std::string shw("Hello World");
   UnicodeString str = string2unicode(shw);
   Button * b1 = new Button(str);
@@ -115,13 +119,13 @@ int main(int argc, char * argv[])
   bg.add(rb);
   bg.add(rb2);
   bg.add(rb3);
-
   ScrollPane scrollPane;
   keyBoard->setTopLevel(&scrollPane);
   scrollPane.setTopLevel();
   scrollPane.add(t);
   scrollPane.add(b1);
   scrollPane.add(b2);
+ 
   scrollPane.add(b3);
   scrollPane.add(tf1);
   scrollPane.add(b4);
@@ -137,16 +141,17 @@ int main(int argc, char * argv[])
   scrollPane.add(subPane);
   scrollPane.add(combo);
   scrollPane.add(b5);
+  
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
   scrollPane.setScrollIncrement(t->font().height());
 
-  //std::string s(_binary_test_map_bin_start, strlen(_binary_test_map_bin_start));
   std::string s(_binary_test_map_bin_start, 1000);
   t->appendText(string2unicode(s));
-  //std::string s2(&_binary_test_map_bin_start[1200], 1300);
-  std::string s2("ABCDEFGHIJKLMNORSTUVWXYZacdefghijklmnopqrstuvwxy_");
+  std::string s2(&_binary_test_map_bin_start[1200], 1300);
+  //std::string s2("ABCDEFGHIJKLMNORSTUVWXYZacdefghijklmnopqrstuvwxy_");
   t2->appendText(string2unicode(s2));
   subPane->setSize(t2->width(), 100);
+  t2->setParentScroller(subPane);
   scrollPane.setLocation(0,0);
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
 
@@ -170,7 +175,10 @@ int main(int argc, char * argv[])
       needsPainting = true;
     }
     if (keys & KEY_X)
+    {
+      printf("%s\n",t2->asString().c_str());
       break;
+    }
 
     if (keys & KEY_Y) {
       scrollPane.setVisible(not scrollPane.visible());
@@ -182,7 +190,8 @@ int main(int argc, char * argv[])
     {
       touchPosition tp = touchReadXY();
       needsPainting = keyBoard->touch(tp.px, tp.py+SCREEN_HEIGHT);
-      needsPainting |= scrollPane.touch(tp.px, tp.py+SCREEN_HEIGHT);
+      if (not needsPainting)
+        needsPainting = scrollPane.touch(tp.px, tp.py+SCREEN_HEIGHT);
     }
 
     needsPainting |= keyBoard->tick();
@@ -194,4 +203,5 @@ int main(int argc, char * argv[])
     }
     needsPainting = false;
   }
+  delete keyBoard;
 }

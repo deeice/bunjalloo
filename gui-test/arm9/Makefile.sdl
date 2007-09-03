@@ -13,7 +13,8 @@ LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lpcnds -lpthread `sdl-config --libs` -limg -lfont
+LIBS	:= -lpcnds -lpthread `sdl-config --libs` -limg -lfont 
+# -L$(TOPDIR) -lDEBUG
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing

@@ -24,7 +24,7 @@
 #include "UnicodeString.h"
 
 class Button;
-class TextArea;
+class EditableTextArea;
 class ScrollPane;
 /** Show a virtual keyboard. Accepts touch input and keypad input. */
 class Keyboard : public Component, public TextListener, public ButtonListener
@@ -42,10 +42,19 @@ class Keyboard : public Component, public TextListener, public ButtonListener
      */
     UnicodeString result() const;
 
+    /** Set the Component that paints the top level.
+     * @param topLevel the top level component that will be hidden when the
+     * keyboards is shown.
+     */
     void setTopLevel(Component * topLevel);
 
+    /** Update timer to deactivate current key selection.
+     * @return true if the activation means a repaint is required.
+     */
     bool tick();
 
+
+    // Interface implementation.
     virtual bool touch(int x, int y);
     virtual void paint(const nds::Rectangle & clip);
     virtual void editText(TextEntryI * entry);
@@ -58,7 +67,7 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     int  m_ticks;
 
     ScrollPane * m_scrollPane;
-    TextArea * m_textArea;
+    EditableTextArea * m_textArea;
     Button * m_shiftKey;
     Button * m_capsLockKey;
     // Button * m_tabKey;
@@ -67,6 +76,10 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     // Button * m_deleteKey;
     Button * m_spaceKey;
     Button * m_extraKey;
+    Button * m_ok;
+    Button * m_cancel;
+    Button * m_clearKey;
+
     enum SpecialKey
     {
       SPKY_SHIFT,
@@ -75,12 +88,16 @@ class Keyboard : public Component, public TextListener, public ButtonListener
       SPKY_BACKSPACE,
       SPKY_SPACE,
       SPKY_EXTRA,
+      SPKY_OK,
+      SPKY_CANCEL,
+      SPKY_CLEAR,
       SPKY_UNKNOWN
     };
     SpecialKey buttonToSpecialKey(const ButtonI * button);
 
-    UnicodeString m_result;
+    UnicodeString m_initialText;
     Component * m_topLevel;
+    TextEntryI * m_entry;
 
     void initUI();
 
@@ -91,6 +108,14 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     void updateModifierKeys();
     void updateLayout(const char * text, const char * numbers);
     void updateTicksForUI(ButtonI * button);
+    void appendText(const UnicodeString & text);
+    void layoutViewer();
+    void applyResult();
+
+    /** Get the current multi line state.
+     * @return true if multi line entries are allowed, false otherwise.
+     */
+    inline bool multiLine() const;
 
 };
 #endif

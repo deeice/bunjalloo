@@ -31,6 +31,7 @@ using namespace nds;
 using namespace std;
 const static nds::Color EDGE(20,20,20);
 const static nds::Color SHADOW(28,28,28);
+const static unsigned char NEWLINE('\n');
 
 static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
 static const UnicodeString s_delimiters(intDelimiters,6);
@@ -92,9 +93,13 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
   }
 }
 
-const UnicodeString & TextArea::document() const
+void TextArea::document(UnicodeString & returnString) const
 {
-  return m_document;
+  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  for (; it != m_document.end(); ++it)
+  {
+    returnString.append(*it);
+  }
 }
 
 void TextArea::clearText()
@@ -103,7 +108,9 @@ void TextArea::clearText()
   m_appendPosition = 0;
   m_preferredWidth = -1;
   m_preferredHeight = m_font->height();
+  currentLine();
 }
+
 
 void TextArea::appendText(const UnicodeString & unicodeString)
 {
@@ -115,25 +122,45 @@ void TextArea::appendText(const UnicodeString & unicodeString)
   {
     const UnicodeString word(nextWord(unicodeString, currPosition));
     int size = textSize(word);
-    
+
     // if the word ends with a new line, then increment the height.
     // otherwise, if we go off the end of the line, increment the height.
-    if (word[word.length()-1] == '\n')
+    if ((m_appendPosition + size) > width())
     {
+      // this word overflows the line - make a new line to hold the text.
+      m_document.push_back(UnicodeString());
+      // m_document += NEWLINE;
       m_appendPosition = 0;
-      m_preferredHeight += m_font->height();
-    }
-    else if ((m_appendPosition + size) > width())
-    {
-      // this word overflows the line
-      m_document += '\n';
-      m_appendPosition = 0;
-      m_preferredHeight += m_font->height();
+      //m_preferredHeight += m_font->height();
     }
     m_preferredWidth += size;
-    m_document += word;
+    currentLine().append(word);
     m_appendPosition += size;
     advanceWord(unicodeString, word.length(), currPosition, it);
+
+    // if the word ended in a NEWLINE, then go onto the next line.
+    if (m_parseNewline and word[word.length()-1] == NEWLINE)
+    {
+      m_appendPosition = 0;
+      m_document.push_back(UnicodeString());
+    }
+  }
+  m_preferredHeight = m_document.size() * m_font->height();
+}
+
+void TextArea::layoutText()
+{
+  // need to shuffle the document about... this requires a new copy of it.
+  UnicodeString tmp;
+  document(tmp);
+  clearText();
+  if (not tmp.empty())
+    appendText(tmp);
+  if (m_preferredHeight == 0)
+    m_preferredHeight = m_font->height();
+  int wInt = static_cast<int>(m_bounds.w);
+  if ( m_preferredWidth < 0 or (wInt <= m_preferredWidth)) {
+    m_preferredWidth = m_bounds.w;
   }
 }
 
@@ -141,22 +168,7 @@ void TextArea::setSize(unsigned int w, unsigned int h)
 {
   if (m_bounds.w != (int)w) {
     Component::setSize(w, h);
-    UnicodeString tmp(m_document);
-    clearText();
-    //m_preferredHeight = 0;
-    if (not tmp.empty())
-      appendText(tmp);
-    if (m_preferredHeight == 0)
-      m_preferredHeight = m_font->height();
-    int wInt = static_cast<int>(w);
-    /*printf("uint: %d int: %d val: %d, %s %s\n", w, wInt, m_preferredWidth, (w <= m_preferredWidth)?"ui is less":"ui is more",
-        (wInt<=m_preferredWidth)?"int is less":"int is more");*/
-    if ( m_preferredWidth < 0 or (wInt <= m_preferredWidth)) {
-      m_preferredWidth = w;
-    }
-    else {
-      //m_preferredWidth += 1;
-    }
+    layoutText();
   } else {
     Component::setSize(w, h);
   }
@@ -272,6 +284,7 @@ int TextArea::textSize(const UnicodeString & unicodeString) const
   return size;
 }
 
+#if 0
 bool TextArea::doSingleChar(unsigned int value)
 {
   if (m_palette) {
@@ -280,9 +293,9 @@ bool TextArea::doSingleChar(unsigned int value)
     }
     Font::Glyph g;
     m_font->glyph(value, g);
-    if (m_parseNewline and value == '\n') {
+    if (m_parseNewline and value == NEWLINE) {
       incrLine();
-    } else if (value != '\n') {
+    } else if (value != NEWLINE) {
       checkLetter(g);
       if (g.data) {
         printAt(g, m_cursorx, m_cursory);
@@ -301,6 +314,24 @@ bool TextArea::doSingleChar(unsigned int value)
   {
     incrLine();
   }
+  return (m_cursory > m_bounds.bottom());
+}
+#endif
+bool TextArea::doSingleChar(unsigned int value)
+{
+  if (value == UTF8::MALFORMED) {
+    value = '?';
+  }
+  Font::Glyph g;
+  m_font->glyph(value, g);
+  if (value != NEWLINE) {
+    checkLetter(g);
+    if (g.data) {
+      printAt(g, m_cursorx, m_cursory);
+    }
+    m_cursorx += g.width;
+  }
+  // else ignore new line character.
   return (m_cursory > m_bounds.bottom());
 }
 
@@ -416,10 +447,36 @@ void TextArea::paint(const nds::Rectangle & clip)
   // then theres clip-width which is where it should draw to.
   setCursor(m_bounds.x, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
-  printu(m_document);
+  // work out the number of lines to skip
+  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  int skipLines((m_bounds.y-(m_font->height()/2))/m_font->height());
+  if (skipLines < 0)
+  {
+    setCursor(m_bounds.x, m_bounds.y + (-skipLines)*m_font->height());
+    it += (-skipLines);
+  }
+
+  for (; it != m_document.end() and m_cursory < m_bounds.bottom(); ++it)
+  {
+    printu(*it);
+    incrLine();
+  }
 }
 
 std::string TextArea::asString() const
 {
-  return unicode2string(m_document);
+  std::string returnString;
+  bool needComma(false);
+  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  for (; it != m_document.end(); ++it)
+  {
+    if (needComma)
+      returnString += ",\n";
+    returnString += "[\"";
+    returnString.append(unicode2string(*it));
+    returnString += "\"]";
+    needComma = true;
+  }
+
+  return returnString;
 }

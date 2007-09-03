@@ -36,4 +36,3 @@ bool TextField::touch(int x, int y)
   }
   return false;
 }
-

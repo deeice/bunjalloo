@@ -15,14 +15,18 @@ class TextField: public TextContainer, public TextEntryI
      */
     TextField(const UnicodeString & text);
 
-    virtual const UnicodeString & text() const
+    // from TextEntryI
+    virtual void text(UnicodeString & returnString) const
     {
-
-      return TextContainer::text();
+      returnString = TextContainer::text();
     }
     virtual void setText(const UnicodeString & text)
     {
       TextContainer::setText(text);
+    }
+    virtual bool isMultiLine() const 
+    {
+      return false;
     }
 
     // From Component.
