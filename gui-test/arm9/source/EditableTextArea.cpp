@@ -82,7 +82,7 @@ void EditableTextArea::deleteChar()
   if (m_caretLine == -1)
   {
     UnicodeString & line(currentLine());
-    if (line.length())
+    if (not line.empty())
     {
       line.erase(line.length()-1, 1);
     }

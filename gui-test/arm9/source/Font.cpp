@@ -148,7 +148,7 @@ Font::~Font()
 
 int Font::minGlyph() const
 {
-  if (m_range.size()) {
+  if (not m_range.empty()) {
     const Range *range(m_range[0]);
     return range->lower();
   } else {

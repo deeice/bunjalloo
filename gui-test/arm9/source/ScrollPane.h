@@ -45,7 +45,7 @@ class ScrollPane: public Component
     /** Delete the ScrollPanes child components.*/
     ~ScrollPane();
 
-    /** Set the incemental amount that each up/down press moves.
+    /** Set the incremental amount that each up/down press moves.
      * @param scrollIncrement the amount to scroll in pixels.
      */
     void setScrollIncrement(int scrollIncrement);
@@ -74,9 +74,9 @@ class ScrollPane: public Component
      */
     void scrollToPercent(int value);
 
-    /** Set this to be the top level scroll pane. The top level pane is special
+    /** Set this to be the top level ScrollPane. The top level pane is special
      * as its scroll bar does not fill the whole height, but is shown only on
-     * the bottom screen. The top level scroller also handles the popup menu.
+     * the bottom screen. The top level ScrollPane also handles the pop-up menu.
      * @param topLevel true if this is the top level scroll pane. false
      * otherwise. ScrollPanes are initialised to not be the top level one.
      */

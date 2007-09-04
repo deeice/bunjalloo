@@ -24,6 +24,7 @@
 #include "TextAreaFactory.h"
 #include "EditableTextArea.h"
 #include "TextField.h"
+#include "RichTextArea.h"
 #include "Button.h"
 #include "ComboBox.h"
 #include "RadioButton.h"
@@ -39,8 +40,9 @@ int main(int argc, char * argv[])
   irqInit();
   irqSet(IRQ_VBLANK,0);
 
+  RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
   TextArea * t = TextAreaFactory::create();
-  EditableTextArea * t2 = (EditableTextArea*)TextAreaFactory::create(true);
+  EditableTextArea * t2 = (EditableTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_EDIT);
   // t2->setBackgroundColor(Color(31,31,0));
 
   
@@ -122,6 +124,7 @@ int main(int argc, char * argv[])
   ScrollPane scrollPane;
   keyBoard->setTopLevel(&scrollPane);
   scrollPane.setTopLevel();
+  scrollPane.add(rich);
   scrollPane.add(t);
   scrollPane.add(b1);
   scrollPane.add(b2);
@@ -145,10 +148,30 @@ int main(int argc, char * argv[])
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
   scrollPane.setScrollIncrement(t->font().height());
 
+  std::string richText1("This is normal text. ");
+  std::string richText2("This is a link.");
+  std::string richText3("Longer text, but still normal. ");
+  std::string richText4("Normal text. ");
+  std::string richText5("Link text. ");
+  rich->appendText(string2unicode(richText1));
+  rich->appendText(string2unicode(richText1));
+  rich->appendText(string2unicode(richText1));
+  rich->appendText(string2unicode(richText3));
+  rich->appendText(string2unicode(richText4));
+  rich->addLink("www.link1.com");
+  rich->appendText(string2unicode(richText2));
+  rich->endLink();
+  rich->appendText(string2unicode(richText3));
+  rich->appendText(string2unicode(richText1));
+  rich->addLink("www.link2.com");
+  rich->appendText(string2unicode(richText5));
+  rich->endLink();
+  rich->appendText(string2unicode(richText1));
+
+
   std::string s(_binary_test_map_bin_start, 1000);
   t->appendText(string2unicode(s));
   std::string s2(&_binary_test_map_bin_start[1200], 1300);
-  //std::string s2("ABCDEFGHIJKLMNORSTUVWXYZacdefghijklmnopqrstuvwxy_");
   t2->appendText(string2unicode(s2));
   subPane->setSize(t2->width(), 100);
   t2->setParentScroller(subPane);

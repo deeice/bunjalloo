@@ -30,7 +30,7 @@ class UTF8
     /** Decode a UTF-8 character array to a 32 bit value.
      * @param p pointer to the data.
      * @param returnValue the corresponding 31-bit Universal Character Set value.
-     * @return the number of bytes in p that have been read.
+     * @return the number of bytes in @a p that have been read.
      * */
     static unsigned int decode(const void * p, unsigned int & returnValue);
 

@@ -24,20 +24,77 @@
 class Link
 {
   public:
+    /** Creates a link/anchor to the given address.
+     * @param a the document address that the link goes to
+     */
     Link(const std::string & a);
-    ~Link();
 
-    void appendClickZone(int x, int y, int w, int h);
-
-    bool hitTest(int x, int y) const;
+    /** Get the address of the document that this Link points to.
+     * @return the document address.
+     */
     std::string href() const;
 
-    void highlight() const;
+    /** Set if the user has clicked here or not.
+     * @param clicked true if clicked, false otherwise.
+     */
+    inline void setClicked(bool clicked=true);
+
+    /** Check if the user has clicked here or not.
+     * @return true if this Link has been clicked, false otherwise.
+     */
+    inline bool clicked() const;
+
+    /** Set the start position in the text for this Link.
+     * @param startPosition the position in the document that marks the start of the link text.
+     */
+    inline void setTextStart(unsigned int startPosition);
+
+    /** Set the end position in the text for this Link.
+     * @param endPosition the position in the document that marks the end of the link text.
+     */
+    inline void setTextEnd(unsigned int endPosition);
+
+    /** Fetch the position in the text that the Link starts at.
+     * @return the position in the document that marks the start of the text.
+     */
+    inline unsigned int textStart() const;
+    /** Fetch the position in the text that the Link ends at.
+     * @return the position in the document that marks the end of the text.
+     */
+    inline unsigned int textEnd() const;
+
 
   private:
+    unsigned int m_textStart;
+    unsigned int m_textEnd;
+    bool m_clicked;
     std::string m_anchor;
-    typedef std::list<nds::Rectangle*> RectangleList;
-    RectangleList m_clickZones;
 };
 
+void Link::setTextStart(unsigned int startPosition)
+{
+  m_textStart = startPosition;
+}
+void Link::setTextEnd(unsigned int endPosition)
+{
+  m_textEnd = endPosition;
+}
+unsigned int Link::textStart() const
+{
+  return m_textStart;
+}
+unsigned int Link::textEnd() const
+{
+  return m_textEnd;
+}
+
+inline void Link::setClicked(bool clicked)
+{
+  m_clicked = clicked;
+}
+
+inline bool Link::clicked() const
+{
+  return m_clicked;
+}
 #endif

@@ -19,20 +19,20 @@
 #define UnicodeString_h_seen
 #include <string>
 
-/** This typedef is used to represent unicode strings. Unicode character
+/** This typedef is used to represent Unicode strings. Unicode character
  * values are up to 32 bit so an unsigned int is used.
  */
 typedef std::basic_string<unsigned int> UnicodeString;
 
-/** Convert a unicode string to a regular char string, by "escaping" unicode characters.
- * @param ustr the unicode string to convert.
- * @return the char string with any unicode characters escaped to hex values.
+/** Convert a Unicode string to a regular char string, by "escaping" Unicode characters.
+ * @param ustr the Unicode string to convert.
+ * @return the char string with any Unicode characters escaped to hex values.
  */
 std::string unicode2string(const UnicodeString & ustr);
 
-/** Convert a char string to a unicode one.
+/** Convert a char string to a Unicode one.
  * @param str the char string to convert.
- * @return the equivalent unicode string.
+ * @return the equivalent Unicode string.
  */
 UnicodeString string2unicode(const std::string & str);
 

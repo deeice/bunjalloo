@@ -58,7 +58,7 @@ class Font
      * @param text encoded text data.
      * @param textLength the number of bytes in the text.
      * @param width is filled with the width.
-     * @param height is filled with the ehight.
+     * @param height is filled with the height.
      * @param encoding the type of encoding used - utf-8 or iso_8859-1.
      */
     void textSize(const char * text,

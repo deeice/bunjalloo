@@ -72,7 +72,7 @@ Keyboard::Keyboard():
   m_capsLock(false),
   m_ticks(0),
   m_scrollPane(new ScrollPane),
-  m_textArea((EditableTextArea*)TextAreaFactory::create(true)),
+  m_textArea((EditableTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_EDIT)),
   m_shiftKey(new Button),
   m_capsLockKey(new Button),
   // m_tabKey(new Button),
@@ -120,13 +120,13 @@ Keyboard::Keyboard():
   createRow(x, y, text, 2);
 
   // shift, capsLock, tab, enter, backspace, delete, altkeys, space
-  // backspace - at the end of the q-p row, 2 keys wide
+  // backspace - at the end of the Q-P row, 2 keys wide
   createSpecialKey(INITIAL_X+(ROW1_LENGTH)*(KEY_WIDTH+1), INITIAL_Y+KEY_HEIGHT,
       KEY_WIDTH*2+1, KEY_HEIGHT, 
       BACKSPACE_STR, 
       m_backspaceKey);
 
-  // enter - at the end of the a-l row, 2.5 keys wide.
+  // enter - at the end of the A-L row, 2.5 keys wide.
   createSpecialKey(INITIAL_X+(ROW2_LENGTH)*(KEY_WIDTH+1)+KEY_WIDTH/2, INITIAL_Y+(KEY_HEIGHT*2),
       KEY_WIDTH*5/2 + 2, KEY_HEIGHT, 
       ENTER_STR, 
@@ -314,7 +314,7 @@ void Keyboard::pressed(ButtonI * button)
     case SPKY_CANCEL:
       m_textArea->clearText();
       m_textArea->appendText(m_initialText);
-      /* FALL THROGH */
+      /* FALL THROUGH */
     case SPKY_OK:
       m_ticks = 1;
       tick();

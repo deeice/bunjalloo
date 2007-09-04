@@ -33,7 +33,7 @@ class ComboBox: public Component,
     /** Create an empty ComboBox.*/
     ComboBox();
 
-    /** End of the objects existance.*/
+    /** End of the objects existence.*/
     //~ComboBox();
     
     /** Add an item to the list. If it is the first item, it is selected.

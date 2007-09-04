@@ -50,7 +50,7 @@ class Component
 
     /** Set the size in pixels.
      * @param w the width.
-     * @param h the hheight.
+     * @param h the height.
      */
     virtual void setSize(unsigned int w, unsigned int h);
     /** Get the position and size.
@@ -103,7 +103,7 @@ class Component
     /** The height that this component would like to be. */
     int m_preferredHeight;
 
-    /** The visibilty. */
+    /** The visibility. */
     bool m_visible;
 
     /** The child Components. */

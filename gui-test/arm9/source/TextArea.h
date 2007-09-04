@@ -73,13 +73,13 @@ class TextArea : public Component
      */
     void setFont(Font * font);
 
-    /** Set the text colour. Since the text is antialiased, this creates a coloured
+    /** Set the text colour. Since the text is anti aliased, this creates a coloured
      * scale palette based on the original grey-scale palette.
      * @param color the new text colour in 15 bit RGB format.
      */
     void setTextColor(unsigned short color);
 
-    /** Set the background colour. Since the text is antialiased, this creates a coloured
+    /** Set the background colour. Since the text is anti aliased, this creates a coloured
      * scale palette based on the original grey-scale palette.
      * @param color the new text colour in 15 bit RGB format.
      */
@@ -99,6 +99,14 @@ class TextArea : public Component
      */
     std::string asString() const;
 
+    inline int cursorY() const;
+    inline int cursorX() const;
+    /** Get the number of lines that will be skipped when painting.*/
+    int linesToSkip() const;
+
+    inline void setUnderline(bool underline=true);
+    inline bool underline() const;
+
     // Component method reimplementation.
     virtual void setSize(unsigned int w, unsigned int h);
     virtual void paint(const nds::Rectangle & clip);
@@ -108,22 +116,22 @@ class TextArea : public Component
     std::vector<UnicodeString> m_document;
 
     /** Perform layout of the text. This is a pretty costly procedure in terms
-     * of memory and cpu.
+     * of memory and CPU.
      */
     void layoutText();
 
     /** Get the current (last) line of text.
-     * @return the last line of text in the m_document vector.
+     * @return the last line of text in the document vector.
      */
     inline UnicodeString & currentLine();
 
+    /** Called for each line of text that is visible. */
+    virtual void printu(const UnicodeString & unicodeString);
+    /** Print a single character. */
+    bool doSingleChar(unsigned int value);
+
+
   private:
-    enum ControlState {
-      TEXT,
-      LINK,
-      FORM
-    };
-    typedef std::list<Link*> LinkList;
 
     Font * m_font;
     unsigned short * m_palette;
@@ -137,21 +145,18 @@ class TextArea : public Component
     unsigned short m_fgCol;
     //! Position that the current line is at.
     int m_appendPosition;
+    bool m_underLine;
 
-    //LinkList m_links;
 
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
     void incrLine();
-    void checkLetter(Font::Glyph & g);
-    bool doSingleChar(unsigned int value);
+    inline void checkLetter(Font::Glyph & g);
     
-    void removeClickables();
 
     const UnicodeString nextWord(const UnicodeString & unicodeString, 
         int currPosition) const;
     void advanceWord(const UnicodeString & unicodeString, int wordLength,
         int & currPosition, UnicodeString::const_iterator & it) const;
-    void printu(const UnicodeString & unicodeString);
 
     /** Set the cursor position. This is where the text will be "drawn" the
      * next time a print routine is called.
@@ -172,5 +177,20 @@ UnicodeString & TextArea::currentLine()
     m_document.push_back(UnicodeString());
   return m_document.back();
 }
-
+int TextArea::cursorY() const
+{
+  return m_cursory;
+}
+int TextArea::cursorX() const
+{
+  return m_cursory;
+}
+void TextArea::setUnderline(bool underline)
+{
+  m_underLine = underline;
+}
+bool TextArea::underline() const
+{
+  return m_underLine;
+}
 #endif

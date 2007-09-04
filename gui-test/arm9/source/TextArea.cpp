@@ -45,7 +45,8 @@ TextArea::TextArea(Font * font) :
   m_parseNewline(true),
   m_bgCol(0),
   m_fgCol(0),
-  m_appendPosition(0)
+  m_appendPosition(0),
+  m_underLine(false)
 {
   setFont(font);
   m_document.clear();
@@ -54,18 +55,6 @@ TextArea::TextArea(Font * font) :
   m_bounds.w = Canvas::instance().width();
 }
 
-/*
-static void deleteLink(Link * link)
-{
-  delete link;
-}
-
-void TextArea::removeClickables()
-{
-  for_each(m_links.begin(), m_links.end(), deleteLink);
-  m_links.clear();
-}
-*/
 
 void TextArea::setFont(Font * font)
 {
@@ -89,6 +78,15 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
         Canvas::instance().drawPixel(xPosition+(x*2)+1, yPosition+y, m_palette[pix2]);
     }
     data += dataInc;
+  }
+  if (m_underLine)
+  {
+    // draw underline
+    Canvas::instance().horizontalLine(xPosition,
+                                      yPosition+m_font->height()-1, 
+                                      g.width, 
+                                      m_palette[m_paletteLength-1]);
+
   }
 }
 
@@ -210,7 +208,7 @@ const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int 
     unsigned int position = unicodeString.find_first_not_of(s_delimiters,currPosition);
     position = unicodeString.find_first_of(s_delimiters,position);
     position = position==string::npos?unicodeString.length():position;
-    // now make a word delimted with spaces.
+    // now make a word delimited with spaces.
     word = unicodeString.substr(currPosition,position-currPosition);
     word += ' ';
   }
@@ -296,7 +294,7 @@ bool TextArea::doSingleChar(unsigned int value)
     }
     m_cursorx += g.width;
   }
-  // else ignore new line character.
+  // else ignore new line character. New lines are parsed at entry time
   return (m_cursory > m_bounds.bottom());
 }
 
@@ -369,7 +367,7 @@ void TextArea::setPalette(const std::string & fileName)
     m_paletteLength = size/2;
     setBackgroundColor(m_palette[0]);
   } else {
-    /* If the font is not opened, then set the bg red */
+    /* If the font is not opened, then set the background red */
     Canvas::instance().fillRectangle(0,0,256,192,Color(31,0,0));
     setBackgroundColor(Color(31,0,0));
   }
@@ -393,6 +391,11 @@ TextArea::~TextArea()
   delete [] m_palette;
 }
 
+int TextArea::linesToSkip() const
+{
+  return - ( (m_bounds.y-(m_font->height()/2))/m_font->height() );
+}
+
 /** Paint the text area. */
 void TextArea::paint(const nds::Rectangle & clip)
 {
@@ -407,11 +410,11 @@ void TextArea::paint(const nds::Rectangle & clip)
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
   // work out the number of lines to skip
   std::vector<UnicodeString>::const_iterator it(m_document.begin());
-  int skipLines((m_bounds.y-(m_font->height()/2))/m_font->height());
-  if (skipLines < 0)
+  int skipLines = linesToSkip();
+  if (skipLines > 0)
   {
-    setCursor(m_bounds.x, m_bounds.y + (-skipLines)*m_font->height());
-    it += (-skipLines);
+    setCursor(m_bounds.x, m_bounds.y + skipLines*m_font->height());
+    it += skipLines;
   }
 
   for (; it != m_document.end() and m_cursory < m_bounds.bottom(); ++it)

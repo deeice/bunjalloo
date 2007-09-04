@@ -24,10 +24,16 @@ class TextAreaFactory
 {
 
   public:
+    enum TextType
+    {
+      TXT_NORMAL,
+      TXT_EDIT,
+      TXT_RICH
+    };
     /** The user is responsible for calling delete on each TextArea created.
      * @return a new TextArea.
      */
-    static TextArea * create(bool editable=false);
+    static TextArea * create(TextType type=TXT_NORMAL);
 
   private:
     TextAreaFactory();

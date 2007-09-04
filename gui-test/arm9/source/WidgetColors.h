@@ -23,7 +23,7 @@
 class WidgetColors
 {
   public:
-    //! Button forground.
+    //! Button foreground.
     const static unsigned short BUTTON_FOREGROUND;
     //! Button pressed.
     const static unsigned short BUTTON_PRESSED;
@@ -49,5 +49,10 @@ class WidgetColors
     static const unsigned short SCROLLBAR_HANDLE_NOT_HELD;
     //!ScrollBar handle when the user has it selected.
     static const unsigned short SCROLLBAR_HANDLE_HELD;
+
+    //!Link text when it has been selected.
+    static const unsigned short LINK_CLICKED;
+    //!Link text under normal conditions.
+    static const unsigned short LINK_REGULAR;
 };
 #endif

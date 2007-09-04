@@ -19,7 +19,7 @@
 #define TextListener_h_seen
 
 class TextEntryI;
-/** Interface for a class that is interested in editting a TextEntryI.*/
+/** Interface for a class that is interested in editing a TextEntryI.*/
 class TextListener
 {
   public:
@@ -28,7 +28,7 @@ class TextListener
 
     /** This method is typically called by the TextEntryI when it is touched by
      * the user.
-     * @param entry the TextEntryI that is to be editted.
+     * @param entry the TextEntryI that is to be edited.
      */
     virtual void editText(TextEntryI * entry) = 0;
 };

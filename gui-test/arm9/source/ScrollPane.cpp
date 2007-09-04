@@ -291,7 +291,7 @@ bool ScrollPane::touch(int x, int y)
     return false;
   if (m_topLevel and s_popup and s_popup->bounds().hit(x, y))
   {
-    // do not process other events if we hit the popup menu.
+    // do not process other events if we hit the pop-up menu.
     s_popup->touch(x, y);
     return true;
   }
@@ -387,7 +387,7 @@ void ScrollPane::adjustScroll(int & scrollIncrement)
   if (offSet < 0)
   {
     // scrolled too far.
-    // rejig m_scrollIncrement so that offset == 0
+    // change scrollIncrement so that offset == 0
     scrollIncrement += offSet;
   }
 }
