@@ -44,6 +44,8 @@ ViewRender::ViewRender(View * self):
 
 void ViewRender::preFormat(const HtmlElement * element)
 {
+  // FIXME - BWT changes - this needs rewriting!
+#if 0
   if (element->isa(HtmlConstants::A_TAG))
   {
     m_self->m_textArea->setTextColor(nds::Color(0,0,31));
@@ -71,10 +73,13 @@ void ViewRender::preFormat(const HtmlElement * element)
   {
     m_self->m_textArea->insertNewline();
   }
+#endif
 }
 
 void ViewRender::postFormat(const HtmlElement * element)
 {
+  // FIXME - BWT changes - this needs rewriting!
+#if 0
   if (element->isa(HtmlConstants::PRE_TAG))
   {
     m_self->m_textArea->setParseNewline(false);
@@ -123,10 +128,13 @@ void ViewRender::postFormat(const HtmlElement * element)
     m_self->m_textArea->insertNewline();
   }
   */
+#endif
 }
 
 bool ViewRender::applyFormat(const HtmlElement * element)
 {
+  // FIXME - BWT changes - this needs rewriting!
+#if 0
   if (not element->text().empty())
   {
     m_self->m_textArea->printu(element->text());
@@ -176,6 +184,7 @@ bool ViewRender::applyFormat(const HtmlElement * element)
     renderInput(element);
     return false; 
   }
+#endif
   return true;
 }
 
@@ -219,27 +228,35 @@ void ViewRender::setBgColor(const HtmlElement * body)
   {
     unsigned int rgb8 = ((HtmlBodyElement*)body)->bgColor();
     nds::Color col( ((rgb8 >> 16)&0xff)/8, ((rgb8 >> 8)&0xff)/8, (rgb8&0xff)/8);
+    /** FIXME - BWT changes
     m_self->m_textArea->setBackgroundColor(col);
+    */
   }
 }
 
 void ViewRender::doImage(const UnicodeString & imgStr)
 {
+  /** FIXME - BWT changes
   m_self->m_textArea->setTextColor(nds::Color(0,31,0));
   m_self->m_textArea->printu(imgStr);
   m_self->m_textArea->setTextColor(nds::Color(0,0,0));
+  */
 }
 
 void ViewRender::render()
 {
+  /** FIXME - BWT changes
   m_self->m_textArea->setCursor(0, 0);
   m_self->m_textArea->setParseNewline(false);
+  */
   const HtmlElement * root = m_self->m_document.rootNode();
   assert(root->isa(HtmlConstants::HTML_TAG));
   assert(root->hasChildren());
   const HtmlElement * body = root->lastChild();
   setBgColor(body);
+  /** FIXME - BWT changes
   m_self->m_textArea->clear();
+  */
   if (body->hasChildren())
   {
     walkTree(body);
@@ -248,6 +265,7 @@ void ViewRender::render()
 
 void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
+  /** FIXME - BWT changes
   // render the select
   Select * formSelect = new Select( const_cast<HtmlElement*>(selectElement));
   if (selectElement->hasChildren())
@@ -262,10 +280,13 @@ void ViewRender::renderSelect(const HtmlElement * selectElement)
     }
   }
   m_self->m_textArea->addFormControl(formSelect);
+  */
 }
 
 void ViewRender::renderInput(const HtmlElement * inputElement)
 {
+  /** FIXME - BWT changes */
+#if 0
   //Input * formInput = new Input;
   string type = unicode2string(inputElement->attribute("type"));
   if (type == "submit")
@@ -283,4 +304,5 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
     PasswordField * text = new PasswordField(const_cast<HtmlElement*>(inputElement), m_self->m_textArea);
     m_self->m_textArea->addFormControl(text);
   } 
+#endif
 }

@@ -31,6 +31,7 @@
 #include "ButtonGroup.h"
 #include "CheckBox.h"
 #include "Keyboard.h"
+#include "vera.h"
 
 extern const char _binary_test_map_bin_start[];
 
@@ -39,6 +40,9 @@ int main(int argc, char * argv[])
 {
   irqInit();
   irqSet(IRQ_VBLANK,0);
+  static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
+  TextAreaFactory::setFont(&font);
+  TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
 
   RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
   TextArea * t = TextAreaFactory::create();

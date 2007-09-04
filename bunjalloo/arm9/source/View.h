@@ -23,7 +23,8 @@
 class Document;
 class ControllerI;
 
-class TextArea;
+// class TextArea;
+class ScrollPane;
 class Keyboard;
 class ViewRender;
 class FormControl;
@@ -57,7 +58,8 @@ class View : public ViewI
 
     Document & m_document;
     ControllerI & m_controller;
-    TextArea * m_textArea;
+    // TextArea * m_textArea;
+    ScrollPane * m_scrollPane;
     Keyboard * m_keyboard;
     ViewRender * m_renderer;
     InputState m_state;

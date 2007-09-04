@@ -63,7 +63,9 @@ void InputText::draw(TextArea * textArea)
       break;
     }
   }
+  /** Broken by BWT.
   textArea->printu(text);
+  */
 }
 
 FormControl::InputType InputText::inputType() const

@@ -22,7 +22,9 @@
 #include "View.h"
 #include "URI.h"
 #include "HttpClient.h"
+#include "TextAreaFactory.h"
 #include "Config.h"
+#include "Font.h"
 #include "File.h"
 
 using namespace std;
@@ -40,6 +42,8 @@ Controller::Controller()
   : m_document(new Document())
 {
   m_config = new Config(*m_document);
+  TextAreaFactory::setFont(new Font(m_config->font()));
+  TextAreaFactory::usePaletteName(m_config->font()+".pal");
   m_view = new View(*m_document, *this);
 }
 

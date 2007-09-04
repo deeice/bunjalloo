@@ -4,11 +4,9 @@ export OBJCOPYFLAGS:=-I binary -O elf32-i386 -B i386
 export BUILD:=build.sdl
 
 all:
-	@$(MAKE) --no-print-dir -C img
 	@$(MAKE) --no-print-dir -C fonts
 
 clean:
-	@$(MAKE) --no-print-dir -C img clean
 	@$(MAKE) --no-print-dir -C fonts clean
 
 # vim: syntax=make

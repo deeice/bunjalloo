@@ -6,7 +6,7 @@ ASFLAGS :=	$(ARM9FLAGS)
 VPATH	:=	$(ARM9_VPATH)
 DEPSDIR	:=	$(DEPENDS)/arm9
 
-$(LIBDIR)/libndspp9.a:	$(ARM9OBJS)
+$(LIBDIR)/libbwt.a:	$(ARM9OBJS)
 
 -include $(DEPSDIR)/*.d
 

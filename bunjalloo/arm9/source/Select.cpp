@@ -47,6 +47,7 @@ void Select::addOption(const HtmlElement * option, const TextArea* textArea)
 
 void Select::draw(TextArea * textArea)
 {
+  /** Broken by BWT.
   FormControl::draw(textArea);
   ElementVector::const_iterator it(m_options.begin());
   for (; it != m_options.end(); ++it)
@@ -60,4 +61,5 @@ void Select::draw(TextArea * textArea)
       break;
     }
   }
+  */
 }

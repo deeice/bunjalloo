@@ -26,7 +26,8 @@
 #include "FormControl.h"
 #include "Keyboard.h"
 #include "Link.h"
-#include "TextArea.h"
+// #include "TextArea.h"
+#include "ScrollPane.h"
 #include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
@@ -37,13 +38,17 @@ const static int STEP(1);
 View::View(Document & doc, ControllerI & c):
   m_document(doc), 
   m_controller(c),
-  m_textArea(new TextArea( new Font ( c.config().font() ) ) ),
-  m_keyboard(new Keyboard(*m_textArea)),
+//  m_textArea(new TextArea( new Font ( c.config().font() ) ) ),
+  m_scrollPane(new ScrollPane),
+  // m_keyboard(new Keyboard(*m_textArea)),
+  m_keyboard(new Keyboard),
   m_renderer(new ViewRender(this)),
   m_state(BROWSE),
   m_form(0)
 {
-  m_textArea->setPalette(c.config().font()+".pal");
+  // m_textArea->setPalette(c.config().font()+".pal");
+  m_scrollPane->setTopLevel();
+  m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
   m_document.registerView(this);
   keysSetRepeat( 10, 5 );
 }
@@ -55,17 +60,22 @@ void View::notify()
   switch (status) {
     case Document::LOADED:
       {
-        m_textArea->setStartLine( (-SCREEN_HEIGHT / m_textArea->font().height()) - 1);
+        /** Broken by BWT.
+         m_textArea->setStartLine( (-SCREEN_HEIGHT / m_textArea->font().height()) - 1);
+         */
         m_renderer->render();
         swiWaitForVBlank();
       }
       break;
     case Document::INPROGRESS:
       {
+        /** FIXME - broken by BWT.
         const char * l = "Loading..";
         m_textArea->setCursor(0, 0);
         m_textArea->print(l, strlen(l));
+        */
         unsigned int pc = m_document.percentLoaded();
+        // FIXME - double buffering means this no longer works
         nds::Canvas::instance().fillRectangle(0,40, SCREEN_WIDTH, 20, nds::Color(31,31,31));
         nds::Canvas::instance().fillRectangle(0,40, pc*SCREEN_WIDTH / 100, 20, nds::Color(30,20,0));
         swiWaitForVBlank();
@@ -81,21 +91,27 @@ void View::browse()
   u16 keys = keysDownRepeat();
   if (keys & KEY_START) {
     nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
+    /** FIXME - BWT
     m_preInputStartLine = m_textArea->startLine();
+    */
     m_keyboard->setVisible();
     m_state = KEYBOARD;
   }
   if (keys & KEY_DOWN) {
     // scroll down ...
+    /** FIXME - BWT
     m_textArea->setStartLine(m_textArea->startLine()+STEP);
+    */
     m_renderer->render();
   }
   if (keys & KEY_UP) {
     // scroll up ...
+    /** FIXME - BWT
     if (m_textArea->startLine() > ((-SCREEN_HEIGHT / m_textArea->font().height()) - 1)) {
       m_textArea->setStartLine(m_textArea->startLine()-STEP);
       m_renderer->render();
     }
+    */
   }
   if (keys & KEY_LEFT) {
     m_controller.previous();
@@ -107,7 +123,10 @@ void View::browse()
     // render the node tree
     m_document.dumpDOM();
   }
-  if (keys & KEY_TOUCH) {
+  if (keys & KEY_TOUCH)
+  {
+    // FIXME - BWT
+#if 0
     touchPosition tp = touchReadXY();
     Link * clicked = m_textArea->clickLink(tp.px, tp.py+SCREEN_HEIGHT);
     if (clicked != 0)
@@ -152,23 +171,31 @@ void View::browse()
         }
       }
     }
+#endif
   }
 }
 
 void View::keyboard()
 {
   if (m_keyboard->visible()) {
+    /** FIXME - BWT changes
     m_keyboard->handleInput();
+    */
     if (not m_keyboard->visible())
     {
       nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
       if (not m_keyboard->result().empty())
       {
+        /** FIXME  - conver UnicodeString to std::string
+         * BWT Keyboard returns Unicode.
         m_controller.doUri(m_keyboard->result());
+        */
       }
       else
       {
+        /** FIXME BWT
         m_textArea->setStartLine(m_preInputStartLine);
+        */
         m_renderer->render();
       }
     }
@@ -181,6 +208,8 @@ void View::keyboard()
 
 void View::formKeyboard()
 {
+  // FIXME - BWT changes break most of this.
+#if 0
   if (m_keyboard->visible()) {
     m_keyboard->handleInput();
     if (not m_keyboard->visible())
@@ -199,6 +228,7 @@ void View::formKeyboard()
   {
     m_state = BROWSE;
   }
+#endif
 }
 
 void View::tick()

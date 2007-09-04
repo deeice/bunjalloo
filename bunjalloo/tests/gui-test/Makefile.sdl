@@ -28,6 +28,7 @@ arm9/$(TARGET).exe:
 
 #---------------------------------------------------------------------------------
 clean:
+	$(MAKE) -f Makefile.sdl -C common clean
 	$(MAKE) -f Makefile.sdl -C arm9 clean
 	rm -f $(TARGET)
 

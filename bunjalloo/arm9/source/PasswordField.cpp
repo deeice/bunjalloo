@@ -49,5 +49,7 @@ void PasswordField::draw(TextArea * textArea)
     }
   }
   UnicodeString pass(text.length(), '*');
+  /** Broken by BWT.
   textArea->printu(pass);
+  */
 }

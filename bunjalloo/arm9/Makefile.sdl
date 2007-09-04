@@ -13,13 +13,13 @@ LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lpcnds -lpthread `sdl-config --libs` -limg
+LIBS	:= -lpcbwt -lpcnds -lpthread `sdl-config --libs` -limg
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(TOPDIR)/../libndspp 
+LIBDIRS	:=	$(TOPDIR)/bwt  $(TOPDIR)/../libndspp 
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional

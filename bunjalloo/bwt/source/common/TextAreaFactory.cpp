@@ -21,26 +21,54 @@
 #include "TextArea.h"
 #include "EditableTextArea.h"
 #include "RichTextArea.h"
-#include "Font.h"
-#include "vera.h"
+// #include "vera.h"
+
+Font * TextAreaFactory::s_font(0);
+const char* TextAreaFactory::s_paletteData(0);
+int TextAreaFactory::s_paletteSize(0);
+std::string TextAreaFactory::s_name;
 
 TextArea * TextAreaFactory::create(TextType type)
 {
-  static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
+  // static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
 
   TextArea * t(0);
   switch (type)
   {
     case TXT_NORMAL:
-      t = new TextArea(&font);
+      t = new TextArea(s_font);
       break;
     case TXT_EDIT:
-      t = new EditableTextArea(&font);
+      t = new EditableTextArea(s_font);
       break;
     case TXT_RICH:
-      t = new RichTextArea(&font);
+      t = new RichTextArea(s_font);
       break;
   }
-  t->setPalette((const char*)_binary_vera_pal_bin_start, 32);
+  if (s_name.empty())
+  {
+    t->setPalette(s_paletteData, s_paletteSize);
+  }
+  else
+  {
+    t->setPalette(s_name);
+  }
   return t;
+}
+
+void TextAreaFactory::setFont(Font * font)
+{
+  s_font = font;
+}
+
+void TextAreaFactory::usePaletteName(const std::string & name)
+{
+  s_name = name;
+  s_paletteData = 0;
+}
+void TextAreaFactory::usePaletteData(const char * data, int size)
+{
+  s_name.clear();
+  s_paletteData = data;
+  s_paletteSize = size;
 }

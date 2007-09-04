@@ -18,7 +18,10 @@
 #ifndef TextAreaFactory_h_seen
 #define TextAreaFactory_h_seen
 
+#include <string>
+
 class TextArea;
+class Font;
 /** A factory that generates TextArea instances. */
 class TextAreaFactory
 {
@@ -35,7 +38,30 @@ class TextAreaFactory
      */
     static TextArea * create(TextType type=TXT_NORMAL);
 
+    /** Set the font to be used, must be called before calling create(),
+     * @param font the font to use.
+     */
+    static void setFont(Font * font);
+
+    /** Set the palette name to be used. Either usePaletteName() or
+     * usePaletteData() must be called before using create().
+     * @param name the palette file name to use.
+     */
+    static void usePaletteName(const std::string & name);
+
+    /** Set the palette data to be used. Either usePaletteName() or
+     * usePaletteData() must be called before using create().
+     * @param data the palette data to use.
+     * @param size the size of the data.
+     */
+    static void usePaletteData(const char * data, int size);
+
   private:
+    static Font * s_font;
+    static std::string s_name;
+    static const char * s_paletteData;
+    static int s_paletteSize;
+
     TextAreaFactory();
     ~TextAreaFactory();
     TextAreaFactory(const TextAreaFactory &);

@@ -1,6 +1,6 @@
 BUILD		:=	build.sdl
 SOURCES		:=	source  
-INCLUDES	:=	include ../common/fonts/
+INCLUDES	:=	include
 DATA		:=
 
 CFLAGS	:=	-g -Wall  -DDATADIR=$(DATADIR)
@@ -13,14 +13,14 @@ LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lpcnds -lpthread `sdl-config --libs` -limg -lfont 
+LIBS	:= -lpcbwt -lpcnds -lpthread `sdl-config --libs` -lpcbwt -limg -lfont 
 # -L$(TOPDIR) -lDEBUG
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(TOPDIR)/../libndspp 
+LIBDIRS	:=	$(LIBNDSPP)  $(LIBBWT)
 
 #---------------------------------------------------------------------------------
 # no real need to edit anything past this point unless you need to add additional
@@ -59,13 +59,12 @@ export OFILES	:=	$(addsuffix .o,$(BINFILES)) \
  
 export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 			$(foreach dir,$(LIBDIRS),-I$(dir)/include) \
-                        -I$(CURDIR)/$(BUILD) -I$(TOPDIR)/common/img \
-                        -I$(TOPDIR)/common/builtin
+                        -I$(CURDIR)/$(BUILD)   -I$(TOPDIR)/common/fonts/
 
  
-export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) -L$(TOPDIR)/common/img/build.sdl \
-                        -L$(TOPDIR)/common/builtin/build.sdl \
+export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib)  -L$(LIBBWT)/common/img/build.sdl \
                         -L$(TOPDIR)/common/fonts/build.sdl
+
  
 .PHONY: $(BUILD) clean
  
@@ -92,7 +91,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 # main targets
 #---------------------------------------------------------------------------------
 
-$(ARM9ELF)	:	$(OFILES) $(TOPDIR)/../libndspp/lib/libpcnds.a
+$(ARM9ELF)	:	$(OFILES) $(LIBNDSPP)/lib/libpcnds.a
 	@echo linking $(notdir $@)
 	$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 

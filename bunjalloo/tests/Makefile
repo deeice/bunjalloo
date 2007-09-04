@@ -1,5 +1,6 @@
 .PHONY: clean all
 
+export LIBBWT:=$(CURDIR)/../bwt
 SUBDIRS:= $(shell ls | egrep -v '^Main')
 
 all:

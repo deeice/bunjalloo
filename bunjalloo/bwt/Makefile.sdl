@@ -5,7 +5,7 @@
 #---------------------------------------------------------------------------------
 BUILD		:= build
 
-SOURCES :=	source/pc source/common
+SOURCES :=	source/common
 
 DATESTRING	:=	$(shell date +%Y)$(shell date +%m)$(shell date +%d)
 
@@ -29,7 +29,8 @@ export OBJS :=	$(BINFILES:.bin=.o) $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
 export ARCH	:=	
 
 export BASEFLAGS	:=	-g -Wall \
-				-I$(INCDIR) -I$(BASEDIR)/source/pc
+                                -I$(INCDIR) -I$(BASEDIR)/source/common \
+                                -I$(LIBNDSPP)/include -I$(BASEDIR)/common/img
 
 
 .PHONY:	all libs dist docs
@@ -37,6 +38,7 @@ export BASEFLAGS	:=	-g -Wall \
 #---------------------------------------------------------------------------------
 all:	$(DEPENDS) lib $(BUILD)/pc
 #---------------------------------------------------------------------------------
+	@$(MAKE) -C $(BASEDIR)/common -f Makefile.sdl
 	@$(MAKE) -C $(BUILD)/pc -f $(BASEDIR)/Makefile.pc
 
 #---------------------------------------------------------------------------------
@@ -62,17 +64,12 @@ clean:
 #---------------------------------------------------------------------------------
 dist: all
 #---------------------------------------------------------------------------------
-	@tar --exclude=*CVS* -cvjf libndspp-src-$(DATESTRING).tar.bz2 source include license.txt Makefile Makefile.*
-	@tar --exclude=*CVS* -cvjf libndspp-$(DATESTRING).tar.bz2 include lib license.txt
+	@tar --exclude=*CVS* -cvjf libbwt-src-$(DATESTRING).tar.bz2 source include license.txt Makefile Makefile.*
+	@tar --exclude=*CVS* -cvjf libbwt-$(DATESTRING).tar.bz2 include lib license.txt
 
-#---------------------------------------------------------------------------------
-#install: dist
-#---------------------------------------------------------------------------------
-#	mkdir -p /libndspp
-#	bzip2 -cd libndspp-$(DATESTRING).tar.bz2 | tar -xv -C $(DEVKITPRO)/libndspp
 
 #---------------------------------------------------------------------------------
 docs:
 #---------------------------------------------------------------------------------
-	doxygen libpcnds.doxy.cfg
+	doxygen libbwt.doxy.cfg
 

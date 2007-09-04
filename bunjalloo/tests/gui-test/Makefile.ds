@@ -21,14 +21,13 @@ export PATH		:=	$(DEVKITARM)/bin:$(PATH)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-all: cscope.out $(TARGET).ds.gba $(TARGET)-unpatched.nds
+all: $(TARGET).ds.gba $(TARGET)-unpatched.nds
 
 $(TARGET).ds.gba	: $(TARGET).nds
 
 #---------------------------------------------------------------------------------
 $(TARGET).nds	:	$(TARGET).arm7 $(TARGET).arm9
 	@ndstool	-c $(TARGET).nds -7 $(TARGET).arm7 -9 $(TARGET).arm9 \
-	  -b common/data/icon.bmp "$(TARGET);Web Browser;By Richard Quirk" \
 	  > /dev/null
 
 %-unpatched.nds : %.nds
@@ -45,15 +44,12 @@ arm7/$(TARGET).elf:
 	
 #---------------------------------------------------------------------------------
 arm9/$(TARGET).elf:
-	$(MAKE) -C common
+	$(MAKE) -C $(TOPDIR)/common
 	$(MAKE) -C arm9
 
-cscope.out : $(shell find ../libndspp . $(DEVKITPRO)/libnds/  -type f -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl')
-	@rm -f cscope.files
-	@find . ../libndspp $(DEVKITPRO)/libnds/ -name '*.[chs]' -o -name '*.cpp' -o -name '*.inl' > cscope.files
-	@-cscope -b -k -q
 #---------------------------------------------------------------------------------
 clean:
+	$(MAKE) -C common clean
 	$(MAKE) -C arm9 clean
 	$(MAKE) -C arm7 clean
 	rm -f $(TARGET).ds.gba $(TARGET).nds $(TARGET).arm7 $(TARGET).arm9

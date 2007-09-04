@@ -1,14 +1,12 @@
 
 CFILES:=$(wildcard *.cpp)
 OFILES:=$(CFILES:%.cpp=%.o)
-CPPFLAGS += -I../../arm9/source/ -g
+CPPFLAGS += -I../../arm9/source/ -I$(LIBBWT)/include -g
 
 all : tester run
 
 LINKFILES:=Document.o \
-	   UTF8.o \
 	   URI.o \
-	   UnicodeString.o \
 	   Entity.o \
 	   HeaderParser.o \
 	   ParameterSet.o \
@@ -31,7 +29,7 @@ clean:
 	rm -f *.o tester
 
 tester: $(OFILES) $(LINKFILES:%.o=../../arm9/build.sdl/%.o) ../Main.o
-	$(CXX) -o $@ $^ -L.. -lcppunit -ldl
+	$(CXX) -o $@ $^ -L.. -lcppunit -ldl -L$(LIBBWT)/lib -lpcbwt
 
 run: tester
 	@./$<

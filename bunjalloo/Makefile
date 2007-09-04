@@ -4,10 +4,14 @@ target=$(shell basename $(CURDIR))
 export DATADIR:="\"data/$(target)\""
 
 all:  ctags arm9/source/version.c
+	$(MAKE) -C bwt
 	$(MAKE) -f Makefile.ds
 	$(MAKE) -f Makefile.sdl
 
 clean:
+	$(MAKE) -C common clean
+	$(MAKE) -C common -f Makefile.sdl clean
+	$(MAKE) -C bwt clean
 	$(MAKE) -f Makefile.ds clean
 	$(MAKE) -f Makefile.sdl clean
 

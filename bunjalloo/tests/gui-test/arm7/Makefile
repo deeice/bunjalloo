@@ -42,7 +42,7 @@ LIBS	:=	-lnds7 -lndspp7 -ldswifi7
 # list of directories containing libraries, this must be the top level containing
 # include and lib
 #---------------------------------------------------------------------------------
-LIBDIRS	:=	$(LIBNDS) $(TOPDIR)/../libndspp
+LIBDIRS	:=	$(LIBNDS) $(LIBNDSPP)
  
   
 #---------------------------------------------------------------------------------
