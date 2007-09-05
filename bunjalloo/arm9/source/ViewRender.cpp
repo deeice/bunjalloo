@@ -15,27 +15,28 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include <iostream>
 #include <assert.h>
 #include "ndspp.h"
 #include "libnds.h"
+#include "Button.h"
 #include "Canvas.h"
+#include "CheckBox.h"
+#include "ComboBox.h"
 #include "Document.h"
-#include "ViewRender.h"
-#include "View.h"
-#include "RichTextArea.h"
-#include "TextAreaFactory.h"
-#include "ScrollPane.h"
+#include "File.h"
+#include "HtmlBodyElement.h"
+#include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "HtmlImageElement.h"
-#include "HtmlBodyElement.h"
-#include "File.h"
 #include "Keyboard.h"
-#include "ComboBox.h"
-#include "Button.h"
-#include "TextField.h"
 // #include "PasswordField.h"
-#include "HtmlConstants.h"
+#include "RadioButton.h"
+#include "RichTextArea.h"
+#include "ScrollPane.h"
+#include "TextAreaFactory.h"
+#include "TextField.h"
+#include "View.h"
+#include "ViewRender.h"
 
 using namespace std;
 
@@ -65,26 +66,25 @@ void ViewRender::preFormat(const HtmlElement * element)
   {
     textArea()->addLink( unicode2string(element->attribute("href")) );
   }
-#if 0
   else if (element->isa(HtmlConstants::PRE_TAG))
   {
-    m_self->m_textArea->setParseNewline(true);
+    textArea()->setParseNewline(true);
   }
   else if (element->isa(HtmlConstants::UL_TAG) or element->isa(HtmlConstants::OL_TAG))
   {
-    m_self->m_textArea->increaseIndent();
+    // FIXME!!
+    /** m_self->m_textArea->increaseIndent(); */
     if (not element->isBlock() and element->parent()->isa(HtmlConstants::LI_TAG))
-      m_self->m_textArea->insertNewline();
+      textArea()->insertNewline();
   }
   else if (element->isa(HtmlConstants::LI_TAG)) {
     const HtmlElement * prev(element->parent()->previousSibling(element));
-    if (prev and prev->isa("#TEXT"))
+    if (prev and prev->isa("#TEXT")) // TODO - remove #TEXT and so forth
     {
-      m_self->m_textArea->insertNewline();
+      textArea()->insertNewline();
     }
   }
 
-#endif
   if (element->isBlock())
   {
     textArea()->insertNewline();
@@ -93,13 +93,13 @@ void ViewRender::preFormat(const HtmlElement * element)
 
 void ViewRender::postFormat(const HtmlElement * element)
 {
-  // FIXME - BWT changes - this needs rewriting!
   if (element->isa(HtmlConstants::PRE_TAG))
   {
     textArea()->setParseNewline(false);
   }
   else if (element->isa(HtmlConstants::UL_TAG) or element->isa(HtmlConstants::OL_TAG))
   {
+    // FIXME - BWT changes - this needs rewriting!
 #if 0
     textArea()->decreaseIndent();
     // only add an extra \n if the ul is a top level one
@@ -144,11 +144,6 @@ void ViewRender::postFormat(const HtmlElement * element)
 
 bool ViewRender::applyFormat(const HtmlElement * element)
 {
-  // FIXME - BWT changes - this needs rewriting!
-  // Buttons should have setListener called thus:
-  // button->setListener(m_self);
-  // this way, on clicking it calls View::pressed()
-  // View::pressed can then post the form, or whatever.
   if (not element->text().empty())
   {
     textArea()->appendText(element->text());
@@ -245,6 +240,7 @@ void ViewRender::setBgColor(const HtmlElement * body)
     nds::Color col( ((rgb8 >> 16)&0xff)/8, ((rgb8 >> 8)&0xff)/8, (rgb8&0xff)/8);
     /** FIXME - BWT changes
     m_self->m_textArea->setBackgroundColor(col);
+    - semi fixed, but not perfect
     */
     m_self->m_scrollPane->setBackgroundColor(col);
   }
@@ -252,11 +248,6 @@ void ViewRender::setBgColor(const HtmlElement * body)
 
 void ViewRender::doImage(const UnicodeString & imgStr)
 {
-  /** FIXME - BWT changes
-  m_self->m_textArea->setTextColor(nds::Color(0,31,0));
-  m_self->m_textArea->printu(imgStr);
-  m_self->m_textArea->setTextColor(nds::Color(0,0,0));
-  */
   textArea()->setColor(nds::Color(0,21,0));
   textArea()->appendText(imgStr);
   textArea()->endColor();
@@ -275,7 +266,6 @@ void ViewRender::render()
   {
     walkTree(body);
   }
-  cout << "Rendered... almost " << endl;
   ScrollPane & scrollPane(*m_self->m_scrollPane);
   scrollPane.setLocation(0,0);
   scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
@@ -287,7 +277,7 @@ void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
   ComboBox * select = new ComboBox;
   m_textArea = 0;
-  /** FIXME - BWT changes
+  /** FIXME - BWT changes - can I delete Select now?
   // render the select
   Select * formSelect = new Select( const_cast<HtmlElement*>(selectElement));
   */
@@ -320,7 +310,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
   if (not sizeText.empty())
   {
     size = strtol(sizeText.c_str(), 0, 0);
-    size *= 8; // FIXME! should be: textArea->font().height();
+    size *= 8; // FIXME! should be: textArea->font().height(); ?
   }
   if (size > MAX_SIZE)
     size = MAX_SIZE;
@@ -348,6 +338,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
   } 
   else if (type == "password")
   {
+    // TODO - password field should show *** instead of real text.
     TextField * text = new TextField(UnicodeString());
     m_textArea = 0;
     if (size <= 0)
@@ -355,5 +346,21 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
     text->setListener(m_self->m_keyboard);
     text->setSize(size, text->preferredSize().h);
     m_self->m_scrollPane->add(text);
-  } 
+  }
+  else if (type == "checkbox")
+  {
+    m_textArea = 0;
+    CheckBox * checkbox = new CheckBox;
+    m_self->m_scrollPane->add(checkbox);
+  }
+  else if (type == "radio")
+  {
+    m_textArea = 0;
+    RadioButton * radio = new RadioButton;
+    m_self->m_scrollPane->add(radio);
+  }
+  else
+  {
+    // cout << "Type not supported: " << type << endl;
+  }
 }

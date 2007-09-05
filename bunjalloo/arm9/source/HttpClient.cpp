@@ -94,7 +94,7 @@ void HttpClient::debug(const char * s)
     log.open("bunjalloo.log", "a");
     log.write(s);
     log.write("\n");
-    printf("debug:%s\n",s);
+    // printf("debug:%s\n",s);
   } 
   //m_self->m_document->appendLocalData(s, strlen(s));
 }

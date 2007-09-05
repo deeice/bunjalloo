@@ -39,7 +39,7 @@ LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -mno-fpu -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=  -lbwt -lndspp9 -lfat -lnds9 -ldswifi9 -limg
+LIBS	:=  -lbwt -lndspp9 -lfat -lnds9 -ldswifi9 -limg -lbwtimg
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -89,7 +89,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
                         -I$(TOPDIR)/common/builtin/
  
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) -L$(TOPDIR)/common/img/build.ds \
-                        -L$(TOPDIR)/common/builtin/build.ds
+                        -L$(TOPDIR)/common/builtin/build.ds -L$(TOPDIR)/bwt/common/img/build.ds
  
 .PHONY: $(BUILD) clean
  
@@ -116,7 +116,7 @@ $(ARM9BIN)	:	$(ARM9ELF)
 	@$(OBJCOPY) -O binary $< $@
 	@echo built ... $(notdir $@)
 
-$(ARM9ELF)	:	$(OFILES)  $(TOPDIR)/../libndspp/lib/libndspp9.a
+$(ARM9ELF)	:	$(OFILES)  $(TOPDIR)/../libndspp/lib/libndspp9.a $(TOPDIR)/bwt/lib/libbwt.a
 	@echo linking $(notdir $@)
 	@$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 

@@ -209,7 +209,7 @@ void HeaderParser::field()
       default:
         // parse error?
         m_state = PARSE_ERROR;
-        printf("%s",m_position-1);
+        // printf("%s",m_position-1);
         assert(m_state != PARSE_ERROR);
         break;
     }

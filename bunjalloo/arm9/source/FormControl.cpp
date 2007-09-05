@@ -184,7 +184,11 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
   else {
     std::string contentType = "Content-Type: application/x-www-form-urlencoded\r\n";
     char buffer[256];
+#ifdef ARM9
+    siprintf(buffer, "%d", processedData.length());
+#else
     sprintf(buffer, "%d", processedData.length());
+#endif
     contentType += "Content-Length: ";
     contentType += buffer;
     contentType += "\r\n";

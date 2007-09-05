@@ -1,4 +1,3 @@
-#include <iostream>
 #include "Link.h"
 #include "LinkListener.h"
 #include "Palette.h"

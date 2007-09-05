@@ -332,7 +332,11 @@ UnicodeString URI::escape(const UnicodeString & input)
     unsigned int value = *it;
     if ( isEscapable(value))
     {
+#ifdef ARM9
+      siprintf(buffer, "%%%02X", value);
+#else
       sprintf(buffer, "%%%02X", value);
+#endif
       char * src = buffer;
       while (*src != 0) {
         output += *src;

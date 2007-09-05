@@ -16,7 +16,6 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include <libgen.h>
-//#include <iostream>
 #include "ndspp.h"
 #include "libnds.h"
 #include "Canvas.h"
@@ -142,48 +141,34 @@ void View::pressed(ButtonI * button)
 {
   // FIXME - BWT - callback for button presses
   // Hmm, how to go from the button pressed to the form it lives in?
+  // Originally, each control had a HtmlElement associated with it...
 #if 0
-  Link * clicked = m_textArea->clickLink(tp.px, tp.py+SCREEN_HEIGHT);
-  if (clicked != 0)
+  // check for form click
+  FormControl * formClick = m_textArea->clickForm(tp.px, tp.py+SCREEN_HEIGHT);
+  if (formClick) 
   {
-    clicked->highlight();
-    string s = clicked->href();
-
-    m_textArea->setStartLine(0);
-    URI uri(m_document.uri());
-    //cout << "Navigated to " << tmpURI.asString() << endl;
-    // TODO - "navigate or download"..
-    m_controller.doUri( uri.navigateTo(s).asString() );
-  }
-  else
-  {
-    // check for form click
-    FormControl * formClick = m_textArea->clickForm(tp.px, tp.py+SCREEN_HEIGHT);
-    if (formClick) 
+    // more complex than the link..
+    m_form = formClick;
+    switch (m_form->inputType())
     {
-      // more complex than the link..
-      m_form = formClick;
-      switch (m_form->inputType())
-      {
-        case FormControl::ONE_CLICK:
-          {
-            // m_form->input
-            URI uri(m_document.uri());
-            m_form->input(tp.px, tp.py, m_controller, uri);
-            m_state = BROWSE;
-          }
-          break;
-        case FormControl::KEYBOARD:
-          {
-            m_state = FORM_KEYBOARD;
-            m_preInputStartLine = m_textArea->startLine();
-            m_keyboard->setVisible();
-          }
-          break;
-        case FormControl::MENU:
-          m_state = FORM;
-          break;
-      }
+      case FormControl::ONE_CLICK:
+        {
+          // m_form->input
+          URI uri(m_document.uri());
+          m_form->input(tp.px, tp.py, m_controller, uri);
+          m_state = BROWSE;
+        }
+        break;
+      case FormControl::KEYBOARD:
+        {
+          m_state = FORM_KEYBOARD;
+          m_preInputStartLine = m_textArea->startLine();
+          m_keyboard->setVisible();
+        }
+        break;
+      case FormControl::MENU:
+        m_state = FORM;
+        break;
     }
   }
 #endif

@@ -13,7 +13,7 @@ LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lpcbwt -lpcnds -lpthread `sdl-config --libs` -limg
+LIBS	:= -lpcbwt -lpcnds -lpthread `sdl-config --libs` -limg -lbwtimg
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -63,7 +63,7 @@ export INCLUDE	:=	$(foreach dir,$(INCLUDES),-I$(CURDIR)/$(dir)) \
 
  
 export LIBPATHS	:=	$(foreach dir,$(LIBDIRS),-L$(dir)/lib) -L$(TOPDIR)/common/img/build.sdl \
-                        -L$(TOPDIR)/common/builtin/build.sdl
+                        -L$(TOPDIR)/common/builtin/build.sdl -L$(TOPDIR)/bwt/common/img/build.sdl
  
 .PHONY: $(BUILD) clean
  

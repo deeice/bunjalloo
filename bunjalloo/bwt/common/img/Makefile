@@ -2,7 +2,7 @@
 
 GRITFLAGS := -pw 16 -gB 8 -m -ft b
 IMGFILES := $(wildcard *.png)
-LIBNAME:=$(BUILD)/libimg.a
+LIBNAME:=$(BUILD)/libbwtimg.a
 OFILES := $(IMGFILES:%.png=$(BUILD)/%.pal.o) $(IMGFILES:%.png=$(BUILD)/%.img.o) $(IMGFILES:%.png=$(BUILD)/%.map.o)
 HFILES := $(IMGFILES:%.png=%.h)
 
