@@ -46,5 +46,6 @@ bool isWhitespace(unsigned int value);
  * @param modify the string that is stripped in place.
  */
 void stripWhitespace(std::string & modify);
+void stripWhitespace(UnicodeString & modify);
 
 #endif

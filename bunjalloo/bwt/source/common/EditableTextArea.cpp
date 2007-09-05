@@ -34,6 +34,7 @@ EditableTextArea::EditableTextArea(Font * font) :
   m_appendedNewLine(false),
   m_scrollPane(0)
 {
+  setListener(0);
 }
 
 void EditableTextArea::paint(const nds::Rectangle & clip)

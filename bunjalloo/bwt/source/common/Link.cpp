@@ -16,18 +16,24 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "Link.h"
-#include "Rectangle.h"
-#include "Canvas.h"
-#include "Palette.h"
-
-using nds::Rectangle;
+#include "WidgetColors.h"
 
 Link::Link(const std::string & a) :
   m_textStart(0),
   m_textEnd(0),
+  m_color(WidgetColors::LINK_REGULAR),
   m_clicked(false),
   m_anchor(a)
 { }
+
+Link::Link(unsigned short color) :
+  m_textStart(0),
+  m_textEnd(0),
+  m_color(color),
+  m_clicked(false),
+  m_anchor("")
+{ }
+
 
 std::string Link::href() const
 {
@@ -39,4 +45,11 @@ std::string Link::href() const
   return unicode2string(href);
   */
   return m_anchor;
+}
+
+Link::EventType Link::eventType() const
+{
+  if (m_anchor.empty())
+    return STATE_COLOR;
+  return STATE_LINK;
 }

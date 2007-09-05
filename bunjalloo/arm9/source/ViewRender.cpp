@@ -15,7 +15,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-//#include <iostream>
+#include <iostream>
 #include <assert.h>
 #include "ndspp.h"
 #include "libnds.h"
@@ -23,34 +23,49 @@
 #include "Document.h"
 #include "ViewRender.h"
 #include "View.h"
-#include "TextArea.h"
+#include "RichTextArea.h"
+#include "TextAreaFactory.h"
+#include "ScrollPane.h"
 #include "HtmlElement.h"
 #include "HtmlImageElement.h"
 #include "HtmlBodyElement.h"
 #include "File.h"
-#include "Select.h"
+#include "Keyboard.h"
+#include "ComboBox.h"
 #include "Button.h"
-#include "InputText.h"
-#include "PasswordField.h"
+#include "TextField.h"
+// #include "PasswordField.h"
 #include "HtmlConstants.h"
 
 using namespace std;
 
 ViewRender::ViewRender(View * self):
   m_self(self),
+  m_textArea(0),
   m_lastElement(0)
 {
+}
+
+RichTextArea * ViewRender::textArea()
+{
+  if (m_textArea == 0)
+  {
+    m_textArea = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
+    m_textArea->addLinkListener(m_self);
+    m_textArea->setParseNewline(false);
+    m_self->m_scrollPane->add(m_textArea);
+  }
+  return m_textArea;
 }
 
 void ViewRender::preFormat(const HtmlElement * element)
 {
   // FIXME - BWT changes - this needs rewriting!
-#if 0
   if (element->isa(HtmlConstants::A_TAG))
   {
-    m_self->m_textArea->setTextColor(nds::Color(0,0,31));
-    m_self->m_textArea->addLink( unicode2string(element->attribute("href")) );
+    textArea()->addLink( unicode2string(element->attribute("href")) );
   }
+#if 0
   else if (element->isa(HtmlConstants::PRE_TAG))
   {
     m_self->m_textArea->setParseNewline(true);
@@ -69,24 +84,24 @@ void ViewRender::preFormat(const HtmlElement * element)
     }
   }
 
+#endif
   if (element->isBlock())
   {
-    m_self->m_textArea->insertNewline();
+    textArea()->insertNewline();
   }
-#endif
 }
 
 void ViewRender::postFormat(const HtmlElement * element)
 {
   // FIXME - BWT changes - this needs rewriting!
-#if 0
   if (element->isa(HtmlConstants::PRE_TAG))
   {
-    m_self->m_textArea->setParseNewline(false);
+    textArea()->setParseNewline(false);
   }
   else if (element->isa(HtmlConstants::UL_TAG) or element->isa(HtmlConstants::OL_TAG))
   {
-    m_self->m_textArea->decreaseIndent();
+#if 0
+    textArea()->decreaseIndent();
     // only add an extra \n if the ul is a top level one
     const HtmlElement * next = element->parent()->nextSibling(element);
     if ( next 
@@ -96,6 +111,7 @@ void ViewRender::postFormat(const HtmlElement * element)
     {
       m_self->m_textArea->insertNewline();
     }
+#endif
   }
   else if (element->isa(HtmlConstants::LI_TAG))
   {
@@ -109,35 +125,35 @@ void ViewRender::postFormat(const HtmlElement * element)
       }
     }
     if (not hasBlock)
-      m_self->m_textArea->insertNewline();
+      textArea()->insertNewline();
   }
   else if (element->isa(HtmlConstants::P_TAG) or (element->tagName()[0] == 'h' and (element->tagName()[1] >= '1' and element->tagName()[1] <= '6')))
   {
-    m_self->m_textArea->insertNewline();
+    textArea()->insertNewline();
   } 
   else if (element->isa(HtmlConstants::A_TAG))
   {
-    m_self->m_textArea->setTextColor(nds::Color(0,0,0));
-    m_self->m_textArea->setLink(false);
+    textArea()->endLink();
   }
 
-
-  /*
   if (element->isBlock())
   {
-    m_self->m_textArea->insertNewline();
+    textArea()->insertNewline();
   }
-  */
-#endif
 }
 
 bool ViewRender::applyFormat(const HtmlElement * element)
 {
   // FIXME - BWT changes - this needs rewriting!
-#if 0
+  // Buttons should have setListener called thus:
+  // button->setListener(m_self);
+  // this way, on clicking it calls View::pressed()
+  // View::pressed can then post the form, or whatever.
   if (not element->text().empty())
   {
-    m_self->m_textArea->printu(element->text());
+    textArea()->appendText(element->text());
+    // and clear the text.
+    element->clearText();
   }
   else if (element->isa(HtmlConstants::SCRIPT_TAG) or element->isa(HtmlConstants::STYLE_TAG))
   {
@@ -145,7 +161,7 @@ bool ViewRender::applyFormat(const HtmlElement * element)
   }
   else if (element->isa(HtmlConstants::BR_TAG))
   {
-    m_self->m_textArea->insertNewline();
+    textArea()->insertNewline();
   } 
   else if (element->isa(HtmlConstants::IMG_TAG))
   {
@@ -184,7 +200,6 @@ bool ViewRender::applyFormat(const HtmlElement * element)
     renderInput(element);
     return false; 
   }
-#endif
   return true;
 }
 
@@ -231,6 +246,7 @@ void ViewRender::setBgColor(const HtmlElement * body)
     /** FIXME - BWT changes
     m_self->m_textArea->setBackgroundColor(col);
     */
+    m_self->m_scrollPane->setBackgroundColor(col);
   }
 }
 
@@ -241,33 +257,40 @@ void ViewRender::doImage(const UnicodeString & imgStr)
   m_self->m_textArea->printu(imgStr);
   m_self->m_textArea->setTextColor(nds::Color(0,0,0));
   */
+  textArea()->setColor(nds::Color(0,21,0));
+  textArea()->appendText(imgStr);
+  textArea()->endColor();
 }
 
 void ViewRender::render()
 {
-  /** FIXME - BWT changes
-  m_self->m_textArea->setCursor(0, 0);
-  m_self->m_textArea->setParseNewline(false);
-  */
+  m_self->m_scrollPane->removeChildren();
+  m_textArea = 0;
   const HtmlElement * root = m_self->m_document.rootNode();
   assert(root->isa(HtmlConstants::HTML_TAG));
   assert(root->hasChildren());
   const HtmlElement * body = root->lastChild();
   setBgColor(body);
-  /** FIXME - BWT changes
-  m_self->m_textArea->clear();
-  */
   if (body->hasChildren())
   {
     walkTree(body);
   }
+  cout << "Rendered... almost " << endl;
+  ScrollPane & scrollPane(*m_self->m_scrollPane);
+  scrollPane.setLocation(0,0);
+  scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+  scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+  scrollPane.scrollToPercent(0);
 }
 
 void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
+  ComboBox * select = new ComboBox;
+  m_textArea = 0;
   /** FIXME - BWT changes
   // render the select
   Select * formSelect = new Select( const_cast<HtmlElement*>(selectElement));
+  */
   if (selectElement->hasChildren())
   {
     const ElementList & theChildren = selectElement->children();
@@ -275,34 +298,62 @@ void ViewRender::renderSelect(const HtmlElement * selectElement)
     for (; it != theChildren.end(); ++it)
     {
       if ( (*it)->isa(HtmlConstants::OPTION_TAG) ) {
-        formSelect->addOption((*it), m_self->m_textArea);
+        //formSelect->addOption((*it), m_self->m_textArea);
+        const HtmlElement * option(*it);
+        if (option->hasChildren() and option->firstChild()->isa("#TEXT"))
+        {
+          select->addItem(option->firstChild()->text());
+        }
       }
     }
   }
-  m_self->m_textArea->addFormControl(formSelect);
-  */
+  m_self->m_scrollPane->add(select);
 }
+static const int MAX_SIZE(nds::Canvas::instance().width());
+static const int MIN_SIZE(8);
 
 void ViewRender::renderInput(const HtmlElement * inputElement)
 {
   /** FIXME - BWT changes */
-#if 0
-  //Input * formInput = new Input;
+  string sizeText = unicode2string(inputElement->attribute("size"));
+  int size(0);
+  if (not sizeText.empty())
+  {
+    size = strtol(sizeText.c_str(), 0, 0);
+    size *= 8; // FIXME! should be: textArea->font().height();
+  }
+  if (size > MAX_SIZE)
+    size = MAX_SIZE;
+
   string type = unicode2string(inputElement->attribute("type"));
   if (type == "submit")
   {
-    Button * submitButton = new Button(const_cast<HtmlElement*>(inputElement), m_self->m_textArea);
-    m_self->m_textArea->addFormControl(submitButton);
+    UnicodeString value(inputElement->attribute("value"));
+    Button * submitButton = new Button(value);
+    submitButton->setListener(m_self);
+    m_textArea = 0;
+    if (size > MIN_SIZE)
+      submitButton->setSize(size, submitButton->preferredSize().h);
+    m_self->m_scrollPane->add(submitButton);
   }
   else if (type.empty() or type == "text")
   {
-    InputText * text = new InputText(const_cast<HtmlElement*>(inputElement), m_self->m_textArea);
-    m_self->m_textArea->addFormControl(text);
+    TextField * text = new TextField(inputElement->attribute("value"));
+    m_textArea = 0;
+    if (size <= 0)
+      size = MIN_SIZE*8; // FIXME! textArea->font().height();
+    text->setListener(m_self->m_keyboard);
+    text->setSize(size, text->preferredSize().h);
+    m_self->m_scrollPane->add(text);
   } 
   else if (type == "password")
   {
-    PasswordField * text = new PasswordField(const_cast<HtmlElement*>(inputElement), m_self->m_textArea);
-    m_self->m_textArea->addFormControl(text);
+    TextField * text = new TextField(UnicodeString());
+    m_textArea = 0;
+    if (size <= 0)
+      size = MIN_SIZE*8; // FIXME! textArea->font().height();
+    text->setListener(m_self->m_keyboard);
+    text->setSize(size, text->preferredSize().h);
+    m_self->m_scrollPane->add(text);
   } 
-#endif
 }

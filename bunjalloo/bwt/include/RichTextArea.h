@@ -3,6 +3,7 @@
 
 #include "TextArea.h"
 
+class LinkListener;
 /** Class that adds clickable links, etc, to a standard TextArea. */
 class RichTextArea: public TextArea
 {
@@ -21,6 +22,18 @@ class RichTextArea: public TextArea
     /** End the link. */
     void endLink();
 
+    void setColor(unsigned short color);
+
+    void endColor();
+
+    /** Add a listener for when a Link is clicked.
+     */
+    void addLinkListener(LinkListener * linkListener);
+
+    /** Insert a new line - usefull for when we don't parse new lines
+     */
+    void insertNewline();
+
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);
 
@@ -31,8 +44,9 @@ class RichTextArea: public TextArea
 
   private:
     enum ControlState {
-      STATE_TEXT,
+      STATE_PLAIN,
       STATE_LINK,
+      STATE_COLOR
     };
     typedef std::list<Link*> LinkList;
     LinkList m_links;
@@ -45,6 +59,7 @@ class RichTextArea: public TextArea
     LinkList::const_iterator m_currentLink;
     unsigned int m_paintPosition;
     unsigned int m_documentSize;
+    LinkListener * m_linkListener;
 
     /** Delete the links */
     void removeClickables();

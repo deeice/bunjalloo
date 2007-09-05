@@ -91,7 +91,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 # main targets
 #---------------------------------------------------------------------------------
 
-$(ARM9ELF)	:	$(OFILES) $(LIBNDSPP)/lib/libpcnds.a
+$(ARM9ELF)	:	$(OFILES) $(LIBNDSPP)/lib/libpcnds.a $(LIBBWT)/lib/libpcbwt.a
 	@echo linking $(notdir $@)
 	$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 

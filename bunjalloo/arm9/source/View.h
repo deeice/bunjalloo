@@ -19,6 +19,8 @@
 #define View_h_seen
 
 #include "ViewI.h"
+#include "ButtonListener.h"
+#include "LinkListener.h"
 
 class Document;
 class ControllerI;
@@ -30,7 +32,7 @@ class ViewRender;
 class FormControl;
 
 /** Handle the displaying of HTML data.*/
-class View : public ViewI
+class View : public ViewI, public ButtonListener, public LinkListener
 {
   friend class ViewRender;
   public:
@@ -45,6 +47,16 @@ class View : public ViewI
     /** Show the view, handle key events for one frame.
      */
     void tick();
+
+    /** Implement the ButtonListener interface.
+     * @param button the button that has been pressed.
+     */
+    virtual void pressed(ButtonI * button);
+
+    /** Implement the LinkListener interface.
+     * @param link the link that has been clicked.
+     */
+    virtual void linkClicked(Link * link);
 
   private:
 
@@ -65,6 +77,8 @@ class View : public ViewI
     InputState m_state;
     FormControl * m_form;
     int m_preInputStartLine;
+    bool m_dirty;
+    std::string m_linkHref;
 
     void browse();
     void keyboard();

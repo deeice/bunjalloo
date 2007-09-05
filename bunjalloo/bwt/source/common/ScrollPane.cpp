@@ -81,35 +81,46 @@ void ScrollPane::layoutChildren()
   int lastXPos = m_bounds.x;
   int lastYPos = m_bounds.y;
   int rowHeight = 0;
+  // printf(" ******** layoutChildren ******* \n");
   for (; it != m_children.end(); ++it)
   {
     Component * c(*it);
-    Rectangle r(c->preferredSize());
-    if ( (r.w + lastXPos) < m_bounds.w )
+    // printf("Child :");
+    Rectangle childPrefSize(c->preferredSize());
+    childPrefSize.x = c->x(); 
+    childPrefSize.y = c->y(); 
+    // printf("x %d y %d w %d h %d\n", childPrefSize.x, childPrefSize.y, childPrefSize.w, childPrefSize.h);
+    if ( (childPrefSize.w + lastXPos) < childWidth )
     {
       c->setLocation(lastXPos, lastYPos);
-      if (r.h > rowHeight)
+      if (childPrefSize.h > rowHeight)
       {
-        rowHeight = r.h;
+        rowHeight = childPrefSize.h;
       }
-      r.x = lastXPos;
+      childPrefSize.x = lastXPos;
       yPos = lastYPos+rowHeight+MIN_PADDING;
     }
     else {
-      c->setLocation(x()+r.x, yPos);
+      c->setLocation(x()+childPrefSize.x, yPos);
       lastYPos = yPos;
-      yPos += r.h+MIN_PADDING;
-      rowHeight = r.h;
+      yPos += childPrefSize.h+MIN_PADDING;
+      rowHeight = childPrefSize.h;
     }
-    if (childWidth <= r.w)
-      c->setSize(childWidth, r.h);
-    else if (m_stretchChildren) {
-      c->setSize(childWidth, r.h);
+    childPrefSize.x = c->x(); 
+    childPrefSize.y = c->y(); 
+
+    if (childWidth <= childPrefSize.w)
+      c->setSize(childWidth, childPrefSize.h);
+    else if (m_stretchChildren)
+    {
+      c->setSize(childWidth, childPrefSize.h);
     }
     else
-      c->setSize(r.w, r.h);
-    
-    lastXPos = x()+r.x+c->width()+MIN_PADDING;
+      c->setSize(childPrefSize.w, childPrefSize.h);
+    childPrefSize.w = c->width();
+    childPrefSize.h = c->height();
+    // printf("       x %d y %d w %d h %d\n", childPrefSize.x, childPrefSize.y, childPrefSize.w, childPrefSize.h);
+    lastXPos = x()+childPrefSize.x+c->width()+MIN_PADDING;
   }
 }
 
@@ -218,7 +229,7 @@ void ScrollPane::showScrollBar(const nds::Rectangle & clip)
     return;
   }
 
-  if (clip.h < m_scrollBar->total()) {
+  if (m_scrollBar->height() < m_scrollBar->total()) {
     m_scrollBar->paint(clip);
   }
 }
@@ -354,8 +365,13 @@ void ScrollPane::scrollToPercent(int i)
 
   int topLimit = m_scrollBar->y();
   int total = m_scrollBar->total() - m_scrollBar->visibleRange();
-
-  int y = (total * i) / 256;
+  int y = 0;
+  if (total > 0)
+  {
+    // otherwise total height would be less than the visible range - so move to
+    // topLimit
+    y = (total * i) / 256;
+  }
   // find difference and move by it
   int currentTop = m_children.front()->bounds().top();
   int dy = currentTop - topLimit + y;
@@ -384,7 +400,8 @@ void ScrollPane::adjustScroll(int & scrollIncrement)
   }
 
   int offSet = (m_children.back()->bounds().bottom() - scrollIncrement) - m_bounds.bottom();
-  if (offSet < 0)
+  int top = m_children.front()->bounds().top();
+  if (offSet < 0 and top < 0)
   {
     // scrolled too far.
     // change scrollIncrement so that offset == 0

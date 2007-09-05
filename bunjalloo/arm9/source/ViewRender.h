@@ -19,7 +19,7 @@
 #define ViewRender_h_seen
 
 class View;
-class TextArea;
+class RichTextArea;
 class HtmlElement;
 #include "UnicodeString.h"
 
@@ -31,8 +31,12 @@ class ViewRender
 
   private:
     View * m_self;
+    // keep track of the last RichTextArea component added to the ScrollPane
+    RichTextArea * m_textArea;
+
     const HtmlElement * m_lastElement;
 
+    RichTextArea * textArea();
     void walkTree(const HtmlElement * element);
     bool applyFormat(const HtmlElement * element);
     void preFormat(const HtmlElement * element);

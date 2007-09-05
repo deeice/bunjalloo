@@ -181,7 +181,10 @@ void ScrollBar::calculateHandle()
     m_handleSize = MIN_HANDLE_SIZE;
   int scrollerHeight = visibleRange() - m_handleSize;
 
-  m_handlePosition = ((m_value * scrollerHeight) / (m_total-m_bounds.h) );
+  if (m_total > m_bounds.h)
+    m_handlePosition = ((m_value * scrollerHeight) / (m_total-m_bounds.h) );
+  else
+    m_handlePosition = 0;
   if (m_handlePosition < 0)
     m_handlePosition = 0;
   m_handlePosition += m_bounds.top() + ARROW_HEIGHT;

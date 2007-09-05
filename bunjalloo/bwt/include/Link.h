@@ -29,6 +29,11 @@ class Link
      */
     Link(const std::string & a);
 
+    /** Creates a color change
+     * @param a the document address that the link goes to
+     */
+    Link(unsigned short color);
+
     /** Get the address of the document that this Link points to.
      * @return the document address.
      */
@@ -63,10 +68,19 @@ class Link
      */
     inline unsigned int textEnd() const;
 
+    enum EventType {
+      STATE_PLAIN,
+      STATE_LINK,
+      STATE_COLOR,
+    };
+    EventType eventType() const;
 
+    inline unsigned short color() const;
+    inline void setColor(unsigned short color);
   private:
     unsigned int m_textStart;
     unsigned int m_textEnd;
+    unsigned short m_color;
     bool m_clicked;
     std::string m_anchor;
 };
@@ -96,5 +110,13 @@ inline void Link::setClicked(bool clicked)
 inline bool Link::clicked() const
 {
   return m_clicked;
+}
+inline unsigned short Link::color() const
+{
+  return m_color;
+}
+void Link::setColor(unsigned short color)
+{
+  m_color = color;
 }
 #endif

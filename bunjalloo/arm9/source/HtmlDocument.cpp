@@ -81,6 +81,10 @@ void HtmlDocument::dumpDOM()
     }
   }
 }
+#else
+void HtmlDocument::dumpDOM()
+{
+}
 #endif
 
 HtmlDocument::HtmlDocument(): 

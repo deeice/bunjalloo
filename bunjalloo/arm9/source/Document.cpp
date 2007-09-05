@@ -76,7 +76,7 @@ const UnicodeString & Document::asText() const
 
 void Document::dumpDOM() 
 {
-  //m_htmlDocument->dumpDOM();
+  m_htmlDocument->dumpDOM();
 }
 
 const HtmlElement * Document::rootNode() const

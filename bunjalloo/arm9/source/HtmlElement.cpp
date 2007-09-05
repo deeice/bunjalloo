@@ -178,3 +178,8 @@ ElementList HtmlElement::elementsByTagName(const std::string & name) const
   }
   return returnList;
 }
+
+void HtmlElement::clearText() const
+{
+  UnicodeString().swap(m_text);
+}

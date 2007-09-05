@@ -63,9 +63,15 @@ void TextContainer::setSize(unsigned int w, unsigned int h)
   }
   else
   {
+    m_preferredWidth = w;
   }
   textArea()->setSize(w, h);
-  m_preferredHeight = textArea()->preferredSize().h+BORDER_HEIGHT;
+  m_preferredHeight = textArea()->font().height()+BORDER_HEIGHT;
+  /*
+  int tmpPW = textArea()->preferredSize().w+BORDER_WIDTH;
+  if (tmpPW > m_preferredWidth)
+    m_preferredWidth = tmpPW;
+  */
   layout();
 }
 

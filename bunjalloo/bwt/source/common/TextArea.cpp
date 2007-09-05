@@ -15,6 +15,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
+#include <iostream>
 #include <assert.h>
 #include "libnds.h"
 #include "ndspp.h"
@@ -101,13 +102,17 @@ void TextArea::document(UnicodeString & returnString) const
 
 void TextArea::clearText()
 {
-  m_document.clear();
+  // Could do the following to completely free the memory, but there
+  // is a fair chance it will be reused anyway... speed vs memory again :-/
+  //m_document.swap(std::vector<UnicodeString>());
+  std::vector<UnicodeString> tmp;
+  m_document.swap(tmp);
+  //m_document.clear();
   m_appendPosition = 0;
   m_preferredWidth = -1;
   m_preferredHeight = m_font->height();
   currentLine();
 }
-
 
 void TextArea::appendText(const UnicodeString & unicodeString)
 {
@@ -124,6 +129,7 @@ void TextArea::appendText(const UnicodeString & unicodeString)
     // otherwise, if we go off the end of the line, increment the height.
     if ((m_appendPosition + size) > width())
     {
+      // trim spaces from the end of the line
       // this word overflows the line - make a new line to hold the text.
       m_document.push_back(UnicodeString());
       // m_document += NEWLINE;
@@ -149,6 +155,8 @@ void TextArea::layoutText()
 {
   // need to shuffle the document about... this requires a new copy of it.
   UnicodeString tmp;
+  bool pnl = parseNewline();
+  setParseNewline();
   document(tmp);
   clearText();
   if (not tmp.empty())
@@ -159,6 +167,7 @@ void TextArea::layoutText()
   if ( m_preferredWidth < 0 or (wInt <= m_preferredWidth)) {
     m_preferredWidth = m_bounds.w;
   }
+  setParseNewline(pnl);
 }
 
 void TextArea::setSize(unsigned int w, unsigned int h)
@@ -212,7 +221,7 @@ const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int 
     word = unicodeString.substr(currPosition,position-currPosition);
     word += ' ';
   }
-  int size(textSize(unicodeString));
+  int size(textSize(word));
   if (size > width())
   {
     // This is a very long word, split it up
@@ -271,11 +280,14 @@ int TextArea::textSize(const UnicodeString & unicodeString) const
   for (; it != unicodeString.end(); ++it)
   {
     unsigned int value(*it);
-    if (value == UTF8::MALFORMED)
-      value = '?';
-    Font::Glyph g;
-    m_font->glyph(value, g);
-    size += g.width;
+    if (value != NEWLINE)
+    {
+      if (value == UTF8::MALFORMED)
+        value = '?';
+      Font::Glyph g;
+      m_font->glyph(value, g);
+      size += g.width;
+    }
   }
   return size;
 }
@@ -417,7 +429,7 @@ void TextArea::paint(const nds::Rectangle & clip)
     it += skipLines;
   }
 
-  for (; it != m_document.end() and m_cursory < m_bounds.bottom(); ++it)
+  for (; it != m_document.end() and (m_cursory < m_bounds.bottom()) and (m_cursory < clip.bottom()); ++it)
   {
     printu(*it);
     incrLine();
@@ -441,3 +453,4 @@ std::string TextArea::asString() const
 
   return returnString;
 }
+

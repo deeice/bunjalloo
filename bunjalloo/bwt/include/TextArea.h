@@ -104,6 +104,8 @@ class TextArea : public Component
     /** Get the number of lines that will be skipped when painting.*/
     int linesToSkip() const;
 
+    inline bool parseNewline() const;
+    inline void setParseNewline(bool parse=true);
     inline void setUnderline(bool underline=true);
     inline bool underline() const;
 
@@ -192,5 +194,13 @@ void TextArea::setUnderline(bool underline)
 bool TextArea::underline() const
 {
   return m_underLine;
+}
+bool TextArea::parseNewline() const
+{
+    return m_parseNewline;
+}
+void TextArea::setParseNewline(bool parse)
+{
+    m_parseNewline = parse;
 }
 #endif

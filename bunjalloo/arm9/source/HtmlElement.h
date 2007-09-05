@@ -156,6 +156,8 @@ class HtmlElement /* : public Element */
     inline bool isBlock() const;
     inline void setBlock(bool isblock=true);
 
+    void clearText() const;
+
     //void dump() const;
   protected:
     std::string m_tagName;
@@ -163,7 +165,7 @@ class HtmlElement /* : public Element */
     UnicodeString m_title;
     UnicodeString m_lang;
     UnicodeString m_dir;
-    UnicodeString m_text;
+    mutable UnicodeString m_text;
     // not implemented
     //std::string m_className;
     // std::vector<std::string> m_classList;

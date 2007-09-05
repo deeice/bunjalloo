@@ -39,7 +39,13 @@ Component::Component() :
 
 Component::~Component()
 {
+  removeChildren();
+}
+
+void Component::removeChildren()
+{
   for_each(m_children.begin(), m_children.end(), deleteChild);
+  m_children.clear();
 }
 
 void Component::add(Component * child)

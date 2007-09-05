@@ -40,7 +40,10 @@ class Component
     /** Add a child Component.
      * @param child the child Component to add.
      */
-    virtual void add(Component * child);
+    void add(Component * child);
+
+    /** Remove and delete all child Components. */
+    void removeChildren();
 
     /** Set the absolute on screen location.
      * @param x the horizontal x position.

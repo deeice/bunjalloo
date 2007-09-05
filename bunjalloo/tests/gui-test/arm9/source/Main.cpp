@@ -43,7 +43,25 @@ int main(int argc, char * argv[])
   static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
   TextAreaFactory::setFont(&font);
   TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
+  Keyboard * keyBoard = new Keyboard();
+  ScrollPane scrollPane;
+#if 1
+  TextField * tf = new TextField(string2unicode("Enter the value here. This line is too big to fit in"));
+  TextField * passwd = new TextField(UnicodeString());
+  RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
+  Button * goBtn = new Button(string2unicode("Go"));
+  rich->appendText(string2unicode("This is some long text "));
+  passwd->setSize(60,18);
+  
+  scrollPane.setTopLevel();
+  scrollPane.add(rich);
+  scrollPane.add(passwd);
+  scrollPane.add(goBtn);
+  scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
+  scrollPane.add(tf);
+  scrollPane.setScrollIncrement(13);
 
+#else
   RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
   TextArea * t = TextAreaFactory::create();
   EditableTextArea * t2 = (EditableTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_EDIT);
@@ -87,9 +105,10 @@ int main(int argc, char * argv[])
   b3->setSize(60, 18);
   combo2->addItem(str);
   combo2->addItem(str);
-  shw = "Another Button";
+  shw = "Go";
   str = string2unicode(shw);
   Button * b4 = new Button(str);
+  //b4->setSize(6*13, 10);
   shw = "Last one!";
   str = string2unicode(shw);
   Button * b5 = new Button(str);
@@ -97,13 +116,12 @@ int main(int argc, char * argv[])
   combo2->addItem(str);
   combo2->addItem(str);
 
-  Keyboard * keyBoard = new Keyboard();
   t2->setListener(keyBoard);
   
   shw = "A text field that has a very, very long and pointless string";
   str = string2unicode(shw);
   TextField * tf1 = new TextField(str);
-  tf1->setSize(120, 18);
+  tf1->setSize(160, 18);
   tf1->setListener(keyBoard);
   combo2->addItem(str);
 
@@ -125,7 +143,6 @@ int main(int argc, char * argv[])
   bg.add(rb);
   bg.add(rb2);
   bg.add(rb3);
-  ScrollPane scrollPane;
   keyBoard->setTopLevel(&scrollPane);
   scrollPane.setTopLevel();
   scrollPane.add(rich);
@@ -158,6 +175,7 @@ int main(int argc, char * argv[])
   std::string richText4("Normal text. ");
   std::string richText5("Link text. ");
   rich->appendText(string2unicode(richText1));
+  rich->insertNewline();
   rich->appendText(string2unicode(richText1));
   rich->appendText(string2unicode(richText1));
   rich->appendText(string2unicode(richText3));
@@ -170,7 +188,6 @@ int main(int argc, char * argv[])
   rich->addLink("www.link2.com");
   rich->appendText(string2unicode(richText5));
   rich->endLink();
-  rich->appendText(string2unicode(richText1));
 
 
   std::string s(_binary_test_map_bin_start, 1000);
@@ -179,6 +196,7 @@ int main(int argc, char * argv[])
   t2->appendText(string2unicode(s2));
   subPane->setSize(t2->width(), 100);
   t2->setParentScroller(subPane);
+#endif
   scrollPane.setLocation(0,0);
   scrollPane.setSize(Canvas::instance().width(),Canvas::instance().height());
 
@@ -203,7 +221,7 @@ int main(int argc, char * argv[])
     }
     if (keys & KEY_X)
     {
-      printf("%s\n",t2->asString().c_str());
+      //printf("%s\n",t2->asString().c_str());
       break;
     }
 
