@@ -23,6 +23,7 @@ LINKFILES:=Document.o \
 	   HtmlPreElement.o \
 	   HtmlMetaElement.o \
 	   HtmlImageElement.o \
+	   HtmlTextAreaElement.o \
 	   HtmlAnchorElement.o
 
 clean:

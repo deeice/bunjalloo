@@ -98,3 +98,18 @@ void Component::setLocation(unsigned int x, unsigned int y)
   m_bounds.x = x;
   m_bounds.y = y;
 }
+
+unsigned int Component::childCount() const
+{
+  return m_children.size();
+}
+
+const Component * Component::childAt(unsigned int i) const
+{
+  if (not m_children.empty() and m_children.size() > i)
+  {
+    return m_children[i];
+  }
+  return 0;
+}
+

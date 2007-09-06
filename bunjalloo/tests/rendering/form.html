@@ -1,10 +1,29 @@
 <form method="GET" action=/test>
   <select name="myopts" >
-    <option selected=true value="1">chips</option>
-    <option value="2">peas</option>
+    <option value="1">chips</option>
+    <option selected=true value="2">peas</option>
     <option value="3">gravy</option>
     <optgroup>??</optgroup>
+
+  <select name="status">
+    <option value="Any">Any</option>
+
+    <option value="1">SPR</option>
+
+    <option value="2">ECR</option>
+
+    <option value="3">RNG</option>
+
+    <option value="4">AR</option>
+
+    <option value="5">SOP</option>
+
+    <option value="6">CCN</option>
+
+    <option value="7">REQ</option>
   </select>
+
+
   <input name=lr type=checkbox value=lang_it onClick="fnOnClickSome()"> Italian <br>
   <input name=lr type=checkbox value=lang_ja onClick="fnOnClickSome()"> Japanese <br>
   <input name=lr type=checkbox value=lang_ar onClick="fnOnClickSome()"> Arabic <br>
@@ -13,6 +32,15 @@
   <input name=lr type=checkbox value=lang_hy onClick="fnOnClickSome()"> English <br>
   <input name=lr type=checkbox value=lang_hy onClick="fnOnClickSome()"> Spanish <br>
   <input name=lr type=checkbox value=lang_hy onClick="fnOnClickSome()"> Chinese <br>
+
+  <input name=lr value=1 type=radio > radio 1 <br>
+  <input name=lr checked value=2 type=radio > radio 2 <br>
+  <input name=lr value=3 type=radio > radio 3 <br>
+
+  <input name=rr value=0 type=radio > group 2 r 1 <br>
+  <input name=rr checked value=2 type=radio > group 2 r 2 <br>
+  <input name=rr value=5 type=radio > group 2 r 3 <br>
+
   This is some long text &raquo;
   <input name="pass" type="password" size=6 value="">
   <input name="number" type="text" size=160 value="Enter the value here. This line is too big to fit in">

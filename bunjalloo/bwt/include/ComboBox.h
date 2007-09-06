@@ -41,10 +41,16 @@ class ComboBox: public Component,
      */
     void addItem(const UnicodeString & item);
 
-    /** The main button has been pressed. This shows the drop down list of items.
+    /** A button on the drop down list has been pressed. Set the text of the
+     * main button to the selected item.
      * @param button the button that was pressed.
      */
     void pressed(ButtonI * button);
+
+    int selectedIndex() const;
+    const UnicodeString & selectedItem() const;
+    void setSelectedIndex(int select);
+    unsigned int items() const;
 
     // implemented from Component.
     virtual bool touch(int x, int y);
@@ -53,14 +59,12 @@ class ComboBox: public Component,
     virtual void setSize(unsigned int w, unsigned int h);
   private:
     int m_items;
+    int m_selectedIndex;
     bool m_open;
 
-    inline ScrollPane * scrollPane() {
-      return (ScrollPane*)m_children.front();
-    }
-    inline Button * button() {
-      return (Button*)m_children.back();
-    }
+    inline ScrollPane * scrollPane();
+    inline const ScrollPane * scrollPane() const;
+    inline Button * button();
     
 };
 #endif

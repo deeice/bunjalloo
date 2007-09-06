@@ -135,6 +135,8 @@ void TextArea::appendText(const UnicodeString & unicodeString)
       m_appendPosition = 0;
       //m_preferredHeight += m_font->height();
     }
+    if (m_preferredWidth < 0)
+      m_preferredWidth = 0;
     m_preferredWidth += size;
     currentLine().append(word);
     m_appendPosition += size;

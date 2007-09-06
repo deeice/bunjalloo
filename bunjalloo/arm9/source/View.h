@@ -63,14 +63,11 @@ class View : public ViewI, public ButtonListener, public LinkListener
     enum InputState
     {
       BROWSE,
-      FORM,
-      FORM_KEYBOARD,
       KEYBOARD
     };
 
     Document & m_document;
     ControllerI & m_controller;
-    // TextArea * m_textArea;
     ScrollPane * m_scrollPane;
     Keyboard * m_keyboard;
     ViewRender * m_renderer;
@@ -82,7 +79,6 @@ class View : public ViewI, public ButtonListener, public LinkListener
 
     void browse();
     void keyboard();
-    void formKeyboard();
 
 };
 #endif

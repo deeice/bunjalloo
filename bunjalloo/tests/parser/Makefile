@@ -24,6 +24,7 @@ LINKFILES:=Document.o \
 	   HtmlOptionElement.o \
 	   HtmlFormElement.o \
 	   HtmlInputElement.o \
+	   HtmlTextAreaElement.o \
 	   HtmlMetaElement.o \
 	   HtmlImageElement.o \
 	   HtmlAnchorElement.o

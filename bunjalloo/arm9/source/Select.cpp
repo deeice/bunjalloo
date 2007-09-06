@@ -16,50 +16,61 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "Select.h"
-#include "Rectangle.h"
 #include "HtmlElement.h"
 #include "HtmlOptionElement.h"
-#include "TextArea.h"
+#include "HtmlConstants.h"
 
 
-Select::Select(HtmlElement * select):
-  FormControl(select)
-{}
-
-void Select::addOption(const HtmlElement * option, const TextArea* textArea)
+Select::Select(HtmlElement * select):m_element(select)
 {
-  if (option->hasChildren())
+  if (m_element->hasChildren())
   {
-    if (option->firstChild()->isa("#TEXT"))
+    bool haveSelected(false);
+    const ElementList & theChildren = m_element->children();
+    ElementList::const_iterator it(theChildren.begin());
+    for (; it != theChildren.end(); ++it)
     {
-      // option has name - the text - and a value (if set)
-      m_options.push_back(option);
-      int size = textArea->textSize(option->firstChild()->text());
-      if ( size > m_size->w)
-      {
-        if (size > MAX_SIZE)
-          size = MAX_SIZE;
-        m_size->w = size;
+      if ( (*it)->isa(HtmlConstants::OPTION_TAG) ) {
+        const HtmlOptionElement * option((HtmlOptionElement*)*it);
+        if (option->hasChildren() and option->firstChild()->isa("#TEXT"))
+        {
+          this->addItem(option->firstChild()->text());
+          if (option->selected())
+          {
+            int itemCount = items();
+            if (itemCount > 0)
+            {
+              setSelectedIndex(itemCount - 1);
+              haveSelected = true;
+            }
+          }
+        }
       }
+    }
+    if (not haveSelected)
+    {
+      setSelectedIndex(0);
     }
   }
 }
 
-void Select::draw(TextArea * textArea)
+void Select::pressed(ButtonI * button)
 {
-  /** Broken by BWT.
-  FormControl::draw(textArea);
-  ElementVector::const_iterator it(m_options.begin());
-  for (; it != m_options.end(); ++it)
+  ComboBox::pressed(button);
+  const ElementList & theChildren = m_element->children();
+  int selected = selectedIndex();
+  ElementList::const_iterator it(theChildren.begin());
+  for (int index = 0; it != theChildren.end(); ++it)
   {
-    // print the option
-    const HtmlOptionElement * option( (HtmlOptionElement*)(*it));
-    if ( option->selected() )
+    if ( (*it)->isa(HtmlConstants::OPTION_TAG) )
     {
-      // test setting the value attribute!
-      textArea->printu(option->firstChild()->text());
-      break;
+      const HtmlOptionElement * option((HtmlOptionElement*)*it);
+      if (index == selected)
+      {
+        m_element->setAttribute("value", option->attribute("value"));
+        break;
+      }
+      index++;
     }
   }
-  */
 }

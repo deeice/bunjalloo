@@ -139,39 +139,16 @@ void View::browse()
 
 void View::pressed(ButtonI * button)
 {
+  if (m_form)
+    return;
+  printf("Form clicked\n");
   // FIXME - BWT - callback for button presses
   // Hmm, how to go from the button pressed to the form it lives in?
-  // Originally, each control had a HtmlElement associated with it...
-#if 0
+  // Originally, each control had a HtmlElement associated with it.
+  FormControl * formControl = (FormControl*)button;
   // check for form click
-  FormControl * formClick = m_textArea->clickForm(tp.px, tp.py+SCREEN_HEIGHT);
-  if (formClick) 
-  {
-    // more complex than the link..
-    m_form = formClick;
-    switch (m_form->inputType())
-    {
-      case FormControl::ONE_CLICK:
-        {
-          // m_form->input
-          URI uri(m_document.uri());
-          m_form->input(tp.px, tp.py, m_controller, uri);
-          m_state = BROWSE;
-        }
-        break;
-      case FormControl::KEYBOARD:
-        {
-          m_state = FORM_KEYBOARD;
-          m_preInputStartLine = m_textArea->startLine();
-          m_keyboard->setVisible();
-        }
-        break;
-      case FormControl::MENU:
-        m_state = FORM;
-        break;
-    }
-  }
-#endif
+  // more complex than the link..
+  m_form = formControl;
 }
 
 void View::linkClicked(Link * link)
@@ -216,31 +193,6 @@ void View::keyboard()
   }
 }
 
-void View::formKeyboard()
-{
-  // FIXME - BWT changes break most of this.
-#if 0
-  if (m_keyboard->visible()) {
-    m_keyboard->handleInput();
-    if (not m_keyboard->visible())
-    {
-      nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
-      if (not m_keyboard->result().empty())
-      {
-        UnicodeString ustr(string2unicode(m_keyboard->result()));
-        m_form->input(ustr);
-      }
-      m_textArea->setStartLine(m_preInputStartLine);
-      m_renderer->render();
-    }
-  }
-  else
-  {
-    m_state = BROWSE;
-  }
-#endif
-}
-
 void View::tick()
 {
   scanKeys();
@@ -248,11 +200,6 @@ void View::tick()
   {
     case BROWSE:
       browse();
-      break;
-    case FORM:
-      break;
-    case FORM_KEYBOARD:
-      formKeyboard();
       break;
     case KEYBOARD:
       keyboard();
@@ -267,6 +214,7 @@ void View::tick()
     m_dirty = false;
   }
 
+  // clicked a link:
   if (not m_linkHref.empty()) {
     URI uri(m_document.uri());
     string tmp(m_linkHref);
@@ -274,5 +222,15 @@ void View::tick()
     // cout << "Navigated to " << m_linkHref << endl;
     // TODO - "navigate or download"..
     m_controller.doUri( uri.navigateTo(tmp).asString() );
+  }
+
+  if (m_form)
+  {
+    URI uri(m_document.uri());
+    FormControl * tmp = m_form;
+    m_form = 0;
+
+    tmp->input(m_controller, uri);
+    m_state = BROWSE;
   }
 }

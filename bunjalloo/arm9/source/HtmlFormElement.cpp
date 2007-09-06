@@ -35,3 +35,4 @@ const UnicodeString * HtmlFormElement::attributePtr(const std::string & name) co
   return 0;
 
 }
+

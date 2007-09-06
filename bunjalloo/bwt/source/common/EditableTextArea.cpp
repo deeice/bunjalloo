@@ -32,9 +32,22 @@ EditableTextArea::EditableTextArea(Font * font) :
   m_caretChar(-1),
   m_caretPixelX(-1),
   m_appendedNewLine(false),
+  m_echoText(true),
   m_scrollPane(0)
 {
-  setListener(0);
+}
+
+void EditableTextArea::printu(const UnicodeString & unicodeString)
+{
+  if (m_echoText)
+  {
+    TextArea::printu(unicodeString);
+  }
+  else
+  {
+    UnicodeString tmp(unicodeString.length(), '*');
+    TextArea::printu(tmp);
+  }
 }
 
 void EditableTextArea::paint(const nds::Rectangle & clip)
@@ -55,7 +68,12 @@ void EditableTextArea::paint(const nds::Rectangle & clip)
       if (m_caretPixelX == -1)
       {
         m_caretPixelX = 0;
-        UnicodeString & line(m_document[m_caretLine]);
+        UnicodeString tmp;
+        if (not echoText())
+        {
+          UnicodeString(m_document[m_caretLine].length(),'*').swap(tmp);
+        }
+        const UnicodeString & line(echoText()?m_document[m_caretLine]:tmp);
         for (int i = 0; i < (int)line.length() and i < m_caretChar; ++i)
         {
           unsigned int value(line[i]);
@@ -239,9 +257,14 @@ void EditableTextArea::setCaret(int x, int y)
       m_caretLine = -1;
       return;
     }
-    UnicodeString & line(m_document[m_caretLine]);
     m_caretChar = 0;
     m_caretPixelX = -1;
+    UnicodeString tmp;
+    if (not echoText())
+    {
+      UnicodeString(m_document[m_caretLine].length(),'*').swap(tmp);
+    }
+    const UnicodeString & line(echoText()?m_document[m_caretLine]:tmp);
     int size = 0;
     for (int i = 0; i < (int)line.length(); ++i)
     {

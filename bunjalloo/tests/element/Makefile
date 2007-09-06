@@ -14,6 +14,7 @@ LINKFILES:=HtmlElement.o\
 	   HtmlOptionElement.o \
 	   HtmlFormElement.o \
 	   HtmlInputElement.o \
+	   HtmlTextAreaElement.o \
 	   HtmlImageElement.o \
 	   HtmlAnchorElement.o
 #Document.o UTF8.o Entity.o HeaderParser.o HtmlParser.o HtmlDocument.o  ElementFactory.o 

@@ -13,7 +13,7 @@ LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lpcbwt -lpcnds -lpthread `sdl-config --libs` -lpcbwt -limg -lfont 
+LIBS	:= -lpcbwt -lpcnds -lpthread `sdl-config --libs` -lpcbwt -lbwtimg -lfont 
 # -L$(TOPDIR) -lDEBUG
  
 #---------------------------------------------------------------------------------

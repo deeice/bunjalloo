@@ -20,14 +20,13 @@
 
 #include "InputText.h"
 class HtmlElement;
-class TextArea;
 
 class PasswordField: public InputText
 {
 
   public:
-    PasswordField(HtmlElement * element, const TextArea * textArea);
-    virtual void draw(TextArea * gfx);
+    PasswordField(HtmlElement * element);
+    virtual bool echoText() const;
 
   private:
     // the user input

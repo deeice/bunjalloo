@@ -21,6 +21,8 @@
 class View;
 class RichTextArea;
 class HtmlElement;
+class FormRadio;
+#include <map>
 #include "UnicodeString.h"
 
 class ViewRender
@@ -29,12 +31,16 @@ class ViewRender
     ViewRender(View * self);
     void render();
 
+    // ElementList selectedRadioButtons() const;
+
   private:
     View * m_self;
     // keep track of the last RichTextArea component added to the ScrollPane
     RichTextArea * m_textArea;
 
     const HtmlElement * m_lastElement;
+    typedef std::map<UnicodeString, FormRadio*> FormGroupMap;
+    FormGroupMap m_radioGroup;
 
     RichTextArea * textArea();
     void walkTree(const HtmlElement * element);
@@ -44,7 +50,9 @@ class ViewRender
     void setBgColor(const HtmlElement * body);
     void renderSelect(const HtmlElement * body);
     void doImage(const UnicodeString & unicode);
-    void renderInput(const HtmlElement * body);
+    void renderInput(const HtmlElement * inputElement);
+    void renderTextArea(const HtmlElement * inputElement);
+    void clearRadioGroups();
 
 };
 #endif

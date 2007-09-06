@@ -258,8 +258,10 @@ void Keyboard::editText(TextEntryI * entry)
   m_initialText.clear();
   entry->text(m_initialText);
   //m_textArea->clearText();
+  m_textArea->setEchoText(entry->echoText());
   m_textArea->setText(m_initialText);
   m_entry = entry;
+  layoutViewer();
 }
 
 Keyboard::SpecialKey Keyboard::buttonToSpecialKey(const ButtonI * button)

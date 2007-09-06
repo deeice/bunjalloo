@@ -93,8 +93,26 @@ class Component
      */
     virtual bool touch(int x, int y);
 
+    /** Get the current visibility.
+     * @return true if visible, false otherwise.
+     */
     inline bool visible() const;
+
+    /** Set the visibility.
+     * @param visible true if this Component is visible.
+     */
     inline void setVisible(bool visible=true);
+
+    /** Get the number of children that this Component has.
+     * @return the number of child components 
+     */
+    unsigned int childCount() const;
+
+    /** Get the child Component at the given index.
+     * @param i the index of the child.
+     * @return the Child component at @a i or 0 if not present.
+     */
+    const Component * childAt(unsigned int i) const;
 
   protected:
     /** Holds the position and size. */

@@ -23,14 +23,19 @@
 #include "Button.h"
 #include "WidgetColors.h"
 
+// An offset for the drop down bar.
+static const int COMBO_DD_BAR_WIDTH(8);
+
 ComboBox::ComboBox():
   m_items(0),
+  m_selectedIndex(0),
   m_open(false)
 {
   // implemented as a scroll bar + buttons.
   add(new ScrollPane);
   add(new Button);
   scrollPane()->setBackgroundColor(WidgetColors::COMBOBOX_DROP_DOWN);
+  scrollPane()->setStretchChildren();
   button()->setDecoration(false);
   button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
 }
@@ -48,6 +53,10 @@ void ComboBox::addItem(const UnicodeString & item)
   }
   Button * b = new Button(item);
   // add callback to button so that the combobox is updated.
+  if (b->preferredSize().w > m_bounds.w)
+  {
+     m_bounds.w = b->preferredSize().w;
+  }
   b->setListener(this);
   b->setSize(m_bounds.w, m_bounds.h);
   b->setDecoration(false);
@@ -62,6 +71,7 @@ void ComboBox::addItem(const UnicodeString & item)
   }
 
   scrollPane()->setSize(m_bounds.w, idealHeight);
+  button()->setSize(m_bounds.w, m_bounds.h);
   scrollPane()->setScrollIncrement(m_bounds.h);
 }
 
@@ -98,10 +108,10 @@ void ComboBox::setLocation(unsigned int x, unsigned int y)
 void ComboBox::setSize(unsigned int w, unsigned int h)
 {
   Component::setSize(w, h);
-  button()->setSize(w-4, h);
   
-  scrollPane()->setSize(m_bounds.w, scrollPane()->preferredSize().h);
+  scrollPane()->setSize(w, scrollPane()->preferredSize().h);
   m_preferredHeight = button()->preferredSize().h;
+  m_preferredWidth = w+COMBO_DD_BAR_WIDTH;
 }
 
 void ComboBox::paint(const nds::Rectangle & clip)
@@ -139,7 +149,50 @@ void ComboBox::pressed(ButtonI * pressed)
 {
   Button * button = (Button*)pressed;
   this->button()->setText(button->text());
+
+  for (unsigned int i = 0; i < scrollPane()->childCount(); ++i)
+  {
+    if (scrollPane()->childAt(i) == button)
+    {
+      m_selectedIndex = i;
+      break;
+    }
+  }
   button->setSelected(false);
   m_open = false;
   this->button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
+}
+
+ScrollPane * ComboBox::scrollPane() {
+  return (ScrollPane*)m_children.front();
+}
+const ScrollPane * ComboBox::scrollPane() const {
+  return (const ScrollPane*)m_children.front();
+}
+Button * ComboBox::button() {
+  return (Button*)m_children.back();
+}
+
+const UnicodeString & ComboBox::selectedItem() const
+{
+  return ((Button*)scrollPane()->childAt(m_selectedIndex))->text();
+}
+
+int ComboBox::selectedIndex() const
+{
+  return m_selectedIndex;
+}
+
+void ComboBox::setSelectedIndex(int select)
+{
+  Button * b((Button*)scrollPane()->childAt(select));
+  if (b)
+  {
+    pressed(b);
+  }
+}
+
+unsigned int ComboBox::items() const
+{
+  return scrollPane()->childCount();
 }

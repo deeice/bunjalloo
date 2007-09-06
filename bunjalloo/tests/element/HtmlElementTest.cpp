@@ -1,5 +1,6 @@
 #include "HtmlElementTest.h"
 #include "HtmlElement.h"
+#include "HtmlTextAreaElement.h"
 #include "HtmlMetaElement.h"
 #include "HtmlOptionElement.h"
 #include "HtmlAnchorElement.h"
@@ -244,4 +245,18 @@ void HtmlElementTest::testElementsByTagName()
   CPPUNIT_ASSERT_EQUAL( expected , select->elementsByTagName("option").size());
 
 
+}
+
+void HtmlElementTest::testTextAreaElement()
+{
+  m_element = ElementFactory::create("textarea");
+  HtmlTextAreaElement * element = (HtmlTextAreaElement*)m_element;
+  m_element->setAttribute("rows", string2unicode("10"));
+  m_element->setAttribute("cols", string2unicode("80"));
+  int expected = 10;
+  int result = element->rows();
+  CPPUNIT_ASSERT_EQUAL( expected, result);
+  expected = 80;
+  result = element->cols();
+  CPPUNIT_ASSERT_EQUAL( expected, result);
 }

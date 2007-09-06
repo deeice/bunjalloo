@@ -15,39 +15,24 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#ifndef HtmlInputElement_h_seen
-#define HtmlInputElement_h_seen
+#ifndef HtmlTextAreaElement_h_seen
+#define HtmlTextAreaElement_h_seen
 
 #include "HtmlElement.h"
-class HtmlInputElement:public HtmlElement
+class HtmlTextAreaElement:public HtmlElement
 {
   public:
-    HtmlInputElement(const std::string & tagName) 
-      : HtmlElement(tagName), m_checked(false)
+    HtmlTextAreaElement(const std::string & tagName) 
+      : HtmlElement(tagName), m_rows(0), m_cols(0)
     {}
-
-    enum InputType
-    {
-      SUBMIT,
-      TEXT,
-      PASSWORD,
-      RADIO,
-      CHECKBOX,
-      HIDDEN
-    };
-    InputType inputType() const;
 
     virtual void setAttribute(const std::string & name, 
         const UnicodeString & value);
-    bool checked() const;
-    void setChecked(bool checked);
+    int rows() const;
+    int cols() const;
 
   protected:
-    UnicodeString m_type;
-    UnicodeString m_value;
-    UnicodeString m_name;
-    UnicodeString m_size;
-    bool m_checked;
-    const UnicodeString * attributePtr(const std::string & name) const;
+    int m_rows;
+    int m_cols;
 };
 #endif

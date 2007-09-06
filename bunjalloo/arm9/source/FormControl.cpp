@@ -15,65 +15,19 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
-#include "Canvas.h"
-#include "URI.h"
-#include "HtmlElement.h"
-#include "ControllerI.h"
-#include "Palette.h"
 #include "FormControl.h"
-#include "TextArea.h"
-//#include "md5.h"
+#include "HtmlElement.h"
+#include "HtmlConstants.h"
+#include "HtmlInputElement.h"
+#include "ControllerI.h"
+#include "URI.h"
 
-using nds::Canvas;
-using nds::Color;
 const int FormControl::MAX_SIZE(120);
 const int FormControl::MIN_SIZE(8);
 
-FormControl::FormControl(HtmlElement * element)
-  : m_size(new nds::Rectangle), m_element(element)
-{
-  m_size->x = 0;
-  m_size->y = 0;
-  m_size->w = 1;
-  m_size->h = 1;
-}
-
-FormControl::~FormControl()
-{
-  delete m_size;
-}
-
-void FormControl::setPosition(int x, int y)
-{
-  m_size->x = x;
-  m_size->y = y;
-}
-
-void FormControl::setHeight(int h)
-{
-  m_size->h = h;
-}
-int FormControl::width() const
-{
-  return m_size->w+MIN_SIZE;
-}
-
-bool FormControl::hitTest(int x, int y) const
-{
-  return m_size->hit(x,y);
-}
-
-void FormControl::draw(TextArea * gfx)
-{
-  Canvas::instance().drawRectangle(m_size->x, m_size->y, m_size->w, m_size->h, Color(15,25,20));
-}
-
-FormControl::InputType FormControl::inputType() const
-{
-  return ONE_CLICK;
-}
-
-void FormControl::input(const UnicodeString & str)
+FormControl::FormControl(const HtmlElement * element):
+  Button(element->attribute("value")),
+  m_element(element)
 {
 }
 
@@ -109,8 +63,7 @@ static void addBoundary(std::string & processedData, unsigned char boundary[16])
 }
 #endif
 
-
-void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
+void FormControl::input(ControllerI & controller, URI & uri)
 {
   // need to walk up m_element until we find the form father or the html element.
   HtmlElement * currentNode = m_element->parent();
@@ -129,7 +82,10 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
   //m_processedData += '?';
   uri.setMethod(unicode2string(currentNode->attribute("method")));
 
-  ElementList inputs(currentNode->elementsByTagName("input"));
+  ElementList inputs(currentNode->elementsByTagName(HtmlConstants::INPUT_TAG));
+  ElementList selects(currentNode->elementsByTagName(HtmlConstants::SELECT_TAG));
+  ElementList::iterator inputEnd(inputs.end());
+  inputs.splice(inputEnd, selects);
   ElementList::const_iterator inputIt(inputs.begin());
   bool needAmp(false);
   bool isGet = uri.method() == "GET";
@@ -143,17 +99,58 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
   }
   */
   std::string processedData;
+  UnicodeString myName = m_element->attribute("name");
+  const UnicodeString one(string2unicode("1"));
   for (; inputIt != inputs.end(); ++inputIt)
   {
     const HtmlElement * element(*inputIt);
     UnicodeString name = element->attribute("name");
-    std::string type = unicode2string(element->attribute("type"));
-    if (not name.empty() and (type.empty() or type == "text" or type == "password")
-        or (m_element == element) )
+    UnicodeString value = element->attribute("value");
+    bool includeValue(false);
+    if (element->isa(HtmlConstants::INPUT_TAG))
     {
-      UnicodeString value = element->attribute("value");
-      if (not value.empty() or (m_element == element))
+      HtmlInputElement::InputType inputType = ((const HtmlInputElement*)element)->inputType();
+      bool checked = ((const HtmlInputElement*)element)->checked();
+      switch (inputType)
       {
+        case HtmlInputElement::TEXT:
+        case HtmlInputElement::PASSWORD:
+          includeValue = not name.empty();
+          break;
+
+        case HtmlInputElement::SUBMIT:
+          includeValue = not name.empty() and not value.empty();
+          break;
+
+        case HtmlInputElement::CHECKBOX:
+          includeValue = checked;
+          if (value.empty())
+          {
+            value = string2unicode("on");
+          }
+          break;
+
+        case HtmlInputElement::RADIO:
+          // only include the selected radio button
+          includeValue = checked;
+          break;
+
+        case HtmlInputElement::HIDDEN:
+          includeValue = true;
+          break;
+
+      }
+    }
+    else if (element->isa(HtmlConstants::SELECT_TAG))
+    {
+      includeValue = not value.empty();
+    }
+    if (m_element == element and not myName.empty())
+    {
+      includeValue = true;
+    }
+    if (includeValue)
+    {
         //if (isGet) {
           if (needAmp) {
             processedData += '&';
@@ -172,7 +169,6 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
           md5_update(&ctx, (unsigned char*)postData.back().c_str(), postData.back().length());
         }
         */
-      }
     }
   }
   if (isGet) {
@@ -225,5 +221,6 @@ void FormControl::input(int x, int y, ControllerI & controller, URI & uri)
     uri.setRequestHeader(processedData);
     */
   }
+  printf("Go to %s\n", uri.asString().c_str());
   controller.doUri(uri);
 }

@@ -26,6 +26,7 @@
 #include "HtmlOptionElement.h"
 #include "HtmlFormElement.h"
 #include "HtmlInputElement.h"
+#include "HtmlTextAreaElement.h"
 #include "HtmlElement.h"
 #include "HtmlConstants.h"
 
@@ -67,6 +68,14 @@ HtmlElement * ElementFactory::create(const std::string & elementType)
   else if (elementType == HtmlConstants::INPUT_TAG)
   {
     return new HtmlInputElement(elementType);
+  }
+  else if (elementType == HtmlConstants::SELECT_TAG)
+  {
+    return new HtmlInputElement(elementType);
+  }
+  else if (elementType == HtmlConstants::TEXTAREA_TAG)
+  {
+    return new HtmlTextAreaElement(elementType);
   }
   /*
   else if (elementType == HtmlConstants::UL_TAG or elementType == HtmlConstants::OL_TAG or elementType == HtmlConstants::LI_TAG)

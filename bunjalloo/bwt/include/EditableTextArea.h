@@ -57,6 +57,9 @@ class EditableTextArea: public TextArea, public TextEntryI
      */
     bool caretVisible() const;
 
+    inline void setEchoText(bool echo=true);
+    inline bool echoText() const;
+
     // interface implementation
     virtual void text(UnicodeString & returnString) const;
     virtual void setText(const UnicodeString & text);
@@ -64,11 +67,16 @@ class EditableTextArea: public TextArea, public TextEntryI
     virtual bool touch(int x, int y);
     virtual bool isMultiLine() const;
 
+  protected:
+    /** Overloaded from TextArea. If echo is off, shows * instead of text.*/
+    virtual void printu(const UnicodeString & unicodeString);
+
   private:
     int m_caretLine;
     int m_caretChar;
     int m_caretPixelX;
     bool m_appendedNewLine;
+    bool m_echoText;
     ScrollPane * m_scrollPane;
 
     void setCaret(int x, int y);
@@ -76,5 +84,12 @@ class EditableTextArea: public TextArea, public TextEntryI
     void resizeParent();
 
 };
-
+void EditableTextArea::setEchoText(bool echo)
+{
+  m_echoText = echo;
+}
+bool EditableTextArea::echoText() const
+{
+  return m_echoText;
+}
 #endif

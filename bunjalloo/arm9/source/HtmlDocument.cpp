@@ -707,8 +707,9 @@ void HtmlDocument::inSelect(const std::string & tag, const AttributeVector & att
   }
   else if (tag == HtmlConstants::SELECT_TAG)
   {
-    // parse error
+    // parse error - send a SELECT end, then reparse as a start tag.
     handleEndTag(tag);
+    handleStartTag(tag, attrs);
   }
   // else parse error, ignore.
 }

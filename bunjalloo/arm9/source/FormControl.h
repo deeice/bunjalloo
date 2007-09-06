@@ -18,53 +18,26 @@
 #ifndef FormControl_h_seen
 #define FormControl_h_seen
 
-#include "UnicodeString.h"
-#include "Rectangle.h"
-
-class TextArea;
-class ControllerI;
+#include <string>
+#include "Button.h"
 class HtmlElement;
+class ControllerI;
 class URI;
 
-class FormControl
+class FormControl : public Button
 {
   public:
     static const int MAX_SIZE;
     static const int MIN_SIZE;
-    FormControl(HtmlElement * element);
-    virtual ~FormControl();
-    virtual void draw(TextArea * gfx);
-
-    enum InputType
-    {
-      KEYBOARD,
-      ONE_CLICK,
-      MENU
-    };
-
-    /** Does this control require keyboard input? .
-     * @return true if it does. false if only clicks are needed.
-     */
-    virtual InputType inputType() const;
-
-    /** Input a unicode string.
-     * @param str the input value.
-     */
-    virtual void input(const UnicodeString & str);
+    FormControl(const HtmlElement * element);
 
     /** input a touch value after clicking.
      * @param str the input touch.
      */
-    virtual void input(int x, int y, ControllerI & controller, URI & uri);
-
-    void setHeight(int h);
-    void setPosition(int x, int y);
-    int width() const;
-    bool hitTest(int x, int y) const;
+    virtual void input(ControllerI & controller, URI & uri);
 
   protected:
-    nds::Rectangle * m_size;
-    HtmlElement * m_element;
+    const HtmlElement * m_element;
     std::string m_processedData;
 };
 

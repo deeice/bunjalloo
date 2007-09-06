@@ -173,12 +173,9 @@ void ScrollBar::calculateHandle()
   }
 
   m_handleSize = (visibleRange() * visibleRange())/total();
-  if (m_scrollPane->topLevel())
-  {
-    m_handleSize *= 2;
-  }
   if (m_handleSize < MIN_HANDLE_SIZE)
     m_handleSize = MIN_HANDLE_SIZE;
+
   int scrollerHeight = visibleRange() - m_handleSize;
 
   if (m_total > m_bounds.h)

@@ -43,3 +43,34 @@ const UnicodeString * HtmlInputElement::attributePtr(const std::string & name) c
   return 0;
 
 }
+
+HtmlInputElement::InputType HtmlInputElement::inputType() const
+{
+  std::string type = unicode2string(m_type);
+  if (type == "submit") return SUBMIT;
+  if (type.empty() or type == "text") return TEXT;
+  if (type == "password") return PASSWORD;
+  if (type == "checkbox") return CHECKBOX;
+  if (type == "radio") return RADIO;
+  return HIDDEN;
+}
+
+bool HtmlInputElement::checked() const
+{
+  return m_checked;
+}
+
+void HtmlInputElement::setChecked(bool checked)
+{
+  m_checked = checked;
+}
+
+void HtmlInputElement::setAttribute(const std::string & name, 
+        const UnicodeString & value)
+{
+  HtmlElement::setAttribute(name, value);
+  if (name == "checked")
+  {
+    m_checked = true;
+  }
+}

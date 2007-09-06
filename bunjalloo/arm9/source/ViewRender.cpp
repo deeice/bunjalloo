@@ -18,23 +18,26 @@
 #include <assert.h>
 #include "ndspp.h"
 #include "libnds.h"
-#include "Button.h"
 #include "Canvas.h"
-#include "CheckBox.h"
-#include "ComboBox.h"
 #include "Document.h"
 #include "File.h"
+#include "FormCheckBox.h"
+#include "FormControl.h"
+#include "FormRadio.h"
+#include "FormTextArea.h"
 #include "HtmlBodyElement.h"
 #include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "HtmlImageElement.h"
+#include "HtmlInputElement.h"
+#include "InputText.h"
 #include "Keyboard.h"
-// #include "PasswordField.h"
+#include "PasswordField.h"
 #include "RadioButton.h"
 #include "RichTextArea.h"
 #include "ScrollPane.h"
+#include "Select.h"
 #include "TextAreaFactory.h"
-#include "TextField.h"
 #include "View.h"
 #include "ViewRender.h"
 
@@ -52,6 +55,7 @@ RichTextArea * ViewRender::textArea()
   if (m_textArea == 0)
   {
     m_textArea = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
+    m_textArea->setSize(nds::Canvas::instance().width(), m_textArea->font().height());
     m_textArea->addLinkListener(m_self);
     m_textArea->setParseNewline(false);
     m_self->m_scrollPane->add(m_textArea);
@@ -195,6 +199,11 @@ bool ViewRender::applyFormat(const HtmlElement * element)
     renderInput(element);
     return false; 
   }
+  else if (element->isa(HtmlConstants::TEXTAREA_TAG))
+  {
+    renderTextArea(element);
+    return false; 
+  }
   return true;
 }
 
@@ -253,9 +262,35 @@ void ViewRender::doImage(const UnicodeString & imgStr)
   textArea()->endColor();
 }
 
+void ViewRender::clearRadioGroups()
+{
+  FormGroupMap::iterator it(m_radioGroup.begin());
+  for (; it != m_radioGroup.end(); ++it)
+  {
+    delete it->second;
+  }
+  m_radioGroup.clear();
+}
+
+/*
+ElementList ViewRender::selectedRadioButtons() const
+{
+  ElementList theList;
+  FormGroupMap::const_iterator it(m_radioGroup.begin());
+  for (; it != m_radioGroup.end(); ++it)
+  {
+     theList.push_back(it->second->selectedElement());
+  }
+  return theList;
+}
+*/
+
 void ViewRender::render()
 {
   m_self->m_scrollPane->removeChildren();
+
+  clearRadioGroups();
+
   m_textArea = 0;
   const HtmlElement * root = m_self->m_document.rootNode();
   assert(root->isa(HtmlConstants::HTML_TAG));
@@ -275,32 +310,16 @@ void ViewRender::render()
 
 void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
-  ComboBox * select = new ComboBox;
+  Select * select = new Select(const_cast<HtmlElement*>(selectElement));
   m_textArea = 0;
-  /** FIXME - BWT changes - can I delete Select now?
-  // render the select
-  Select * formSelect = new Select( const_cast<HtmlElement*>(selectElement));
-  */
-  if (selectElement->hasChildren())
-  {
-    const ElementList & theChildren = selectElement->children();
-    ElementList::const_iterator it(theChildren.begin());
-    for (; it != theChildren.end(); ++it)
-    {
-      if ( (*it)->isa(HtmlConstants::OPTION_TAG) ) {
-        //formSelect->addOption((*it), m_self->m_textArea);
-        const HtmlElement * option(*it);
-        if (option->hasChildren() and option->firstChild()->isa("#TEXT"))
-        {
-          select->addItem(option->firstChild()->text());
-        }
-      }
-    }
-  }
   m_self->m_scrollPane->add(select);
 }
+
+
+// FIXME - where should this go?
 static const int MAX_SIZE(nds::Canvas::instance().width());
 static const int MIN_SIZE(8);
+
 
 void ViewRender::renderInput(const HtmlElement * inputElement)
 {
@@ -315,52 +334,82 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
   if (size > MAX_SIZE)
     size = MAX_SIZE;
 
-  string type = unicode2string(inputElement->attribute("type"));
-  if (type == "submit")
+  HtmlInputElement::InputType type = ((const HtmlInputElement*)inputElement)->inputType();
+  switch (type)
   {
-    UnicodeString value(inputElement->attribute("value"));
-    Button * submitButton = new Button(value);
-    submitButton->setListener(m_self);
-    m_textArea = 0;
-    if (size > MIN_SIZE)
-      submitButton->setSize(size, submitButton->preferredSize().h);
-    m_self->m_scrollPane->add(submitButton);
-  }
-  else if (type.empty() or type == "text")
-  {
-    TextField * text = new TextField(inputElement->attribute("value"));
-    m_textArea = 0;
-    if (size <= 0)
-      size = MIN_SIZE*8; // FIXME! textArea->font().height();
-    text->setListener(m_self->m_keyboard);
-    text->setSize(size, text->preferredSize().h);
-    m_self->m_scrollPane->add(text);
-  } 
-  else if (type == "password")
-  {
-    // TODO - password field should show *** instead of real text.
-    TextField * text = new TextField(UnicodeString());
-    m_textArea = 0;
-    if (size <= 0)
-      size = MIN_SIZE*8; // FIXME! textArea->font().height();
-    text->setListener(m_self->m_keyboard);
-    text->setSize(size, text->preferredSize().h);
-    m_self->m_scrollPane->add(text);
-  }
-  else if (type == "checkbox")
-  {
-    m_textArea = 0;
-    CheckBox * checkbox = new CheckBox;
-    m_self->m_scrollPane->add(checkbox);
-  }
-  else if (type == "radio")
-  {
-    m_textArea = 0;
-    RadioButton * radio = new RadioButton;
-    m_self->m_scrollPane->add(radio);
-  }
-  else
-  {
-    // cout << "Type not supported: " << type << endl;
+    case HtmlInputElement::SUBMIT:
+      {
+        FormControl * submitButton = new FormControl(inputElement);
+        submitButton->setListener(m_self);
+        m_textArea = 0;
+        if (size > MIN_SIZE)
+          submitButton->setSize(size, submitButton->preferredSize().h);
+        m_self->m_scrollPane->add(submitButton);
+      }
+      break;
+    case HtmlInputElement::TEXT:
+      {
+        InputText * text = new InputText(const_cast<HtmlElement*>(inputElement));
+        m_textArea = 0;
+        if (size <= 0)
+          size = MIN_SIZE*8; // FIXME! textArea->font().height();
+        text->setListener(m_self->m_keyboard);
+        text->setSize(size, text->preferredSize().h);
+        m_self->m_scrollPane->add(text);
+      } 
+      break;
+    case HtmlInputElement::PASSWORD:
+      {
+        // TODO - password field should show *** instead of real text.
+        PasswordField * text = new PasswordField(const_cast<HtmlElement*>(inputElement));
+        m_textArea = 0;
+        if (size <= 0)
+          size = MIN_SIZE*8; // FIXME! textArea->font().height();
+        text->setListener(m_self->m_keyboard);
+        text->setSize(size, text->preferredSize().h);
+        m_self->m_scrollPane->add(text);
+      }
+      break;
+    case HtmlInputElement::CHECKBOX:
+      {
+        m_textArea = 0;
+        FormCheckBox * checkbox = new FormCheckBox(const_cast<HtmlElement*>(inputElement));
+        m_self->m_scrollPane->add(checkbox);
+      }
+      break;
+    case HtmlInputElement::RADIO:
+      {
+        // see if there is a RadioGroup with this name
+        UnicodeString name = inputElement->attribute("name");
+        // FIXME - get the group.
+        m_textArea = 0;
+        RadioButton * radio = new RadioButton;
+        m_self->m_scrollPane->add(radio);
+        if (not name.empty())
+        {
+          FormGroupMap::iterator it(m_radioGroup.find(name));
+          if (it != m_radioGroup.end())
+          {
+            it->second->add(radio, const_cast<HtmlElement*>(inputElement));
+          }
+          else
+          {
+            FormRadio * fr = new FormRadio;
+            fr->add(radio, const_cast<HtmlElement*>(inputElement));
+            m_radioGroup[name] = fr;
+          }
+        }
+      }
+      break;
+    case HtmlInputElement::HIDDEN:
+      break;
   }
 }
+
+void ViewRender::renderTextArea(const HtmlElement * textAreaElement)
+{
+  FormTextArea * text = new FormTextArea(const_cast<HtmlElement*>(textAreaElement));
+  text->setListener(m_self->m_keyboard);
+  m_self->m_scrollPane->add(text);
+}
+

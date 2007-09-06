@@ -23,6 +23,8 @@ class TextListener;
 class TextEntryI
 {
   public:
+    TextEntryI():m_listener(0) {}
+
     virtual ~TextEntryI() {}
 
     /** Get the text that this TextEntryI holds.
@@ -48,6 +50,14 @@ class TextEntryI
     inline TextListener * listener() const
     {
       return m_listener;
+    }
+
+    /** Get the echo text availability of this TextEntryI. 
+     * Password fields should return false.
+     */
+    inline virtual bool echoText() const
+    {
+      return true;
     }
 
     /** Remove the current callback TextListener.

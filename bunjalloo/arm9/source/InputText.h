@@ -18,20 +18,16 @@
 #ifndef InputText_h_seen
 #define InputText_h_seen
 
-#include "FormControl.h"
+#include "TextField.h"
 class HtmlElement;
-class TextArea;
 
-class InputText: public FormControl
+class InputText: public TextField
 {
-
   public:
-    InputText(HtmlElement * element, const TextArea * textArea);
-    virtual void draw(TextArea * gfx);
-    virtual InputType inputType() const;
-    virtual void input(const UnicodeString & str);
+    InputText(HtmlElement * element);
+    virtual void setText(const UnicodeString & text);
 
   private:
-    // the user input
+    HtmlElement * m_element;
 };
 #endif
