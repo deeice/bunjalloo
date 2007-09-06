@@ -141,7 +141,6 @@ void View::pressed(ButtonI * button)
 {
   if (m_form)
     return;
-  printf("Form clicked\n");
   // FIXME - BWT - callback for button presses
   // Hmm, how to go from the button pressed to the form it lives in?
   // Originally, each control had a HtmlElement associated with it.

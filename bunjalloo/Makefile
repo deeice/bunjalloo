@@ -40,5 +40,7 @@ dist: all
 	cp $(target)-unpatched.nds $(distdir)/$(target).nds
 	cp data/ -rvfp $(distdir)/
 	find $(distdir) -name '.svn' -type d | xargs rm -rf 
-	zip -r $(target).zip $(distdir)/
+	cd $(distdir) && zip -r $(target).zip *
+	mv $(distdir)/$(target).zip .
+	rm -rf $(distdir)
 
