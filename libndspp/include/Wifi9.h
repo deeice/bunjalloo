@@ -67,6 +67,8 @@ namespace nds
        */
       void disconnect();
 
+      int signalStrength() const;
+
     private:
       bool m_connected;
       //! construct the class, calls initialise

@@ -63,3 +63,12 @@ Wifi9::WifiStatus Wifi9::status() const
 void Wifi9::disconnect()
 {
 }
+
+int Wifi9::signalStrength() const
+{
+  if (not m_connected)
+    return 0;
+
+  // ??? 
+  return 10;
+}

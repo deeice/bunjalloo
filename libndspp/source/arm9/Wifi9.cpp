@@ -154,3 +154,20 @@ void Wifi9::disconnect()
   REG_IPC_FIFO_TX=0xDEADFEED;
   Wifi_DisableWifi();
 }
+
+int Wifi9::signalStrength() const
+{
+  if (not m_connected)
+    return 0;
+
+  Wifi_AccessPoint accessPoint;
+  for (int ap = 0; ap < 3; ++ap) 
+  {
+    int result = Wifi_GetAPData(ap, &accessPoint);
+    if (result == WIFI_RETURN_OK)
+    {
+      return accessPoint.rssi;
+    }
+  }
+  return 0;
+}
