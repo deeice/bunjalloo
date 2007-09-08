@@ -25,6 +25,7 @@
 #include "FormControl.h"
 #include "Keyboard.h"
 #include "Link.h"
+#include "TextField.h"
 #include "ScrollPane.h"
 #include "URI.h"
 #include "View.h"
@@ -39,6 +40,7 @@ View::View(Document & doc, ControllerI & c):
   m_scrollPane(new ScrollPane),
   m_keyboard(new Keyboard),
   m_renderer(new ViewRender(this)),
+  m_addressBar(new TextField(UnicodeString())),
   m_state(BROWSE),
   m_form(0),
   m_dirty(true)
@@ -50,6 +52,13 @@ View::View(Document & doc, ControllerI & c):
   m_keyboard->setTopLevel(m_scrollPane);
   m_document.registerView(this);
   keysSetRepeat( 10, 5 );
+}
+
+View::~View()
+{
+  delete m_keyboard;
+  delete m_renderer;
+  delete m_addressBar;
 }
 
 void View::notify()
@@ -92,11 +101,10 @@ void View::browse()
   u16 keys = keysDownRepeat();
   if (keys & KEY_START) {
     // nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
-    /** FIXME - BWT
-    m_preInputStartLine = m_textArea->startLine();
-    m_keyboard->setVisible();
+    m_addressBar->setText(string2unicode(m_document.uri()));
+    m_keyboard->editText(m_addressBar);
     m_state = KEYBOARD;
-    */
+    m_dirty = true;
   }
   if (keys & KEY_DOWN) {
     // scroll down ...
@@ -118,10 +126,10 @@ void View::browse()
     m_scrollPane->up();
     m_dirty = true;
   }
-  if (keys & KEY_LEFT) {
+  if ( (keys & KEY_LEFT) or (keys & KEY_L) ) {
     m_controller.previous();
   }
-  if (keys & KEY_RIGHT) {
+  if ( (keys & KEY_RIGHT) or (keys & KEY_R) ) {
     m_controller.next();
   }
   if (keys & KEY_A) {
@@ -163,32 +171,13 @@ void View::linkClicked(Link * link)
 
 void View::keyboard()
 {
-  if (m_keyboard->visible()) {
-    /** FIXME - BWT changes
-    m_keyboard->handleInput();
-    */
-    if (not m_keyboard->visible())
-    {
-      nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
-      if (not m_keyboard->result().empty())
-      {
-        /** FIXME  - conver UnicodeString to std::string
-         * BWT Keyboard returns Unicode.
-        m_controller.doUri(m_keyboard->result());
-        */
-      }
-      else
-      {
-        /** FIXME BWT
-        m_textArea->setStartLine(m_preInputStartLine);
-        */
-        m_renderer->render();
-      }
-    }
-  }
-  else
+  u16 keys = keysDownRepeat();
+  if (keys & KEY_TOUCH)
   {
-    m_state = BROWSE;
+    touchPosition tp = touchReadXY();
+    m_dirty = m_keyboard->touch(tp.px, tp.py+SCREEN_HEIGHT);
+    if (not m_dirty)
+      m_dirty = m_scrollPane->touch(tp.px, tp.py+SCREEN_HEIGHT);
   }
 }
 
@@ -211,6 +200,15 @@ void View::tick()
     m_keyboard->paint(m_scrollPane->preferredSize());
     nds::Canvas::instance().endPaint();
     m_dirty = false;
+  }
+
+  if (m_state == KEYBOARD and not m_keyboard->visible()) {
+    m_state = BROWSE;
+    string newAddress = unicode2string(m_keyboard->result());
+    if (not newAddress.empty())
+    {
+      m_controller.doUri(newAddress);
+    }
   }
 
   // clicked a link:

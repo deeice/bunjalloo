@@ -29,6 +29,7 @@ class ControllerI;
 class ScrollPane;
 class Keyboard;
 class ViewRender;
+class TextField;
 class FormControl;
 
 /** Handle the displaying of HTML data.*/
@@ -41,6 +42,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
      * @param controller the controller.
      */
     View(Document & doc, ControllerI & controller);
+
+    ~View();
 
     void notify();
 
@@ -71,6 +74,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     ScrollPane * m_scrollPane;
     Keyboard * m_keyboard;
     ViewRender * m_renderer;
+    TextField * m_addressBar;
     InputState m_state;
     FormControl * m_form;
     int m_preInputStartLine;
