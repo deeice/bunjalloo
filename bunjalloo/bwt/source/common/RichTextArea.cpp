@@ -331,7 +331,8 @@ int RichTextArea::pointToCharIndex(int x, int y) const
   }
   if (caretChar == -1)
   {
-    caretChar = line.length();
+    // caretChar = line.length();
+    return -1;
   }
   // now we know the line and the character in that line.
   if (lineNum > 0)
@@ -346,7 +347,9 @@ bool RichTextArea::touch(int x, int y)
 {
   if ( m_bounds.hit(x, y))
   {
-    unsigned int charClicked = pointToCharIndex(x, y);
+    int charClicked = pointToCharIndex(x, y);
+    if (charClicked == -1)
+      return false;
     // now see if this is in a link
     LinkList::const_iterator linkIt(m_links.begin());
     for (; linkIt != m_links.end(); ++linkIt)
