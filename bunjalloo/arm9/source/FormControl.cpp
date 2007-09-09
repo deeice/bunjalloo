@@ -233,6 +233,6 @@ void FormControl::input(ControllerI & controller, URI & uri)
     uri.setRequestHeader(processedData);
     */
   }
-  printf("Go to %s\n", uri.asString().c_str());
+  //printf("Go to %s\n", uri.asString().c_str());
   controller.doUri(uri);
 }

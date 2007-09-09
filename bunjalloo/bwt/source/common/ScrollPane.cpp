@@ -401,7 +401,7 @@ void ScrollPane::adjustScroll(int & scrollIncrement)
 
   int offSet = (m_children.back()->bounds().bottom() - scrollIncrement) - m_bounds.bottom();
   int top = m_children.front()->bounds().top() - bounds().top();
-  if (offSet < 0 and top < 0)
+  if (offSet < 0 and top <= 0)
   {
     // scrolled too far.
     // change scrollIncrement so that offset == 0
