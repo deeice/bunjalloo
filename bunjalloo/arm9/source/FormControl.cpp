@@ -84,8 +84,11 @@ void FormControl::input(ControllerI & controller, URI & uri)
 
   ElementList inputs(currentNode->elementsByTagName(HtmlConstants::INPUT_TAG));
   ElementList selects(currentNode->elementsByTagName(HtmlConstants::SELECT_TAG));
+  ElementList textarea(currentNode->elementsByTagName(HtmlConstants::TEXTAREA_TAG));
   ElementList::iterator inputEnd(inputs.end());
   inputs.splice(inputEnd, selects);
+  inputEnd = inputs.end();
+  inputs.splice(inputEnd, textarea);
   ElementList::const_iterator inputIt(inputs.begin());
   bool needAmp(false);
   bool isGet = uri.method() == "GET";
@@ -157,6 +160,16 @@ void FormControl::input(ControllerI & controller, URI & uri)
     {
       includeValue = not value.empty();
     }
+    else if (element->isa(HtmlConstants::TEXTAREA_TAG))
+    {
+      includeValue = false; // because it is already hacked in here
+      if (needAmp) {
+        processedData += '&';
+      }
+      processedData += unicode2string(URI::escape(name));
+      processedData += "=";
+      processedData += unicode2string(element->firstChild()->text());
+    }
     if (m_element == element and not myName.empty())
     {
       includeValue = true;
@@ -190,7 +203,7 @@ void FormControl::input(ControllerI & controller, URI & uri)
     uri = uri.navigateTo(m_processedData);
   }
   else {
-    std::string contentType = "Content-Type: application/x-www-form-urlencoded\r\n";
+    std::string contentType;
     char buffer[256];
 #ifdef ARM9
     siprintf(buffer, "%d", processedData.length());
@@ -200,6 +213,7 @@ void FormControl::input(ControllerI & controller, URI & uri)
     contentType += "Content-Length: ";
     contentType += buffer;
     contentType += "\r\n";
+    contentType += "Content-Type: application/x-www-form-urlencoded\r\n";
     contentType += "\r\n";
     // add url
 

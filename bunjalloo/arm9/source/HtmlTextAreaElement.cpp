@@ -2,6 +2,19 @@
 
 static const int MINIMUM_ROWS(4);
 static const int MINIMUM_COLS(10);
+const UnicodeString * HtmlTextAreaElement::attributePtr(const std::string & name) const
+{
+  const UnicodeString * p = HtmlElement::attributePtr(name);
+  if (p) {
+    return p;
+  }
+  if (name == "name")
+  {
+    return &m_name;
+  }
+  return 0;
+}
+
 void HtmlTextAreaElement::setAttribute(const std::string & name, 
     const UnicodeString & value)
 {

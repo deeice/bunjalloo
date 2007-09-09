@@ -34,7 +34,7 @@ void FormTextArea::layoutViewer()
 void FormTextArea::editText(TextEntryI * entry)
 {
   if (listener())
-    listener()->editText(entry);
+    listener()->editText(this);
 }
 
 inline EditableTextArea * FormTextArea::textArea()

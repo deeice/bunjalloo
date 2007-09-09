@@ -34,5 +34,7 @@ class HtmlTextAreaElement:public HtmlElement
   protected:
     int m_rows;
     int m_cols;
+    UnicodeString m_name;
+    const UnicodeString * attributePtr(const std::string & name) const;
 };
 #endif
