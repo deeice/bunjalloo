@@ -32,6 +32,14 @@ const UnicodeString * HtmlInputElement::attributePtr(const std::string & name) c
   {
     return &m_value;
   }
+  if (name == "src")
+  {
+    return &m_src;
+  }
+  if (name == "alt")
+  {
+    return &m_alt;
+  }
   if (name == "name")
   {
     return &m_name;
@@ -48,6 +56,8 @@ HtmlInputElement::InputType HtmlInputElement::inputType() const
 {
   std::string type = unicode2string(m_type);
   if (type == "submit") return SUBMIT;
+  if (type == "image") return IMAGE;
+  if (type == "button") return SUBMIT;
   if (type.empty() or type == "text") return TEXT;
   if (type == "password") return PASSWORD;
   if (type == "checkbox") return CHECKBOX;
@@ -72,5 +82,15 @@ void HtmlInputElement::setAttribute(const std::string & name,
   if (name == "checked")
   {
     m_checked = true;
+    
   }
+  else if (name == "alt")
+  {
+    m_hasAltText = true;
+  }
+}
+
+bool HtmlInputElement::hasAltText() const
+{
+  return m_hasAltText;
 }

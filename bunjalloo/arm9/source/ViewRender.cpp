@@ -146,6 +146,25 @@ void ViewRender::postFormat(const HtmlElement * element)
   }
 }
 
+static UnicodeString extractImageText(const HtmlElement * element, bool hasAltText)
+{
+  const UnicodeString & altText = element->attribute("alt");
+  // NO! It might not be a HtmlImageElement - could be a HtmlInputElement
+  if (hasAltText) {
+    return altText;
+  }
+  const UnicodeString & srcText = element->attribute("src");
+  if (not srcText.empty())
+  {
+    string tmp = unicode2string(srcText);
+    const char * bname = nds::File::base(tmp.c_str());
+    string bnamestr(bname);
+    bnamestr = "["+ bnamestr+"]";
+    return string2unicode(bnamestr);
+  }
+  return string2unicode("[IMG]");
+}
+
 bool ViewRender::applyFormat(const HtmlElement * element)
 {
   if (not element->text().empty())
@@ -166,28 +185,12 @@ bool ViewRender::applyFormat(const HtmlElement * element)
   {
     // hurrah for alt text. some people set it to "", which screws up any
     // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
-    const UnicodeString & altText = element->attribute("alt");
     bool hasAltText = ((HtmlImageElement*)element)->hasAltText();
-    if (hasAltText) {
-      if (not altText.empty()) {
-        doImage(altText);
-      }
-      return false;
-    }
-    const UnicodeString & srcText = element->attribute("src");
-    if (not srcText.empty())
+    UnicodeString imgText = extractImageText(element, hasAltText);
+    if (not imgText.empty())
     {
-      string tmp = unicode2string(srcText);
-      const char * bname = nds::File::base(tmp.c_str());
-      string bnamestr(bname);
-      bnamestr = "["+ bnamestr+"]";
-      UnicodeString ustr (string2unicode(bnamestr));
-      doImage(ustr);
-      return false;
+      doImage(imgText);
     }
-    UnicodeString ustr( string2unicode("[IMG]"));
-    doImage(ustr);
-    return false;
   }
   else if (element->isa(HtmlConstants::SELECT_TAG))
   {
@@ -337,13 +340,23 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
   HtmlInputElement::InputType type = ((const HtmlInputElement*)inputElement)->inputType();
   switch (type)
   {
+    case HtmlInputElement::IMAGE:
     case HtmlInputElement::SUBMIT:
       {
-        FormControl * submitButton = new FormControl(inputElement);
+        bool hasAltText = ((HtmlInputElement*)inputElement)->hasAltText();
+        FormControl * submitButton = new FormControl(inputElement, 
+            type == HtmlInputElement::SUBMIT?(
+            inputElement->attribute("value").empty()?
+            string2unicode("Submit"):
+            inputElement->attribute("value")):
+            extractImageText(inputElement, hasAltText)
+            );
         submitButton->setListener(m_self);
         m_textArea = 0;
         if (size > MIN_SIZE)
+        {
           submitButton->setSize(size, submitButton->preferredSize().h);
+        }
         m_self->m_scrollPane->add(submitButton);
       }
       break;

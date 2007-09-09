@@ -17,18 +17,19 @@
 */
 #ifndef HtmlInputElement_h_seen
 #define HtmlInputElement_h_seen
-
 #include "HtmlElement.h"
+
 class HtmlInputElement:public HtmlElement
 {
   public:
     HtmlInputElement(const std::string & tagName) 
-      : HtmlElement(tagName), m_checked(false)
+      : HtmlElement(tagName), m_checked(false), m_hasAltText(false)
     {}
 
     enum InputType
     {
       SUBMIT,
+      IMAGE,
       TEXT,
       PASSWORD,
       RADIO,
@@ -41,13 +42,17 @@ class HtmlInputElement:public HtmlElement
         const UnicodeString & value);
     bool checked() const;
     void setChecked(bool checked);
+    bool hasAltText() const;
 
   protected:
     UnicodeString m_type;
     UnicodeString m_value;
     UnicodeString m_name;
+    UnicodeString m_alt;
+    UnicodeString m_src;
     UnicodeString m_size;
     bool m_checked;
+    bool m_hasAltText;
     const UnicodeString * attributePtr(const std::string & name) const;
 };
 #endif

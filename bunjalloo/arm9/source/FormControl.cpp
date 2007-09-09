@@ -25,8 +25,8 @@
 const int FormControl::MAX_SIZE(120);
 const int FormControl::MIN_SIZE(8);
 
-FormControl::FormControl(const HtmlElement * element):
-  Button(element->attribute("value")),
+FormControl::FormControl(const HtmlElement * element, const UnicodeString & text):
+  Button(text),
   m_element(element)
 {
 }
@@ -118,8 +118,20 @@ void FormControl::input(ControllerI & controller, URI & uri)
           includeValue = not name.empty();
           break;
 
+        case HtmlInputElement::IMAGE:
+          includeValue = m_element == element;
+          if (includeValue) 
+          {
+            if (needAmp) {
+              processedData += '&';
+            }
+            needAmp = true;
+            // FIXME - add correct x,y value..
+            processedData += "x=0&y=0";
+          }
+          break;
         case HtmlInputElement::SUBMIT:
-          includeValue = not name.empty() and not value.empty();
+          includeValue = m_element == element;
           break;
 
         case HtmlInputElement::CHECKBOX:
@@ -221,6 +233,6 @@ void FormControl::input(ControllerI & controller, URI & uri)
     uri.setRequestHeader(processedData);
     */
   }
-  //printf("Go to %s\n", uri.asString().c_str());
+  printf("Go to %s\n", uri.asString().c_str());
   controller.doUri(uri);
 }

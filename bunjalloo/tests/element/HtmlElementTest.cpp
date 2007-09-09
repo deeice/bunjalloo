@@ -3,6 +3,7 @@
 #include "HtmlTextAreaElement.h"
 #include "HtmlMetaElement.h"
 #include "HtmlOptionElement.h"
+#include "HtmlInputElement.h"
 #include "HtmlAnchorElement.h"
 #include "ElementFactory.h"
 
@@ -259,4 +260,18 @@ void HtmlElementTest::testTextAreaElement()
   expected = 80;
   result = element->cols();
   CPPUNIT_ASSERT_EQUAL( expected, result);
+}
+
+void HtmlElementTest::testInputElement()
+{
+  m_element = ElementFactory::create("input");
+  HtmlInputElement * element = (HtmlInputElement*)m_element;
+  CPPUNIT_ASSERT(not element->hasAltText());
+
+  UnicodeString altText = string2unicode("alt text");
+  UnicodeString srcText = string2unicode("image.png");
+  m_element->setAttribute("src", srcText);
+  m_element->setAttribute("alt", altText);
+  CPPUNIT_ASSERT_ASSERTION_PASS(altText == m_element->attribute("alt"));
+  CPPUNIT_ASSERT_ASSERTION_PASS(srcText ==  m_element->attribute("src"));
 }

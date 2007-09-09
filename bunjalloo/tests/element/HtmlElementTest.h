@@ -23,6 +23,7 @@ class HtmlElementTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testOptionElement );
   CPPUNIT_TEST( testElementsByTagName );
   CPPUNIT_TEST( testTextAreaElement );
+  CPPUNIT_TEST( testInputElement );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -45,6 +46,7 @@ public:
   void testOptionElement();
   void testElementsByTagName();
   void testTextAreaElement();
+  void testInputElement();
 
 private:
   HtmlElement * m_element;
