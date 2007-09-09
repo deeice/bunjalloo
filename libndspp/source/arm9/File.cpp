@@ -186,6 +186,6 @@ const char * File::base(const char * path)
   if (pos == std::string::npos)
     return path;
   else
-    return &path[pos];
+    return &path[pos+1];
 }
 

@@ -163,6 +163,13 @@ void File::close()
 const char * File::base(const char * path)
 {
   // easy
-  return ::basename((char*)path);
+  static std::string str;
+  str = path;
+  unsigned int pos = str.rfind("/");
+  if (pos == std::string::npos)
+    return path;
+  else
+    return &path[pos+1];
+  //return ::basename((char*)path);
 }
 
