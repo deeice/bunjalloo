@@ -165,7 +165,8 @@ void EditableTextArea::recalculateCaret()
     if (m_caretChar >= newLength)
     {
       m_caretLine++;
-      m_caretChar = diff-1;
+      // fix Issue 19 - off by one on wrap around new line.
+      m_caretChar = diff;
       m_caretPixelX = -1;
     }
   }
