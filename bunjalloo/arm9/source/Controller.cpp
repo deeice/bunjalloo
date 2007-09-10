@@ -39,7 +39,7 @@ static const char s_errorText[] = {
 const static char * LICENCE_URL = "file:///licence";
 
 Controller::Controller()
-  : m_document(new Document())
+  : m_document(new Document()), m_wifiInit(false)
 {
   m_config = new Config(*m_document);
   TextAreaFactory::setFont(new Font(m_config->font()));
@@ -192,10 +192,20 @@ void Controller::fetchHttp(const URI & uri)
 {
   HttpClient client(uri.server().c_str(), uri.port(), uri);
   client.setController(this);
+  m_stop = false;
   while (not client.finished())
   {
     client.handleNextState();
+    if (client.state() > HttpClient::WIFI_OFF)
+    {
+      m_wifiInit = true;
+    }
     m_view->tick();
+    if (m_stop)
+    {
+      loadError();
+      return;
+    }
     swiWaitForVBlank();
   }
 
@@ -218,3 +228,12 @@ void Controller::fetchHttp(const URI & uri)
   }
 }
 
+bool Controller::wifiInitialised() const
+{
+  return m_wifiInit;
+}
+
+void Controller::stop()
+{
+  m_stop = true;
+}

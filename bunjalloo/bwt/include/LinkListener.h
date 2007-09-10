@@ -19,11 +19,15 @@
 #define LinkListener_h_seen
 
 class Link;
+/** Classes that want to register interest in link clicking should inherit from this interface. */
 class LinkListener
 {
   public:
     virtual ~LinkListener() {}
 
+    /** Called when a Link is clicked somehwere.
+     * @param link the link that has been clicked.
+     */
     virtual void linkClicked(Link * link) = 0;
 
 };

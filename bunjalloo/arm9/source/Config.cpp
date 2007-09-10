@@ -30,6 +30,7 @@ static const char PROXY_STR[] = "proxy";
 static const char FONT_STR[] = "font";
 static const char COOKIE_STR[] = "cookiefile";
 static const char MAX_CONNECT[] = "timeout";
+static const char TOOLBAR_TIME[] = "toolbar";
 using namespace std;
 
 std::string Config::font() const
@@ -84,7 +85,16 @@ void Config::parseLine(ParameterSet & set)
 
   if (set.hasParameter(MAX_CONNECT))
   {
-    set.parameter(MAX_CONNECT, m_maxConnect);
+    string value;
+    set.parameter(MAX_CONNECT, value);
+    m_maxConnect = strtoul(value.c_str(), 0, 0);
+  }
+
+  if (set.hasParameter(TOOLBAR_TIME))
+  {
+    string value;
+    set.parameter(TOOLBAR_TIME, value);
+    m_toolbarTime = strtoul(value.c_str(), 0, 0);
   }
 }
 
@@ -158,7 +168,12 @@ bool Config::useProxy() const
   return not m_proxy.empty();
 }
 
-std::string Config::maxConnections() const
+unsigned int Config::maxConnections() const
 {
   return m_maxConnect;
+}
+
+unsigned int Config::toolbarTimer() const
+{
+  return m_toolbarTime;
 }

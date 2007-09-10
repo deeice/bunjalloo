@@ -26,6 +26,7 @@
 #include "Keyboard.h"
 #include "Link.h"
 #include "TextField.h"
+#include "Toolbar.h"
 #include "ScrollPane.h"
 #include "URI.h"
 #include "View.h"
@@ -41,17 +42,19 @@ View::View(Document & doc, ControllerI & c):
   m_keyboard(new Keyboard),
   m_renderer(new ViewRender(this)),
   m_addressBar(new TextField(UnicodeString())),
+  m_toolbar(new Toolbar(doc, c, *this)),
   m_state(BROWSE),
   m_form(0),
   m_dirty(true)
 {
   m_scrollPane->setTopLevel();
-  m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
   m_scrollPane->setLocation(0, 0);
+  m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
   m_scrollPane->setScrollIncrement(20);
   m_keyboard->setTopLevel(m_scrollPane);
   m_document.registerView(this);
   keysSetRepeat( 10, 5 );
+  m_toolbar->setVisible();
 }
 
 View::~View()
@@ -59,6 +62,7 @@ View::~View()
   delete m_keyboard;
   delete m_renderer;
   delete m_addressBar;
+  delete m_toolbar;
 }
 
 void View::notify()
@@ -96,15 +100,21 @@ void View::notify()
   }
 }
 
+void View::enterUrl()
+{
+  m_addressBar->setText(string2unicode(m_document.uri()));
+  m_keyboard->editText(m_addressBar);
+  m_toolbar->setVisible(false);
+  m_state = KEYBOARD;
+  m_dirty = true;
+}
+
 void View::browse()
 {
   u16 keys = keysDownRepeat();
   if (keys & KEY_START) {
     // nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
-    m_addressBar->setText(string2unicode(m_document.uri()));
-    m_keyboard->editText(m_addressBar);
-    m_state = KEYBOARD;
-    m_dirty = true;
+    enterUrl();
   }
   if (keys & KEY_DOWN) {
     // scroll down ...
@@ -139,9 +149,22 @@ void View::browse()
   if (keys & KEY_TOUCH)
   {
     touchPosition tp = touchReadXY();
+
+    if (not m_keyboard->visible())
+    {
+      if ( m_toolbar->touch(tp.px, tp.py) )
+      {
+        return;
+      }
+    }
+
     m_dirty = m_keyboard->touch(tp.px, tp.py+SCREEN_HEIGHT);
     if (not m_dirty)
       m_dirty = m_scrollPane->touch(tp.px, tp.py+SCREEN_HEIGHT);
+    if (m_keyboard->visible())
+      m_toolbar->setVisible(false);
+    else
+      m_toolbar->setVisible(true);
   }
 }
 
@@ -194,12 +217,15 @@ void View::tick()
       break;
   }
   m_dirty |= m_keyboard->tick();
+  m_toolbar->tick();
 
   if (m_dirty) {
-    m_scrollPane->paint(m_scrollPane->preferredSize());
-    m_keyboard->paint(m_scrollPane->preferredSize());
+    const static nds::Rectangle clip = {0, 0, nds::Canvas::instance().width(), nds::Canvas::instance().height()};
+    m_scrollPane->paint(clip);
+    m_keyboard->paint(clip);
     nds::Canvas::instance().endPaint();
     m_dirty = false;
+    m_toolbar->updateIcons();
   }
 
   if (m_state == KEYBOARD and not m_keyboard->visible()) {
@@ -207,6 +233,7 @@ void View::tick()
     string newAddress = unicode2string(m_keyboard->result());
     if (not newAddress.empty())
     {
+      m_toolbar->setVisible(true);
       m_controller.doUri(newAddress);
     }
   }

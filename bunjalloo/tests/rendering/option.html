@@ -1,0 +1,28 @@
+<SCRIPT TYPE="text/javascript">
+<!--
+function dropdown(mySel)
+{
+var myWin, myVal;
+myVal = mySel.options[mySel.selectedIndex].value;
+if(myVal)
+   {
+   if(mySel.form.target)myWin = parent[mySel.form.target];
+   else myWin = window;
+   if (! myWin) return true;
+   myWin.location = myVal;
+   }
+return false;
+}
+//-->
+</SCRIPT>
+
+<FORM 
+     ACTION="../cgi-bin/redirect.pl" 
+     METHOD=POST onSubmit="return dropdown(this.gourl)">
+<p align="center">
+<SELECT NAME="gourl">
+<OPTION VALUE="">Select a value...
+<OPTION 
+              value=?variable=1>001 Variable<OPTION 
+              value=?variable=2>002 Variable</OPTION></SELECT>
+</SELECT>

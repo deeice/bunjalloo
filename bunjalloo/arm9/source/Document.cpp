@@ -43,14 +43,18 @@ Document::~Document()
 void Document::setUri(const std::string & uriString)
 {
   // m_uri = uriString;
-
-  vector<string>::iterator currPosition(m_historyPosition);
-  if (hasNextHistory()) {
-    m_history.erase(currPosition, m_history.end());
+  if (m_history.empty() or uriString != *m_historyPosition)
+  {
+    // refreshing the same page
+    vector<string>::iterator currPosition(m_historyPosition);
+    if (hasNextHistory()) {
+      ++currPosition;
+      m_history.erase(currPosition, m_history.end());
+    }
+    m_history.push_back(uriString);
+    m_historyPosition = m_history.end();
+    --m_historyPosition;
   }
-  m_history.push_back(uriString);
-  m_historyPosition = m_history.end();
-  --m_historyPosition;
   m_headerParser->setUri(uriString);
 #if 0
   printf("%s %d\n", m_historyPosition->c_str(), m_history.size());
@@ -170,6 +174,10 @@ bool Document::hasPreviousHistory() const
 bool Document::hasNextHistory() const
 {
   vector<string>::iterator currPosition(m_historyPosition);
+  if (currPosition == m_history.end())
+  {
+    return false;
+  }
   ++currPosition;
   return currPosition != m_history.end();
 }

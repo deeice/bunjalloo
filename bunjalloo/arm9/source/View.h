@@ -25,12 +25,12 @@
 class Document;
 class ControllerI;
 
-// class TextArea;
-class ScrollPane;
-class Keyboard;
-class ViewRender;
-class TextField;
 class FormControl;
+class Keyboard;
+class ScrollPane;
+class TextField;
+class Toolbar;
+class ViewRender;
 
 /** Handle the displaying of HTML data.*/
 class View : public ViewI, public ButtonListener, public LinkListener
@@ -61,6 +61,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
      */
     virtual void linkClicked(Link * link);
 
+    void enterUrl();
+
   private:
 
     enum InputState
@@ -75,6 +77,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     Keyboard * m_keyboard;
     ViewRender * m_renderer;
     TextField * m_addressBar;
+    Toolbar * m_toolbar;
     InputState m_state;
     FormControl * m_form;
     int m_preInputStartLine;

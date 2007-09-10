@@ -52,7 +52,7 @@ void HttpClient::setController(Controller * c)
     URI uri(m_self->config().proxy());
     setConnection(uri.server().c_str(), uri.port());
   }
-  m_maxConnectAttempts = strtoul(m_self->config().maxConnections().c_str(), 0, 0);
+  m_maxConnectAttempts = m_self->config().maxConnections();
   if (m_maxConnectAttempts == 0)
   {
     m_maxConnectAttempts = MAX_CONNECT_ATTEMPTS;
@@ -335,4 +335,9 @@ void HttpClient::readAll()
       m_connectAttempts = 0;
       break;
   }
+}
+
+HttpClient::ConnectionState HttpClient::state() const
+{
+  return m_state;
 }

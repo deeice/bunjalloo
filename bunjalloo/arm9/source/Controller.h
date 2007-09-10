@@ -44,6 +44,7 @@ class Controller : public ControllerI
     
     virtual void previous();
     virtual void next();
+    virtual void stop();
 
     virtual const Config & config() const;
 
@@ -53,10 +54,15 @@ class Controller : public ControllerI
     /** Loops forever.*/
     void mainLoop();
 
+    virtual bool wifiInitialised() const;
+
   private:
     Document * m_document;
     View * m_view;
     Config * m_config;
+    bool m_wifiInit;
+    bool m_stop;
+
 
     void localFile(const std::string &);
     void fetchHttp(const URI &);
@@ -64,5 +70,6 @@ class Controller : public ControllerI
     void loadError();
     // helper to avoid code dupe
     void handleUri(const URI & uri);
+
 };
 #endif

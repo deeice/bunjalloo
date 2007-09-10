@@ -21,6 +21,7 @@
 #include <list>
 #include "Rectangle.h"
 
+/** Encapsulates links and colored text on a text page.*/
 class Link
 {
   public:
@@ -30,7 +31,7 @@ class Link
     Link(const std::string & a);
 
     /** Creates a color change
-     * @param a the document address that the link goes to
+     * @param color the color of the text.
      */
     Link(unsigned short color);
 

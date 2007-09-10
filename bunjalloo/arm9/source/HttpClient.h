@@ -50,6 +50,8 @@ class HttpClient: public nds::Client
     /** Handle the next stage of the connection process.  */
     void handleNextState();
 
+    ConnectionState state() const;
+
     /** Has the fetching finished?.
      * @return true if it has, false otherwise.
      */ 

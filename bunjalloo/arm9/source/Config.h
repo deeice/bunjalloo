@@ -52,9 +52,14 @@ class Config
     bool useProxy() const;
 
     /** Get the value for the max connection attempts ("timeout")
-     * @return the value as a string
+     * @return the value as an unsigned int
      */
-    std::string maxConnections() const;
+    unsigned int maxConnections() const;
+
+    /** Get the value for the toolbar disappearing
+     * @return the value as an unsigned int
+     */
+    unsigned int toolbarTimer() const;
 
     /** Reload the config file.
      */
@@ -72,7 +77,8 @@ class Config
     std::string m_font;
     std::string m_cookieList;
     std::string m_proxy;
-    std::string m_maxConnect;
+    int m_maxConnect;
+    int m_toolbarTime;
 
     void configPathMember(const std::string & value, std::string & member);
     void handleCookies() const;
