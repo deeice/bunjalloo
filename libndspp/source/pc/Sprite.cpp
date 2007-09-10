@@ -47,9 +47,9 @@ Sprite::Sprite(int screen, int w, int h, int tile, int colors):
   m_OAM(screen==0?(unsigned short*)OAM:(unsigned short*)OAM_SUB)
 {
   initialise(); 
+  this->color(colors);
   this->tile(tile);
   this->setSize(w,h);
-  this->color(colors);
 }
 
 Sprite::~Sprite()
@@ -417,10 +417,10 @@ unsigned int Sprite::tile() const
   return OBJ_CHAR(s_sprites[m_screen][m_index].attribute[2]);
 }
 
-void Sprite::tile(unsigned int tile)
+void Sprite::tile(unsigned int t)
 { 
   if (!valid()) return;
-  setAttrBit(2,OBJ_CHAR(tile),true,OBJ_CHAR(0xFFFF));
+  setAttrBit(2,OBJ_CHAR(t),true,OBJ_CHAR(0xFFFF));
 }
 
 unsigned int Sprite::priority() const
@@ -614,7 +614,10 @@ void Sprite::draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char
       int y = j + yi*8;
       unsigned char pixelPair = *gfx++;
       int pix = pixelPair&0xf;
-
+      if (color() == 256)
+      {
+        pix = pixelPair;
+      }
       if (pix) {
         SDLhandler::instance().drawPixel(xPos+x, yPos+y, 2+m_screen, pix);
       }
@@ -635,7 +638,7 @@ void Sprite::render()
   uint16 * oamRam = this->oamData();
   int xPos = OBJ_X(sprite.attribute[1]);
   int yPos = OBJ_Y(sprite.attribute[0]);
-  int position =0;
+  int position = 0;
   for (unsigned int y = 0; y < h/8; ++y)
   {
     for (unsigned int x = 0; x < w/8; ++x)

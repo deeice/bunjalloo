@@ -48,6 +48,7 @@ typedef void (* VoidFunctionPointer)(void);
 #define BG_SIZE(m)		((m<<14))
 
 #define RGB5(r,g,b)  ((r)|((g)<<5)|((b)<<10))
+#define RGB8(r,g,b)  (((r)/8)|(((g)/8)<<5)|(((b)/8)<<10))
 
 // Sprite control defines
 

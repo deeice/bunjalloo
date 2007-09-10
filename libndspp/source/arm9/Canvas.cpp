@@ -33,12 +33,15 @@ Canvas & Canvas::instance()
 
 Canvas::~Canvas(){}
 
+// static unsigned short BG_MEM_BUFFER[192*256];
+
 Canvas::Canvas():
   m_bgMain(new Background(0,3,0,31)),
   m_bgSub(new Background(1,3,0,31)),
   m_frontMain((unsigned short*)BG_BMP_RAM(0)),
   m_backMain( m_frontMain + BUFFER_SIZE ),
   m_frontSub((unsigned short*)BG_BMP_RAM_SUB(0)),
+  //m_backSub((unsigned short*)BG_MEM_BUFFER)
   m_backSub((unsigned short*)BG_BMP_RAM(16))
 {
   // set up background.
@@ -46,6 +49,8 @@ Canvas::Canvas():
   Video & sub(Video::instance(1));
   sub.setMode(5);
   main.setMode(5);
+  main.enableObjects();
+  sub.enableObjects();
 
   // redo the banks - we want enough VRAM for the main and sub screen
   // Can't use hardware double buffering on sub screen, have to fudge it.
@@ -53,11 +58,11 @@ Canvas::Canvas():
                     VRAM_B_MAIN_BG_0x06020000,
                     VRAM_C_SUB_BG,
                     VRAM_D_MAIN_BG_0x06040000);
-  /*
+                    //VRAM_D_SUB_SPRITE);
   vramSetBankI(VRAM_I_SUB_SPRITE);
-  vramSetBankF(VRAM_F_MAIN_SPRITE);
-  vramSetBankG(VRAM_G_MAIN_SPRITE);
-  */
+  vramSetBankE(VRAM_E_MAIN_SPRITE);
+  /*vramSetBankF(VRAM_F_MAIN_SPRITE);
+  vramSetBankG(VRAM_G_MAIN_SPRITE);*/
 
   m_bgMain->enable();
   m_bgSub->enable();
@@ -112,5 +117,5 @@ void Canvas::endPaint()
   //memcpy(m_frontMain, m_backMain, SCREEN_WIDTH*SCREEN_HEIGHT*2);
   memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
 
-  memcpy(m_backMain, m_frontMain, SCREEN_WIDTH*SCREEN_HEIGHT*2);
+  //memcpy(m_backMain, m_frontMain, SCREEN_WIDTH*SCREEN_HEIGHT*2);
 }
