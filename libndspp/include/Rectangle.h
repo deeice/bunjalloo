@@ -31,6 +31,7 @@ namespace nds
     int left() const;
     int top() const;
     int bottom() const;
+    Rectangle intersect(const Rectangle & r2) const;
   };
 }
 #endif

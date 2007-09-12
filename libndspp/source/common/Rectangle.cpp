@@ -16,6 +16,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 #include "Rectangle.h"
+#include <algorithm>
 
 bool nds::Rectangle::hit(int testx, int testy) const
 {
@@ -38,3 +39,29 @@ int nds::Rectangle::bottom() const
 {
   return y+h;
 }
+
+nds::Rectangle nds::Rectangle::intersect(const nds::Rectangle & r2) const
+{
+  const nds::Rectangle & r1(*this);
+  bool haveIntersect =  not ( r1.right() < r2.left()
+      or r1.left() > r2.right()
+      or r1.top() > r2.bottom() 
+      or r1.bottom() < r2.top()
+      );
+  Rectangle rect = {0, 0, 0, 0};
+  if (not haveIntersect)
+  {
+    return rect;
+  }
+  using std::max;
+  using std::min;
+  rect.x = max(r1.left(), r2.left());
+  rect.y = max(r1.top(), r2.top());
+  int minRight = min(r1.right(), r2.right());
+  rect.w = minRight-rect.x;
+  int minBottom = min(r1.bottom(), r2.bottom());
+  rect.h = minBottom-rect.y;
+
+  return rect;
+}
+
