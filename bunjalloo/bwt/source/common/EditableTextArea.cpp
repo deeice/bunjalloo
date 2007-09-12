@@ -33,6 +33,7 @@ EditableTextArea::EditableTextArea(Font * font) :
   m_caretPixelX(-1),
   m_appendedNewLine(false),
   m_echoText(true),
+  //m_layingOut(false),
   m_scrollPane(0)
 {
 }
@@ -145,7 +146,9 @@ void EditableTextArea::recalculateCaret()
     oldPrevLength = m_document[m_caretLine-1].length();
   }
   // redo the text layout
+  //m_layingOut = true;
   layoutText();
+  //m_layingOut = false;
   if (m_appendedNewLine)
   {
     m_caretChar = 0;
@@ -185,6 +188,14 @@ void EditableTextArea::recalculateCaret()
 }
 void EditableTextArea::appendText(const UnicodeString & unicodeString)
 {
+  /* FIXME - virtual TextArea::appendText
+  if (m_layingOut)
+  {
+    TextArea::appendText(unicodeString);
+    return;
+  }
+  */
+
   if (m_caretLine == -1)
   {
     TextArea::appendText(unicodeString);
@@ -207,7 +218,12 @@ void EditableTextArea::appendText(const UnicodeString & unicodeString)
     {
       m_caretChar = line.length();
     }
-    line.insert(m_caretChar, unicodeString);
+    if (line.empty())
+    {
+      line.append(unicodeString);
+    }
+    else
+      line.insert(m_caretChar, unicodeString);
     if (unicodeString.length() == 1 and unicodeString[0] == '\n')
     {
       m_appendedNewLine = true;
@@ -225,13 +241,24 @@ void EditableTextArea::appendText(const UnicodeString & unicodeString)
 void EditableTextArea::clearText()
 {
   TextArea::clearText();
+  //m_layingOut = true;
   layoutText();
+  //m_layingOut = false;
   resizeParent();
   m_caretLine = -1;
   m_caretChar = -1;
   m_caretPixelX = -1;
   m_appendedNewLine = false;
 }
+
+/*
+void EditableTextArea::setSize(unsigned int w, unsigned int h)
+{
+  //m_layingOut = true;
+  TextArea::setSize(w, h);
+  m_layingOut = false;
+}
+*/
 
 void EditableTextArea::resizeParent()
 {

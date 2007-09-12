@@ -18,6 +18,7 @@
 #ifndef RichTextArea_h_seen
 #define RichTextArea_h_seen
 
+#include <map>
 #include "TextArea.h"
 
 class LinkListener;
@@ -28,13 +29,15 @@ class RichTextArea: public TextArea
     RichTextArea(Font * font);
     ~RichTextArea();
 
-    /** Reimplemented from TextArea.*/
-    void appendText(const UnicodeString & unicodeString);
+    /** Overridden from TextArea. */
+    virtual void appendText(const UnicodeString & unicodeString);
 
     /** Add a link to the text.
      * @param href the document address to link to,
      */
     void addLink(const std::string & href);
+
+    void add(Component * child);
 
     /** End the link. */
     void endLink();
@@ -53,11 +56,15 @@ class RichTextArea: public TextArea
 
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);
+    virtual void setLocation(unsigned int x, unsigned int y);
+    virtual void setSize(unsigned int w, unsigned int h);
 
   protected:
     /** Overloaded from TextArea. This checks the current char vs the links to
      * see if the current character is a link or not.*/
     virtual void printu(const UnicodeString & unicodeString);
+
+    virtual void incrLine();
 
   private:
     enum ControlState {
@@ -65,18 +72,27 @@ class RichTextArea: public TextArea
       STATE_LINK,
       STATE_COLOR
     };
-    typedef std::list<Link*> LinkList;
-    LinkList m_links;
     /** Keep track of the current document size. */
-    unsigned int m_currentPosition;
-    ControlState m_state;
-    // for painting:
+    unsigned int m_documentSize;
     unsigned int m_nextEvent;
     unsigned int m_nextEventType;
-    LinkList::const_iterator m_currentLink;
     unsigned int m_paintPosition;
-    unsigned int m_documentSize;
+    ControlState m_state;
+    typedef std::list<Link*> LinkList;
+    LinkList m_links;
+    // for painting:
+    LinkList::const_iterator m_currentLink;
     LinkListener * m_linkListener;
+
+    typedef std::map<int, int> LineHeightMap;
+    LineHeightMap m_lineHeight;
+    int m_lineNumber;
+
+    // std::vector<Component*>::const_iterator m_currentChildIt;
+    unsigned int m_currentChildIndex;
+    std::vector<unsigned int> m_childPositions;
+
+    const nds::Rectangle * m_clip;
 
     /** Delete the links */
     void removeClickables();
@@ -85,5 +101,9 @@ class RichTextArea: public TextArea
     void checkSkippedLines(int skipLines);
     int pointToCharIndex(int x, int y) const;
 
+    void appendText_copyPaste(const UnicodeString & unicodeString);
+
+    bool lineHasComponent(int line) const;
+    bool childTouch(int x, int y);
 };
 #endif

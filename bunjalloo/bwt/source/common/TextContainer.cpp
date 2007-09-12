@@ -85,11 +85,11 @@ void TextContainer::layout()
   appendText.clear();
   UnicodeString::const_iterator it(m_text.begin());
   int size(0);
-  for (; it != m_text.end() and size < textArea()->width(); ++it)
+  for (; it != m_text.end() and size <= textArea()->width(); ++it)
   {
     Font::Glyph g;
     textArea()->font().glyph(*it, g);
-    if ((size + g.width) < textArea()->width()) {
+    if ((size + g.width) <= textArea()->width()) {
       size += g.width;
       appendText += *it;
     } else {

@@ -92,6 +92,8 @@ class ScrollPane: public Component
      */
     void setBackgroundColor(unsigned short color);
 
+    bool scrollBarHit(int x, int y);
+
     // From Component
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);

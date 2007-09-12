@@ -38,6 +38,7 @@ static const UnicodeString s_delimiters(intDelimiters,6);
 static const int INDENT(16);
 
 TextArea::TextArea(Font * font) : 
+  m_appendPosition(0),
   m_font(0),
   m_palette(0),
   m_basePalette(0),
@@ -45,7 +46,6 @@ TextArea::TextArea(Font * font) :
   m_parseNewline(true),
   m_bgCol(0),
   m_fgCol(0),
-  m_appendPosition(0),
   m_underLine(false)
 {
   setFont(font);
@@ -131,9 +131,8 @@ void TextArea::appendText(const UnicodeString & unicodeString)
       // trim spaces from the end of the line
       // this word overflows the line - make a new line to hold the text.
       m_document.push_back(UnicodeString());
-      // m_document += NEWLINE;
       m_appendPosition = 0;
-      //m_preferredHeight += m_font->height();
+      m_preferredHeight += m_font->height();
     }
     if (m_preferredWidth < 0)
       m_preferredWidth = 0;
@@ -147,9 +146,10 @@ void TextArea::appendText(const UnicodeString & unicodeString)
     {
       m_appendPosition = 0;
       m_document.push_back(UnicodeString());
+      m_preferredHeight += font().height();
     }
   }
-  m_preferredHeight = m_document.size() * m_font->height();
+  // m_preferredHeight = m_document.size() * m_font->height();
 }
 
 void TextArea::layoutText()

@@ -200,28 +200,6 @@ void ScrollPane::down()
   calculateScrollBar();
 }
 
-static nds::Rectangle intersect(const nds::Rectangle & r1, const nds::Rectangle & r2)
-{
-  bool haveIntersect =  not ( r1.right() < r2.left()
-      or r1.left() > r2.right()
-      or r1.top() > r2.bottom() 
-      or r1.bottom() < r2.top()
-      );
-  Rectangle rect = {0, 0, 0, 0};
-  if (not haveIntersect)
-  {
-    return rect;
-  }
-  rect.x = max(r1.left(), r2.left());
-  rect.y = max(r1.top(), r2.top());
-  int minRight = min(r1.right(), r2.right());
-  rect.w = minRight-rect.x;
-  int minBottom = min(r1.bottom(), r2.bottom());
-  rect.h = minBottom-rect.y;
-
-  return rect;
-}
-
 void ScrollPane::showScrollBar(const nds::Rectangle & clip)
 {
   if (m_children.empty())
@@ -261,7 +239,7 @@ void ScrollPane::paint(const nds::Rectangle & clip)
   {
     Component * c(*it);
     Rectangle bounds(c->bounds());
-    Rectangle thisClip(intersect(realClip, bounds));
+    Rectangle thisClip(realClip.intersect(bounds));
     // if the bounds of the component are smaller than the scrollpane, clip to the component.
     if (thisClip.w == 0 and thisClip.h == 0)
       continue;
@@ -271,7 +249,7 @@ void ScrollPane::paint(const nds::Rectangle & clip)
 
   if (m_topLevel and s_popup != 0) {
     Rectangle bounds(s_popup->bounds());
-    Rectangle thisClip(intersect(realClip, bounds));
+    Rectangle thisClip(realClip.intersect(bounds));
     s_popup->paint(thisClip);
   }
 }
@@ -294,6 +272,11 @@ void ScrollPane::setTopLevel(bool topLevel)
 bool ScrollPane::topLevel() const
 {
   return m_topLevel;
+}
+
+bool ScrollPane::scrollBarHit(int x, int y)
+{
+  return m_scrollBar->bounds().hit(x, y);
 }
 
 bool ScrollPane::touch(int x, int y)

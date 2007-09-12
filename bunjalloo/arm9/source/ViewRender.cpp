@@ -55,7 +55,7 @@ RichTextArea * ViewRender::textArea()
   if (m_textArea == 0)
   {
     m_textArea = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
-    m_textArea->setSize(nds::Canvas::instance().width(), m_textArea->font().height());
+    m_textArea->setSize(nds::Canvas::instance().width()-7, m_textArea->font().height());
     m_textArea->addLinkListener(m_self);
     m_textArea->setParseNewline(false);
     m_self->m_scrollPane->add(m_textArea);
@@ -69,6 +69,10 @@ void ViewRender::preFormat(const HtmlElement * element)
   if (element->isa(HtmlConstants::A_TAG))
   {
     textArea()->addLink( unicode2string(element->attribute("href")) );
+  }
+  if (element->isa(HtmlConstants::FORM_TAG))
+  {
+    textArea()->insertNewline();
   }
   else if (element->isa(HtmlConstants::PRE_TAG))
   {
@@ -314,8 +318,11 @@ void ViewRender::render()
 void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
   Select * select = new Select(const_cast<HtmlElement*>(selectElement));
+  /*
   m_textArea = 0;
   m_self->m_scrollPane->add(select);
+  */
+  textArea()->add(select);
 }
 
 
@@ -352,42 +359,45 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
             extractImageText(inputElement, hasAltText)
             );
         submitButton->setListener(m_self);
-        m_textArea = 0;
+        // m_textArea = 0;
         if (size > MIN_SIZE)
         {
           submitButton->setSize(size, submitButton->preferredSize().h);
         }
-        m_self->m_scrollPane->add(submitButton);
+        /* m_self->m_scrollPane->add(submitButton); */
+        textArea()->add(submitButton);
       }
       break;
     case HtmlInputElement::TEXT:
       {
         InputText * text = new InputText(const_cast<HtmlElement*>(inputElement));
-        m_textArea = 0;
+        // m_textArea = 0;
         if (size <= 0)
           size = MIN_SIZE*8; // FIXME! textArea->font().height();
         text->setListener(m_self->m_keyboard);
         text->setSize(size, text->preferredSize().h);
-        m_self->m_scrollPane->add(text);
+        /*m_self->m_scrollPane->add(text);*/
+        textArea()->add(text);
       } 
       break;
     case HtmlInputElement::PASSWORD:
       {
         // TODO - password field should show *** instead of real text.
         PasswordField * text = new PasswordField(const_cast<HtmlElement*>(inputElement));
-        m_textArea = 0;
+        // m_textArea = 0;
         if (size <= 0)
           size = MIN_SIZE*8; // FIXME! textArea->font().height();
         text->setListener(m_self->m_keyboard);
         text->setSize(size, text->preferredSize().h);
-        m_self->m_scrollPane->add(text);
+        // m_self->m_scrollPane->add(text);
+        textArea()->add(text);
       }
       break;
     case HtmlInputElement::CHECKBOX:
       {
-        m_textArea = 0;
+        // m_textArea = 0;
         FormCheckBox * checkbox = new FormCheckBox(const_cast<HtmlElement*>(inputElement));
-        m_self->m_scrollPane->add(checkbox);
+        textArea()->add(checkbox);
       }
       break;
     case HtmlInputElement::RADIO:
@@ -395,9 +405,9 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         // see if there is a RadioGroup with this name
         UnicodeString name = inputElement->attribute("name");
         // FIXME - get the group.
-        m_textArea = 0;
+        // m_textArea = 0;
         RadioButton * radio = new RadioButton;
-        m_self->m_scrollPane->add(radio);
+        textArea()->add(radio);
         if (not name.empty())
         {
           FormGroupMap::iterator it(m_radioGroup.find(name));
@@ -423,6 +433,7 @@ void ViewRender::renderTextArea(const HtmlElement * textAreaElement)
 {
   FormTextArea * text = new FormTextArea(const_cast<HtmlElement*>(textAreaElement));
   text->setListener(m_self->m_keyboard);
+  m_textArea = 0;
   m_self->m_scrollPane->add(text);
 }
 

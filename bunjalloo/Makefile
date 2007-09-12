@@ -19,7 +19,7 @@ docs:
 	@-doxygen doxygen.cfg
 
 ctags:
-	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .
+	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ../libndspp
 
 arm9/source/version.c:
 	version=$$(svn info | grep ^Revision | cut -d: -f2 | tr -d ' ') ;\

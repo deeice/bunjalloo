@@ -51,7 +51,7 @@ class TextArea : public Component
     /** Append text to the text area.
      * @param unicodeString the text to append.
      */
-    void appendText(const UnicodeString & unicodeString);
+    /*virtual*/ void appendText(const UnicodeString & unicodeString);
 
     /** Clear the text (empty the document model).
      */
@@ -132,7 +132,19 @@ class TextArea : public Component
     /** Print a single character. */
     bool doSingleChar(unsigned int value);
 
+  protected:
+    //! Position that the current line is at.
+    int m_appendPosition;
+    int m_cursorx;
+    int m_cursory;
+    int m_initialCursorx;
 
+    const UnicodeString nextWord(const UnicodeString & unicodeString, 
+        int currPosition) const;
+    void advanceWord(const UnicodeString & unicodeString, int wordLength,
+        int & currPosition, UnicodeString::const_iterator & it) const;
+
+    virtual void incrLine();
   private:
 
     Font * m_font;
@@ -140,25 +152,15 @@ class TextArea : public Component
     unsigned short * m_basePalette;
     int m_paletteLength;
     bool m_parseNewline;
-    int m_cursorx;
-    int m_cursory;
-    int m_initialCursorx;
     unsigned short m_bgCol;
     unsigned short m_fgCol;
-    //! Position that the current line is at.
-    int m_appendPosition;
     bool m_underLine;
 
 
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
-    void incrLine();
     inline void checkLetter(Font::Glyph & g);
     
 
-    const UnicodeString nextWord(const UnicodeString & unicodeString, 
-        int currPosition) const;
-    void advanceWord(const UnicodeString & unicodeString, int wordLength,
-        int & currPosition, UnicodeString::const_iterator & it) const;
 
     /** Set the cursor position. This is where the text will be "drawn" the
      * next time a print routine is called.

@@ -22,7 +22,7 @@
 
 CheckBox::CheckBox():ToggleButton()
 {
-  setSize(16, 16);
+  setSize(18, 18);
 }
 
 const unsigned char * CheckBox::getGfxData() 

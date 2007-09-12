@@ -66,6 +66,7 @@ class EditableTextArea: public TextArea, public TextEntryI
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);
     virtual bool isMultiLine() const;
+    // virtual void setSize(unsigned int w, unsigned int h);
 
   protected:
     /** Overloaded from TextArea. If echo is off, shows * instead of text.*/
@@ -77,6 +78,7 @@ class EditableTextArea: public TextArea, public TextEntryI
     int m_caretPixelX;
     bool m_appendedNewLine;
     bool m_echoText;
+//    bool m_layingOut;
     ScrollPane * m_scrollPane;
 
     void setCaret(int x, int y);

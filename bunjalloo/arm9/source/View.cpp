@@ -149,6 +149,8 @@ void View::browse()
   if (keys & KEY_TOUCH)
   {
     touchPosition tp = touchReadXY();
+    int x = tp.px;
+    int y = tp.py+SCREEN_HEIGHT;
 
     if (not m_keyboard->visible())
     {
@@ -158,12 +160,12 @@ void View::browse()
       }
     }
 
-    m_dirty = m_keyboard->touch(tp.px, tp.py+SCREEN_HEIGHT);
+    m_dirty = m_keyboard->touch(x, y);
     if (not m_dirty)
-      m_dirty = m_scrollPane->touch(tp.px, tp.py+SCREEN_HEIGHT);
+      m_dirty = m_scrollPane->touch(x, y);
     if (m_keyboard->visible())
       m_toolbar->setVisible(false);
-    else
+    else if (not m_scrollPane-> scrollBarHit(x, y))
       m_toolbar->setVisible(true);
   }
 }
