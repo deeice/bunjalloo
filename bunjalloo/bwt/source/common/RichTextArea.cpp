@@ -168,7 +168,7 @@ void RichTextArea::add(Component * child)
     else
       y += font().height();
   }
-  printf("Add Child at %d %d (%d, line %d)\n", x, y, m_documentSize, m_document.size());
+  //printf("Add Child at %d %d (%d, line %d)\n", x, y, m_documentSize, m_document.size());
   child->setLocation(x, y);
 
   m_lineHeight[m_document.size()-1] = std::max(child->height(), font().height());
@@ -202,7 +202,7 @@ void RichTextArea::setLocation(unsigned int x, unsigned int y)
 
 void RichTextArea::setSize(unsigned int w, unsigned int h)
 {
-  printf("Set size %d %d\n", w, h);
+  //printf("Set size %d %d\n", w, h);
   Component::setSize(w, h);
   // re-layout children.. uf, nightmare.
 }
@@ -227,7 +227,7 @@ void RichTextArea::endLink()
     link.setTextEnd(m_documentSize);
     if (link.textEnd() == link.textStart())
     {
-      printf("pop link endLink\n");
+      //printf("pop link endLink\n");
       m_links.pop_back();
       delete &link;
     }
@@ -277,7 +277,7 @@ void RichTextArea::endColor()
     link.setTextEnd(m_documentSize);
     if (link.textEnd() == link.textStart())
     {
-    printf("pop link endCol\n");
+    //printf("pop link endCol\n");
       m_links.pop_back();
       delete &link;
     }
@@ -348,7 +348,7 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
           {
             m_cursorx += c->width();
           }
-          printf("cursorx %d\n", m_cursorx);
+          //printf("cursorx %d\n", m_cursorx);
           ++m_currentChildIndex;
         }
         else
@@ -632,7 +632,7 @@ int RichTextArea::pointToCharIndex(int x, int y) const
     lineNum++;
   }
   lineNum--;
-  printf("lineNum = %d\n", lineNum);
+  //printf("lineNum = %d\n", lineNum);
   //int lineNum = (y - m_bounds.y)/font().height();
   unsigned int charNumber = 0;
   unsigned int currentChildIndex = 0;
@@ -692,7 +692,7 @@ int RichTextArea::pointToCharIndex(int x, int y) const
     }
   }
 done:
-  printf("caretChar %d\n", caretChar);
+  //printf("caretChar %d\n", caretChar);
   if (caretChar == -1)
   {
     // caretChar = line.length();
@@ -704,7 +704,7 @@ done:
     int charsToLine = documentSize(lineNum);
     caretChar += charsToLine;
   }
-  printf("return caretChar %d\n", caretChar);
+  //printf("return caretChar %d\n", caretChar);
   return caretChar;
 }
 
