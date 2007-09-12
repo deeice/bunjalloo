@@ -35,8 +35,11 @@ arm9/source/version.c:
 
 
 distdir=$(target)-dist
-dist: all
+
+$(distdir):
 	mkdir $(distdir) -p
+
+dist: all $(distdir)
 	cp $(target)-unpatched.nds $(distdir)/$(target).nds
 	cp data/ -rvfp $(distdir)/
 	find $(distdir) -name '.svn' -type d | xargs rm -rf 
@@ -44,3 +47,7 @@ dist: all
 	mv $(distdir)/$(target).zip .
 	rm -rf $(distdir)
 
+dist-src: $(distdir)
+	cd $(distdir) && svn export $(REP)/bunjalloo
+	cd $(distdir) && svn export $(REP)/libndspp
+	tar czvf $(distdir).tar.gz $(distdir)
