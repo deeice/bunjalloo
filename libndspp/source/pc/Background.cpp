@@ -174,47 +174,6 @@ void Background::setRotateFlags(volatile unsigned short * BG_REG)
 
 void Background::update()
 {
-#if 0
-  vuint16 * BG_REG( m_bg.screen?&SUB_BG0_X0:&BG0_X0);
-  switch(m_bg.number)
-  {
-    case 0: 
-      /* fall through */
-    case 1:
-      {
-        BG_REG[(m_bg.number*2)] = m_bg.xScroll;
-        BG_REG[(m_bg.number*2)+1] = m_bg.yScroll;
-      }
-      break;
-    case 2:
-      {
-        if(m_DISPCNT & (MODE_1_2D| MODE_2_2D|MODE_3_2D|MODE_4_2D|MODE_5_2D))
-        {
-          setRotateFlags(&BG_REG[8]);
-        }
-        else  //it is a text background
-        {
-          BG_REG[(m_bg.number*2)] = m_bg.xScroll;
-          BG_REG[(m_bg.number*2)+1] = m_bg.yScroll;
-        }
-      }
-      break;
-    case 3:
-      {
-        if(m_DISPCNT & (MODE_2_2D|MODE_3_2D|MODE_4_2D|MODE_5_2D))//it is a rot background
-        {
-          setRotateFlags(&BG_REG[16]);
-        }
-        else //it is a text background
-        {
-          BG_REG[(m_bg.number*2)] = m_bg.xScroll;
-          BG_REG[(m_bg.number*2)+1] = m_bg.yScroll;
-        }
-      }
-      break;
-    default: break;
-  }
-#endif
   // update flags
   if (enabled())
     enable();

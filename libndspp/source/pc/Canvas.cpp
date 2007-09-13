@@ -34,6 +34,7 @@ Canvas::Canvas()
   Video & sub(Video::instance(1));
   sub.setMode(5);
   main.setMode(5);
+  main.setToBottom();
   m_clip.x = m_clip.y = 0;
   m_clip.w = width();
   m_clip.h = height();
@@ -53,17 +54,17 @@ void Canvas::drawPixel(int x, int y, int colour)
   if (not m_clip.hit(x, y))
     return;
   int layer = ( (y < 192) ? 0:1 );
-  u16 * vram = SDLhandler::instance().vramMain(0);
+  u16 * vram = SDLhandler::instance().vramSub(0);
   if (layer) {
     y-=192;
-    vram = SDLhandler::instance().vramSub(0);
+    vram = SDLhandler::instance().vramMain(0);
   }
   vram[x+y*SCREEN_WIDTH] = colour;
 }
 
 unsigned short * Canvas::vram(int y)
 {
-  int layer = ( (y < 192) ? 0:1 );
+  int layer = ( (y < 192) ? 1:0 );
   u16 * vram = SDLhandler::instance().vramMain(0);
   if (layer) {
     vram = SDLhandler::instance().vramSub(0);

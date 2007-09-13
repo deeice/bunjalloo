@@ -76,7 +76,7 @@ void Sprite::y(unsigned char y)
 bool Sprite::rotateScale() const
 { 
   if (!valid()) return false;
-  return s_sprites[m_screen][m_index].attribute[0]&ATTR0_ROTSCALE;
+  return s_sprites[m_screen][m_index].attribute[0]&ATTR0_ROTSCALE_DOUBLE;
 }
 
 void Sprite::setAttrBit(unsigned int attrn, unsigned int bits, bool set, unsigned int clear)
@@ -95,7 +95,7 @@ void Sprite::setAttrBit(unsigned int attrn, unsigned int bits, bool set, unsigne
 void Sprite::rotateScale(bool s)
 { 
   if (!valid()) return;
-  setAttrBit(0,ATTR0_ROTSCALE,s);
+  setAttrBit(0,ATTR0_ROTSCALE_DOUBLE,s);
 }
 
 bool Sprite::doubleSize() const
@@ -473,10 +473,11 @@ void Sprite::getAffine(
     signed short & pd) const
 {
   if (!valid()) return;
-  pa = s_affine[m_index].hdx;
-  pb = s_affine[m_index].hdy;
-  pc = s_affine[m_index].vdx;
-  pd = s_affine[m_index].vdy;
+  int r(rotate());
+  pa = s_affine[r].hdx;
+  pb = s_affine[r].hdy;
+  pc = s_affine[r].vdx;
+  pd = s_affine[r].vdy;
 }
 void Sprite::setAffine( 
     signed short pa,
@@ -485,10 +486,11 @@ void Sprite::setAffine(
     signed short pd)
 {
   if (!valid()) return;
-   s_affine[m_index].hdx = pa;
-   s_affine[m_index].hdy = pb;
-   s_affine[m_index].vdx = pc;
-   s_affine[m_index].vdy = pd;
+  int r(rotate());
+  s_affine[r].hdx = pa;
+  s_affine[r].hdy = pb;
+  s_affine[r].vdx = pc;
+  s_affine[r].vdy = pd;
 }
 
 void Sprite::update() const
@@ -532,10 +534,12 @@ void Sprite::copyOAM(int screen)
   if (screen == 1 || screen == 2) {
     DC_FlushRange(s_sprites[1],128*sizeof(SpriteEntry));
     dmaCopy(s_sprites[1], OAM_SUB, 128 * sizeof(SpriteEntry));
-    /*pSpriteEntry oam = (pSpriteEntry)OAM_SUB;
+    /*
+    pSpriteEntry oam = (pSpriteEntry)OAM_SUB;
     for (int i = 0; i < 128; i++) {
       oam[i] = s_sprites[m_screen][i];
-    }*/
+    }
+    */
   }
 }
 

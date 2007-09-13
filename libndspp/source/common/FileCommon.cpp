@@ -36,3 +36,15 @@ void nds::File::readlines(std::vector<std::string> & lines)
     delete [] data;
   }
 }
+
+const char * nds::File::base(const char * path)
+{
+  static std::string str;
+  str = path;
+  unsigned int pos = str.rfind("/");
+  if (pos == std::string::npos)
+    return path;
+  else
+    return &path[pos+1];
+}
+

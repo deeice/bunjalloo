@@ -184,6 +184,9 @@ void irqSet(int irq, VoidFunctionPointer fp);
 
 void setGenericSound( u32 rate, u8 vol, u8 pan, u8 format);
 void playGenericSound(const void* data, u32 length);
+// 1024 byte lut.
+extern short COS[512];
+extern short SIN[512];
 
 // ARM9, ARM7
 #else

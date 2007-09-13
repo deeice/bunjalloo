@@ -20,6 +20,9 @@
 #include <iostream>
 #include "SDLhandler.h"
 
+short COS[512] = {};
+short SIN[512] = {};
+
 void dmaCopy(const void * source, void * destination, unsigned int length)
 {
   ::memcpy(destination, source, length);

@@ -69,7 +69,7 @@ Canvas::Canvas():
   m_bgMain->update();
   m_bgSub->update();
 
-  main.setToTop();
+  main.setToBottom();
   m_clip.x = m_clip.y = 0;
   m_clip.w = width();
   m_clip.h = height();
@@ -99,7 +99,7 @@ void Canvas::drawPixel(int x, int y, int colour)
 
 unsigned short * Canvas::vram(int y)
 {
-  return (y < 192) ? m_backMain:m_backSub;
+  return (y < 192) ? m_backSub:m_backMain;
 }
 
 void Canvas::endPaint()
