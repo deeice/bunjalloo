@@ -56,7 +56,6 @@ class RichTextArea: public TextArea
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);
     virtual void setLocation(unsigned int x, unsigned int y);
-    virtual void setSize(unsigned int w, unsigned int h);
 
   protected:
     /** Overloaded from TextArea. This checks the current char vs the links to
@@ -87,20 +86,20 @@ class RichTextArea: public TextArea
     LineHeightMap m_lineHeight;
     int m_lineNumber;
 
-    // std::vector<Component*>::const_iterator m_currentChildIt;
     unsigned int m_currentChildIndex;
     std::vector<unsigned int> m_childPositions;
 
-    const nds::Rectangle * m_clip;
-
     /** Delete the links */
     void removeClickables();
-    int documentSize(int endLine=-1) const;
+    unsigned int documentSize(int endLine=-1, unsigned int * childIndex=0) const;
     void handleNextEvent();
     void checkSkippedLines(int skipLines);
     int pointToCharIndex(int x, int y) const;
 
     void appendText_copyPaste(const UnicodeString & unicodeString);
+
+    // get the document line at the clicked y position
+    int lineAt(int y) const;
 
     bool lineHasComponent(int line) const;
     bool childTouch(int x, int y);

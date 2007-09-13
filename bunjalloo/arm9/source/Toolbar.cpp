@@ -16,6 +16,7 @@
 */
 #include <algorithm>
 #include <functional>
+#include "libnds.h"
 #include "ControllerI.h"
 #include "Config.h"
 #include "Document.h"
@@ -45,7 +46,7 @@ enum ToolbarIcon
   ICON_BACK_DISABLE,
   ICON_FORWARD_DISABLE,
   ICON_STOP_DISABLE,
-  ICON_REFRESH_DISABLE,
+  ICON_SPINNER,
 
   ICON_BOOKMARK,
   ICON_GO_URL,
@@ -55,7 +56,7 @@ enum ToolbarIcon
   ICON_NOT_CONNECTED,
   ICON_CONNECTED,
   ICON_CONNECT_ERROR,
-  ICON_UNUSED_3
+  ICON_SPINNER_INACTIVE
 
 };
 
@@ -71,6 +72,8 @@ enum ToolbarSpriteID
 
   SPRITE_CONNECT_STATUS,
 
+  SPRITE_SPINNER,
+
   SPRITE_END_OF_ENTRIES,
 
 };
@@ -83,7 +86,7 @@ Toolbar::Toolbar(Document & doc, ControllerI & cont, View & view):
   m_timerReset(TIMER_RESET),
   m_timer(m_timerReset)
 {
-  static const int screen(1);
+  static const int screen(0);
   m_document.registerView(this);
   for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
   {
@@ -94,6 +97,9 @@ Toolbar::Toolbar(Document & doc, ControllerI & cont, View & view):
     sprite->y(TOOLBAR_Y);
     m_sprites.push_back(sprite);
   }
+  nds::Sprite * spinner(m_sprites[SPRITE_SPINNER]);
+  spinner->x( spinner->x() - 8);
+  spinner->y( spinner->y() - 8);
 
   Image image("/"DATADIR"/fonts/toolbar.png");
   if (image.isValid())
@@ -237,8 +243,6 @@ void Toolbar::handlePress(int i)
     case SPRITE_GO_URL:
       m_view.enterUrl();
       break;
-    case SPRITE_CONNECT_STATUS:
-      break;
     default:
       break;
   }
@@ -251,7 +255,7 @@ void Toolbar::updateIcons()
   m_sprites[SPRITE_STOP]->tile( TILES_PER_ICON * ( m_document.status() != Document::LOADED ? ICON_STOP: ICON_STOP_DISABLE));
   m_sprites[SPRITE_REFRESH]->tile( TILES_PER_ICON * ICON_REFRESH);
   m_sprites[SPRITE_GO_URL]->tile( TILES_PER_ICON * ICON_GO_URL);
-  m_sprites[SPRITE_BOOKMARK]->tile( TILES_PER_ICON * ICON_UNUSED_3);
+  m_sprites[SPRITE_BOOKMARK]->tile( TILES_PER_ICON * ICON_SPINNER_INACTIVE);
   bool wifiInit = m_controller.wifiInitialised();
   ToolbarIcon wifiIcon(ICON_NOT_CONNECTED);
   if (wifiInit)
@@ -276,6 +280,7 @@ void Toolbar::updateIcons()
     }
   }
   m_sprites[SPRITE_CONNECT_STATUS]->tile( TILES_PER_ICON * wifiIcon);
+  m_sprites[SPRITE_SPINNER]->tile( TILES_PER_ICON * ( m_document.status() == Document::LOADED ? ICON_SPINNER_INACTIVE: ICON_SPINNER));
 }
 
 void Toolbar::tick()
@@ -290,6 +295,14 @@ void Toolbar::tick()
   }
   if (visible())
   {
+    m_angle+=32;
+    m_angle &= 0x1ff;
+    nds::Sprite * spinner(m_sprites[SPRITE_SPINNER]);
+    spinner->rotateScale(true);
+    spinner->rotate(1);
+    u16 cosAng = COS[m_angle] / 16;
+    u16 sinAng = SIN[m_angle] / 16;
+    spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
     for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
   }
 }

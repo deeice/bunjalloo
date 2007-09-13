@@ -51,6 +51,7 @@ class Toolbar: public ViewI
 
     int m_timerReset;
     int m_timer;
+    int m_angle;
 
     void handlePress(int i);
 

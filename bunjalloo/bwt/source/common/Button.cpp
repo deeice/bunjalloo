@@ -73,7 +73,7 @@ void Button::paint(const nds::Rectangle & clip)
     {
       Canvas::instance().horizontalLine(m_bounds.x, m_bounds.bottom()-1, m_bounds.w, lowlight);
     }
-    Canvas::instance().verticalLine(m_bounds.right(), m_bounds.top(), m_bounds.h, lowlight);
+    Canvas::instance().verticalLine(m_bounds.right()-1, m_bounds.top(), m_bounds.h, lowlight);
   }
 }
 

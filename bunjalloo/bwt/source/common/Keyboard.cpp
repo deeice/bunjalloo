@@ -44,12 +44,12 @@ static const UnicodeString ENTER_STR(string2unicode(" Enter"));
 static const UnicodeString SHIFT_STR(string2unicode("Shift"));
 static const UnicodeString SPACE_STR(string2unicode(" "));
 static const UnicodeString EXTRA_STR(string2unicode(" Alt"));
-static const UnicodeString OK_STR(string2unicode("   OK"));
+static const UnicodeString OK_STR(string2unicode("    OK"));
 static const UnicodeString CANCEL_STR(string2unicode(" Cancel"));
 static const UnicodeString CLEAR_STR(string2unicode(" Clr"));
 
 const static int KEY_HEIGHT = 18;
-const static int KEY_WIDTH = 18;
+const static int KEY_WIDTH = 19;
 const static int GAP = 10;
 const static int SCROLLPANE_POS_Y = 4;
 const static int SCROLLPANE_SIZE = SCREEN_HEIGHT*2/5 - GAP;
@@ -114,32 +114,32 @@ Keyboard::Keyboard():
   y += KEY_HEIGHT;
   text += ROW3_LENGTH;
   createRow(x, y, text, 2);
-  x += (KEY_WIDTH+1)*(ROW3_LENGTH-3);
+  x += (KEY_WIDTH)*(ROW3_LENGTH-3);
   text += 2;
   createRow(x, y, text, 2);
 
   // shift, capsLock, tab, enter, backspace, delete, altkeys, space
   // backspace - at the end of the Q-P row, 2 keys wide
-  createSpecialKey(INITIAL_X+(ROW1_LENGTH)*(KEY_WIDTH+1), INITIAL_Y+KEY_HEIGHT,
-      KEY_WIDTH*2+1, KEY_HEIGHT, 
+  createSpecialKey(INITIAL_X+(ROW1_LENGTH)*(KEY_WIDTH), INITIAL_Y+KEY_HEIGHT,
+      KEY_WIDTH*2, KEY_HEIGHT, 
       BACKSPACE_STR, 
       m_backspaceKey);
 
   // enter - at the end of the A-L row, 2.5 keys wide.
-  createSpecialKey(INITIAL_X+(ROW2_LENGTH)*(KEY_WIDTH+1)+KEY_WIDTH/2, INITIAL_Y+(KEY_HEIGHT*2),
-      KEY_WIDTH*5/2 + 2, KEY_HEIGHT, 
+  createSpecialKey(INITIAL_X+(ROW2_LENGTH)*(KEY_WIDTH)+KEY_WIDTH/2, INITIAL_Y+(KEY_HEIGHT*2),
+      KEY_WIDTH*5/2, KEY_HEIGHT, 
       ENTER_STR, 
       m_enterKey);
   
   // m_clearKey - at the end of the space and final row
-  createSpecialKey(INITIAL_X+KEY_WIDTH/2+(KEY_WIDTH+1)*ROW3_LENGTH-1, INITIAL_Y+(KEY_HEIGHT*4),
-      (KEY_WIDTH*3/2)+2, KEY_HEIGHT, 
+  createSpecialKey(INITIAL_X+KEY_WIDTH/2+(KEY_WIDTH)*ROW3_LENGTH-1, INITIAL_Y+(KEY_HEIGHT*4),
+      (KEY_WIDTH*3/2), KEY_HEIGHT, 
       CLEAR_STR, 
       m_clearKey);
 
   // spaceKey - in between the final 4 chars on the final row
-  createSpecialKey(INITIAL_X+(KEY_WIDTH*3/2)+(KEY_WIDTH+1)*2, INITIAL_Y+(KEY_HEIGHT*4),
-      (KEY_WIDTH)*5+4, KEY_HEIGHT, 
+  createSpecialKey(INITIAL_X+(KEY_WIDTH*3/2)+(KEY_WIDTH)*2-1, INITIAL_Y+(KEY_HEIGHT*4),
+      (KEY_WIDTH)*5, KEY_HEIGHT, 
       SPACE_STR, 
       m_spaceKey);
 
@@ -157,7 +157,7 @@ Keyboard::Keyboard():
 
   // caps - at the start of the a-l row. 1.5 keys wide
   createSpecialKey(INITIAL_X-KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*2),
-      (KEY_WIDTH*3/2)-1, KEY_HEIGHT, 
+      (KEY_WIDTH*3/2), KEY_HEIGHT, 
       CAPS_STR, 
       m_capsLockKey);
 
@@ -168,8 +168,8 @@ Keyboard::Keyboard():
       m_shiftKey);
 
   // m_extraKey
-  createSpecialKey(INITIAL_X-(KEY_WIDTH/2), INITIAL_Y+(KEY_HEIGHT*4),
-      (KEY_WIDTH*2)-1, KEY_HEIGHT, 
+  createSpecialKey(INITIAL_X-(KEY_WIDTH/2)-2, INITIAL_Y+(KEY_HEIGHT*4),
+      (KEY_WIDTH*2), KEY_HEIGHT, 
       EXTRA_STR, 
       m_extraKey);
 
@@ -216,7 +216,8 @@ void Keyboard::createRow(int x, int y, const char * text, int keys)
     unsigned int uchar[] = {text[i], 0};
     key->setSize(KEY_WIDTH, KEY_HEIGHT);
     key->setText(UnicodeString(uchar));
-    key->setLocation(x+i*(KEY_WIDTH+1), y);
+    //key->setLocation(x+i*(KEY_WIDTH+1), y);
+    key->setLocation(x+i*(KEY_WIDTH), y);
     add(key);
     key->setListener(this);
   }

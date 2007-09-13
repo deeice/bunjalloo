@@ -102,10 +102,8 @@ void TextArea::clearText()
 {
   // Could do the following to completely free the memory, but there
   // is a fair chance it will be reused anyway... speed vs memory again :-/
-  //m_document.swap(std::vector<UnicodeString>());
   std::vector<UnicodeString> tmp;
   m_document.swap(tmp);
-  //m_document.clear();
   m_appendPosition = 0;
   m_preferredWidth = -1;
   m_preferredHeight = m_font->height();
@@ -117,8 +115,8 @@ void TextArea::appendText(const UnicodeString & unicodeString)
   // append text, adding in new lines as needed to wrap.
   int currPosition = 0;
   // find the next space character
-  UnicodeString::const_iterator it(unicodeString.begin());
-  for (; it != unicodeString.end();)
+  for (UnicodeString::const_iterator it(unicodeString.begin());
+      it != unicodeString.end();)
   {
     const UnicodeString word(nextWord(unicodeString, currPosition));
     int size = textSize(word);
@@ -148,7 +146,6 @@ void TextArea::appendText(const UnicodeString & unicodeString)
       m_preferredHeight += font().height();
     }
   }
-  // m_preferredHeight = m_document.size() * m_font->height();
 }
 
 void TextArea::layoutText()
