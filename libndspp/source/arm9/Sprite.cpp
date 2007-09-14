@@ -76,7 +76,7 @@ void Sprite::y(unsigned char y)
 bool Sprite::rotateScale() const
 { 
   if (!valid()) return false;
-  return s_sprites[m_screen][m_index].attribute[0]&ATTR0_ROTSCALE_DOUBLE;
+  return s_sprites[m_screen][m_index].attribute[0]&ATTR0_ROTSCALE;
 }
 
 void Sprite::setAttrBit(unsigned int attrn, unsigned int bits, bool set, unsigned int clear)
@@ -95,7 +95,7 @@ void Sprite::setAttrBit(unsigned int attrn, unsigned int bits, bool set, unsigne
 void Sprite::rotateScale(bool s)
 { 
   if (!valid()) return;
-  setAttrBit(0,ATTR0_ROTSCALE_DOUBLE,s);
+  setAttrBit(0,ATTR0_ROTSCALE,s);
 }
 
 bool Sprite::doubleSize() const

@@ -637,7 +637,7 @@ void Sprite::render()
   uint16 * oamRam = this->oamData();
   int xPos = OBJ_X(sprite.attribute[1]);
   int yPos = OBJ_Y(sprite.attribute[0]);
-  if (rotateScale())
+  if (rotateScale() and doubleSize())
   {
     xPos += width()/2;
     yPos += width()/2;
