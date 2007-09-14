@@ -55,6 +55,8 @@ void Canvas::verticalLine(int x, int y, int length, int colour)
 void Canvas::horizontalLine(int x, int y, int length, int colour)
 {
 
+  if ((y < m_clip.y) or (y > m_clip.bottom()))
+    return;
 
   if ( (x < m_clip.x) and (x+length) > m_clip.x) 
   {
