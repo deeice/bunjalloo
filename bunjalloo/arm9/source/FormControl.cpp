@@ -62,6 +62,27 @@ static void addBoundary(std::string & processedData, unsigned char boundary[16])
 }
 #endif
 
+static void appendFormElements(ElementList & list, const HtmlElement * formElement)
+{
+  if (formElement->isa(HtmlConstants::INPUT_TAG)
+      or formElement->isa(HtmlConstants::SELECT_TAG)
+      or formElement->isa(HtmlConstants::TEXTAREA_TAG))
+  {
+    list.push_back(const_cast<HtmlElement*>(formElement));
+  }
+  if (formElement->hasChildren())
+  {
+    ElementList::const_iterator it(formElement->children().begin());
+    for (; it != formElement->children().end(); ++it)
+    {
+      const HtmlElement * element(*it);
+      if (element) {
+        appendFormElements(list, element);
+      }
+    }
+  }
+}
+
 void FormControl::input(ControllerI & controller, URI & uri)
 {
   // need to walk up m_element until we find the form father or the html element.
@@ -76,18 +97,11 @@ void FormControl::input(ControllerI & controller, URI & uri)
   {
     return;
   }
-  // select the "successful controls" and post them
-  //m_processedData = unicode2string(currentNode->attribute("action"));
-  //m_processedData += '?';
   uri.setMethod(unicode2string(currentNode->attribute("method")));
 
-  ElementList inputs(currentNode->elementsByTagName(HtmlConstants::INPUT_TAG));
-  ElementList selects(currentNode->elementsByTagName(HtmlConstants::SELECT_TAG));
-  ElementList textarea(currentNode->elementsByTagName(HtmlConstants::TEXTAREA_TAG));
+  ElementList inputs;
+  appendFormElements(inputs, currentNode);
   ElementList::iterator inputEnd(inputs.end());
-  inputs.splice(inputEnd, selects);
-  inputEnd = inputs.end();
-  inputs.splice(inputEnd, textarea);
   ElementList::const_iterator inputIt(inputs.begin());
   bool needAmp(false);
   bool isGet = uri.method() == "GET";
@@ -133,7 +147,7 @@ void FormControl::input(ControllerI & controller, URI & uri)
           }
           break;
         case HtmlInputElement::SUBMIT:
-          includeValue = m_element == element;
+          includeValue = m_element == element and not name.empty();
           break;
 
         case HtmlInputElement::CHECKBOX:
@@ -215,6 +229,11 @@ void FormControl::input(ControllerI & controller, URI & uri)
     contentType += "Content-Type: application/x-www-form-urlencoded\r\n";
     contentType += "\r\n";
     // add url
+    std::string action = unicode2string(currentNode->attribute("action"));
+    if (not action.empty())
+    {
+      uri = uri.navigateTo(action);
+    }
 
     contentType += processedData;
     uri.setRequestHeader(contentType);
