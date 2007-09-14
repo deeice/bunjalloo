@@ -220,7 +220,9 @@ void ViewRender::walkTree(const HtmlElement * element)
   {
     const ElementList & theChildren = element->children();
     ElementList::const_iterator it(theChildren.begin());
+
     bool hasBlock(false);
+    /*
     for (; it != theChildren.end(); ++it)
     {
       const HtmlElement * child(*it);
@@ -229,6 +231,7 @@ void ViewRender::walkTree(const HtmlElement * element)
         break;
       }
     }
+    */
 
     it = theChildren.begin();
     for (; it != theChildren.end(); ++it)
@@ -326,13 +329,12 @@ void ViewRender::renderSelect(const HtmlElement * selectElement)
 
 
 // FIXME - where should this go?
-static const int MAX_SIZE(nds::Canvas::instance().width());
+static const int MAX_SIZE(nds::Canvas::instance().width()-7);
 static const int MIN_SIZE(8);
 
 
 void ViewRender::renderInput(const HtmlElement * inputElement)
 {
-  /** FIXME - BWT changes */
   string sizeText = unicode2string(inputElement->attribute("size"));
   int size(0);
   if (not sizeText.empty())

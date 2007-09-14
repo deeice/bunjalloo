@@ -253,6 +253,30 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
   unsigned int lastPosition = unicodeString.find_last_not_of(delimeter);
   unsigned int i = 0;
   bool hasComponent(lineHasComponent(m_lineNumber));
+  /*
+  printf("hasComponent %s , m_currentChildIndex %d string %d\n", hasComponent?"Yes":"no", m_currentChildIndex, 
+      unicodeString.size());
+  */
+  // this is for the case of components alone on a line, still need to jump past them
+  // so that the next component is considered (otherwise we miss them)
+  if (unicodeString.size() == 0 and hasComponent)
+  {
+    // how to factor this loop?
+    while (hasComponent and m_currentChildIndex < m_childPositions.size() 
+        and m_paintPosition == m_childPositions[m_currentChildIndex])
+    {
+      Component * c(m_children[m_currentChildIndex]);
+      if (m_cursory == c->y())
+      {
+        m_cursorx += c->width();
+      }
+      else
+      {
+        break;
+      }
+      ++m_currentChildIndex;
+    }
+  }
 
   for (; it != unicodeString.end() ; ++it, ++i)
   {
@@ -343,7 +367,7 @@ unsigned int RichTextArea::documentSize(int endLine, unsigned int * childIndex) 
     total += it->length();
 
     // skip to the next child position
-    if (currentChildIndex < m_childPositions.size() and total > m_childPositions[currentChildIndex])
+    while (currentChildIndex < m_childPositions.size() and total > m_childPositions[currentChildIndex])
     {
       ++currentChildIndex;
     }
@@ -353,6 +377,15 @@ unsigned int RichTextArea::documentSize(int endLine, unsigned int * childIndex) 
     *childIndex = currentChildIndex;
   }
   return total;
+}
+
+int RichTextArea::linesToSkip() const
+{
+  if (m_bounds.y < 0)
+  {
+    return lineAt(0) + 1;
+  }
+  return 0;
 }
 
 void RichTextArea::paint(const nds::Rectangle & clip)
@@ -377,16 +410,46 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   m_paintPosition = 0;
   m_lineNumber = 0;
   // work out what happens when we skip lines.
-  int skipLines(linesToSkip());
+  // how to factor this ? copied from lineAt()
+  int dy = (- m_bounds.y);
+  int lineNum = 0;
+  for (; dy > font().height();)
+  {
+    LineHeightMap::const_iterator it(m_lineHeight.find(lineNum));
+
+    if (m_lineHeight.end() != it)
+    {
+      dy -= it->second;
+    }
+    else
+    {
+      dy -= font().height();
+    }
+    lineNum++;
+  }
+  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  int skipLines(lineNum);
   m_currentChildIndex = 0;
+  // printf("Skip %d lines dy %d\n", skipLines, dy);
   if (skipLines > 0)
   {
     checkSkippedLines(skipLines);
     m_lineNumber = skipLines;
+    setCursor(m_bounds.x, -dy);
+    it += skipLines;
+  }
+  else
+  {
+    setCursor(m_bounds.x, m_bounds.y);
   }
 
-  TextArea::paint(clip);
-  
+  //TextArea::paint(clip);
+
+  for (; it != m_document.end() and (m_cursory < m_bounds.bottom()) and (m_cursory < clip.bottom()); ++it)
+  {
+    printu(*it);
+    incrLine();
+  }
   for (std::vector<Component*>::iterator it(m_children.begin());
       it != m_children.end(); 
       ++it)

@@ -101,7 +101,7 @@ class TextArea : public Component
     inline int cursorY() const;
     inline int cursorX() const;
     /** Get the number of lines that will be skipped when painting.*/
-    int linesToSkip() const;
+    virtual int linesToSkip() const;
 
     inline bool parseNewline() const;
     inline void setParseNewline(bool parse=true);
@@ -144,6 +144,12 @@ class TextArea : public Component
         int & currPosition, UnicodeString::const_iterator & it) const;
 
     virtual void incrLine();
+    /** Set the cursor position. This is where the text will be "drawn" the
+     * next time a print routine is called.
+     * @param x the cursor x position in pixels.
+     * @param y the cursor y position in pixels.
+     */
+    void setCursor(int x, int y);
   private:
 
     Font * m_font;
@@ -161,12 +167,6 @@ class TextArea : public Component
     
 
 
-    /** Set the cursor position. This is where the text will be "drawn" the
-     * next time a print routine is called.
-     * @param x the cursor x position in pixels.
-     * @param y the cursor y position in pixels.
-     */
-    void setCursor(int x, int y);
 };
 
 // inline implementations

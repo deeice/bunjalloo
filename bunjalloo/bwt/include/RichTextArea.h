@@ -52,10 +52,12 @@ class RichTextArea: public TextArea
     /** Insert a new line - usefull for when we don't parse new lines
      */
     void insertNewline();
+    virtual int linesToSkip() const;
 
     virtual void paint(const nds::Rectangle & clip);
     virtual bool touch(int x, int y);
     virtual void setLocation(unsigned int x, unsigned int y);
+
 
   protected:
     /** Overloaded from TextArea. This checks the current char vs the links to

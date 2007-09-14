@@ -98,8 +98,6 @@ Toolbar::Toolbar(Document & doc, ControllerI & cont, View & view):
     m_sprites.push_back(sprite);
   }
   nds::Sprite * spinner(m_sprites[SPRITE_SPINNER]);
-  spinner->x( spinner->x() - 8);
-  spinner->y( spinner->y() - 8);
 
   Image image("/"DATADIR"/fonts/toolbar.png");
   if (image.isValid())
