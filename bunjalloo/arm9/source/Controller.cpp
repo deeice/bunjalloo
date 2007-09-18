@@ -81,6 +81,7 @@ void Controller::handleUri(const URI & uri)
       }
       break;
 
+    case URI::HTTPS_PROTOCOL:
     case URI::HTTP_PROTOCOL:
       fetchHttp(uri);
       break;
