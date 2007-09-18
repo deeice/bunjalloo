@@ -58,6 +58,8 @@ class HeaderParser
      */
     const std::string redirect() const;
 
+    void refresh(std::string & refresh, int & time) const;
+
     /** Get the HTTP status code. This is the numeric part of HTTP/1.1 NNN Blah blah.
      * @return the status code.
      */

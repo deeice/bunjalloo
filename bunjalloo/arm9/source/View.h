@@ -82,6 +82,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     int m_preInputStartLine;
     bool m_dirty;
     std::string m_linkHref;
+    int m_refreshing;
 
     void browse();
     void keyboard();

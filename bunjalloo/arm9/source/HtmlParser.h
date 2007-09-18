@@ -71,6 +71,8 @@ class HtmlParser
      */
     void parseRefresh(const std::string & value);
 
+    void refresh(std::string & refresh, int & time) const;
+
   protected:
     enum ContentModel {
       PCDATA,

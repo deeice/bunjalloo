@@ -77,6 +77,17 @@ void View::notify()
          */
         m_renderer->render();
         m_dirty = true;
+        string refresh;
+        int refreshTime;
+        m_document.refresh(refresh, refreshTime);
+        if (not refresh.empty() and refreshTime >= 0)
+        {
+          m_refreshing = refreshTime * 30;
+        }
+        else
+        {
+          m_refreshing = 0;
+        }
       }
       break;
     case Document::INPROGRESS:
@@ -166,6 +177,15 @@ void View::browse()
       m_toolbar->setVisible(false);
     else if (not m_scrollPane-> scrollBarHit(x, y))
       m_toolbar->setVisible(true);
+  }
+  if (m_refreshing > 0)
+  {
+    m_refreshing--;
+    if (m_refreshing == 0)
+    {
+      int tmp;
+      m_document.refresh(m_linkHref, tmp);
+    }
   }
 }
 

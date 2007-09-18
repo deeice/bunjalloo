@@ -309,12 +309,12 @@ void ViewRender::render()
   if (body->hasChildren())
   {
     walkTree(body);
+    ScrollPane & scrollPane(*m_self->m_scrollPane);
+    scrollPane.setLocation(0,0);
+    scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+    scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+    scrollPane.scrollToPercent(0);
   }
-  ScrollPane & scrollPane(*m_self->m_scrollPane);
-  scrollPane.setLocation(0,0);
-  scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-  scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-  scrollPane.scrollToPercent(0);
 }
 
 void ViewRender::renderSelect(const HtmlElement * selectElement)

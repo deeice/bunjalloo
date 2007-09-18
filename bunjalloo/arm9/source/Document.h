@@ -128,6 +128,13 @@ class Document
      */
     std::string gotoNextHistory();
 
+    /** Get the value of any refresh: headers or meta-headers.
+     * @param refresh the url that refresh was set to.
+     * @param time the time until the page should refresh.
+     * If either refresh is empty or time is negative, then not valid.
+     */
+    void refresh(std::string & refresh, int & time) const;
+
   private:
     //std::string m_uri;
     Status m_status;

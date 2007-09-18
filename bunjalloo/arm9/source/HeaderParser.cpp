@@ -113,6 +113,10 @@ const std::string HeaderParser::redirect() const
   return m_redirect;
 }
 
+void HeaderParser::refresh(std::string & refreshUrl, int & time ) const
+{
+  m_htmlParser->refresh(refreshUrl, time);
+}
 
 unsigned int HeaderParser::expected() const
 {

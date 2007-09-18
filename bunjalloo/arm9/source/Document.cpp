@@ -159,6 +159,11 @@ void Document::setStatus(Document::Status status)
   notifyAll();
 }
 
+void Document::refresh(std::string & refreshUrl, int & time) const
+{
+  m_headerParser->refresh(refreshUrl, time);
+}
+
 Document::Status Document::status() const
 {
   return m_status;

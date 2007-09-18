@@ -105,6 +105,9 @@ class HtmlParserImpl
       m_contentModel = model;
     }
 
+    void refresh(std::string & refresh, int & time) const;
+    void setRefresh(const std::string & refresh, int time);
+
   private:
     static const unsigned int NBSP = 160;
     const char * m_input;
@@ -129,6 +132,12 @@ class HtmlParserImpl
     string m_doctypeToken;
     //! Sometimes the chunking screws us over.
     string m_leftOvers;
+
+    //! URL for refresh header.
+    string m_refresh; 
+    //! time for refresh header.
+    int m_refreshTime;
+
     bool m_doctypeTokenIsError;
     void next();
     //! rewind one character to reconsume it.
@@ -195,6 +204,8 @@ void HtmlParserImpl::reset()
   m_contentModel = HtmlParser::PCDATA;
   m_encoding = HtmlParser::ISO_ENCODING;
   m_leftOvers.clear();
+  m_refresh.clear();
+  m_refreshTime = -1;
 }
 
 void HtmlParserImpl::initialise(const char * data, unsigned int length)
@@ -1337,6 +1348,7 @@ void HtmlParser::setContentModel(ContentModel newModel)
 
 
 
+/*
 static void extractCharset(const string & value, string & mimeType, string & charset)
 {
   unsigned int position(value.find(";"));
@@ -1354,6 +1366,17 @@ static void extractCharset(const string & value, string & mimeType, string & cha
   }
   stripWhitespace(mimeType);
   stripWhitespace(charset);
+}
+*/
+void HtmlParserImpl::setRefresh(const std::string & refresh, int time)
+{
+  m_refresh = refresh;
+  m_refreshTime = time;
+}
+void HtmlParserImpl::refresh(std::string & refresh, int & time) const
+{
+  refresh = m_refresh;
+  time = m_refreshTime;
 }
 
 void HtmlParser::parseContentType(const std::string & value)
@@ -1395,11 +1418,25 @@ void HtmlParser::parseContentType(const std::string & value)
 
 void HtmlParser::parseRefresh(const std::string & value)
 {
-  // TODO - implement actual refreshing.
+  // actual refreshing implemented in view.
   string lowerValue(value);
   transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
-  string time, url;
-  extractCharset(lowerValue, time, url);
+  ParameterSet refreshSet(lowerValue);
+  string refresh;
+  if (refreshSet.hasParameter("url"))
+  {
+    refreshSet.parameter("url", refresh);
+  }
+  if (not refreshSet.keyValueMap().empty())
+  {
+    // bit of a hack this - adds an empty key for the time.. if no time given, then will be the url, which == 0
+    m_details->setRefresh(refresh, strtol(refreshSet.keyValueMap().begin()->first.c_str(), 0, 10));
+  }
+}
+
+void HtmlParser::refresh(std::string & refreshUrl, int & time) const
+{
+  m_details->refresh(refreshUrl, time);
 }
 
 void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
@@ -1415,7 +1452,7 @@ void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
     }
     else if (httpEquiv == "refresh")
     {
-
+      parseRefresh(content);
     }
   }
 }
