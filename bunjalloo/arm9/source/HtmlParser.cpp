@@ -19,11 +19,12 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <algorithm>
-#include "HtmlParser.h"
-#include "HtmlElement.h"
 #include "Entity.h"
-#include "UTF8.h"
+#include "HtmlElement.h"
+#include "HtmlParser.h"
+#include "ParameterSet.h"
 #include "UnicodeString.h"
+#include "UTF8.h"
 
 using namespace std;
 
@@ -33,6 +34,7 @@ class HtmlParserImpl
 
   public:
     enum TokeniserState {
+      BOM,
       DATA,
       ENTITY_DATA,
       TAG_OPEN,
@@ -66,7 +68,7 @@ class HtmlParserImpl
 
     HtmlParserImpl(HtmlParser & self) 
       : m_self(self) ,
-      m_encoding(HtmlParser::UTF8_ENCODING)
+      m_encoding(HtmlParser::ISO_ENCODING)
     {}
 
     void initialise(const char * data, unsigned int length);
@@ -148,6 +150,7 @@ class HtmlParserImpl
     string asUnconsumedCharString(int amount);
     void consume(int amount);
     void addAttribute();
+    void handleBom();
     void handleData();
     void handleEntityData();
     void handleTagOpen();
@@ -188,9 +191,9 @@ void HtmlParserImpl::reset()
 {
   m_attribute = 0;
   m_tagAttributes.clear();
-  m_state = DATA;
+  m_state = BOM;
   m_contentModel = HtmlParser::PCDATA;
-  m_encoding = HtmlParser::UTF8_ENCODING;
+  m_encoding = HtmlParser::ISO_ENCODING;
   m_leftOvers.clear();
 }
 
@@ -1094,6 +1097,16 @@ void HtmlParserImpl::handleBogusDoctype()
   }
 }
 
+void HtmlParserImpl::handleBom()
+{
+  const unsigned char * bom = (const unsigned char *)m_position;
+  if (bom[0] == 0xef and bom[1] == 0xbb and bom[2] == 0xbf)
+  {
+    setEncoding(HtmlParser::UTF8_ENCODING);
+  }
+  m_state = DATA;
+}
+
 void HtmlParserImpl::handleData()
 {
   // consume next character.
@@ -1171,6 +1184,12 @@ void HtmlParserImpl::fire()
 {
   //debug();
   switch (m_state) {
+    case BOM:
+      {
+        // check BOM for UTF-8
+        handleBom();
+      }
+      break;
     case DATA:
       {
         handleData();
@@ -1339,14 +1358,34 @@ static void extractCharset(const string & value, string & mimeType, string & cha
 
 void HtmlParser::parseContentType(const std::string & value)
 {
+  ParameterSet paramSet(value);
+  if (paramSet.hasParameter("charset"))
+  {
+    string charset;
+    paramSet.parameter("charset", charset);
+    if (charset == "iso-8859-1")
+    {
+      setEncoding(HtmlParser::ISO_ENCODING);
+    }
+    else if (charset == "utf-8")
+    {
+      setEncoding(HtmlParser::UTF8_ENCODING);
+    }
+  }
   string lowerValue(value);
   transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
+  /*
   string charset, mimeType;
-  extractCharset(lowerValue, charset, mimeType);
-  if (mimeType == "charset=iso-8859-1")
+  extractCharset(lowerValue, mimeType, charset);
+  if (charset == "charset=iso-8859-1")
   {
     setEncoding(HtmlParser::ISO_ENCODING);
   }
+  if (charset == "charset=utf-8")
+  {
+    setEncoding(HtmlParser::UTF8_ENCODING);
+  }
+  */
   bool isPlain = lowerValue.find("text/plain") != string::npos;
   if (isPlain)
   {

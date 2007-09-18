@@ -194,6 +194,7 @@ void Font::glyph(unsigned int value, Glyph & glyphData) const
 void Font::textSize(const char * text, int amount, int & width, int & height, const std::string & encoding) const
 {
   // length of text in bytes.
+  bool utf8(encoding == "utf-8");
   width = 0;
   height = m_height;
   int maxWidth = 0;
@@ -202,7 +203,7 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
   {
     unsigned int value;
     unsigned int read(1);
-    if (encoding == "utf-8") {
+    if (utf8) {
       read = UTF8::decode(text, value);
     } else {
       value = (int)(text[0]&0xff);
