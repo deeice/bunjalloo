@@ -14,12 +14,13 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "Canvas.h"
+#include "EditableTextArea.h"
+#include "ElementFactory.h"
 #include "FormTextArea.h"
 #include "HtmlElement.h"
 #include "HtmlTextAreaElement.h"
 #include "TextAreaFactory.h"
-#include "EditableTextArea.h"
-#include "Canvas.h"
 
 FormTextArea::FormTextArea(HtmlElement * element) :
   m_element(element)
@@ -29,10 +30,7 @@ FormTextArea::FormTextArea(HtmlElement * element) :
   add(text);
   int fontSize(text->font().height());
   setSize(nds::Canvas::instance().width(), fontSize);
-  if (m_element->hasChildren() and m_element->firstChild()->isa("#TEXT"))
-  {
-    text->setText(m_element->firstChild()->text());
-  }
+  text->setText(textNode()->text());
   HtmlTextAreaElement * textElement((HtmlTextAreaElement*)m_element);
   text->setSize(fontSize * textElement->cols(), fontSize * textElement->rows());
   m_preferredHeight = fontSize * textElement->rows();
@@ -76,10 +74,20 @@ void FormTextArea::text(UnicodeString & returnString) const
 void FormTextArea::setText(const UnicodeString & text)
 {
   textArea()->setText(text);
-  if (m_element->hasChildren() and m_element->firstChild()->isa("#TEXT"))
-  {
-    m_element->firstChild()->text() = text;
-  }
+  textNode()->text() = text;
   layoutViewer();
 }
 
+HtmlElement * FormTextArea::textNode()
+{
+  // see if the child nodes have textnodes
+  if (m_element->hasChildren() and m_element->firstChild()->isa("#TEXT"))
+  {
+    return m_element->firstChild();
+  }
+  else
+  {
+    m_element->append( ElementFactory::create("#TEXT"));
+    return m_element->firstChild();
+  }
+}
