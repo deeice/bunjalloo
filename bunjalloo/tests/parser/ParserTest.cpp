@@ -114,6 +114,18 @@ void ParserTest::testIso()
   CPPUNIT_ASSERT_EQUAL( expectedDataSize , dataSize);
 }
 
+void ParserTest::testRefresh()
+{
+  readFile("refresh.txt");
+  m_headerParser->feed(m_data, m_length);
+  std::string refresh;
+  int refreshTime;
+  m_htmlParser->refresh(refresh, refreshTime);
+  std::string expected("refresh2.html");
+  CPPUNIT_ASSERT_EQUAL( expected , refresh);
+  int expectedTime = 6;
+  CPPUNIT_ASSERT_EQUAL( expectedTime , refreshTime);
+}
 
 void ParserTest::testBogusDoctype()
 {

@@ -29,6 +29,7 @@ class ParserTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testNotFound );
   CPPUNIT_TEST( testNotHtml );
   CPPUNIT_TEST( testIso );
+  CPPUNIT_TEST( testRefresh );
   CPPUNIT_TEST( testBogusDoctype );
   CPPUNIT_TEST( testMetaIso );
   CPPUNIT_TEST( testSlashdot );
@@ -43,6 +44,7 @@ public:
   void testNotFound();
   void testNotHtml();
   void testIso();
+  void testRefresh();
   void testBogusDoctype();
   void testMetaIso();
   void testSlashdot();
