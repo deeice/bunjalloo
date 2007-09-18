@@ -22,6 +22,7 @@
 using namespace std;
 
 static const char * const HTTP_STR = "http";
+static const char * const HTTPS_STR = "https";
 static const char * const FILE_STR = "file";
 static const char * const CONFIG_STR = "config";
 static const char * const GET_STR = "GET";
@@ -82,6 +83,7 @@ URI::Protocol_t URI::protocol() const
 {
   if (m_protocol == FILE_STR) return FILE_PROTOCOL;
   if (m_protocol == HTTP_STR) return HTTP_PROTOCOL;
+  if (m_protocol == HTTPS_STR) return HTTPS_PROTOCOL;
   if (m_protocol == CONFIG_STR) return CONFIG_PROTOCOL;
   return UNKNOWN_PROTOCOL;
 }
@@ -95,6 +97,7 @@ bool URI::isValid() const
   switch (protocol())
   {
     case FILE_PROTOCOL:
+    case HTTPS_PROTOCOL:
     case HTTP_PROTOCOL:
     case CONFIG_PROTOCOL:
       return true;
@@ -107,24 +110,27 @@ int URI::port() const
 {
   int firstSlash(m_address.find("/"));
   int portDots(m_address.find(":"));
+  int defaultPort = protocol() == HTTPS_PROTOCOL?443:80;
   if (portDots == -1)
-    return 80;
+  {
+    return defaultPort;
+  }
   if (firstSlash == -1 or (firstSlash > portDots))
   {
     int amount = firstSlash==-1?m_address.length():firstSlash;
     amount -= portDots;
     if (amount == 1) {
-      return 80;
+      return defaultPort;
     }
     string portStr = m_address.substr(portDots+1, amount);
     return strtol(portStr.c_str(), 0, 0);
   }
-  return 80;
+  return defaultPort;
 }
 
 std::string URI::server() const
 {
-  if (isValid() and protocol() == HTTP_PROTOCOL )
+  if (isValid() and (protocol() == HTTP_PROTOCOL or protocol() == HTTPS_PROTOCOL))
   {
     int firstSlash(m_address.find("/"));
     int portDots(m_address.find(":"));
@@ -213,7 +219,8 @@ URI URI::navigateTo(const std::string & newFile ) const
   tmp.setUri(newFile);
   if (tmp.isValid())
   {
-    if (protocol() == HTTP_PROTOCOL and tmp.protocol() != HTTP_PROTOCOL)
+    if ((protocol() == HTTP_PROTOCOL or protocol() == HTTPS_PROTOCOL) 
+        and (tmp.protocol() != HTTP_PROTOCOL and tmp.protocol() != HTTPS_PROTOCOL))
     {
       // Security problem - remote files shouldn't be able to link to local one.
       return *this;

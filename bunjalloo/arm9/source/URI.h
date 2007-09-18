@@ -25,6 +25,7 @@ class URI
     enum Protocol_t
     {
       UNKNOWN_PROTOCOL,
+      HTTPS_PROTOCOL,
       HTTP_PROTOCOL,
       FILE_PROTOCOL,
       CONFIG_PROTOCOL
