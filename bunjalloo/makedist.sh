@@ -20,11 +20,19 @@ read -p "Summary? " summary
 revision=$(svn info | grep ^Revision | cut -d: -f2 | tr -d ' ')
 
 make dist
-$MV bunjalloo.zip bunjalloo-${release}.zip
-$UPLOAD -s "$summary" -p quirkysoft -l Type-Archive,Program-Bunjalloo,OpSys-NDS bunjalloo-${release}.zip
+$MV ${project}.zip ${project}-${release}.zip
+$UPLOAD -s "$summary" -p quirkysoft -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${project}-${release}.zip
 tagname=${project}_${release}_r${revision}
 $SVN cp $trunk $tags/$tagname
 
-make dist-src REP=${tags/https/http}/$tagname
-$MV bunjalloo-dist.tar.gz bunjalloo-src-${release}.tar.gz
-$UPLOAD -s "Source code for release $release" -p quirkysoft -l Type-Source,Program-Bunjalloo bunjalloo-src-${release}.tar.gz
+REP=${tags/https/http}/$tagname
+distdir=${project}-${release}
+mkdir -p $distdir
+cd $distdir
+svn export ${REP}/${project}
+svn export ${REP}/libndspp
+cd ..
+tar czvf ${distdir}.tar.gz ${distdir}
+
+$MV ${project}-${release}.tar.gz ${project}-src-${release}.tar.gz
+$UPLOAD -s "Source code for release $release" -p quirkysoft -l Type-Source,Program-Bunjalloo ${project}-src-${release}.tar.gz

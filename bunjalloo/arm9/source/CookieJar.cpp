@@ -20,6 +20,7 @@
 #include "URI.h"
 
 using namespace std;
+static const char * PATH_STR("path");
 
 CookieJar::CookieJar()
 {
@@ -67,15 +68,15 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
 
   ParameterSet paramSet(request);
   const KeyValueMap & keyValueMap(paramSet.keyValueMap());
-  if ( paramSet.hasParameter("path") )
+  if ( paramSet.hasParameter(PATH_STR) )
   {
-    paramSet.parameter("path", path);
+    paramSet.parameter(PATH_STR, path);
   }
   
   for (KeyValueMap::const_iterator it(keyValueMap.begin()); it != keyValueMap.end(); ++it)
   {
     string name = it->first;
-    if (name == "path")
+    if (name == PATH_STR)
     {
       continue;
     }

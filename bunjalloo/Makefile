@@ -3,6 +3,8 @@
 target=$(shell basename $(CURDIR))
 export DATADIR:="\"data/$(target)\""
 
+export DATESTRING:="\"$(shell date '+%Y%m%d')\""
+
 all:  ctags arm9/source/version.c
 	$(MAKE) -C bwt
 	$(MAKE) -f Makefile.ds
@@ -20,19 +22,6 @@ docs:
 
 ctags:
 	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ../libndspp
-
-arm9/source/version.c:
-	version=$$(svn info | grep ^Revision | cut -d: -f2 | tr -d ' ') ;\
-	currversion=0 ;\
-	if [ -e $@ ] ; then \
-	  currversion=$$(grep VERSION $@ | cut -d' ' -f6 | tr -d '"') ;\
-	fi ;\
-	if [ x$$version != x ] ; then \
-	  if [ $$currversion -lt $$version ] ; then \
-	    echo 'const char * VERSION = "'$$version'" ;' > $@ ;\
-	  fi ;\
-	fi
-
 
 distdir=$(target)-dist
 
