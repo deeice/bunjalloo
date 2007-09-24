@@ -34,11 +34,11 @@ $(LIBNAME) : $(OFILES)
 	echo "#ifdef __cplusplus" >> $@ ;\
 	echo "extern \"C\" {" >> $@ ;\
 	echo "#endif" >> $@ ;\
-        name=$$(echo _binary_$* | sed -e 's/^\([0-9]\)/_\1/' | tr . _) ;\
+        name=$$(echo _binary_$* | tr . _) ;\
 	echo "extern const u16" $$name"_pal_bin_end[];" >> $@ ;\
 	echo "extern const u16" $$name"_pal_bin_start[];" >> $@ ;\
 	echo "extern const u32" $${name}_pal_bin_size[]";" >> $@ ;\
-        name=$$(echo _binary_$* | sed -e 's/^\([0-9]\)/_\1/' | tr . _) ;\
+        name=$$(echo _binary_$* | tr . _) ;\
 	echo "extern const u16" $$name"_img_bin_end[];" >> $@ ;\
 	echo "extern const u16" $$name"_img_bin_start[];" >> $@ ;\
 	echo "extern const u32" $$name"_img_bin_size[];" >> $@ ;\
