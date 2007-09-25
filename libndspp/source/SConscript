@@ -1,0 +1,15 @@
+Import('env')
+
+# build the source sub dirs.
+subdirs = env['SOURCE_DIRS']
+# add source/<dir> to CPPPATH so it is used when searching for includes.
+[env.Append(CPPPATH='#source/%s'%subdir) for subdir in subdirs]
+
+objs = []
+# Builds the subdirs, get the objects
+for subdir in subdirs:
+  objs.append(SConscript('%s/SConscript'%(subdir)))
+
+Return('objs')
+
+# vim: set filetype=python :

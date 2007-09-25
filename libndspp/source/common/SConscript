@@ -1,0 +1,9 @@
+Import('env')
+
+# can't glob here as the glob takes place in the build dir.
+files = env['COMMON_SOURCE']
+
+objs = [env.Object(filename) for filename in files]
+Return('objs')
+
+# vim: set filetype=python :

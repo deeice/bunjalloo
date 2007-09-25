@@ -1,0 +1,58 @@
+import os, os.path, glob, sys
+
+libName = 'ndspp'
+#os.path.basename( os.getcwd())
+
+headers=['#/include']
+commonFlags = ' -g -Wall -O2 '
+
+defaultEnv = Environment( CCFLAGS=commonFlags, CPPPATH=headers,
+    tools=['default', 'color'], toolpath = ['ndspp-scons'])
+buildTargets = ['pc', 'arm9', 'arm7']
+# function definitions
+
+def createEnv(buildTarget):
+  global defaultEnv
+  env = None
+  if buildTarget.startswith('arm'):
+    env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })] )
+  else:
+    env = defaultEnv.Copy()
+    for i in ['CC', 'CXX']:
+      if os.environ.has_key(i) and os.environ[i]:
+        env[i] = os.environ[i]
+  return env
+
+def build(buildTarget):
+  """ build a particular build target """
+  subdirs = []
+
+  if (buildTarget != 'arm7'):
+    subdirs.append('common')
+
+  env = createEnv(buildTarget)
+
+  subdirs.append(buildTarget)
+
+  env['SOURCE_DIRS'] = subdirs
+
+  for subdir in subdirs:
+    env['%s_SOURCE'%(subdir.upper())] = [ os.path.basename(filename) for filename in glob.glob('source/%s/*.cpp'%subdir)]
+
+  # export the env to the SConscripts
+  Export('env')
+
+  # get the build artifacts from the sub directories
+  # build them in build/<target> directory
+  buildDir = 'build/%s'%buildTarget
+  objs = SConscript('source/SConscript', build_dir=buildDir, duplicate=0)
+
+  # create lib/libndspp-<target> file
+  libraryName = 'lib/%s-%s'%(libName, buildTarget)
+  lib = env.Library(libraryName, objs)
+  env.Precious(lib)
+
+# build steps
+[ build(buildTarget) for buildTarget in buildTargets ]
+
+# vim: set filetype=python :
