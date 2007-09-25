@@ -206,7 +206,7 @@ def build(buildTarget):
   if (buildTarget == 'arm9'):
     env['ICON'] = 'common/data/icon.bmp'
     env['BANNER'] = '%s;Web Browser;By Richard Quirk'
-    env['DLDIFILE'] = '~/data/ez5s.dldi'
+    env['DLDIFILE'] = '%s/data/ez5s.dldi'%(os.environ['HOME'])
     env.NdsTool(executableName, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
     env.DldiPatch('%s-patched'%executableName, executableName)
 
