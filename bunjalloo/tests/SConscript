@@ -1,0 +1,35 @@
+import glob, os.path
+Import('env')
+testEnv = env.Copy()
+
+# add bunjalloo lib - contains all testable code items except "Main.o"
+testEnv.Prepend(LIBS='bunjalloo')
+# unit tests need cppunit and dl
+testEnv.Append(LIBS=['cppunit','dl'])
+# add top level to lib path so that it "magically" searches in the right
+# places.
+testEnv.Append(LIBPATH=['../..'])
+testEnv.Append(CPPPATH=['../..'])
+
+# create the driver and export it to child scripts
+mainObj = testEnv.Object('Main.cpp')
+Export('mainObj')
+
+# find the test directories
+dirs = [d for d in glob.glob(str(testEnv.Dir('#tests'))+'/*') if os.path.isdir(d)]
+for d in dirs:
+  # find source code in the test directory
+  files = [os.path.basename(f) for f in glob.glob('/'.join([d, '*.cpp']))]
+  if (len(files)):
+    basedir = os.path.basename(d)
+    # set the absolute output name here, since cannot do it from child script
+    testEnv['TESTER'] = '/'.join([d,'tester'])
+    # Set the sources for the unit test - this is so the sources are built in
+    # the build directory and not in place.  Can only glob from here, not once
+    # we descend into the sub dir.
+    testEnv['TESTER_SOURCES'] = files
+    Export('testEnv')
+    # build the tester..
+    SConscript( basedir+'/SConscript', duplicate=0)
+
+# vim: set filetype=python :

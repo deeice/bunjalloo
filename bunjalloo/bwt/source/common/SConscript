@@ -1,0 +1,8 @@
+Import('bwtEnv')
+
+# can't glob here since building in a build dir breaks things.
+files = bwtEnv['BWT_SOURCE']
+objs = [bwtEnv.Object(filename) for filename in files]
+Return('objs')
+
+# vim: set filetype=python :

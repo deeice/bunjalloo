@@ -1,0 +1,225 @@
+import os, os.path, glob, sys
+import time
+
+executableName = os.path.basename( os.getcwd())
+libndsppDir = '../libndspp'
+
+headers=['#/%s/include'%libndsppDir]
+commonFlags = ' -g -Wall -O2 '
+libraryFiles = {
+    'pc': '',
+    }
+
+# create the default environment with coloured output
+defaultEnv = Environment(CCFLAGS=commonFlags, CPPPATH=headers,
+    tools=['default', 'color'], toolpath = ['%s/ndspp-scons'%libndsppDir])
+buildTargets = ['pc', 'arm9', 'arm7']
+
+# function definitions
+
+## create the environment for the chosen target
+# @param buildTarget the target build (pc, arm9, arm7)
+# @return the environment copied from defaultEnv
+def createEnv(buildTarget):
+  global defaultEnv
+  env = None
+  if buildTarget.startswith('arm'):
+    env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })],
+        OBJCOPYFLAGS = ' -I binary -O elf32-littlearm -B arm \
+            --rename-section .data=.rodata,readonly,contents ')
+  else:
+    env = defaultEnv.Copy()
+    env.Append(OBJCOPY = 'objcopy')
+    env.Append(OBJCOPYFLAGS = ' -I binary -O elf32-i386 -B i386 ')
+    env.Prepend( LIBS=['SDL'])
+    for i in ['CC', 'CXX', 'OBJCOPY']:
+      if os.environ.has_key(i) and os.environ[i]:
+        env[i] = os.environ[i]
+
+  env.Append( LIBPATH=['#/%s/lib'%libndsppDir])
+  env.Prepend( LIBS=['ndspp-%s'%buildTarget])
+  env.Prepend( LIBS=['png','z'])
+  addObjCopyImageBuilders(env)
+  return env
+
+## Add the project directories to the given Environment.
+# @param env the environment for this build
+# @param buildTarget the build target name
+def addProjectDirs(env, buildTarget):
+  env.Append( CPPPATH=['#/bwt/include'])
+  env.Prepend(LIBPATH=['#/build/%s/bwt/lib/'%buildTarget])
+  env.Prepend(LIBS=['bwt'])
+  env.Append( CPPDEFINES=[('DATADIR','\\"data/bunjalloo\\"')])
+  env.Append(CPPDEFINES=[ ('DATESTRING','\\"%d%02d%02d\\"'%tuple(time.localtime()[0:3]))])
+  pass
+
+## Add the project specific builders.
+# @param env the Environment to alter.
+def addObjCopyImageBuilders(env):
+
+  ## Create bin files from png.
+  # This adds an "emitter" that tells the Builder what things are made,
+  # allowing 1 to many rules (png -> map, pal, img)
+  # @param target the target artifacts
+  # @param source the source input
+  # @param env the environment
+  # @return target, source list tuple
+  def img_emitter(target, source, env):
+    # add img.bin, pal.bin and map.bin to the output as side effects
+    fileName = os.path.basename(str(source[0])).split(os.path.extsep)[0]
+    t = []
+    t.append('%s.img.bin'%(fileName))
+    t.append('%s.pal.bin'%(fileName))
+    t.append('%s.map.bin'%(fileName))
+    return (t, source)
+
+  env.Append(GRITFLAGS='-pw 16 -gB 8 -m -ft b -fh! -q')
+  gritBld = Builder(action='cd ${TARGET.dir} && grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS',
+      suffix='.bin',
+      src_suffix='.png',
+      emitter=img_emitter)
+  env.Append( BUILDERS = { 'Gfx2Bin': gritBld } )
+
+  # create o file from bin
+  # cd to the directory otherwise puts build path in name.
+  objBld = Builder(action='cd ${SOURCE.dir} && $OBJCOPY $OBJCOPYFLAGS ${SOURCE.file} ${TARGET.file}',
+      suffix='.o',
+      src_suffix='.bin')
+  env.Append( BUILDERS = { 'Bin2o': objBld } )
+
+  ## Create header file from png. Opens the .h file and writes several lines
+  # into it.
+  # @param target the target files
+  # @param source the source file
+  # @param env the Environment
+  def build_h(target, source, env):
+    fp = open(str(target[0]), 'w')
+    f = os.path.basename(str(source[0])).split(os.path.extsep)[0]
+    fd = f.replace('.','_')
+    fp.write("""#ifndef %s_h_seen
+#define %s_h_seen
+#ifdef __cplusplus
+extern "C" {
+#endif"""%(fd, fd))
+    for i in ('pal', 'img', 'map'):
+      fp.write("""
+              extern const u16 _binary_%s_%s_bin_end[];
+              extern const u16 _binary_%s_%s_bin_start[];
+              extern const u32 _binary_%s_%s_bin_size[];
+              """%(fd, i, fd, i, fd, i))
+    fp.write("""
+#ifdef __cplusplus
+};
+#endif
+#endif
+""")
+    return None
+
+  bldHeader = Builder( action = build_h, suffix='.h', src_suffix='.png')
+  env.Append(BUILDERS = {'Png2h': bldHeader})
+
+  ## Execute unit tests, creating a test.passed cache file.
+  # taken from www.scons.org/wiki/UnitTest
+  def build_unit_test(target, source, env):
+    app = str(source[0].abspath)
+    cwd = os.getcwd()
+    os.chdir(os.path.dirname(app))
+    result = os.spawnl(os.P_WAIT, app, app)
+    os.chdir(cwd)
+    if result == 0:
+      open(str(target[0]),'w').write("PASSED\n")
+    else:
+      return 1
+  # Create a builder for tests
+  bld = Builder(action = build_unit_test)
+  env.Append(BUILDERS = {'Test' :  bld})
+
+## Build everything for a particular target.
+def build(buildTarget):
+  """ build a particular build target """
+  subdirs = []
+  sourceDirectory = buildTarget
+
+  if buildTarget != 'arm7':
+    sourceDirectory = 'arm9'
+
+  env = createEnv(buildTarget)
+
+  if buildTarget != 'arm7':
+    addProjectDirs(env, buildTarget)
+
+  subdirs.append(sourceDirectory)
+
+  env['SOURCE_DIRS'] = subdirs
+  env['PLATFORM_NAME'] = buildTarget
+  env['SOURCE_NAME'] = sourceDirectory
+
+  env['BWT_SOURCE'] = [ os.path.basename(filename) for filename in glob.glob('bwt/source/common/*.cpp')]
+  for subdir in subdirs:
+    env['%s_SOURCE'%(subdir.upper())] = [ os.path.basename(filename) for filename in glob.glob('%s/source/*.c*'%subdir)]
+
+  # export the env to the SConscripts
+  Export('env')
+
+  # get the build artifacts from the sub directories
+  # build them in build/<target> directory
+  buildDir = '#build/%s'%buildTarget
+  objs = []
+  libbwt = None
+  if buildTarget != 'arm7':
+    libbwt = SConscript('bwt/SConscript', build_dir='/'.join([buildDir, 'bwt']), duplicate=0)
+  objs.append(SConscript('%s/source/SConscript'%sourceDirectory, build_dir=buildDir, duplicate=0))
+
+  # create <builddir>/<target> file
+  program = '%s/%s'%(buildDir, executableName)
+  prog = env.Program(program, objs)
+  libObjs = [ o for o in Flatten(objs) if (str(o).lower().rfind('main')==-1)]
+  if (libObjs):
+    # library used for unit tests
+    lib = env.Library(program, libObjs)
+
+  if (buildTarget != 'pc'):
+    env.SideEffect(program+'.map', program)
+    env.Elf2Arm('%s.arm'%program,  prog)
+
+  if (libbwt != None):
+    env.Depends(prog, libbwt)
+
+  if (buildTarget == 'arm9'):
+    env['ICON'] = 'common/data/icon.bmp'
+    env['BANNER'] = '%s;Web Browser;By Richard Quirk'
+    env.NdsTool(executableName, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
+
+  # build the tests
+  if (buildTarget == 'pc'):
+    # build tests
+    SConscript('tests/SConscript', build_dir='/'.join([buildDir, 'tests']), duplicate=0)
+    env.Command('#/%s'%os.path.basename(str(prog[0])), prog, [Copy('$TARGET', '$SOURCE')])
+  SConscript('tests/gui-test/SConscript', build_dir='/'.join([buildDir, 'gui-test']), duplicate=0)
+
+# build steps
+[ build(buildTarget) for buildTarget in buildTargets ]
+
+cmd = defaultEnv.Command('tags', '%s.nds'%executableName, 'ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ../libndspp')
+defaultEnv.Append(TARFLAGS='--exclude=.svn -c -z')
+# build dist
+# not worth doing from scons - adds a lot of overhead :-(
+#data_dir = 'data/bunjalloo'
+#data_files = Split("""
+#    config.ini
+#    docs/copying
+#    docs/warranty
+#    fonts/sans.map
+#    fonts/sans.img
+#    fonts/sans.pal
+#    user/ckallow.lst
+#    """)
+#dist_bin_files = [ executableName+'.nds', [ '/'.join([data_dir,f]) for f in data_files]]
+
+#defaultEnv.Zip(executableName, dist_bin_files)
+
+#build dist-src
+# - this is really crap in scons cf autotools
+#defaultEnv.Tar("""%s-src.tar.gz"""%executableName , Split("""arm9 arm7 tests data SConstruct COPYING"""))
+
+# vim: set filetype=python :

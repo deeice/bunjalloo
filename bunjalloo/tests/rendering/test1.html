@@ -1,0 +1,30 @@
+
+<html>
+  <head>
+    <meta HTTP-EQUIV="content-type" CONTENT="text/html; charset=UTF-8">
+  </head>
+  <body alink=#ff0000 bgcolor=#ffffff link=#0000cc text=#000000 vlink=#551a8b onLoad="setFocus()">
+    <form method=GET action="/search" name=f>
+      <font size=-1> <br> <b>Buscar resultados </b> </font> <font size=-1>con <b>todas </b> las palabras </font>
+      <input type=text value="" name=as_q size=25>
+
+      <font size=-1>
+        <input type=hidden name=hl value="es">
+        <select name=num>
+          <option value="10" selected>10 resultados
+          <option value="20">20 resultados
+          <option value="30">30 resultados
+          <option value="50">50 resultados
+          <option value="100">100 resultados
+        </select> 
+        <input type=submit name=btnG value="Buscar con Google">
+      </font>
+      <font size=-1>con la <b>frase exacta </b> </font>
+      <input type=text size=25 value="" name=as_epq>
+      <font size=-1>con <b>alguna </b> de las palabras </font>
+      <input type=text size=25 value="" name=as_oq>
+      <font size=-1> <b>sin </b> las palabras </font>
+      <input type=text size=25 value="" name=as_eq>
+    </form>
+  </body>
+</html>

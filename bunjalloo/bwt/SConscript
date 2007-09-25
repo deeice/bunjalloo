@@ -1,0 +1,24 @@
+import glob, os.path
+Import('env')
+
+# Build the bwt library.
+
+# New Environment from parent.
+bwtEnv = env.Copy()
+
+# make sure we search for headers in img dir
+bwtEnv.Append(CPPPATH='../img')
+
+Export('bwtEnv')
+# build common source into "common" build dir
+objs = SConscript('source/common/SConscript', build_dir='common', duplicate=0)
+# build image files into "img" build dir
+objs.append(SConscript('common/img/SConscript', build_dir='img', duplicate=0))
+
+# build the library in lib dir.
+libbwt = bwtEnv.Library('lib/bwt', objs)
+
+# return the library to the parent.
+Return('libbwt')
+
+# vim: set filetype=python :
