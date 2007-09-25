@@ -1,8 +1,13 @@
+.PHONY: all clean
+
+SCONS := $(shell which scons)
+ifeq ($(strip $(SCONS)),)
+$(error "This program uses the scons software construction tool. See www.scons.org for more details.")
+endif
+
 all:
-	$(MAKE) -f Makefile.ds
-	$(MAKE) -f Makefile.sdl
+	$(SCONS)
 
 clean:
-	$(MAKE) -f Makefile.ds clean
-	$(MAKE) -f Makefile.sdl clean
+	$(SCONS) -c
 
