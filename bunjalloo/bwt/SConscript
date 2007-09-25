@@ -7,13 +7,13 @@ Import('env')
 bwtEnv = env.Copy()
 
 # make sure we search for headers in img dir
-bwtEnv.Append(CPPPATH='../img')
+bwtEnv.Append(CPPPATH='../data')
 
 Export('bwtEnv')
 # build common source into "common" build dir
-objs = SConscript('source/common/SConscript', build_dir='common', duplicate=0)
-# build image files into "img" build dir
-objs.append(SConscript('common/img/SConscript', build_dir='img', duplicate=0))
+objs = SConscript('source/SConscript', build_dir='common', duplicate=0)
+# build image files into "data" build dir
+objs.append(SConscript('img/SConscript', build_dir='data', duplicate=0))
 
 # build the library in lib dir.
 libbwt = bwtEnv.Library('lib/bwt', objs)

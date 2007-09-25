@@ -1,42 +1,13 @@
-.PHONY: all clean docs arm9/source/version.c
+.PHONY: all clean
 
-target=$(shell basename $(CURDIR))
-export DATADIR:="\"data/$(target)\""
+SCONS := $(shell which scons)
+ifeq ($(strip $(SCONS)),)
+$(error "This program uses the scons software construction tool. See www.scons.org for more details.")
+endif
 
-export DATESTRING:="\"$(shell date '+%Y%m%d')\""
-
-all:  ctags arm9/source/version.c
-	$(MAKE) -C bwt
-	$(MAKE) -f Makefile.ds
-	$(MAKE) -f Makefile.sdl
+all:
+	$(SCONS)
 
 clean:
-	$(MAKE) -C common clean
-	$(MAKE) -C common -f Makefile.sdl clean
-	$(MAKE) -C bwt clean
-	$(MAKE) -f Makefile.ds clean
-	$(MAKE) -f Makefile.sdl clean
+	$(SCONS) -c
 
-docs:
-	@-doxygen doxygen.cfg
-
-ctags:
-	ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ../libndspp
-
-distdir=$(target)-dist
-
-$(distdir):
-	mkdir $(distdir) -p
-
-dist: all $(distdir)
-	cp $(target)-unpatched.nds $(distdir)/$(target).nds
-	cp data/ -rvfp $(distdir)/
-	find $(distdir) -name '.svn' -type d | xargs rm -rf 
-	cd $(distdir) && zip -r $(target).zip *
-	mv $(distdir)/$(target).zip .
-	rm -rf $(distdir)
-
-dist-src: $(distdir)
-	cd $(distdir) && svn export $(REP)/bunjalloo
-	cd $(distdir) && svn export $(REP)/libndspp
-	tar czvf $(distdir).tar.gz $(distdir)

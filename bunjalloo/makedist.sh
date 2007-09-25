@@ -19,14 +19,22 @@ read -p "Summary? " summary
 
 revision=$(svn info | grep ^Revision | cut -d: -f2 | tr -d ' ')
 
-make dist
-$MV ${project}.zip ${project}-${release}.zip
+distdir=${project}-${release}
+
+cp $project.nds $distdir/$project.nds
+cp data/ -rvfp $distdir/
+find $distdir -name '.svn' -type d | xargs rm -rf 
+cd $distdir
+zip -r $project.zip *
+cd -
+$MV $distdir/$project.zip $distdir.zip
+rm -rf $distdir
+
 $UPLOAD -s "$summary" -p quirkysoft -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${project}-${release}.zip
 tagname=${project}_${release}_r${revision}
 $SVN cp $trunk $tags/$tagname
 
 REP=${tags/https/http}/$tagname
-distdir=${project}-${release}
 mkdir -p $distdir
 cd $distdir
 svn export ${REP}/${project}

@@ -1,5 +1,6 @@
 import os, os.path, glob, sys
 import time
+from walktree import find
 
 executableName = os.path.basename( os.getcwd())
 libndsppDir = '../libndspp'
@@ -74,7 +75,9 @@ def addObjCopyImageBuilders(env):
     return (t, source)
 
   env.Append(GRITFLAGS='-pw 16 -gB 8 -m -ft b -fh! -q')
-  gritBld = Builder(action='cd ${TARGET.dir} && grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS',
+  # chdir=1 changes to the target dir before executing.
+  gritBld = Builder(action='grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS',
+      chdir=1,
       suffix='.bin',
       src_suffix='.png',
       emitter=img_emitter)
@@ -134,6 +137,21 @@ extern "C" {
   bld = Builder(action = build_unit_test)
   env.Append(BUILDERS = {'Test' :  bld})
 
+  def build_cscope_file(target, source, env):
+    try:
+      f = open(str(target[0]), 'w')
+      [f.write('%s\n'%str(s)) for s in source]
+      return 0
+    except Exception,e:
+      return 1
+  # create cscope.out from all source files.
+  cscopeFileBld = Builder(action=build_cscope_file, suffix='.files')
+  env.Append(BUILDERS = {'CscopeFile' :  cscopeFileBld})
+  def cscope_emitter(target, source, env):
+    return ( ['cscope.out', 'cscope.po.out', 'cscope.in.out'], source)
+  cscopeBld = Builder(action='-cscope -b -k -q', suffix='.out', src_suffix='.files', emitter=cscope_emitter)
+  env.Append(BUILDERS = {'Cscope' :  cscopeBld})
+
 ## Build everything for a particular target.
 def build(buildTarget):
   """ build a particular build target """
@@ -154,9 +172,9 @@ def build(buildTarget):
   env['PLATFORM_NAME'] = buildTarget
   env['SOURCE_NAME'] = sourceDirectory
 
-  env['BWT_SOURCE'] = [ os.path.basename(filename) for filename in glob.glob('bwt/source/common/*.cpp')]
+  env['BWT_SOURCE'] = [ os.path.basename(filename) for filename in glob.glob('bwt/source/*.cpp')]
   for subdir in subdirs:
-    env['%s_SOURCE'%(subdir.upper())] = [ os.path.basename(filename) for filename in glob.glob('%s/source/*.c*'%subdir)]
+    env['%s_SOURCE'%(subdir.upper())] = [ os.path.basename(filename) for filename in glob.glob('%s/*.c*'%subdir)]
 
   # export the env to the SConscripts
   Export('env')
@@ -168,7 +186,7 @@ def build(buildTarget):
   libbwt = None
   if buildTarget != 'arm7':
     libbwt = SConscript('bwt/SConscript', build_dir='/'.join([buildDir, 'bwt']), duplicate=0)
-  objs.append(SConscript('%s/source/SConscript'%sourceDirectory, build_dir=buildDir, duplicate=0))
+  objs.append(SConscript('%s/SConscript'%sourceDirectory, build_dir=buildDir, duplicate=0))
 
   # create <builddir>/<target> file
   program = '%s/%s'%(buildDir, executableName)
@@ -188,38 +206,25 @@ def build(buildTarget):
   if (buildTarget == 'arm9'):
     env['ICON'] = 'common/data/icon.bmp'
     env['BANNER'] = '%s;Web Browser;By Richard Quirk'
+    env['DLDIFILE'] = '~/data/ez5s.dldi'
     env.NdsTool(executableName, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
+    env.DldiPatch('%s-patched'%executableName, executableName)
 
   # build the tests
   if (buildTarget == 'pc'):
     # build tests
     SConscript('tests/SConscript', build_dir='/'.join([buildDir, 'tests']), duplicate=0)
     env.Command('#/%s'%os.path.basename(str(prog[0])), prog, [Copy('$TARGET', '$SOURCE')])
+    filetypes = ['.cpp', '.c', '.h', '.inl', '.py']
+    exclude = ['/build/']
+    allFiles = [find('.', filetypes, exclude) , find('../libndspp', filetypes, exclude)]
+    env.CscopeFile('cscope', allFiles )
+    env.Cscope('cscope')
   SConscript('tests/gui-test/SConscript', build_dir='/'.join([buildDir, 'gui-test']), duplicate=0)
 
 # build steps
 [ build(buildTarget) for buildTarget in buildTargets ]
 
 cmd = defaultEnv.Command('tags', '%s.nds'%executableName, 'ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ../libndspp')
-defaultEnv.Append(TARFLAGS='--exclude=.svn -c -z')
-# build dist
-# not worth doing from scons - adds a lot of overhead :-(
-#data_dir = 'data/bunjalloo'
-#data_files = Split("""
-#    config.ini
-#    docs/copying
-#    docs/warranty
-#    fonts/sans.map
-#    fonts/sans.img
-#    fonts/sans.pal
-#    user/ckallow.lst
-#    """)
-#dist_bin_files = [ executableName+'.nds', [ '/'.join([data_dir,f]) for f in data_files]]
-
-#defaultEnv.Zip(executableName, dist_bin_files)
-
-#build dist-src
-# - this is really crap in scons cf autotools
-#defaultEnv.Tar("""%s-src.tar.gz"""%executableName , Split("""arm9 arm7 tests data SConstruct COPYING"""))
 
 # vim: set filetype=python :

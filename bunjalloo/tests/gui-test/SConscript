@@ -1,12 +1,6 @@
 Import ('env')
 import os.path
 
-# the source for each processor
-sources = {
-    'arm7': 'main.cpp',
-    'arm9': 'Main.cpp',
-    }
-
 # copy the env since we change it by adding the font path
 testEnv = env.Copy()
 testEnv.Append(CPPPATH='fonts')
@@ -20,7 +14,7 @@ programName = os.path.basename(str(Dir('.').abspath))
 Export('testEnv')
 # create the font files
 objs = SConscript('common/fonts/SConscript', build_dir='fonts', duplicate=0)
-program = testEnv.Program( '%s/%s'%(sourceDirectory, programName), [ '%s/source/%s'%(sourceDirectory, sources[sourceDirectory]) , objs])
+program = testEnv.Program( '%s/%s'%(sourceDirectory, programName), [ '%s/%s'%(sourceDirectory, 'main.cpp') , objs])
 if (buildTarget != 'pc'):
   env.SideEffect(str(program[0])+'.map', program)
   env.Elf2Arm('%s.arm'%str(program[0]),  program)
