@@ -98,7 +98,7 @@ Toolbar::Toolbar(Document & doc, ControllerI & cont, View & view):
     m_sprites.push_back(sprite);
   }
 
-  Image image("/"DATADIR"/fonts/toolbar.png");
+  Image image("/"DATADIR"/fonts/toolbar.png", true);
   if (image.isValid())
   {
     const unsigned char * data = image.data();
