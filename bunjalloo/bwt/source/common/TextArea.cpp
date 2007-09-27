@@ -424,6 +424,10 @@ void TextArea::paint(const nds::Rectangle & clip)
   {
     setCursor(m_bounds.x, m_bounds.y + skipLines*m_font->height());
     it += skipLines;
+    if (skipLines >= (int)m_document.size())
+    {
+      return;
+    }
   }
 
   for (; it != m_document.end() and (m_cursory < m_bounds.bottom()) and (m_cursory < clip.bottom()); ++it)

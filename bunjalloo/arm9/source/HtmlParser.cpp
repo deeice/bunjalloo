@@ -1346,33 +1346,12 @@ void HtmlParser::setContentModel(ContentModel newModel)
   m_details->setContentModel(newModel);
 }
 
-
-
-/*
-static void extractCharset(const string & value, string & mimeType, string & charset)
-{
-  unsigned int position(value.find(";"));
-  if (position != string::npos)
-  {
-    mimeType = value.substr(0,position);
-    position++;
-    unsigned int nextPosition(value.find(";",position));
-    nextPosition = nextPosition==string::npos?value.length():nextPosition;
-    charset = value.substr(position, (nextPosition-position+1));
-  } 
-  else {
-    mimeType = value.substr(0,value.length());
-    charset.clear();
-  }
-  stripWhitespace(mimeType);
-  stripWhitespace(charset);
-}
-*/
 void HtmlParserImpl::setRefresh(const std::string & refresh, int time)
 {
   m_refresh = refresh;
   m_refreshTime = time;
 }
+
 void HtmlParserImpl::refresh(std::string & refresh, int & time) const
 {
   refresh = m_refresh;
@@ -1395,21 +1374,7 @@ void HtmlParser::parseContentType(const std::string & value)
       setEncoding(HtmlParser::UTF8_ENCODING);
     }
   }
-  string lowerValue(value);
-  transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
-  /*
-  string charset, mimeType;
-  extractCharset(lowerValue, mimeType, charset);
-  if (charset == "charset=iso-8859-1")
-  {
-    setEncoding(HtmlParser::ISO_ENCODING);
-  }
-  if (charset == "charset=utf-8")
-  {
-    setEncoding(HtmlParser::UTF8_ENCODING);
-  }
-  */
-  bool isPlain = lowerValue.find("text/plain") != string::npos;
+  bool isPlain = value.find("text/plain") != string::npos;
   if (isPlain)
   {
     setContentModel(PLAINTEXT);
@@ -1419,9 +1384,7 @@ void HtmlParser::parseContentType(const std::string & value)
 void HtmlParser::parseRefresh(const std::string & value)
 {
   // actual refreshing implemented in view.
-  string lowerValue(value);
-  transform(lowerValue.begin(), lowerValue.end(), lowerValue.begin(), ::tolower);
-  ParameterSet refreshSet(lowerValue);
+  ParameterSet refreshSet(value);
   string refresh;
   if (refreshSet.hasParameter("url"))
   {
@@ -1446,6 +1409,7 @@ void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
   if (not httpEquiv.empty() and not content.empty())
   {
     transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);
+    transform(content.begin(), content.end(), content.begin(), ::tolower);
     if (httpEquiv == "content-type")
     {
       parseContentType(content);
