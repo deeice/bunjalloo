@@ -40,19 +40,44 @@ static bool isPng(const char *filename)
    return(!png_sig_cmp(buf, (png_size_t)0, PNG_BYTES_TO_CHECK));
 }
 
-Image::Image(const char * filename):
+Image::ImageType Image::imageType(const char * filename)
+{
+  if (isPng(filename))
+    return Image::ImagePNG;
+  return Image::ImageUNKNOWN;
+}
+
+Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_valid(false),
+  m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
   m_data(0),
   m_palette(0)
 {
-  if (not isPng(filename))
+  ImageType actualType(imageType(filename));
+  if (actualType != type)
+  {
+    // make your mind up
+    return;
+  }
+  if (type == ImageUNKNOWN)
   {
     return;
   }
-  readPng(filename);
+  readImage(filename, type);
+}
 
+Image::Image(const char * filename, bool keepPalette):
+  m_valid(false),
+  m_keepPalette(keepPalette),
+  m_width(0),
+  m_height(0),
+  m_data(0),
+  m_palette(0)
+{
+  ImageType type(imageType(filename));
+  readImage(filename, type);
 }
 
 Image::~Image()
@@ -137,20 +162,20 @@ void Image::readPng(const char * filename)
    // paletted images require this:
    if(info_ptr->color_type == PNG_COLOR_TYPE_PALETTE) 
    {
-#if 0
-     png_set_palette_to_rgb(png_ptr);
-#else
-     // png_set_palette_to_rgb(png_ptr);
-     png_colorp png_palette;
-     int palette_entries;
-     png_get_PLTE(png_ptr,info_ptr, &png_palette, &palette_entries);
-     m_paletteSize = palette_entries;
-     m_palette = (unsigned short*)malloc(sizeof(unsigned short) * palette_entries);
-     for (int i = 0; i < palette_entries; ++i)
+     if (not m_keepPalette)
+       png_set_palette_to_rgb(png_ptr);
+     else
      {
-       m_palette[i] = RGB8(png_palette[i].red, png_palette[i].green, png_palette[i].blue);
+       png_colorp png_palette;
+       int palette_entries;
+       png_get_PLTE(png_ptr,info_ptr, &png_palette, &palette_entries);
+       m_paletteSize = palette_entries;
+       m_palette = (unsigned short*)malloc(sizeof(unsigned short) * palette_entries);
+       for (int i = 0; i < palette_entries; ++i)
+       {
+         m_palette[i] = RGB8(png_palette[i].red, png_palette[i].green, png_palette[i].blue);
+       }
      }
-#endif
    }
    png_set_interlace_handling(png_ptr);
    png_read_update_info(png_ptr, info_ptr);
@@ -178,6 +203,15 @@ void Image::readPng(const char * filename)
    /* that's it */
    m_valid = true;
 }
+
+void Image::readGif(const char * filename)
+{
+}
+
+void Image::readJpeg(const char * filename)
+{
+}
+
 unsigned int Image::paletteSize() const
 {
   return m_paletteSize;
@@ -186,3 +220,22 @@ const unsigned short * Image::palette() const
 {
   return m_palette;
 }
+
+void Image::readImage(const char *filename, ImageType type)
+{
+  switch (type)
+  {
+    case ImagePNG:
+      readPng(filename);
+      break;
+    case ImageGIF:
+      readGif(filename);
+      break;
+    case ImageJPEG:
+      readJpeg(filename);
+      break;
+    case ImageUNKNOWN:
+      break;
+  }
+}
+

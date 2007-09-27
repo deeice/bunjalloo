@@ -36,7 +36,7 @@ static void EncodeTest(signed int value, char * expectedData, unsigned int expec
   unsigned char encoded[6];
   unsigned int actualUsed = UTF8::encode(value, encoded);
   CPPUNIT_ASSERT_EQUAL( expectedUsed, actualUsed );
-  for (int i = 0; i < actualUsed; ++i)
+  for (unsigned int i = 0; i < actualUsed; ++i)
   {
     unsigned char d = (unsigned char)expectedData[i];
     CPPUNIT_ASSERT_EQUAL(d, encoded[i]);

@@ -20,29 +20,82 @@
 class Image
 {
   public:
-    Image(const char * filename);
+    enum ImageType
+    {
+      ImagePNG,
+      ImageJPEG,
+      ImageGIF,
+      ImageUNKNOWN
+    };
+
+    /** Create an image from the given file name, using the given ImageType.
+     * @param filename the name of the file to open.
+     * @param type the type of the image - usually given by Mime Type, etc.
+     * @param keepPalette if the image is recognised as having palette data,
+     *   then if this flag is true the palette will be kept. Otherwise the
+     *   palette data will be lost (converted to RGB triplets vs indexed)
+     * */
+    Image(const char * filename, ImageType type, bool keepPalette=false);
+
+    /** Create an image from the given file name.
+     * @param filename the name of the file to open.
+     * @param keepPalette if the image is recognised as having palette data,
+     *   then if this flag is true the palette will be kept. Otherwise the
+     *   palette data will be lost (converted to RGB triplets vs indexed)
+     * */
+    Image(const char * filename, bool keepPalette=false);
+
+    /** Free up the data.*/
     ~Image();
 
+    /** Is this valid or not.
+     * @return true if the image is valid, false otherwise.
+     */
     bool isValid() const;
 
+    /** Get the width.
+     * @return the image width in pixels.
+     */
     unsigned int width() const;
+    
+    /** Get the height.
+     * @return the image height in pixels.
+     */
     unsigned int height() const;
+
+    /** Get the size of the palette, if this is a palettized image and the
+     * keepPalette flag was used.
+     * @return the number of colours in the palette.
+     */
     unsigned int paletteSize() const;
+    
+    /** Get a pointer to the palette data. 
+     * @return the pointer to the palette data.
+     * @see paletteSize()
+     */
     const unsigned short * palette() const;
     
 
-    // RGB data.
+    /** Get the RGB or indexed image data.
+     * @return pointer to the pixel data.
+     */
     const unsigned char * data() const;
 
   private:
+
     bool m_valid;
+    bool m_keepPalette;
     unsigned int m_width;
     unsigned int m_height;
     unsigned int m_paletteSize;
     unsigned char * m_data;
     unsigned short * m_palette;
-    
+
     void readPng(const char *filename);
+    void readGif(const char *filename);
+    void readJpeg(const char *filename);
+    void readImage(const char *filename, ImageType type);
+    static ImageType imageType(const char * filename);
 
 };
 #endif
