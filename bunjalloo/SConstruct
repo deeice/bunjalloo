@@ -71,10 +71,10 @@ def addObjCopyImageBuilders(env):
     t = []
     t.append('%s.img.bin'%(fileName))
     t.append('%s.pal.bin'%(fileName))
-    t.append('%s.map.bin'%(fileName))
+    # t.append('%s.map.bin'%(fileName))
     return (t, source)
 
-  env.Append(GRITFLAGS='-pw 16 -gB 8 -m -ft b -fh! -q')
+  env.Append(GRITFLAGS='-pw 16 -gB 8 -m! -ft b -fh! -q')
   # chdir=1 changes to the target dir before executing.
   gritBld = Builder(action='grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS',
       chdir=1,
