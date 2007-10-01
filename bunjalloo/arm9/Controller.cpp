@@ -16,15 +16,16 @@
 */
 #include "libnds.h"
 #include <vector>
+#include "Cache.h"
+#include "Config.h"
 #include "Controller.h"
 #include "Document.h"
-#include "View.h"
-#include "URI.h"
+#include "File.h"
+#include "Font.h"
 #include "HttpClient.h"
 #include "TextAreaFactory.h"
-#include "Config.h"
-#include "Font.h"
-#include "File.h"
+#include "URI.h"
+#include "View.h"
 
 using namespace std;
 
@@ -44,6 +45,7 @@ Controller::Controller()
   TextAreaFactory::setFont(new Font(m_config->font()));
   TextAreaFactory::usePaletteName(m_config->font()+".pal");
   m_view = new View(*m_document, *this);
+  m_cache = new Cache(*m_document, m_config->useCache());
 }
 
 Controller::~Controller()
@@ -68,6 +70,7 @@ const Config & Controller::config() const
 
 void Controller::handleUri(const URI & uri)
 {
+  m_document->setCacheFile("");
   switch (uri.protocol())
   {
     case URI::FILE_PROTOCOL:
@@ -190,32 +193,43 @@ void Controller::localFile(const std::string & fileName)
 
 void Controller::fetchHttp(const URI & uri)
 {
-  HttpClient client(uri.server().c_str(), uri.port(), uri);
-  client.setController(this);
-  m_stop = false;
-  while (not client.finished())
+  bool hasPage = false;
+  if (not m_cache->load(uri))
   {
-    client.handleNextState();
-    if (client.state() > HttpClient::WIFI_OFF)
+    HttpClient client(uri.server().c_str(), uri.port(), uri);
+    client.setController(this);
+    m_stop = false;
+    while (not client.finished())
     {
-      m_wifiInit = true;
+      client.handleNextState();
+      if (client.state() > HttpClient::WIFI_OFF)
+      {
+        m_wifiInit = true;
+      }
+      m_view->tick();
+      if (m_stop)
+      {
+        loadError();
+        return;
+      }
+      swiWaitForVBlank();
     }
-    m_view->tick();
-    if (m_stop)
-    {
-      loadError();
-      return;
-    }
-    swiWaitForVBlank();
+    hasPage = client.hasPage();
+  }
+  else
+  {
+    // page was cached.
+    hasPage = true;
   }
 
-  if (client.hasPage())
+  if (hasPage)
   {
     URI docUri(m_document->uri());
     if (docUri != uri)
     {
+      //m_redirects[uri.asString()] = docUri.asString();
       // redirected
-      client.disconnect();
+      //client.disconnect(); // < check that there are no regressions from this change for caching!
       swiWaitForVBlank();
       swiWaitForVBlank();
       m_document->reset();

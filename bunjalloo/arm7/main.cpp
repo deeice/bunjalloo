@@ -13,7 +13,34 @@
 
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+  This file incorporates work covered by the following copyright and  
+  permission notice:  
+
+     Copyright (C) 2005
+             Michael Noland (joat)
+             Jason Rogers (dovoto)
+             Dave Murphy (WinterMute)
+
+     This software is provided 'as-is', without any express or implied
+     warranty.  In no event will the authors be held liable for any
+     damages arising from the use of this software.
+
+     Permission is granted to anyone to use this software for any
+     purpose, including commercial applications, and to alter it and
+     redistribute it freely, subject to the following restrictions:
+
+     1.      The origin of this software must not be misrepresented; you
+             must not claim that you wrote the original software. If you use
+             this software in a product, an acknowledgment in the product
+             documentation would be appreciated but is not required.
+     2.      Altered source versions must be plainly marked as such, and
+             must not be misrepresented as being the original software.
+     3.      This notice may not be removed or altered from any source
+             distribution.
+
 */
+
 #include <nds.h>
 #include <stdlib.h>
 #include <dswifi7.h>
@@ -121,13 +148,60 @@ void WifiVblankHandler()
   Wifi_Update();
 }
 
+// Clock code is taken from libnds CVS
+void syncRTC() {
+  if (++IPC->time.rtc.seconds == 60 )
+  {
+    IPC->time.rtc.seconds = 0;
+    if (++IPC->time.rtc.minutes == 60) 
+    {
+      IPC->time.rtc.minutes  = 0;
+      if (++IPC->time.rtc.hours == 24) 
+      {
+        rtcGetTimeAndDate((uint8 *)&(IPC->time.rtc.year));
+      }
+    }
+  }
+
+}
+
+void initClockIRQ()
+{
+  REG_RCNT = 0x8100;
+  irqSet(IRQ_NETWORK, syncRTC);
+  // Reset the clock if needed
+  rtcReset();
+
+  uint8 command[4];
+  command[0] = READ_STATUS_REG2;
+  rtcTransaction(command, 1, &command[1], 1);
+
+  command[0] = WRITE_STATUS_REG2;
+  command[1] = 0x41;
+  rtcTransaction(command, 2, 0, 0);
+
+  command[0] = WRITE_INT_REG1;
+  command[1] = 0x01;
+  rtcTransaction(command, 2, 0, 0);
+
+  command[0] = WRITE_INT_REG2;
+  command[1] = 0x00;
+  command[2] = 0x21;
+  command[3] = 0x35;
+  rtcTransaction(command, 4, 0, 0);
+
+  // Read all time settings on first start
+  rtcGetTimeAndDate((uint8 *)&(IPC->time.rtc.year));
+
+}
+
 int main(int argc, char ** argv) {
 
   // must be the first thing we do...
   Wifi7 wifi;
 
   // Reset the clock if needed
-  rtcReset();
+  initClockIRQ();
 
   //enable sound
   powerON(POWER_SOUND);

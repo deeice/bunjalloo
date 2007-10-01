@@ -18,7 +18,7 @@
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
-#include <libgen.h>
+#include <dirent.h>
 
 using namespace nds;
 
@@ -116,16 +116,22 @@ void FileImplementation::close()
 File::File():m_details(new FileImplementation())
 {}
 
-void File::open(const char * name, const char * mode)
+static std::string toFat(const char * path)
 {
-  // append name to cwd to emulate FAT behaviour.
   char * dirname = get_current_dir_name();
   std::string fullpath(dirname);
   free(dirname);
-  if (name[0] != '/') {
+  if (path[0] != '/') {
     fullpath += "/";
   }
-  fullpath += name;
+  fullpath += path;
+  return fullpath;
+}
+
+void File::open(const char * name, const char * mode)
+{
+  // append name to cwd to emulate FAT behaviour.
+  std::string fullpath(toFat(name));
   m_details->open(fullpath.c_str(), mode);
 }
 
@@ -157,4 +163,69 @@ bool File::is_open()
 void File::close()
 {
   m_details->close();
+}
+
+#include <fcntl.h>
+#include <sys/types.h>
+/*
+bool nds::File::direxists(const char * path)
+{
+  // see if the file exists
+  std::string fullpath(toFat(path));
+  int fp = ::open(fullpath.c_str(), O_RDONLY|O_DIRECTORY);
+  printf("fp %d  for %s from %s\n", fp, fullpath.c_str(), path);
+  bool ex = false;
+  if (fp != -1)
+  {
+    ex = true;
+    ::close(fp);
+  }
+  return ex;
+}
+*/
+
+nds::File::FileType nds::File::exists(const char * path)
+{
+  return existsCommon(toFat(path).c_str());
+}
+
+bool nds::File::mkdir(const char * path)
+{
+  return mkdirCommon(path);
+}
+
+int File::mkdir(const char * path, unsigned int mode)
+{
+  std::string fullpath(toFat(path));
+  printf("Makeing dir %s\n", fullpath.c_str());
+  return ::mkdir(fullpath.c_str(), mode);
+}
+
+bool File::unlink(const char * path)
+{
+  printf("rm %s\n", toFat(path).c_str());
+  return ::unlink(toFat(path).c_str()) == 0;
+  //return false;
+}
+
+void nds::File::ls(const char * path, std::vector<std::string> & entries)
+{
+  if (exists(path) == F_DIR)
+  {
+    DIR * dir = ::opendir(toFat(path).c_str());
+    if (dir == NULL)
+    {
+      return;
+    }
+    struct dirent * ent;
+
+    while ( (ent = ::readdir(dir)) != 0)
+    {
+      if (strcmp( ent->d_name, ".") != 0 and strcmp(ent->d_name, "..") != 0 )
+      {
+        entries.push_back(ent->d_name);
+      }
+    }
+    ::closedir(dir);
+  }
 }

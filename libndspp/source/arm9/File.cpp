@@ -17,7 +17,9 @@
 #include "File.h"
 #include <string>
 #include <fat.h>
+#include <unistd.h>
 #include <stdio.h>
+#include <sys/dir.h>
 
 using namespace nds;
 
@@ -175,4 +177,60 @@ bool File::is_open()
 void File::close()
 {
   m_details->close();
+}
+
+/*
+bool nds::File::direxists(const char * path)
+{
+  // see if the file exists
+  DIR_ITER * dir = ::diropen(path);
+  bool ex(false);
+  if (dir != 0)
+  {
+    ex = true;
+    ::dirclose(dir);
+  }
+  return ex;
+}
+*/
+
+nds::File::FileType nds::File::exists(const char * path)
+{
+  return existsCommon(path);
+}
+bool nds::File::mkdir(const char * path)
+{
+  return mkdirCommon(path);
+}
+
+int nds::File::mkdir(const char * path, unsigned int mode)
+{
+  return ::mkdir(path, mode);
+}
+
+bool nds::File::unlink(const char * path)
+{
+  return ::unlink(path) == 0;
+}
+
+void nds::File::ls(const char * path, std::vector<std::string> & entries)
+{
+  if (exists(path) == F_DIR)
+  {
+    DIR_ITER * dir = ::diropen(path);
+    if (dir == NULL)
+    {
+      return;
+    }
+    struct stat st;
+    char filename[256];
+    while (::dirnext(dir, filename, &st) == 0)
+    {
+      if (strcmp(filename, ".") != 0 and strcmp(filename, "..") != 0 )
+      {
+        entries.push_back(filename);
+      }
+    }
+    ::dirclose(dir);
+  }
 }

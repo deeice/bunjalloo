@@ -25,6 +25,7 @@
 #include "ParameterSet.h"
 #include "UnicodeString.h"
 #include "UTF8.h"
+#include "File.h"
 
 using namespace std;
 
@@ -107,6 +108,7 @@ class HtmlParserImpl
 
     void refresh(std::string & refresh, int & time) const;
     void setRefresh(const std::string & refresh, int time);
+    void setCacheFile(const std::string & filename);
 
   private:
     static const unsigned int NBSP = 160;
@@ -139,6 +141,10 @@ class HtmlParserImpl
     int m_refreshTime;
 
     bool m_doctypeTokenIsError;
+
+    //! Name of the html file in the cache to save to.
+    string m_cacheFilename;
+
     void next();
     //! rewind one character to reconsume it.
     void rewind();
@@ -215,6 +221,12 @@ void HtmlParserImpl::initialise(const char * data, unsigned int length)
   m_lastPosition = data;
   m_end = data+length;
   m_value = 0;
+  if (not m_cacheFilename.empty())
+  {
+    nds::File f;
+    f.open(m_cacheFilename.c_str(), "a");
+    f.write(data, length);
+  }
 }
 
 
@@ -1318,6 +1330,20 @@ void HtmlParserImpl::fire()
   };
 }
 
+void HtmlParserImpl::setCacheFile(const std::string & filename)
+{
+  nds::File f;
+  if (not filename.empty())
+  {
+    f.open(filename.c_str(), "w");
+  }
+  m_cacheFilename.clear();
+  if (f.is_open())
+  {
+    m_cacheFilename = filename;
+  }
+}
+
 HtmlParser::HtmlParser():
   m_details(new HtmlParserImpl(*this))
 {
@@ -1331,6 +1357,7 @@ HtmlParser::~HtmlParser()
 void HtmlParser::feed(const char * data, unsigned int length)
 {
   m_details->initialise(data, length);
+  //printf("%s", data);
   while (m_details->position() < m_details->end()) {
     m_details->fire();
   }
@@ -1447,4 +1474,9 @@ void HtmlParser::handleEndTag(const std::string & tag)
 
 void HtmlParser::handleData(unsigned int ucodeChar)
 {
+}
+
+void HtmlParser::setCacheFile(const std::string & filename)
+{
+  m_details->setCacheFile(filename);
 }

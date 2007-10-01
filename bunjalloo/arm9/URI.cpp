@@ -15,9 +15,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "URI.h"
+#include "crc32.h"
 #include <algorithm>
 #include <vector>
 #include <functional>
+#ifdef ARM9
+#define sprintf siprintf
+#endif
 
 using namespace std;
 
@@ -338,11 +342,7 @@ UnicodeString URI::escape(const UnicodeString & input)
     unsigned int value = *it;
     if ( isEscapable(value))
     {
-#ifdef ARM9
-      siprintf(buffer, "%%%02X", value);
-#else
       sprintf(buffer, "%%%02X", value);
-#endif
       char * src = buffer;
       while (*src != 0) {
         output += *src;
@@ -384,3 +384,13 @@ std::string URI::requestHeader() const
 {
   return m_requestHeader;
 }
+
+std::string URI::crc32() const
+{
+  unsigned int crc = CalcCRC32((const unsigned char*)m_address.c_str(), m_address.length(), 0, 0);
+  char buffer[32];
+  sprintf(buffer, "%08X", crc);
+  return buffer;
+
+}
+

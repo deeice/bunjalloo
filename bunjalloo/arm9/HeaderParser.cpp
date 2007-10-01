@@ -15,15 +15,17 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <assert.h>
+#include "CookieJar.h"
+#include "File.h"
 #include "HeaderParser.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
-#include "CookieJar.h"
 #include "URI.h"
 
 using namespace std;
 static const string HTTP1("HTTP/1.");
 static const int HTTP1_LEN = HTTP1.length();
+static const unsigned char FIELD_VALUE_SEP(':');
 
 HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
   m_uri(*(new URI())),
@@ -146,6 +148,15 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   {
     m_cookieJar->addCookieHeader(m_uri, value);
   }
+
+  if (field != "transfer-encoding")
+  {
+    string text(field);
+    text += FIELD_VALUE_SEP;
+    text += value;
+    text += "\r\n";
+    addToCacheFile(text);
+  }
 }
 
 void HeaderParser::parseError()
@@ -206,13 +217,12 @@ void HeaderParser::field()
       case ' ':
         m_state = AFTER_FIELD;
         break;
-      case ':':
+      case FIELD_VALUE_SEP:
         m_state = BEFORE_VALUE;
         break;
       default:
         // parse error?
         m_state = PARSE_ERROR;
-        // printf("%s",m_position-1);
         assert(m_state != PARSE_ERROR);
         break;
     }
@@ -220,7 +230,7 @@ void HeaderParser::field()
 }
 void HeaderParser::afterField()
 {
-  if (m_value == ':') {
+  if (m_value == FIELD_VALUE_SEP) {
     m_state = BEFORE_VALUE;
   } else {
     switch (m_value) {
@@ -311,6 +321,7 @@ void HeaderParser::httpResponse()
   }
   if (response.substr(0,HTTP1_LEN) == HTTP1 and response[HTTP1_LEN+1] == ' ') {
     m_httpStatusCode = strtol(response.substr(9,3).c_str(), 0, 0);
+    addToCacheFile(response+"\n");
     m_state = BEFORE_FIELD;
   } else {
     m_state = PARSE_ERROR;
@@ -337,4 +348,23 @@ void HeaderParser::fireData()
   // once done, feed the data to the html parser.
   m_htmlParser->feed(m_position, length);
   m_position += length;
+}
+void HeaderParser::setCacheFile(const std::string & cacheFile)
+{
+  m_cacheFile = cacheFile;
+  if (not m_cacheFile.empty())
+  {
+    nds::File f;
+    f.open(cacheFile.c_str(), "w");
+  }
+}
+
+void HeaderParser::addToCacheFile(const std::string & text)
+{
+  if (not m_cacheFile.empty())
+  {
+    nds::File f;
+    f.open(m_cacheFile.c_str(), "a");
+    f.write(text.c_str());
+  }
 }

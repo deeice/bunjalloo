@@ -73,6 +73,10 @@ class HtmlParser
 
     void refresh(std::string & refresh, int & time) const;
 
+    /** Set the name of the file to cache to.
+     */
+    void setCacheFile(const std::string & filename);
+
   protected:
     enum ContentModel {
       PCDATA,

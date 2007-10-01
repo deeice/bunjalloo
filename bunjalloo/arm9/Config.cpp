@@ -130,9 +130,8 @@ void Config::handleCookies() const
 }
 
 
-Config::Config(Document & doc)://, ControllerI & controller):
+Config::Config(Document & doc):
     m_document(doc),
-    //m_controller(controller),
     m_font("font"),
     m_cookieList("ckallow.lst"),
     m_proxy(""),

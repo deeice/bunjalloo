@@ -135,6 +135,7 @@ class Document
      */
     void refresh(std::string & refresh, int & time) const;
 
+    void setCacheFile(const std::string & cacheFile);
   private:
     //std::string m_uri;
     Status m_status;

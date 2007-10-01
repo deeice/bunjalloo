@@ -27,7 +27,43 @@ namespace nds
   {
     public:
       
+      /** Get the base name of the file.
+       * @param path the file path
+       * @return the base name of the file - e.g for /path/to/file returns "file".
+       */
       static const char * base(const char * path);
+      
+      /** Get the directory of the file.
+       * @param path the file path
+       * @return the directory of the file - e.g for /path/to/file returns "/path/to", for "file" returns "."
+       */
+      static const char * dirname(const char * path);
+
+      enum FileType
+      {
+        F_REG, //!< regular file
+        F_DIR, //!< directory
+        F_NONE //!< non existant
+      };
+      /** See if a file or directory exists.
+       * @param path the file path
+       * @return the type of node if it exists, or F_NONE if it does not.
+       */
+      static FileType exists(const char * path);
+
+      /** Create a directory. Make parent directories as needed.
+       * @param path the directory path
+       * @return true if the new directory exists, false if it does not.
+       */
+      static bool mkdir(const char * path);
+
+      static bool unlink(const char * path);
+      static bool rmrf(const char * path);
+
+      // entries is a list of basename files in the directory
+      static void ls(const char * path, std::vector<std::string> & entries);
+
+
       //! Create a file object.
       File();
 
@@ -72,6 +108,9 @@ namespace nds
       FileImplementation * m_details;
       File(const File &);
       const File operator=(const File &);
+      static FileType existsCommon(const char * path);
+      static bool mkdirCommon(const char * path);
+      static int mkdir(const char * path, unsigned int mode);
   };
 }
 

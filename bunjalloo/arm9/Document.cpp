@@ -19,6 +19,7 @@
 #include "HeaderParser.h"
 #include "HtmlElement.h"
 #include "CookieJar.h"
+#include "URI.h"
 
 using namespace std;
 
@@ -209,4 +210,17 @@ std::string Document::gotoNextHistory()
 CookieJar * Document::cookieJar() const
 {
   return m_cookieJar;
+}
+
+void Document::setCacheFile(const std::string & cacheFile)
+{
+  m_htmlDocument->setCacheFile(cacheFile);
+  if (not cacheFile.empty())
+  {
+    m_headerParser->setCacheFile(cacheFile+".hdr");
+  }
+  else
+  {
+    m_headerParser->setCacheFile(cacheFile);
+  }
 }

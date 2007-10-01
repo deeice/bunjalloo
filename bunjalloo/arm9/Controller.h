@@ -21,6 +21,7 @@ class Document;
 class View;
 class Config;
 class URI;
+class Cache;
 
 #include "ControllerI.h"
 
@@ -59,6 +60,7 @@ class Controller : public ControllerI
     Document * m_document;
     View * m_view;
     Config * m_config;
+    Cache * m_cache;
     bool m_wifiInit;
     bool m_stop;
 
@@ -69,6 +71,5 @@ class Controller : public ControllerI
     void loadError();
     // helper to avoid code dupe
     void handleUri(const URI & uri);
-
 };
 #endif

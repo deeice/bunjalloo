@@ -113,6 +113,11 @@ class URI
      */
     bool operator!=(const URI & other);
 
+    /** Get the CRC for the address.
+     * @return the 32 bit CRC value for the address as a string
+     */
+    std::string crc32() const;
+
   private:
     std::string m_method;
     std::string m_protocol;

@@ -75,6 +75,8 @@ class HeaderParser
 
     void setUri(const std::string & uri);
 
+    void setCacheFile(const std::string & cacheFile);
+
   private:
     enum HeaderState
     {
@@ -109,6 +111,8 @@ class HeaderParser
     HtmlParser* m_htmlParser;
     CookieJar * m_cookieJar;
 
+    std::string m_cacheFile;
+
     void parseError();
     void handleHeader(const std::string & field, const std::string & value);
     void rewind();
@@ -124,6 +128,7 @@ class HeaderParser
     void chunkLine();
     void fireData();
 
+    void addToCacheFile(const std::string & text);
 };
 
 #endif
