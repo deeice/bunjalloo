@@ -208,7 +208,14 @@ void PSImpl::cleanup()
   if ( not m_paramName.empty() ) {
     if (m_value != 0)
     {
-      m_paramValue += m_value;
+      if (m_state == IN_NAME)
+      {
+        inName();
+      }
+      else
+      {
+        m_paramValue += m_value;
+      }
     }
     addCurrentParam();
   }

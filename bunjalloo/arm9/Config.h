@@ -70,6 +70,8 @@ class Config
      */
     void postConfiguration(const std::string & encodedString);
 
+    bool useCache() const;
+
   private:
     static const std::string s_configFile;
     Document & m_document;
@@ -78,6 +80,7 @@ class Config
     std::string m_proxy;
     int m_maxConnect;
     int m_toolbarTime;
+    bool m_useCache;
 
     void configPathMember(const std::string & value, std::string & member);
     void handleCookies() const;

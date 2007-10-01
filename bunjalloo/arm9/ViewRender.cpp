@@ -305,7 +305,7 @@ void ViewRender::render()
   assert(root->isa(HtmlConstants::HTML_TAG));
   assert(root->hasChildren());
   const HtmlElement * body = root->lastChild();
-  setBgColor(body);
+  //setBgColor(body);
   if (body->hasChildren())
   {
     walkTree(body);

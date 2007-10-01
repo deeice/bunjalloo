@@ -1,5 +1,4 @@
 import os, os.path, glob, sys
-import time
 from walktree import find
 
 executableName = os.path.basename( os.getcwd())
@@ -39,7 +38,7 @@ def createEnv(buildTarget):
 
   env.Append( LIBPATH=['#/%s/lib'%libndsppDir])
   env.Prepend( LIBS=['ndspp-%s'%buildTarget])
-  env.Prepend( LIBS=['png','z'])
+  env.Prepend( LIBS=['png','z','gif'])
   addObjCopyImageBuilders(env)
   return env
 
@@ -51,7 +50,6 @@ def addProjectDirs(env, buildTarget):
   env.Prepend(LIBPATH=['#/build/%s/bwt/lib/'%buildTarget])
   env.Prepend(LIBS=['bwt'])
   env.Append( CPPDEFINES=[('DATADIR','\\"data/bunjalloo\\"')])
-  env.Append(CPPDEFINES=[ ('DATESTRING','\\"%d%02d%02d\\"'%tuple(time.localtime()[0:3]))])
   pass
 
 ## Add the project specific builders.
@@ -220,7 +218,9 @@ def build(buildTarget):
     allFiles = [find('.', filetypes, exclude) , find('../libndspp', filetypes, exclude)]
     env.CscopeFile('cscope', allFiles )
     env.Cscope('cscope')
-  SConscript('tests/gui-test/SConscript', build_dir='/'.join([buildDir, 'gui-test']), duplicate=0)
+  if (buildTarget != 'arm7'):
+    SConscript('tests/gui-test/SConscript', build_dir='/'.join([buildDir, 'gui-test']), duplicate=0)
+    SConscript('tests/images/SConscript', build_dir='/'.join([buildDir, 'images']), duplicate=0)
 
 # build steps
 [ build(buildTarget) for buildTarget in buildTargets ]

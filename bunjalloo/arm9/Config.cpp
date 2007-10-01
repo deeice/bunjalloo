@@ -30,6 +30,7 @@ static const char FONT_STR[] = "font";
 static const char COOKIE_STR[] = "cookiefile";
 static const char MAX_CONNECT[] = "timeout";
 static const char TOOLBAR_TIME[] = "toolbar";
+static const char USECACHE[] = "usecache";
 using namespace std;
 
 std::string Config::font() const
@@ -95,6 +96,14 @@ void Config::parseLine(ParameterSet & set)
     set.parameter(TOOLBAR_TIME, value);
     m_toolbarTime = strtoul(value.c_str(), 0, 0);
   }
+
+  if (set.hasParameter(USECACHE))
+  {
+    string value;
+    set.parameter(USECACHE, value);
+    m_useCache = strtoul(value.c_str(), 0, 0) != 0;
+  }
+
 }
 
 void Config::handleCookies() const
@@ -126,7 +135,8 @@ Config::Config(Document & doc)://, ControllerI & controller):
     //m_controller(controller),
     m_font("font"),
     m_cookieList("ckallow.lst"),
-    m_proxy("")
+    m_proxy(""),
+    m_useCache(false)
 {
   reload();
 }
@@ -175,4 +185,9 @@ unsigned int Config::maxConnections() const
 unsigned int Config::toolbarTimer() const
 {
   return m_toolbarTime;
+}
+
+bool Config::useCache() const
+{
+  return m_useCache;
 }

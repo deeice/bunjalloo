@@ -34,7 +34,7 @@ class Image
      * @param keepPalette if the image is recognised as having palette data,
      *   then if this flag is true the palette will be kept. Otherwise the
      *   palette data will be lost (converted to RGB triplets vs indexed)
-     * */
+     */
     Image(const char * filename, ImageType type, bool keepPalette=false);
 
     /** Create an image from the given file name.
@@ -42,7 +42,7 @@ class Image
      * @param keepPalette if the image is recognised as having palette data,
      *   then if this flag is true the palette will be kept. Otherwise the
      *   palette data will be lost (converted to RGB triplets vs indexed)
-     * */
+     */
     Image(const char * filename, bool keepPalette=false);
 
     /** Free up the data.*/

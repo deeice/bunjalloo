@@ -4,6 +4,7 @@ Import('testEnv')
 fontName = 'vera'
 extensions = ['map', 'pal', 'img']
 files = [ '%s.%s'%(fontName, ext) for ext in extensions]
+files.append('test.map')
 
 # convert png to a .h file
 testEnv.Png2h('%s.png'%fontName)

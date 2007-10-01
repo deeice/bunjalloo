@@ -1374,7 +1374,9 @@ void HtmlParser::parseContentType(const std::string & value)
       setEncoding(HtmlParser::UTF8_ENCODING);
     }
   }
-  bool isPlain = value.find("text/plain") != string::npos;
+
+  // mime type is set to a parameter name...
+  bool isPlain = paramSet.hasParameter("text/plain");
   if (isPlain)
   {
     setContentModel(PLAINTEXT);

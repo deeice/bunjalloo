@@ -18,6 +18,7 @@
 #include "Image.h"
 #include "File.h"
 #include "png.h"
+#include "gif_lib.h"
 
 static const int PNG_BYTES_TO_CHECK = 8;
 
@@ -40,10 +41,28 @@ static bool isPng(const char *filename)
    return(!png_sig_cmp(buf, (png_size_t)0, PNG_BYTES_TO_CHECK));
 }
 
+static bool isGif(const char *filename)
+{
+   char buf[GIF_STAMP_LEN+1];
+
+   nds::File f;
+   f.open(filename, "rb");
+   if (not f.is_open())
+      return 0;
+
+   /* Read in some of the signature bytes */
+   if (f.read(buf, GIF_STAMP_LEN) != GIF_STAMP_LEN)
+      return 0;
+
+   buf[GIF_STAMP_LEN] = 0;
+   /* Compare the first 3 bytes of the signature.  Return true if they match */
+   return (strncmp(GIF_STAMP, buf, GIF_VERSION_POS) == 0);
+}
+
 Image::ImageType Image::imageType(const char * filename)
 {
-  if (isPng(filename))
-    return Image::ImagePNG;
+  if (isPng(filename)) return Image::ImagePNG;
+  if (isGif(filename)) return Image::ImageGIF;
   return Image::ImageUNKNOWN;
 }
 
@@ -204,8 +223,151 @@ void Image::readPng(const char * filename)
    m_valid = true;
 }
 
+/** RAII wrapper around the GifFileType. */
+class GifClass
+{
+  public:
+    inline GifClass(const char * filename):m_buffer(0)
+    {
+      m_gifFile = DGifOpenFileName(filename);
+    }
+
+    inline ~GifClass()
+    {
+      if (m_gifFile)
+        DGifCloseFile(m_gifFile);
+      delete m_buffer;
+    }
+
+    // hackily throw in the screen buffer pointer too...
+    inline void setScreenBuffer(unsigned char * buf)
+    {
+      m_buffer = buf;
+    }
+
+    inline operator GifFileType *()
+    {
+      return m_gifFile;
+    }
+
+    inline GifFileType * operator ->()
+    {
+      return m_gifFile;
+    }
+
+  private:
+    GifFileType * m_gifFile;
+    unsigned char * m_buffer;
+};
+
+static const int InterlacedOffset[] = { 0, 4, 2, 1 };
+static const int InterlacedJumps[] = { 8, 8, 4, 2 };
+
 void Image::readGif(const char * filename)
 {
+  m_valid = false;
+  GifClass GifFile(filename);
+  if (GifFile == 0)
+  {
+    return;
+  }
+  m_width = GifFile->SWidth;
+  m_height = GifFile->SHeight;
+
+  // this code is adapted from giflib's gif2rgb.c utility program.
+  // ScreenBuffer holds the index into palette values.
+  // FIXME: this is not very good yet - if the image is too big, what then?
+  // also, it allocates 4 * the image width*height
+  unsigned char * ScreenBuffer = (unsigned char*)malloc( m_height * m_width );
+  if (ScreenBuffer == 0) {
+    return;
+  }
+  GifFile.setScreenBuffer(ScreenBuffer);
+
+  for (int i = 0; i < GifFile->SWidth*GifFile->SHeight; i++)
+  {
+    ScreenBuffer[i] = GifFile->SBackGroundColor;
+  }
+
+  GifRecordType RecordType;
+  do {
+    GifByteType *Extension;
+    int Row, Col, Width, Height, ExtCode;
+    if (DGifGetRecordType(GifFile, &RecordType) == GIF_ERROR) {
+      return;
+    }
+    switch (RecordType) {
+      case IMAGE_DESC_RECORD_TYPE:
+        if (DGifGetImageDesc(GifFile) == GIF_ERROR) {
+          return;
+        }
+        Row = GifFile->Image.Top; /* Image Position relative to Screen. */
+        Col = GifFile->Image.Left;
+        Width = GifFile->Image.Width;
+        Height = GifFile->Image.Height;
+
+        if ((GifFile->Image.Left + GifFile->Image.Width) > GifFile->SWidth 
+            or (GifFile->Image.Top + GifFile->Image.Height) > GifFile->SHeight)
+        {
+          return;
+        }
+        if (GifFile->Image.Interlace) {
+          /* Need to perform 4 passes on the images: */
+          for (int i = 0; i < 4; i++)
+            for (int j = Row + InterlacedOffset[i]; j < Row + Height;
+                j += InterlacedJumps[i])
+            {
+              if (DGifGetLine(GifFile, &ScreenBuffer[j*m_width +  Col],
+                    Width) == GIF_ERROR)
+              {
+                return;
+              }
+            }
+        }
+        else {
+          for (int i = 0; i < Height; i++, Row++) {
+            if (DGifGetLine(GifFile, &ScreenBuffer[ Row*m_width+Col], Width) == GIF_ERROR) 
+            {
+              return;
+            }
+          }
+        }
+        break;
+      case EXTENSION_RECORD_TYPE:
+        /* Skip any extension blocks in file: */
+        if (DGifGetExtension(GifFile, &ExtCode, &Extension) == GIF_ERROR) {
+          return;
+        }
+        while (Extension != NULL) {
+          if (DGifGetExtensionNext(GifFile, &Extension) == GIF_ERROR) {
+            return;
+          }
+        }
+        break;
+      case TERMINATE_RECORD_TYPE:
+        break;
+      default:		    /* Should be traps by DGifGetRecordType. */
+        break;
+    }
+  }
+  while (RecordType != TERMINATE_RECORD_TYPE);
+
+  // map ScreenBuffer to m_data
+  ColorMapObject * ColorMap = (GifFile->Image.ColorMap ? GifFile->Image.ColorMap : GifFile->SColorMap);
+  m_data = (unsigned char * ) malloc(3*m_width*m_height);
+  unsigned char * dest = m_data;
+  for (unsigned int i = 0; i < m_height; i++)
+  {
+    unsigned char * GifRow = &ScreenBuffer[i*m_width];
+    for (unsigned int j = 0; j < m_width; j++)
+    {
+      GifColorType * ColorMapEntry = &ColorMap->Colors[GifRow[j]];
+      *dest++ = ColorMapEntry->Red;
+      *dest++ = ColorMapEntry->Green;
+      *dest++ = ColorMapEntry->Blue;
+    }
+  }
+  m_valid = true;
 }
 
 void Image::readJpeg(const char * filename)
