@@ -30,7 +30,7 @@
 using namespace std;
 const int SDLhandler::WIDTH(32*8);
 const int SDLhandler::HEIGHT(2*24*8);
-SDL_Rect SDLhandler::GAP = { 0, 192, SDLhandler::WIDTH, 16};
+SDL_Rect SDLhandler::GAP = { 0, 192, SDLhandler::WIDTH, 0};
 
 SDLhandler::SDLhandler():
     m_screen(0),

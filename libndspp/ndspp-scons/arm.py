@@ -41,11 +41,14 @@ def addBinBuilder(env):
     banner = ''
     if env.has_key('BANNER'):
       banner = env['BANNER']
-    if env.has_key('ICON'):
-      return """ndstool -c %s -7 %s -9 %s -b %s "%s" \
-	  > /dev/null """%(target[0], source[0], source[1], env['ICON'], banner)
+    if (len(source)>=2):
+      if env.has_key('ICON'):
+        return """ndstool -c %s -7 %s -9 %s -b %s "%s" \
+            > /dev/null """%(target[0], source[0], source[1], env['ICON'], banner)
+      else:
+        return """ndstool -c %s -7 %s -9 %s > /dev/null """%(target[0], source[0], source[1], source[2])
     else:
-      return """ndstool -c %s -7 %s -9 %s > /dev/null """%(target[0], source[0], source[1], source[2])
+        return """ndstool -c %s -9 %s > /dev/null """%(target[0], source[0])
   bld = Builder(generator=generate_nds, suffix='.nds')
   env.Append( BUILDERS = { 'NdsTool': bld } )
 
