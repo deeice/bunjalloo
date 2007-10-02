@@ -436,18 +436,3 @@ void HeaderParser::addToCacheFile(const std::string & text)
     f.write(text.c_str());
   }
 }
-
-#if 0
-void processZip()
-{
-  /* reset sliding window if necessary */
-  if (m_stream->avail_out == 0) {
-    m_stream->avail_out = WINSIZE;
-    m_stream->next_out = s_window;
-  }
-
-  /* inflate until out of input, output, or at end of block --
-     update the total input and output counters */
-  int ret = inflate(m_stream, Z_NO_FLUSH);
-}
-#endif
