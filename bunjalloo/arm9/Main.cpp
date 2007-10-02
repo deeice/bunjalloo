@@ -25,8 +25,21 @@ int main(int argc, char * argv[])
 {
   irqInit();
   irqSet(IRQ_VBLANK,0);
+  {
+    nds::File f;
+    f.open("bunjalloo.log", "w");
+    f.write("Start\n");
+  }
   Controller * c = new Controller;
+  {
+    nds::File f;
+    f.open("bunjalloo.log", "a");
+    f.write("After Controller\n");
+  }
   if (argc > 1) {
+    nds::File f;
+    f.open("bunjalloo.log", "a");
+    f.write("Argc > 1!\n");
     std::string fileName(argv[1]);
     File check;
     check.open(fileName.c_str());
@@ -42,7 +55,17 @@ int main(int argc, char * argv[])
   }
   else
   {
+    {
+      nds::File f;
+      f.open("bunjalloo.log", "a");
+      f.write("showLicence..\n");
+    }
     c->showLicence();
+  }
+  {
+    nds::File f;
+    f.open("bunjalloo.log", "a");
+    f.write("Start Main Loop\n");
   }
   c->mainLoop();
 }

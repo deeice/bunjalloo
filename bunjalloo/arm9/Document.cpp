@@ -119,16 +119,37 @@ unsigned int Document::percentLoaded() const
     return 0;
 }
 
+#include "File.h"
 void Document::appendLocalData(const char * data, int size)
 {
+  {
+    nds::File f;
+    f.open("bunjalloo.log", "a");
+    f.write("About to call m_headerParser->setDataState()\n");
+  }
   m_headerParser->setDataState();
+  {
+    nds::File f;
+    f.open("bunjalloo.log", "a");
+    f.write("About to appendData\n");
+  }
   appendData(data, size);
+  {
+    nds::File f;
+    f.open("bunjalloo.log", "a");
+    f.write("After appendData\n");
+  }
 }
 
 void Document::appendData(const char * data, int size)
 {
   m_status = INPROGRESS;
   if (size) {
+    {
+      nds::File f;
+      f.open("bunjalloo.log", "a");
+      f.write("size != 0\n");
+    }
     m_headerParser->feed(data,size);
     unsigned int dataExpected(m_headerParser->expected());
     unsigned int dataGot(m_htmlDocument->dataGot());
@@ -140,7 +161,13 @@ void Document::appendData(const char * data, int size)
     {
       *m_historyPosition = m_headerParser->redirect();
     }
-  } 
+  }
+  else
+  {
+    nds::File f;
+    f.open("bunjalloo.log", "a");
+    f.write("size is 0\n");
+  }
   notifyAll();
 }
 

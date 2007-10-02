@@ -203,9 +203,6 @@ int main(int argc, char ** argv) {
   // Reset the clock if needed
   initClockIRQ();
 
-  //enable sound
-  powerON(POWER_SOUND);
-  SOUND_CR = SOUND_ENABLE | SOUND_VOL(0x7F);
   IPC->soundData = 0;
 
   irqInit();

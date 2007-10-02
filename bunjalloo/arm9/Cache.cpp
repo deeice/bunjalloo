@@ -7,18 +7,34 @@ const char * Cache::CACHE_DIR("/"DATADIR"/cache");
 
 Cache::Cache(Document & document, bool useCache):m_document(document),m_useCache(useCache)
 {
+  nds::File f;
+  f.open("bunjalloo.log", "a");
+  f.write("useCache?");
   if (m_useCache)
   {
+    f.write("yes\n");
+    f.close();
     if ( nds::File::exists(CACHE_DIR) != nds::File::F_NONE)
     {
+      f.open("bunjalloo.log", "a");
+      f.write("Remove cache\n");
+      f.close();
       bool result = nds::File::rmrf(CACHE_DIR);
       printf("Cleared cache... %s\n", result?"OK":"NOK");
     }
+    f.open("bunjalloo.log", "a");
+    f.write("Create cache dir\n");
+    f.close();
     if (nds::File::exists(CACHE_DIR) == nds::File::F_NONE and not nds::File::mkdir(CACHE_DIR) )
     {
       // didn't exist, nor can we make it..
       m_useCache = false;
     }
+    f.open("bunjalloo.log", "a");
+    f.write("Done!\n");
+    f.close();
+  } else {
+    f.write("no\n");
   }
 }
 

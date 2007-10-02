@@ -32,7 +32,7 @@ static const char * const CONFIG_STR = "config";
 static const char * const GET_STR = "GET";
 
 URI::URI()
-  : m_method(GET_STR), m_protocol(""),m_address(""),m_requestHeader("")
+  : m_method(GET_STR), m_protocol(""),m_address(""),m_requestHeader(""),m_fix(true)
 {
 }
 
