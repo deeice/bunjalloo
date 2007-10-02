@@ -23,12 +23,10 @@ class Config;
 class URI;
 class Cache;
 
-#include "ControllerI.h"
-
 class HttpClient;
 /** Controller maps user actions to model updates. For example, responds to setting the URI.
  */
-class Controller : public ControllerI
+class Controller
 {
   friend class HttpClient;
   public:
@@ -40,13 +38,16 @@ class Controller : public ControllerI
     /** Handle the user request for setting a URI.
      * @param uri the URI to use.
      */
-    virtual void doUri(const URI & uri);
-    
-    virtual void previous();
-    virtual void next();
-    virtual void stop();
+    void doUri(const URI & uri);
 
-    virtual const Config & config() const;
+    /** Refresh the page - reload from http not from cache.  */
+    void reload();
+    
+    void previous();
+    void next();
+    void stop();
+
+    const Config & config() const;
 
     /** Show the software licence.*/
     void showLicence();
@@ -54,7 +55,7 @@ class Controller : public ControllerI
     /** Loops forever.*/
     void mainLoop();
 
-    virtual bool wifiInitialised() const;
+    bool wifiInitialised() const;
 
   private:
     Document * m_document;

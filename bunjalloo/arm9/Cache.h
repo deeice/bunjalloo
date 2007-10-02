@@ -25,6 +25,11 @@ class Cache
      */
     bool load(const URI & uri);
 
+    /** Remove the given uri form the cache.
+     * @param uri the uri to clean.
+     */
+    void clean(const URI & uri);
+
   private:
     Document & m_document;
     bool m_useCache;

@@ -18,7 +18,7 @@
 #include "HtmlElement.h"
 #include "HtmlConstants.h"
 #include "HtmlInputElement.h"
-#include "ControllerI.h"
+#include "Controller.h"
 #include "URI.h"
 
 const int FormControl::MAX_SIZE(120);
@@ -83,7 +83,7 @@ static void appendFormElements(ElementList & list, const HtmlElement * formEleme
   }
 }
 
-void FormControl::input(ControllerI & controller, URI & uri)
+void FormControl::input(Controller & controller, URI & uri)
 {
   // need to walk up m_element until we find the form father or the html element.
   HtmlElement * currentNode = m_element->parent();

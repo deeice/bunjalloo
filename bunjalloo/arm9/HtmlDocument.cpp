@@ -113,6 +113,7 @@ void HtmlDocument::reset()
 
   m_dataGot = 0; 
   m_state = INITIAL;
+  m_mimeType = TEXT_PLAIN;
 }
 
 void HtmlDocument::handleStartEndTag(const std::string & tag, const AttributeVector & attrs)

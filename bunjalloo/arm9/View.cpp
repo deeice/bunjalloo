@@ -19,7 +19,7 @@
 #include "libnds.h"
 #include "Canvas.h"
 #include "Config.h"
-#include "ControllerI.h"
+#include "Controller.h"
 #include "Document.h"
 #include "FormControl.h"
 #include "Keyboard.h"
@@ -34,7 +34,7 @@
 using namespace std;
 const static int STEP(1);
 
-View::View(Document & doc, ControllerI & c):
+View::View(Document & doc, Controller & c):
   m_document(doc), 
   m_controller(c),
   m_scrollPane(new ScrollPane),

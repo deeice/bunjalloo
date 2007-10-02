@@ -555,3 +555,4 @@ void DocumentTest::testUnicode2String()
   string expected = "%C2%A9";
   CPPUNIT_ASSERT_EQUAL(expected, c);
 }
+

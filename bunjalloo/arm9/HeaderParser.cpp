@@ -21,17 +21,22 @@
 #include "HtmlElement.h"
 #include "HtmlParser.h"
 #include "URI.h"
+#include <zlib.h>
 
 using namespace std;
 static const string HTTP1("HTTP/1.");
 static const int HTTP1_LEN = HTTP1.length();
 static const unsigned char FIELD_VALUE_SEP(':');
+static const int ZWINDOW_SIZE(47);
+static const unsigned int WINSIZE(16384);
 
 HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
   m_uri(*(new URI())),
+  m_gzip(false),
   m_expected(0),
   m_htmlParser(htmlParser),
-  m_cookieJar(cookieJar)
+  m_cookieJar(cookieJar),
+  m_stream(new z_stream_s)
 {
   reset();
 }
@@ -40,9 +45,14 @@ HeaderParser::~HeaderParser()
 
 void HeaderParser::reset()
 {
+  if (m_gzip)
+  {
+    inflateEnd(m_stream);
+  }
   m_state = HTTP_RESPONSE;
   m_redirect = "";
   m_chunked = false;
+  m_gzip = false;
   m_chunkLength = 0;
   m_chunkLengthString = "";
   m_htmlParser->setToStart();
@@ -148,7 +158,25 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   {
     m_cookieJar->addCookieHeader(m_uri, value);
   }
+  else if (field == "content-encoding")
+  {
+    if (value == "gzip")
+    {
+      // oh no!
+      m_gzip = true;
+      m_stream->zalloc = Z_NULL;
+      m_stream->zfree = Z_NULL;
+      m_stream->opaque = Z_NULL;
+      m_stream->avail_in = 0;
+      m_stream->avail_out = 0;
+      m_stream->next_in = Z_NULL;
+      /* automatic zlib or gzip decoding */
+      inflateInit2(m_stream, ZWINDOW_SIZE);
+    }
+  }
 
+  // Store headers in cache. Transfer-encoding isn't stored as it is no longer
+  // valid once the data is in the cache.
   if (field != "transfer-encoding")
   {
     string text(field);
@@ -345,8 +373,48 @@ void HeaderParser::fireData()
       m_chunkLength -= length;
     }
   }
-  // once done, feed the data to the html parser.
-  m_htmlParser->feed(m_position, length);
+  if (m_gzip)
+  {
+    // decode.
+    Bytef * in = new Bytef[length];
+    memcpy(in, m_position, length);
+    m_stream->avail_out = 0;
+    m_stream->avail_in = length;
+    m_stream->next_in = in;
+    Bytef window[WINSIZE];
+    do {
+      if (m_stream->avail_out == 0) {
+        m_stream->avail_out = WINSIZE;
+        m_stream->next_out = window;
+      }
+
+      /* inflate until out of input, output, or at end of block --
+         update the total input and output counters */
+      int ret = inflate(m_stream, Z_BLOCK);
+      int decoded = WINSIZE - m_stream->avail_out;
+      if (ret == Z_STREAM_END)
+      {
+        break;
+      }
+      if (m_htmlParser->mimeType() == HtmlParser::TEXT_HTML
+          or m_htmlParser->mimeType() == HtmlParser::TEXT_PLAIN)
+      {
+        // once done, feed the data to the html parser.
+        printf("decoded %d bytes\n", decoded);
+        m_htmlParser->feed((const char*)window, decoded);
+      }
+    } while (m_stream->avail_in != 0);
+    delete [] in;
+  }
+  else
+  {
+    if (m_htmlParser->mimeType() == HtmlParser::TEXT_HTML
+        or m_htmlParser->mimeType() == HtmlParser::TEXT_PLAIN)
+    {
+      // once done, feed the data to the html parser.
+      m_htmlParser->feed(m_position, length);
+    }
+  }
   m_position += length;
 }
 void HeaderParser::setCacheFile(const std::string & cacheFile)
@@ -368,3 +436,18 @@ void HeaderParser::addToCacheFile(const std::string & text)
     f.write(text.c_str());
   }
 }
+
+#if 0
+void processZip()
+{
+  /* reset sliding window if necessary */
+  if (m_stream->avail_out == 0) {
+    m_stream->avail_out = WINSIZE;
+    m_stream->next_out = s_window;
+  }
+
+  /* inflate until out of input, output, or at end of block --
+     update the total input and output counters */
+  int ret = inflate(m_stream, Z_NO_FLUSH);
+}
+#endif

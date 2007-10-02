@@ -20,7 +20,7 @@
 #include <string>
 #include "Button.h"
 class HtmlElement;
-class ControllerI;
+class Controller;
 class URI;
 
 class FormControl : public Button
@@ -33,7 +33,7 @@ class FormControl : public Button
     /** input a touch value after clicking.
      * @param str the input touch.
      */
-    virtual void input(ControllerI & controller, URI & uri);
+    virtual void input(Controller & controller, URI & uri);
 
   protected:
     const HtmlElement * m_element;

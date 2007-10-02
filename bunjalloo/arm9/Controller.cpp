@@ -107,6 +107,12 @@ void Controller::doUri(const URI & uri)
   }
 }
 
+void Controller::reload()
+{
+  m_cache->clean(m_document->uri());
+  doUri(m_document->uri());
+}
+
 void Controller::previous() 
 {
   string ph = m_document->gotoPreviousHistory();

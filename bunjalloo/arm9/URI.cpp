@@ -15,7 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "URI.h"
-#include "crc32.h"
+#include <zlib.h>
 #include <algorithm>
 #include <vector>
 #include <functional>
@@ -387,9 +387,10 @@ std::string URI::requestHeader() const
 
 std::string URI::crc32() const
 {
-  unsigned int crc = CalcCRC32((const unsigned char*)m_address.c_str(), m_address.length(), 0, 0);
+  uLong crc = ::crc32(0, Z_NULL, 0);
+  crc = ::crc32(crc, (const Bytef*)m_address.c_str(), m_address.length());
   char buffer[32];
-  sprintf(buffer, "%08X", crc);
+  sprintf(buffer, "%08X", (unsigned int)crc);
   return buffer;
 
 }

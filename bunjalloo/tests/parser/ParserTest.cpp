@@ -158,3 +158,13 @@ void ParserTest::testNumbers()
   int size = m_htmlParser->m_tags.size();
   CPPUNIT_ASSERT_EQUAL( 1 , size);
 }
+
+void ParserTest::testGzip()
+{
+  readFile("gzip.txt");
+  // feed data in steps, to make sure we are initialising things correctly.
+  m_headerParser->feed(m_data, m_length-20);
+  m_headerParser->feed(m_data+m_length-20, 20);
+  int size = m_htmlParser->m_tags.size();
+  CPPUNIT_ASSERT_EQUAL( 4 , size);
+}

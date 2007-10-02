@@ -122,7 +122,10 @@ void HttpClient::get(const URI & uri)
     s += "Host:" + uri.server()+"\r\n";
     s += "Connection: close\r\n";
     s += "Accept-charset: ISO-8859-1,UTF-8\r\n";
-    s += "Accept: text/html\r\n";
+    //If the Accept-Encoding field-value is empty, then only the "identity" encoding is acceptable.
+    // -- RFC2616-sec14
+    s += "Accept-encoding: gzip,deflate\r\n";
+    //s += "Accept: text/html\r\n";
     s += "User-Agent: Bunjalloo (";
     s += nds::System::uname();
     s += ";r";

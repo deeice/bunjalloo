@@ -15,7 +15,6 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Config.h"
-#include "ControllerI.h"
 #include "CookieJar.h"
 #include "Document.h"
 #include "File.h"

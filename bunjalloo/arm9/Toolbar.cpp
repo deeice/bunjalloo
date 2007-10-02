@@ -17,7 +17,7 @@
 #include <algorithm>
 #include <functional>
 #include "libnds.h"
-#include "ControllerI.h"
+#include "Controller.h"
 #include "Config.h"
 #include "Document.h"
 #include "URI.h"
@@ -78,7 +78,7 @@ enum ToolbarSpriteID
 
 };
 
-Toolbar::Toolbar(Document & doc, ControllerI & cont, View & view):
+Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
   m_visible(false),
   m_document(doc),
   m_controller(cont),
@@ -233,7 +233,7 @@ void Toolbar::handlePress(int i)
       m_controller.stop();
       break;
     case SPRITE_REFRESH:
-      m_controller.doUri(m_document.uri());
+      m_controller.reload();
       break;
     case SPRITE_BOOKMARK:
       break;

@@ -30,7 +30,7 @@ class Config
      * @param doc the document model of the configuration file.
      * @param controller class that handles the loading, etc, of the config files.
      */
-    Config(Document & doc);//, ControllerI & controller);
+    Config(Document & doc);
 
     /** End of life time. */
     ~Config();

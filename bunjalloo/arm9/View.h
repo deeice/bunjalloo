@@ -22,7 +22,7 @@
 #include "LinkListener.h"
 
 class Document;
-class ControllerI;
+class Controller;
 
 class FormControl;
 class Keyboard;
@@ -40,7 +40,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
      * @param doc the model.
      * @param controller the controller.
      */
-    View(Document & doc, ControllerI & controller);
+    View(Document & doc, Controller & controller);
 
     ~View();
 
@@ -71,7 +71,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     };
 
     Document & m_document;
-    ControllerI & m_controller;
+    Controller & m_controller;
     ScrollPane * m_scrollPane;
     Keyboard * m_keyboard;
     ViewRender * m_renderer;

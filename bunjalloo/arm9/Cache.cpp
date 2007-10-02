@@ -87,3 +87,13 @@ bool Cache::load(const URI & uri)
   }
   return false;
 }
+
+void Cache::clean(const URI & uri)
+{
+  if (m_useCache)
+  {
+    std::string cacheFileName(uri2CacheFile(uri));
+    nds::File::unlink(cacheFileName.c_str());
+    nds::File::unlink((cacheFileName+".hdr").c_str());
+  }
+}

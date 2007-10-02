@@ -136,6 +136,7 @@ void EditableTextArea::deleteChar()
 
 void EditableTextArea::recalculateCaret()
 {
+
   UnicodeString & line(m_document[m_caretLine]);
   m_caretPixelX = -1;
   int oldLength = line.length();
@@ -145,9 +146,7 @@ void EditableTextArea::recalculateCaret()
     oldPrevLength = m_document[m_caretLine-1].length();
   }
   // redo the text layout
-  //m_layingOut = true;
   layoutText();
-  //m_layingOut = false;
   if (m_appendedNewLine)
   {
     m_caretChar = 0;
@@ -155,32 +154,42 @@ void EditableTextArea::recalculateCaret()
     m_appendedNewLine = false;
     return;
   }
-  int newLength = m_document[m_caretLine].length();
-  // work out if the caret should overflow
-  // also, what if it "underflows"?
-  if (newLength < oldLength)
+  if (m_caretLine == (int)m_document.size())
   {
-    // word has wrapped to next line. To calculate where we are, work out the
-    // difference from previous to now
-    // Also, if we add a space to separate a word, the word may go to the *previous* line.
-    int diff = oldLength - newLength;
-    if (m_caretChar >= newLength)
+    m_caretLine--;
+    m_caretChar = m_document[m_caretLine].length();
+    m_caretPixelX = -1;
+  }
+  else
+  {
+    int newLength = m_document[m_caretLine].length();
+
+    // work out if the caret should overflow
+    // also, what if it "underflows"?
+    if (newLength < oldLength)
     {
-      m_caretLine++;
-      // fix Issue 19 - off by one on wrap around new line.
-      m_caretChar = diff;
+      // word has wrapped to next line. To calculate where we are, work out the
+      // difference from previous to now
+      // Also, if we add a space to separate a word, the word may go to the *previous* line.
+      int diff = oldLength - newLength;
+      if (m_caretChar >= newLength)
+      {
+        m_caretLine++;
+        // fix Issue 19 - off by one on wrap around new line.
+        m_caretChar = diff;
+        m_caretPixelX = -1;
+      }
+    }
+    // check for underflow condition
+    int newPrevLength = -1;
+    if (m_caretLine > 0)
+      newPrevLength = m_document[m_caretLine-1].length();
+    if (oldPrevLength != -1 and newPrevLength != -1 and oldPrevLength < newPrevLength)
+    {
+      // the previous line has eaten some of our text
+      m_caretChar = 0;
       m_caretPixelX = -1;
     }
-  }
-  // check for underflow condition
-  int newPrevLength = -1;
-  if (m_caretLine > 0)
-    newPrevLength = m_document[m_caretLine-1].length();
-  if (oldPrevLength != -1 and newPrevLength != -1 and oldPrevLength < newPrevLength)
-  {
-    // the previous line has eaten some of our text
-    m_caretChar = 0;
-    m_caretPixelX = -1;
   }
   // ensure m_document is never empty.
   currentLine();

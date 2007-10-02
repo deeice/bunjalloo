@@ -23,6 +23,7 @@ class HtmlParser;
 class HtmlElement;
 class CookieJar;
 class URI;
+struct z_stream_s;
 
 /** Parse the headers and chunks from a HTTP GET request. 
  * The payload is then passed on to the HtmlParser.
@@ -103,6 +104,7 @@ class HeaderParser
     std::string m_headerValue;
     std::string m_redirect;
     bool m_chunked;
+    bool m_gzip;
     int m_chunkLength;
     std::string m_chunkLengthString;
     unsigned int m_httpStatusCode;
@@ -112,6 +114,7 @@ class HeaderParser
     CookieJar * m_cookieJar;
 
     std::string m_cacheFile;
+    z_stream_s * m_stream;
 
     void parseError();
     void handleHeader(const std::string & field, const std::string & value);

@@ -1345,6 +1345,7 @@ void HtmlParserImpl::setCacheFile(const std::string & filename)
 }
 
 HtmlParser::HtmlParser():
+  m_mimeType(TEXT_HTML),
   m_details(new HtmlParserImpl(*this))
 {
 }
@@ -1402,11 +1403,37 @@ void HtmlParser::parseContentType(const std::string & value)
     }
   }
 
-  // mime type is set to a parameter name...
-  bool isPlain = paramSet.hasParameter("text/plain");
-  if (isPlain)
+  setMimeType(paramSet);
+
+  if (m_mimeType == TEXT_PLAIN)
   {
     setContentModel(PLAINTEXT);
+  }
+}
+
+void HtmlParser::setMimeType(ParameterSet & paramSet)
+{
+  m_mimeType = OTHER;
+  // mime type is set to a parameter name...
+  if (paramSet.hasParameter("text/plain"))
+  {
+    m_mimeType = TEXT_PLAIN;
+  }
+  else if (paramSet.hasParameter("text/html") or paramSet.hasParameter("application/xhtml+xml"))
+  {
+    m_mimeType = TEXT_HTML;
+  }
+  else if (paramSet.hasParameter("image/png"))
+  {
+    m_mimeType = IMAGE_PNG;
+  }
+  else if (paramSet.hasParameter("image/gif"))
+  {
+    m_mimeType = IMAGE_GIF;
+  }
+  else if (paramSet.hasParameter("image/jpeg"))
+  {
+    m_mimeType = IMAGE_JPEG;
   }
 }
 
@@ -1479,4 +1506,9 @@ void HtmlParser::handleData(unsigned int ucodeChar)
 void HtmlParser::setCacheFile(const std::string & filename)
 {
   m_details->setCacheFile(filename);
+}
+
+HtmlParser::MimeType HtmlParser::mimeType() const
+{
+  return m_mimeType;
 }

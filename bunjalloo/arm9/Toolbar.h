@@ -21,13 +21,13 @@
 #include "Sprite.h"
 
 class Document;
-class ControllerI;
+class Controller;
 class View;
 
 class Toolbar: public ViewI
 {
   public:
-    Toolbar(Document & doc, ControllerI & cont, View & view);
+    Toolbar(Document & doc, Controller & cont, View & view);
     ~Toolbar();
 
     bool visible() const;
@@ -46,7 +46,7 @@ class Toolbar: public ViewI
     typedef std::vector<nds::Sprite * > SpriteVector;
     SpriteVector m_sprites;
     Document & m_document;
-    ControllerI & m_controller;
+    Controller & m_controller;
     View & m_view;
 
     int m_timerReset;

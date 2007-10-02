@@ -21,6 +21,7 @@
 #include "Attribute.h"
 class HtmlParserImpl;
 class HtmlElement;
+class ParameterSet;
 
 /**
  * A parser for HTML. Consumes bytes and calls the handler functions for tags.
@@ -77,6 +78,17 @@ class HtmlParser
      */
     void setCacheFile(const std::string & filename);
 
+    enum MimeType
+    {
+      TEXT_HTML,
+      TEXT_PLAIN,
+      IMAGE_PNG,
+      IMAGE_GIF,
+      IMAGE_JPEG,
+      OTHER
+    };
+
+    MimeType mimeType() const;
   protected:
     enum ContentModel {
       PCDATA,
@@ -84,6 +96,8 @@ class HtmlParser
       CDATA,
       PLAINTEXT
     };
+
+    MimeType m_mimeType;
 
     friend class HtmlParserImpl;
     /** Called when a start-end tag is found.
@@ -113,5 +127,7 @@ class HtmlParser
   private:
     //! Nothing to see here.
     HtmlParserImpl* m_details;
+
+    void setMimeType(ParameterSet & paramSet);
 };
 #endif

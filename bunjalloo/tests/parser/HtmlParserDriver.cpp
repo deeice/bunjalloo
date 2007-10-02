@@ -35,7 +35,7 @@ void HtmlParserDriver::handleStartTag(const std::string & tag, const AttributeVe
     Attribute * newAttr = new Attribute(*at);
     newVector.push_back(newAttr);
   }
-  // gah - copy paste from Document, no other way
+
   HtmlElement * element = ElementFactory::create(tag, attrs);
   if (tag == "meta") { 
     checkMetaTagHttpEquiv(element); 
