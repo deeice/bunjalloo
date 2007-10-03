@@ -113,8 +113,9 @@ class HeaderParser
     CookieJar * m_cookieJar;
 
     std::string m_cacheFile;
+    struct z_stream_s * m_stream;
+    char * m_window;
 
-    void fireData();
     void parseError();
     void handleHeader(const std::string & field, const std::string & value);
     void rewind();
@@ -128,6 +129,7 @@ class HeaderParser
     void value();
     void endingHeaders();
     void chunkLine();
+    void fireData();
 
     void addToCacheFile(const std::string & text);
 };

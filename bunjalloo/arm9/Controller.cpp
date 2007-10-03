@@ -44,19 +44,8 @@ Controller::Controller()
   m_config = new Config(*m_document);
   TextAreaFactory::setFont(new Font(m_config->font()));
   TextAreaFactory::usePaletteName(m_config->font()+".pal");
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("About to create view\n");
-    m_view = new View(*m_document, *this);
-    f.write("About to create cache\n");
-    m_cache = new Cache(*m_document, m_config->useCache());
-  }
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("after cache\n");
-  }
+  m_view = new View(*m_document, *this);
+  m_cache = new Cache(*m_document, m_config->useCache());
 }
 
 Controller::~Controller()
@@ -68,35 +57,10 @@ Controller::~Controller()
 
 void Controller::showLicence()
 {
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("About to showLicence\n");
-  }
   m_document->reset();
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("setUri...\n");
-  }
   m_document->setUri(LICENCE_URL);
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("appendLocalData...\n");
-  }
   m_document->appendLocalData(s_licenceText, strlen(s_licenceText));
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("setStatus...\n");
-  }
   m_document->setStatus(Document::LOADED);
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("done showLicence.\n");
-  }
 }
 
 const Config & Controller::config() const
@@ -292,4 +256,9 @@ bool Controller::wifiInitialised() const
 void Controller::stop()
 {
   m_stop = true;
+}
+
+Cache * Controller::cache() const
+{
+  return m_cache;
 }

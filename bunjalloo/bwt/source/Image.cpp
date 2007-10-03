@@ -223,13 +223,21 @@ void Image::readPng(const char * filename)
    m_valid = true;
 }
 
+static int user_read_gif(GifFileType * gif, GifByteType * data, int size)
+{
+  nds::File * f = (nds::File*)(gif->UserData);
+  size_t n = f->read((char*)data, size);
+  return n;
+}
+
 /** RAII wrapper around the GifFileType. */
 class GifClass
 {
   public:
     inline GifClass(const char * filename):m_buffer(0)
     {
-      m_gifFile = DGifOpenFileName(filename);
+      m_file.open(filename, "rb");
+      m_gifFile = DGifOpen((void*)&m_file, user_read_gif);
     }
 
     inline ~GifClass()
@@ -258,6 +266,7 @@ class GifClass
   private:
     GifFileType * m_gifFile;
     unsigned char * m_buffer;
+    nds::File m_file;
 };
 
 static const int InterlacedOffset[] = { 0, 4, 2, 1 };

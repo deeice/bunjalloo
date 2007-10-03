@@ -26,10 +26,12 @@
 #include "FormTextArea.h"
 #include "HtmlBodyElement.h"
 #include "HtmlConstants.h"
+#include "HtmlDocument.h"
 #include "HtmlElement.h"
 #include "HtmlImageElement.h"
 #include "HtmlInputElement.h"
 #include "InputText.h"
+#include "ImageComponent.h"
 #include "Keyboard.h"
 #include "PasswordField.h"
 #include "RadioButton.h"
@@ -37,8 +39,11 @@
 #include "ScrollPane.h"
 #include "Select.h"
 #include "TextAreaFactory.h"
+#include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
+#include "Controller.h"
+#include "Cache.h"
 
 using namespace std;
 
@@ -302,17 +307,43 @@ void ViewRender::render()
 
   m_textArea = 0;
   const HtmlElement * root = m_self->m_document.rootNode();
-  assert(root->isa(HtmlConstants::HTML_TAG));
-  assert(root->hasChildren());
-  const HtmlElement * body = root->lastChild();
-  if (body->hasChildren())
+  if (m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::IMAGE_PNG
+      or m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::IMAGE_GIF)
   {
-    walkTree(body);
-    ScrollPane & scrollPane(*m_self->m_scrollPane);
-    scrollPane.setLocation(0,0);
-    scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-    scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-    scrollPane.scrollToPercent(0);
+    //textArea()->add();
+    
+    URI uri(m_self->m_document.uri());
+    string filename;
+    if (uri.protocol() == URI::FILE_PROTOCOL)
+    {
+      filename = uri.fileName();
+    }
+    else
+    {
+      filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
+    }
+    ImageComponent * imageComponent = new ImageComponent(filename);
+    textArea()->add(imageComponent);
+      ScrollPane & scrollPane(*m_self->m_scrollPane);
+      scrollPane.setLocation(0,0);
+      scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+      scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+      scrollPane.scrollToPercent(0);
+  }
+  else
+  {
+    assert(root->isa(HtmlConstants::HTML_TAG));
+    assert(root->hasChildren());
+    const HtmlElement * body = root->lastChild();
+    if (body->hasChildren())
+    {
+      walkTree(body);
+      ScrollPane & scrollPane(*m_self->m_scrollPane);
+      scrollPane.setLocation(0,0);
+      scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+      scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+      scrollPane.scrollToPercent(0);
+    }
   }
 }
 

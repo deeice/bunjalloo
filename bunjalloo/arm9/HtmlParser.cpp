@@ -1345,7 +1345,7 @@ void HtmlParserImpl::setCacheFile(const std::string & filename)
 }
 
 HtmlParser::HtmlParser():
-  m_mimeType(TEXT_HTML),
+  m_mimeType(UNINITIALISED),
   m_details(new HtmlParserImpl(*this))
 {
 }
@@ -1358,9 +1358,14 @@ HtmlParser::~HtmlParser()
 void HtmlParser::feed(const char * data, unsigned int length)
 {
   m_details->initialise(data, length);
-  //printf("%s", data);
-  while (m_details->position() < m_details->end()) {
-    m_details->fire();
+  if (mimeType() == HtmlParser::TEXT_HTML
+      or mimeType() == HtmlParser::TEXT_PLAIN
+      or mimeType() == HtmlParser::UNINITIALISED)
+  {
+    //printf("%s", data);
+    while (m_details->position() < m_details->end()) {
+      m_details->fire();
+    }
   }
 }
 
@@ -1485,6 +1490,7 @@ HtmlParser::Encoding HtmlParser::encoding() const
 void HtmlParser::setToStart()
 {
   m_details->reset();
+  m_mimeType = UNINITIALISED;
 }
 
 

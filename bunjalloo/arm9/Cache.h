@@ -25,6 +25,8 @@ class Cache
      */
     bool load(const URI & uri);
 
+    std::string fileName(const URI & uri) const;
+
     /** Remove the given uri form the cache.
      * @param uri the uri to clean.
      */

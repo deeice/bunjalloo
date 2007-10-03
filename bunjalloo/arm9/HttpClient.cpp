@@ -125,7 +125,7 @@ void HttpClient::get(const URI & uri)
     //If the Accept-Encoding field-value is empty, then only the "identity" encoding is acceptable.
     // -- RFC2616-sec14
     s += "Accept-encoding: gzip,deflate\r\n";
-    //s += "Accept: text/html\r\n";
+    s += "Accept: text/html\r\n";
     s += "User-Agent: Bunjalloo (";
     s += nds::System::uname();
     s += ";r";

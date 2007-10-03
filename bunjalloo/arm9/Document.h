@@ -136,6 +136,11 @@ class Document
     void refresh(std::string & refresh, int & time) const;
 
     void setCacheFile(const std::string & cacheFile);
+
+    HtmlDocument * htmlDocument() const
+    {
+      return m_htmlDocument;
+    }
   private:
     //std::string m_uri;
     Status m_status;
@@ -150,6 +155,7 @@ class Document
     //! Notify all registered views that there are model changes.
     void notifyAll() const;
 
+    void magicMimeType(const char * data, int length);
     //! No copies.
     Document (const Document&);
     const Document& operator=(const Document&);

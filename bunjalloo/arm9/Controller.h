@@ -57,6 +57,7 @@ class Controller
 
     bool wifiInitialised() const;
 
+    Cache * cache() const;
   private:
     Document * m_document;
     View * m_view;

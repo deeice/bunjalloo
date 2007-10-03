@@ -617,6 +617,11 @@ bool RichTextArea::touch(int x, int y)
         }
         break;
       }
+      else if (((unsigned int)charClicked) >= l->textStart()
+          and ((unsigned int)charClicked) <= l->textEnd())
+      {
+        printf("Image clicked?\n");
+      }
     }
     return true;
   }

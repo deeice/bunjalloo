@@ -80,6 +80,7 @@ class HtmlParser
 
     enum MimeType
     {
+      UNINITIALISED,
       TEXT_HTML,
       TEXT_PLAIN,
       IMAGE_PNG,

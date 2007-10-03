@@ -29,17 +29,15 @@ static const int HTTP1_LEN = HTTP1.length();
 static const unsigned char FIELD_VALUE_SEP(':');
 static const int ZWINDOW_SIZE(47);
 static const unsigned int WINSIZE(16384);
-// it took me an hour to realise that the NDS doesn't like massive arrays on the stack..
-static Bytef window[WINSIZE];
-struct z_stream_s * m_stream = new z_stream_s;
 
 HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
   m_uri(*(new URI())),
   m_gzip(false),
   m_expected(0),
   m_htmlParser(htmlParser),
-  m_cookieJar(cookieJar)
-  //,m_stream(new z_stream_s)
+  m_cookieJar(cookieJar),
+  m_stream(new z_stream_s),
+  m_window(new char[WINSIZE])
 {
   reset();
 }
@@ -74,32 +72,14 @@ void HeaderParser::rewind()
 
 void HeaderParser::next()
 {
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("next...\n");
-    char buff[200];
-    sprintf(buff, "state %d\n", m_state);
-    f.write(buff);
-  }
   m_value = *m_position;
   m_lastPosition = m_position;
   m_position++;
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("end next.\n");
-  }
 }
 
 void HeaderParser::feed(const char * data, unsigned int length)
 {
   //cout << "\nFeed " << length << " bytes." << endl;
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("HeaderParser feed data\n");
-  }
   m_position = data;
   m_end = data+length;
   while (m_position < m_end)
@@ -135,19 +115,7 @@ void HeaderParser::feed(const char * data, unsigned int length)
         parseError();
         break;
       case DATA:
-        {
-          nds::File f;
-          f.open("bunjalloo.log", "a");
-          f.write("call fireData\n");
-          char buff[200];
-          sprintf(buff, "this %08X\n", this);
-          f.write(buff);
-          sprintf(buff, "fireData %08X\n", &HeaderParser::fireData);
-          f.write(buff);
-          sprintf(buff, "feed %08X\n", &HeaderParser::feed);
-          f.write(buff);
-        }
-        this->fireData();
+        fireData();
         break;
     }
   }
@@ -392,24 +360,9 @@ void HeaderParser::httpResponse()
   
 void HeaderParser::fireData()
 {
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("in fireData\n");
-  }
   rewind();
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("after rewind\n");
-  }
   int length = (m_end - m_position);
   if (m_chunked) {
-    {
-      nds::File f;
-      f.open("bunjalloo.log", "a");
-      f.write("chunky\n");
-    }
     if (length >= m_chunkLength) {
       length = m_chunkLength;
       m_state = BEFORE_FIELD;
@@ -421,29 +374,18 @@ void HeaderParser::fireData()
       m_chunkLength -= length;
     }
   }
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("gzip check\n");
-  }
   if (m_gzip)
   {
-    {
-      nds::File f;
-      f.open("bunjalloo.log", "a");
-      f.write("gzipped!\n");
-    }
     // decode.
     Bytef * in = new Bytef[length];
     memcpy(in, m_position, length);
     m_stream->avail_out = 0;
     m_stream->avail_in = length;
     m_stream->next_in = in;
-#if 1
     do {
       if (m_stream->avail_out == 0) {
         m_stream->avail_out = WINSIZE;
-        m_stream->next_out = window;
+        m_stream->next_out = (Bytef*)m_window;
       }
 
       /* inflate until out of input, output, or at end of block --
@@ -454,35 +396,16 @@ void HeaderParser::fireData()
       {
         break;
       }
-      if (m_htmlParser->mimeType() == HtmlParser::TEXT_HTML
-          or m_htmlParser->mimeType() == HtmlParser::TEXT_PLAIN)
-      {
-        // once done, feed the data to the html parser.
-        printf("decoded %d bytes\n", decoded);
-        m_htmlParser->feed((const char*)window, decoded);
-      }
+      // once done, feed the data to the html parser.
+      printf("decoded %d bytes\n", decoded);
+      m_htmlParser->feed(m_window, decoded);
     } while (m_stream->avail_in != 0);
     delete [] in;
-#endif
   }
   else
   {
-    if (m_htmlParser->mimeType() == HtmlParser::TEXT_HTML
-        or m_htmlParser->mimeType() == HtmlParser::TEXT_PLAIN)
-    {
-      // once done, feed the data to the html parser.
-      {
-        nds::File f;
-        f.open("bunjalloo.log", "a");
-        f.write("feed data\n");
-      }
-      m_htmlParser->feed(m_position, length);
-      {
-        nds::File f;
-        f.open("bunjalloo.log", "a");
-        f.write("after feed\n");
-      }
-    }
+    // once done, feed the data to the html parser.
+    m_htmlParser->feed(m_position, length);
   }
   m_position += length;
 }

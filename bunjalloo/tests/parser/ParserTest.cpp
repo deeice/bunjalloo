@@ -148,7 +148,7 @@ void ParserTest::testSlashdot()
   readFile("slashdot.txt");
   m_headerParser->feed(m_data, m_length);
   int size = m_htmlParser->m_tags.size();
-  CPPUNIT_ASSERT_EQUAL( 2 , size);
+  CPPUNIT_ASSERT_EQUAL( 3 , size);
 }
 
 void ParserTest::testNumbers()

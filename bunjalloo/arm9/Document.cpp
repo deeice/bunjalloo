@@ -31,6 +31,7 @@ Document::Document():
 {
   m_history.clear();
   m_historyPosition = m_history.begin();
+  reset();
 }
 
 Document::~Document()
@@ -119,37 +120,21 @@ unsigned int Document::percentLoaded() const
     return 0;
 }
 
-#include "File.h"
 void Document::appendLocalData(const char * data, int size)
 {
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("About to call m_headerParser->setDataState()\n");
-  }
   m_headerParser->setDataState();
+  if (m_status == NOTHING)
   {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("About to appendData\n");
+    // need to get mime type from the data...
+    magicMimeType(data, size);
   }
   appendData(data, size);
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("After appendData\n");
-  }
 }
 
 void Document::appendData(const char * data, int size)
 {
   m_status = INPROGRESS;
   if (size) {
-    {
-      nds::File f;
-      f.open("bunjalloo.log", "a");
-      f.write("size != 0\n");
-    }
     m_headerParser->feed(data,size);
     unsigned int dataExpected(m_headerParser->expected());
     unsigned int dataGot(m_htmlDocument->dataGot());
@@ -161,12 +146,6 @@ void Document::appendData(const char * data, int size)
     {
       *m_historyPosition = m_headerParser->redirect();
     }
-  }
-  else
-  {
-    nds::File f;
-    f.open("bunjalloo.log", "a");
-    f.write("size is 0\n");
   }
   notifyAll();
 }
@@ -249,5 +228,33 @@ void Document::setCacheFile(const std::string & cacheFile)
   else
   {
     m_headerParser->setCacheFile(cacheFile);
+  }
+}
+
+#include <png.h>
+void Document::magicMimeType(const char * data, int length)
+{
+  // this is only for local data - data from http should already have
+  // content-type in the headers or in meta or whatever.
+  if (length < 3)
+  {
+    // assume plain text we only have 2 bytes...
+    m_htmlDocument->parseContentType("text/plain");
+    return;
+  }
+  else
+  {
+    if (!png_sig_cmp((png_byte*)data, (png_size_t)0, 3))
+    {
+      m_htmlDocument->parseContentType("image/png");
+    }
+    else if (strncmp(data, "GIF", 3)==0)
+    {
+      m_htmlDocument->parseContentType("image/gif");
+    }
+    else
+    {
+      // do nothing.
+    }
   }
 }
