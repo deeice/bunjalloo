@@ -178,7 +178,7 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
 
   // Store headers in cache. Transfer-encoding isn't stored as it is no longer
   // valid once the data is in the cache.
-  if (field != "transfer-encoding")
+  if (field != "transfer-encoding" and field != "content-encoding")
   {
     string text(field);
     text += FIELD_VALUE_SEP;
