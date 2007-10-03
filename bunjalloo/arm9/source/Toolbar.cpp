@@ -84,7 +84,8 @@ Toolbar::Toolbar(Document & doc, ControllerI & cont, View & view):
   m_controller(cont),
   m_view(view),
   m_timerReset(TIMER_RESET),
-  m_timer(m_timerReset)
+  m_timer(m_timerReset),
+  m_angle(0)
 {
   static const int screen(0);
   m_document.registerView(this);
