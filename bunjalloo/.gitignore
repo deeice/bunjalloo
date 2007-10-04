@@ -1,0 +1,16 @@
+.sconsign.dblite
+build
+bunjalloo*
+cscope.*
+tags
+tests/cookies/tester
+tests/document/tester
+tests/element/tester
+tests/gui-test/gui-test.nds
+tests/images/images.nds
+tests/parameters/tester
+tests/parser/tester
+tests/uri/tester
+tests/utf8/tester
+walktree.pyc
+data/bunjalloo/cache

@@ -4,13 +4,14 @@
 #include "URI.h"
 #include "Canvas.h"
 #include "Palette.h"
+
 using nds::Canvas;
-ImageComponent::ImageComponent(const std::string & filename):m_image(0)
+
+
+ImageComponent::ImageComponent(Image * image):m_image(image)
 {
-  if (not filename.empty())
+  if (m_image)
   {
-    printf("Image '%s'\n", filename.c_str());
-    m_image = new Image(filename.c_str());
     printf("Here %d %d\n", m_image->width(), m_image->height());
     setSize(m_image->width(), m_image->height());
   }
@@ -25,7 +26,6 @@ static void drawImage(Canvas & canvas, Image & image, int startx, int starty)
 {
   printf("Image %d %d %d %d\n", startx, starty, image.width(), image.height());
   const unsigned char * data = image.data();
-  canvas.fillRectangle(startx, starty, image.width(), image.height(), nds::Color(21,21,21));
   for (unsigned int y = 0; y < image.height(); ++y)
   {
     const unsigned char * row = &data[y*image.width()*3];
@@ -40,7 +40,7 @@ void ImageComponent::paint(const nds::Rectangle & clip)
 {
   if (m_image)
   {
-    printf("Render png\n");
+    printf("Render image\n");
     //nds::Canvas::instance().drawRectangle(x(),y(),width(),height(), nds::Color(31,0,0));
     drawImage(Canvas::instance(), *m_image, x(), y());
   }

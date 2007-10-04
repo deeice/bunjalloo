@@ -7,7 +7,7 @@ class Image;
 class ImageComponent: public Component
 {
   public:
-    ImageComponent(const std::string & filename);
+    ImageComponent(Image * image);
     virtual void paint(const nds::Rectangle & clip);
     virtual ~ImageComponent();
 

@@ -23,8 +23,8 @@ class Image
     enum ImageType
     {
       ImagePNG,
-      ImageJPEG,
       ImageGIF,
+      ImageJPEG,
       ImageUNKNOWN
     };
 

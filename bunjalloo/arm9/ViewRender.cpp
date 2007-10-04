@@ -31,6 +31,7 @@
 #include "HtmlImageElement.h"
 #include "HtmlInputElement.h"
 #include "InputText.h"
+#include "Image.h"
 #include "ImageComponent.h"
 #include "Keyboard.h"
 #include "PasswordField.h"
@@ -307,8 +308,8 @@ void ViewRender::render()
 
   m_textArea = 0;
   const HtmlElement * root = m_self->m_document.rootNode();
-  if (m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::IMAGE_PNG
-      or m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::IMAGE_GIF)
+  HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
+  if (mimeType == HtmlDocument::IMAGE_PNG or mimeType == HtmlDocument::IMAGE_GIF)
   {
     //textArea()->add();
     
@@ -322,7 +323,13 @@ void ViewRender::render()
     {
       filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
     }
-    ImageComponent * imageComponent = new ImageComponent(filename);
+    Image * image(0);
+    if (not filename.empty())
+    {
+      printf("Image '%s'\n", filename.c_str());
+      image = new Image(filename.c_str(), (Image::ImageType)mimeType);
+    }
+    ImageComponent * imageComponent = new ImageComponent(image);
     textArea()->add(imageComponent);
       ScrollPane & scrollPane(*m_self->m_scrollPane);
       scrollPane.setLocation(0,0);

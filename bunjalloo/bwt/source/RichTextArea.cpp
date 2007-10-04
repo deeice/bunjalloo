@@ -606,21 +606,22 @@ bool RichTextArea::touch(int x, int y)
     for (; linkIt != m_links.end(); ++linkIt)
     {
       Link * l(*linkIt);
-      if (l->eventType() == Link::STATE_LINK
-          and ((unsigned int)charClicked) >= l->textStart()
+      if (    ((unsigned int)charClicked) >= l->textStart()
           and ((unsigned int)charClicked) <= l->textEnd())
       {
-        l->setClicked();
-        if (m_linkListener)
+        if (l->eventType() == Link::STATE_LINK)
         {
-          m_linkListener->linkClicked(l);
+          l->setClicked();
+          if (m_linkListener)
+          {
+            m_linkListener->linkClicked(l);
+          }
+          break;
         }
-        break;
-      }
-      else if (((unsigned int)charClicked) >= l->textStart()
-          and ((unsigned int)charClicked) <= l->textEnd())
-      {
-        printf("Image clicked?\n");
+        else
+        {
+          printf("Image clicked?\n");
+        }
       }
     }
     return true;
