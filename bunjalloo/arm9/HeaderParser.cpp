@@ -397,7 +397,6 @@ void HeaderParser::fireData()
         break;
       }
       // once done, feed the data to the html parser.
-      printf("decoded %d bytes\n", decoded);
       m_htmlParser->feed(m_window, decoded);
     } while (m_stream->avail_in != 0);
     delete [] in;

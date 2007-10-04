@@ -232,6 +232,7 @@ void Document::setCacheFile(const std::string & cacheFile)
 }
 
 #include <png.h>
+#include <gif_lib.h>
 void Document::magicMimeType(const char * data, int length)
 {
   // this is only for local data - data from http should already have
@@ -248,7 +249,7 @@ void Document::magicMimeType(const char * data, int length)
     {
       m_htmlDocument->parseContentType("image/png");
     }
-    else if (strncmp(data, "GIF", 3)==0)
+    else if (strncmp(GIF_STAMP, data, GIF_VERSION_POS) == 0)
     {
       m_htmlDocument->parseContentType("image/gif");
     }
