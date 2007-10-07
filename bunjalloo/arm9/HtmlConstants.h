@@ -25,6 +25,7 @@ class HtmlConstants
     const static char BODY_TAG[];
     const static char FRAMESET_TAG[];
     const static char A_TAG[];
+    const static char B_TAG[];
     const static char UL_TAG[];
     const static char OL_TAG[];
     const static char LI_TAG[];

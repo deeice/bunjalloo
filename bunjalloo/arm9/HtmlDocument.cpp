@@ -391,7 +391,7 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
     insertElement(element);
     addActiveFormatter(element);
   }
-  else if ( tag == "b"
+  else if ( tag == HtmlConstants::B_TAG
       or tag == "big"
       or tag == "em"
       or tag == "font"
@@ -552,7 +552,7 @@ void HtmlDocument::inBody(const std::string & tag)
     }
   }
   else if ( tag == HtmlConstants::A_TAG
-         or tag == "b"
+         or tag == HtmlConstants::B_TAG
          or tag == "big"
          or tag == "em"
          or tag == "font"
@@ -1152,7 +1152,7 @@ void HtmlDocument::generateImpliedEndTags(const std::string & except)
 bool HtmlDocument::isFormatting(HtmlElement * node)
 {
   return node->isa(HtmlConstants::A_TAG) 
-    or node->isa("b")
+    or node->isa(HtmlConstants::B_TAG)
     or node->isa("big")
     or node->isa("em")
     or node->isa("font")

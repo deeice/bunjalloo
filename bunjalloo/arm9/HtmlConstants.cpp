@@ -21,6 +21,7 @@ const char HtmlConstants::HTML_TAG[] = "html";
 const char HtmlConstants::BODY_TAG[] = "body";
 const char HtmlConstants::FRAMESET_TAG[] = "frameset";
 const char HtmlConstants::A_TAG[] = "a";
+const char HtmlConstants::B_TAG[] = "b";
 const char HtmlConstants::UL_TAG[] = "ul";
 const char HtmlConstants::OL_TAG[] = "ol";
 const char HtmlConstants::LI_TAG[] = "li";
