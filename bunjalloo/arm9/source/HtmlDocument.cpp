@@ -1173,24 +1173,15 @@ void HtmlDocument::reconstructActiveFormatters()
   {
     return;
   }
-  ElementVector::const_iterator openIt(m_openElements.begin());
-  for ( ; openIt != m_openElements.end(); ++openIt)
+
+  ElementVector::const_reverse_iterator openEl =
+    find_if( m_openElements.rbegin(), m_openElements.rend(),
+        bind2nd( mem_fun(&HtmlElement::isa_ptr), &m_activeFormatters.front()->tagName())
+        );
+  if (openEl != m_openElements.rend())
   {
-    HtmlElement * element(*openIt);
-    if (element->isa( m_activeFormatters.front()->tagName()))
-    {
-      return;
-    }
-  }
-  /*
-  // marker?
-  ElementVector::const_iterator mostRecent = find(m_openElements.begin(), m_openElements.end(), m_activeFormatters.front());
-  if (mostRecent != m_openElements.end())
-  {
-    // the current active formatter is still open, return
     return;
   }
-  */
 
   ElementList::iterator it(m_activeFormatters.begin());
   //3. Let entry be the last (most recently added) element in the list of active formatting elements.
