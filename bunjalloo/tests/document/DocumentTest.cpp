@@ -589,6 +589,6 @@ void DocumentTest::testActiveFormatters()
     child = child->firstChild();
     depth++;
   }
-  int expectedDepth = 3;
+  int expectedDepth = 1;
   CPPUNIT_ASSERT_EQUAL(expectedDepth, depth);
 }
