@@ -59,10 +59,22 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     virtual void editText(TextEntryI * entry);
     virtual void pressed(ButtonI * button);
 
+    enum KeyboardSelection
+    {
+      CANCEL,
+      OK
+    };
+
+    inline KeyboardSelection selected() const
+    {
+      return m_selectedStatus;
+    }
+
   private:
     bool m_extra;
     bool m_shift;
     bool m_capsLock;
+    KeyboardSelection m_selectedStatus;
     int  m_ticks;
 
     ScrollPane * m_scrollPane;

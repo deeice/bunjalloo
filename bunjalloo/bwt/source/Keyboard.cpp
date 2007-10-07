@@ -69,6 +69,7 @@ Keyboard::Keyboard():
   m_extra(false),
   m_shift(false),
   m_capsLock(false),
+  m_selectedStatus(OK),
   m_ticks(0),
   m_scrollPane(new ScrollPane),
   m_textArea((EditableTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_EDIT)),
@@ -314,10 +315,17 @@ void Keyboard::pressed(ButtonI * button)
       updateModifierKeys();
       break;
     case SPKY_CANCEL:
+      m_selectedStatus = CANCEL;
       m_textArea->clearText();
       m_textArea->appendText(m_initialText);
-      /* FALL THROUGH */
+      m_ticks = 1;
+      tick();
+      m_topLevel->setVisible();
+      this->setVisible(false);
+      applyResult();
+      break;
     case SPKY_OK:
+      m_selectedStatus = OK;
       m_ticks = 1;
       tick();
       m_topLevel->setVisible();

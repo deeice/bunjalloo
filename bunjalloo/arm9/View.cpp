@@ -252,7 +252,7 @@ void View::tick()
   if (m_state == KEYBOARD and not m_keyboard->visible()) {
     m_state = BROWSE;
     string newAddress = unicode2string(m_keyboard->result());
-    if (not newAddress.empty() and newAddress != m_document.uri())
+    if (not newAddress.empty() and m_keyboard->selected() == Keyboard::OK)
     {
       m_toolbar->setVisible(true);
       m_controller.doUri(newAddress);
