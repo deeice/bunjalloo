@@ -556,3 +556,39 @@ void DocumentTest::testUnicode2String()
   CPPUNIT_ASSERT_EQUAL(expected, c);
 }
 
+void DocumentTest::testActiveFormatters()
+{
+  readFile("issue29.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+
+  // get the body node
+  ElementList bodyNodes = root->elementsByTagName("body");
+  CPPUNIT_ASSERT(bodyNodes.size() == 1);
+
+  const HtmlElement * body = bodyNodes.front();
+  const HtmlElement * bold = body->firstChild();
+  CPPUNIT_ASSERT(bold->isa("b"));
+
+  ElementList pNodes = bold->elementsByTagName("p");
+  CPPUNIT_ASSERT(pNodes.size() == 2);
+
+  // now see if the 2nd p node has multiple children
+  const HtmlElement * p = pNodes.back();
+  CPPUNIT_ASSERT(p->children().size() == 1);
+
+
+  const HtmlElement * child = p->firstChild();
+  // see how many recursive children the p has
+  int depth = 0;
+  while (child->hasChildren())
+  {
+    child = child->firstChild();
+    depth++;
+  }
+  int expectedDepth = 3;
+  CPPUNIT_ASSERT_EQUAL(expectedDepth, depth);
+}
