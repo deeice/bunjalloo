@@ -500,17 +500,14 @@ void HtmlDocument::inBody(const std::string & tag)
     {
       generateImpliedEndTags();
     }
-    if (inScope(tag))
+    // if there is a tag like this in scope, keep poppin'
+    while (inScope(tag))
     {
-      // if there is a tag like this in scope, keep poppin'
-      while (inScope(tag))
-      {
-        // pop until not in scope.
-        const HtmlElement * popped = currentNode();
-        m_openElements.pop_back();
-        if (popped->isa(tag))
-          break;
-      }
+      // pop until not in scope.
+      const HtmlElement * popped = currentNode();
+      m_openElements.pop_back();
+      if (popped->isa(tag))
+        break;
     }
   }
   else if (tag == HtmlConstants::FORM_TAG)
@@ -1177,6 +1174,16 @@ void HtmlDocument::reconstructActiveFormatters()
   {
     return;
   }
+  ElementVector::const_iterator openIt(m_openElements.begin());
+  for ( ; openIt != m_openElements.end(); ++openIt)
+  {
+    HtmlElement * element(*openIt);
+    if (element->isa( m_activeFormatters.front()->tagName()))
+    {
+      return;
+    }
+  }
+  /*
   // marker?
   ElementVector::const_iterator mostRecent = find(m_openElements.begin(), m_openElements.end(), m_activeFormatters.front());
   if (mostRecent != m_openElements.end())
@@ -1184,6 +1191,7 @@ void HtmlDocument::reconstructActiveFormatters()
     // the current active formatter is still open, return
     return;
   }
+  */
 
   ElementList::iterator it(m_activeFormatters.begin());
   //3. Let entry be the last (most recently added) element in the list of active formatting elements.
