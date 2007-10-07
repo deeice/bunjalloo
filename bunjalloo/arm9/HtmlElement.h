@@ -178,7 +178,7 @@ class HtmlElement /* : public Element */
 
 bool HtmlElement::hasChildren() const
 {
-  return m_children.size() > 0;
+  return not m_children.empty();
 }
 bool HtmlElement::isa(const std::string & name) const
 {
