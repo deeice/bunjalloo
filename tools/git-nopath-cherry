@@ -15,7 +15,7 @@ def print_usage():
 
 # get the patch-id for the pathless diff for hash "h"
 def pathless_diff_id(h):
-  cmd = ['git-diff', '-w', '%s~1..%s'%(h,h)]
+  cmd = ['git-diff-tree', '-p', '%s'%(h)]
   diffoutput = subprocess.Popen(cmd,stdout=subprocess.PIPE)
   cmd = ['sed', '-r', 's,(^diff --git) a/(\\S+) b/(\\S+),\\1 a/f1 b/f1,g']
   sed1 = subprocess.Popen(cmd,stdout=subprocess.PIPE, stdin=diffoutput.stdout)
@@ -33,12 +33,17 @@ def do_cherry(branch, verbose=False):
     exec_cmd('git-sh-setup')
 
     # get commits from branch..HEAD
-    cmd = ['git-log', '--pretty=format:%H', '%s..HEAD'%branch]
-    head_hashes = exec_cmd(cmd).split('\n')
+    cmd = ['git-rev-parse', '--verify', '%s'%branch]
+    branch_hash = exec_cmd(cmd).strip()
+    cmd[2] = 'HEAD'
+    head_hash = exec_cmd(cmd).strip()
+
+    cmd = ['git-rev-list', '^%s'%head_hash, branch_hash]
+    branch_hashes = exec_cmd(cmd).split('\n')
 
     # get commits from HEAD..branch
-    cmd[2] = 'HEAD..%s'%branch
-    branch_hashes = exec_cmd(cmd).split('\n')
+    cmd = ['git-rev-list', head_hash, '^%s'%branch_hash]
+    head_hashes = exec_cmd(cmd).split('\n')
 
     # for each diff on head_hashes, get the "pathless diff hash"
     head_patch_hashes = []
