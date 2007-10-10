@@ -125,6 +125,8 @@ void ScrollPane::layoutChildren()
 
 void ScrollPane::calculateScrollBar()
 {
+  if (m_children.empty())
+    return;
   int topY = m_children.front()->bounds().top();
   int botY = m_children.back()->bounds().bottom();
   // Set the total coverage of the scrollBar
