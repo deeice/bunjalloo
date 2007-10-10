@@ -1,5 +1,4 @@
 #!/bin/bash
-. git-sh-setup
 git-svn dcommit -n | grep diff-tree |\
 while read line
  do git ${line/diff-tree/diff} 
