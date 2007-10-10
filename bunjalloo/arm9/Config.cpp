@@ -122,7 +122,8 @@ void Config::handleCookies() const
     {
       string & line(*it);
       stripWhitespace(line);
-      cookieJar->setAcceptCookies(line);
+      URI uri(line);
+      cookieJar->setAcceptCookies(uri.server());
     }
     cookieList.close();
   }
