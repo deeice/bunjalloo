@@ -62,7 +62,8 @@ RichTextArea * ViewRender::textArea()
     m_textArea = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
     m_textArea->setSize(nds::Canvas::instance().width()-7, m_textArea->font().height());
     m_textArea->addLinkListener(m_self);
-    m_textArea->setParseNewline(false);
+    bool parseNewline(m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::TEXT_PLAIN);
+    m_textArea->setParseNewline(parseNewline);
     m_self->m_scrollPane->add(m_textArea);
   }
   return m_textArea;
