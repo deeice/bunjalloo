@@ -25,11 +25,12 @@ using namespace nds;
 void drawImage(Canvas & canvas, Image & image, int startx, int starty)
 {
   const unsigned char * data = image.data();
+  const unsigned int channels = image.channels();
   canvas.fillRectangle(startx, starty, image.width(), image.height(), nds::Color(21,21,21));
   for (unsigned int y = 0; y < image.height(); ++y)
   {
-    const unsigned char * row = &data[y*image.width()*3];
-    for (unsigned int x = 0; x < image.width(); ++x, row+=3)
+    const unsigned char * row = &data[y*image.width()*channels];
+    for (unsigned int x = 0; x < image.width(); ++x, row+=channels)
     {
       canvas.drawPixel(startx+x, starty+y, RGB8(row[0], row[1], row[2]));
     }

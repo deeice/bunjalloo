@@ -71,6 +71,7 @@ Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_channels(3),
   m_data(0),
   m_palette(0)
 {
@@ -92,6 +93,7 @@ Image::Image(const char * filename, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_channels(3),
   m_data(0),
   m_palette(0)
 {
@@ -175,14 +177,17 @@ void Image::readPng(const char * filename)
    png_set_read_fn(png_ptr, (void *)&f, user_read_fn);
    // read the easy way
    png_read_info(png_ptr, info_ptr);
+
    // alpha images require this:
-   png_set_strip_alpha(png_ptr);
+   if (info_ptr->color_type & PNG_COLOR_MASK_ALPHA)
+     png_set_strip_alpha(png_ptr);
    
    // paletted images require this:
    if(info_ptr->color_type == PNG_COLOR_TYPE_PALETTE) 
    {
-     if (not m_keepPalette)
+     if (not m_keepPalette) {
        png_set_palette_to_rgb(png_ptr);
+     }
      else
      {
        png_colorp png_palette;
@@ -196,9 +201,11 @@ void Image::readPng(const char * filename)
        }
      }
    }
+
    png_set_interlace_handling(png_ptr);
    png_read_update_info(png_ptr, info_ptr);
 
+   m_channels = png_get_channels(png_ptr, info_ptr);
    m_height = info_ptr->height;
    m_width = info_ptr->width;
    m_data = (unsigned char*)malloc( info_ptr->rowbytes * m_height);
@@ -410,3 +417,7 @@ void Image::readImage(const char *filename, ImageType type)
   }
 }
 
+unsigned int Image::channels() const
+{
+  return m_channels;
+}

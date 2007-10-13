@@ -68,6 +68,8 @@ class Image
      * @return the number of colours in the palette.
      */
     unsigned int paletteSize() const;
+
+    unsigned int channels() const;
     
     /** Get a pointer to the palette data. 
      * @return the pointer to the palette data.
@@ -88,6 +90,7 @@ class Image
     unsigned int m_width;
     unsigned int m_height;
     unsigned int m_paletteSize;
+    unsigned int m_channels;
     unsigned char * m_data;
     unsigned short * m_palette;
 

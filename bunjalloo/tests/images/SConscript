@@ -18,12 +18,15 @@ if (buildTarget != 'arm7'):
     env.Elf2Arm('%s.arm'%str(program[0]),  program)
 
   # only create the .nds for the arm9 build target
+  prog = '/%s/%s'%(buildTarget,programName)
   if (buildTarget == 'arm9'):
-    arm9PN = '/arm9/%s'%programName
-    nds = testEnv.NdsTool( programName, ['#/build%s.arm'%(2*arm9PN)])
+    nds = testEnv.NdsTool( programName, ['#/build%s.arm'%(2*prog)])
     testEnv.Command( '/'.join([ str(Dir('.').srcnode().abspath), programName+'.nds' ]),
                    nds,
                    [Copy('$TARGET', '$SOURCE')]
                    )
+  else:
+    prog = '%s/arm9/%s'%(prog,programName)
+    env.Install('#/tests/images', '#/build%s'%(prog))
 
 # vim: set filetype=python :
