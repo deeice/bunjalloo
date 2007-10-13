@@ -32,7 +32,7 @@ const static nds::Color EDGE(20,20,20);
 const static nds::Color SHADOW(28,28,28);
 const static unsigned char NEWLINE('\n');
 
-static const unsigned int intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
+static const unicodeint intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
 static const UnicodeString s_delimiters(intDelimiters,6);
 static const int INDENT(16);
 

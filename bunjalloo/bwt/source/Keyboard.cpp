@@ -204,7 +204,7 @@ void Keyboard::updateRow(const char * newText, int keys, int offset)
   for (int i = 0; i < keys; ++i)
   {
     Button & key(*(Button*)m_children[i+offset]);
-    unsigned int uchar[] = { (unsigned char)newText[i]&0xff, 0};
+    unicodeint uchar[] = { (unsigned char)newText[i]&0xff, 0};
     key.setText(UnicodeString(uchar));
   }
 }
@@ -214,7 +214,7 @@ void Keyboard::createRow(int x, int y, const char * text, int keys)
   for (int i = 0; i < keys; ++i)
   {
     Button * key = new Button();
-    unsigned int uchar[] = {text[i], 0};
+    unicodeint uchar[] = {text[i], 0};
     key->setSize(KEY_WIDTH, KEY_HEIGHT);
     key->setText(UnicodeString(uchar));
     //key->setLocation(x+i*(KEY_WIDTH+1), y);
