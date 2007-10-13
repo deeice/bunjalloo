@@ -30,8 +30,6 @@ def pathless_diff_id(h):
 
 def do_cherry(branch, verbose=False):
   try:
-    exec_cmd('git-sh-setup')
-
     # get commits from branch..HEAD
     cmd = ['git-rev-parse', '--verify', '%s'%branch]
     branch_hash = exec_cmd(cmd).strip()
