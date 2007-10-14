@@ -63,7 +63,6 @@ s32 getFreeSoundChannel() {
   return -1;
 }
 
-int vcount;
 touchPosition first,tempPos;
 
 void VcountHandler() {
@@ -77,41 +76,30 @@ void VcountHandler() {
 
     tempPos = touchReadXY();
 
-    x = tempPos.x;
-    y = tempPos.y;
-    xpx = tempPos.px;
-    ypx = tempPos.py;
-    z1 = tempPos.z1;
-    z2 = tempPos.z2;
+    if ( tempPos.x == 0 || tempPos.y == 0 ) {
+      but |= (1 <<6);
+      lastbut = but;
+    } else {
+      x = tempPos.x;
+      y = tempPos.y;
+      xpx = tempPos.px;
+      ypx = tempPos.py;
+      z1 = tempPos.z1;
+      z2 = tempPos.z2;
+    }
 
   } else {
     lastbut = but;
     but |= (1 <<6);
   }
 
-  if ( vcount == 80 ) {
-    first = tempPos;
-  } else {
-    if ( abs( xpx - first.px) > 10 || 
-         abs( ypx - first.py) > 10 ||
-        (but & ( 1<<6)) ) 
-    {
-      but |= (1 <<6);
-      lastbut = but;
-    } else { 	
-      IPC->mailBusy = 1;
-      IPC->touchX	= x;
-      IPC->touchY	= y;
-      IPC->touchXpx	= xpx;
-      IPC->touchYpx	= ypx;
-      IPC->touchZ1	= z1;
-      IPC->touchZ2	= z2;
-      IPC->mailBusy = 0;
-    }
-  }
-  IPC->buttons		= but;
-  vcount ^= (80 ^ 130);
-  SetYtrigger(vcount);
+  IPC->touchX   = x;
+  IPC->touchY   = y;
+  IPC->touchXpx = xpx;
+  IPC->touchYpx = ypx;
+  IPC->touchZ1  = z1;
+  IPC->touchZ2  = z2;
+  IPC->buttons  = but;
 
 }
 
@@ -199,17 +187,16 @@ int main(int argc, char ** argv) {
 
   // must be the first thing we do...
   Wifi7 wifi;
+  irqInit();
 
-  // Reset the clock if needed
+  // Start the RTC tracking IRQ
   initClockIRQ();
 
   IPC->soundData = 0;
 
-  irqInit();
   irqSet(IRQ_VBLANK, WifiVblankHandler);
   irqEnable(IRQ_VBLANK);
   SetYtrigger(80);
-  vcount = 80;
   irqSet(IRQ_VCOUNT, VcountHandler);
   irqEnable((IRQ_MASK)(IRQ_VBLANK | IRQ_VCOUNT));
 
