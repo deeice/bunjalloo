@@ -197,18 +197,22 @@ int SDLhandler::initSound(int freq, int format)
 }
 unsigned short * SDLhandler::backgroundPaletteMem()
 {
+  m_dirty = true;
   return m_backgroundPalette;
 }
 unsigned short * SDLhandler::subBackgroundPaletteMem()
 {
+  m_dirty = true;
   return m_subBackgroundPalette;
 }
 unsigned short * SDLhandler::spritePaletteMem()
 {
+  m_dirty = true;
   return m_spritePalette;
 }
 unsigned short * SDLhandler::subSpritePaletteMem()
 {
+  m_dirty = true;
   return m_subSpritePalette;
 }
 
@@ -453,6 +457,7 @@ void SDLhandler::loadPalette(const std::string & fileName)
 #endif
 unsigned short * SDLhandler::vramMain(int offset)
 {
+  m_dirty = true;
   return &m_vramMain[offset];
 }
 
@@ -462,43 +467,47 @@ bool SDLhandler::inGap(int y) const
 }
 
 unsigned short * SDLhandler::vramSub(int offset) {
+  m_dirty = true;
   return &m_vramSub[offset];
 }
 void SDLhandler::waitVsync()
 {
   int tmpGF = m_frames;
 
-  // pallete conversions:
-  for (int i = 0; i < 256; i++)
+  if (m_dirty) 
   {
-    m_fadeLevel = m_fadeLevelMain;
-    m_whiteLevel = m_whiteLevelMain;
-    m_backgroundPaletteSDL[i] = decodeColor(m_backgroundPalette[i]);
-    m_spritePaletteSDL[i] = decodeColor(m_spritePalette[i]);
-
-    m_fadeLevel = m_fadeLevelSub;
-    m_whiteLevel = m_whiteLevelSub;
-    m_subBackgroundPaletteSDL[i] = decodeColor(m_subBackgroundPalette[i]);
-    m_subSpritePaletteSDL[i] = decodeColor(m_subSpritePalette[i]);
-#if 0
-    if (m_backgroundPaletteSDL[i] or
-        m_subBackgroundPaletteSDL[i] or
-        m_spritePaletteSDL[i] or
-        m_subSpritePaletteSDL[i])
+    // pallete conversions:
+    for (int i = 0; i < 256; i++)
     {
-      printf("%3d: %08x %08x %08x %08x\n", i, m_backgroundPaletteSDL[i],
-          m_subBackgroundPaletteSDL[i],
-          m_spritePaletteSDL[i],
-          m_subSpritePaletteSDL[i]);
-    }
-#endif
-  }
+      m_fadeLevel = m_fadeLevelMain;
+      m_whiteLevel = m_whiteLevelMain;
+      m_backgroundPaletteSDL[i] = decodeColor(m_backgroundPalette[i]);
+      m_spritePaletteSDL[i] = decodeColor(m_spritePalette[i]);
 
-  clear();
-  BackgroundHandler::render();
-  SpriteHandler::render();
-  
-  SDL_Flip(m_screen);
+      m_fadeLevel = m_fadeLevelSub;
+      m_whiteLevel = m_whiteLevelSub;
+      m_subBackgroundPaletteSDL[i] = decodeColor(m_subBackgroundPalette[i]);
+      m_subSpritePaletteSDL[i] = decodeColor(m_subSpritePalette[i]);
+#if 0
+      if (m_backgroundPaletteSDL[i] or
+          m_subBackgroundPaletteSDL[i] or
+          m_spritePaletteSDL[i] or
+          m_subSpritePaletteSDL[i])
+      {
+        printf("%3d: %08x %08x %08x %08x\n", i, m_backgroundPaletteSDL[i],
+            m_subBackgroundPaletteSDL[i],
+            m_spritePaletteSDL[i],
+            m_subSpritePaletteSDL[i]);
+      }
+#endif
+    }
+
+    clear();
+    BackgroundHandler::render();
+    SpriteHandler::render();
+
+    SDL_Flip(m_screen);
+  }
   SDL_Event event;
   while( SDL_PollEvent( &event ) ) {
     switch( event.type ) {
@@ -548,6 +557,7 @@ void SDLhandler::waitVsync()
   }
   if (m_fn)
     m_fn();
+  m_dirty = false;
 }
 
 void SDLhandler::setFade(int screen, int level)

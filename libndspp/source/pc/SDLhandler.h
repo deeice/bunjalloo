@@ -111,6 +111,8 @@ class SDLhandler
     int m_whiteLevelMain;
     int m_whiteLevelSub;
 
+    bool m_dirty;
+
     SDLhandler();
     ~SDLhandler();
 
