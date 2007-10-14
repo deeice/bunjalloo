@@ -19,6 +19,7 @@
 
 #include <map>
 #include "TextArea.h"
+#include "Link.h"
 
 class LinkListener;
 /** Class that adds clickable links, etc, to a standard TextArea. */
@@ -67,17 +68,12 @@ class RichTextArea: public TextArea
     virtual void incrLine();
 
   private:
-    enum ControlState {
-      STATE_PLAIN,
-      STATE_LINK,
-      STATE_COLOR
-    };
     /** Keep track of the current document size. */
     unsigned int m_documentSize;
     unsigned int m_nextEvent;
-    unsigned int m_nextEventType;
+    Link::EventType m_nextEventType;
     unsigned int m_paintPosition;
-    ControlState m_state;
+    Link::EventType m_state;
     typedef std::list<Link*> LinkList;
     LinkList m_links;
     // for painting:

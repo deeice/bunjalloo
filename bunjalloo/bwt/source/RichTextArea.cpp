@@ -14,7 +14,6 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "Link.h"
 #include "LinkListener.h"
 #include "Palette.h"
 #include "RichTextArea.h"
@@ -28,7 +27,7 @@ using namespace nds;
 RichTextArea::RichTextArea(Font * font) :
   TextArea(font),
   m_documentSize(0),
-  m_state(STATE_PLAIN),
+  m_state(Link::STATE_PLAIN),
   m_linkListener(0)
 {
 }
@@ -47,7 +46,7 @@ void RichTextArea::removeClickables()
 {
   for_each(m_links.begin(), m_links.end(), deleteLink);
   m_links.clear();
-  m_state = STATE_PLAIN;
+  m_state = Link::STATE_PLAIN;
 }
 
 static bool isEmpty(const UnicodeString & line)
@@ -145,14 +144,14 @@ void RichTextArea::addLink(const std::string & href)
   Link * link = new Link(href);
   link->setTextStart(m_documentSize);
   m_links.push_back(link);
-  m_state = STATE_LINK;
+  m_state = Link::STATE_LINK;
 }
 
 void RichTextArea::endLink()
 {
-  if (m_state == STATE_LINK)
+  if (m_state == Link::STATE_LINK)
   {
-    m_state = STATE_PLAIN;
+    m_state = Link::STATE_PLAIN;
     Link & link(*m_links.back());
     link.setTextEnd(m_documentSize);
     if (link.textEnd() == link.textStart())
@@ -173,16 +172,10 @@ void RichTextArea::endLink()
 
 void RichTextArea::setColor(unsigned short color)
 {
-  if (m_state == STATE_LINK)
+  if (m_state == Link::STATE_LINK)
   {
     // adjust the last link to be this color
     // e.g. an image that is a link. => green text [like this] but also a link.
-    // i.e. may have some text and an image inside a link.
-    // how can I do this? it appears to be IMPOSSIBLE. Or at least require a million flags and states.
-    // when coupled with bold, etc, it is going to piss me right off.
-    // some link <bold, but still a link> [an image.png] end link
-    // The worst of all this, is that the state is already stored correctly in the document tree, 
-    // but I can't use that here because it deals in rows newlines and spaces.
     string href = m_links.back()->href();
     endLink();
     addLink(href);
@@ -193,15 +186,15 @@ void RichTextArea::setColor(unsigned short color)
     Link * link = new Link(color);
     link->setTextStart(m_documentSize);
     m_links.push_back(link);
-    m_state = STATE_COLOR;
+    m_state = Link::STATE_COLOR;
   }
 }
 
 void RichTextArea::endColor()
 {
-  if (m_state == STATE_COLOR)
+  if (m_state == Link::STATE_COLOR)
   {
-    m_state = STATE_PLAIN;
+    m_state = Link::STATE_PLAIN;
     Link & link(*m_links.back());
     link.setTextEnd(m_documentSize);
     if (link.textEnd() == link.textStart())
@@ -211,7 +204,7 @@ void RichTextArea::endColor()
       delete &link;
     }
   }
-  else if (m_state == STATE_LINK)
+  else if (m_state == Link::STATE_LINK)
   {
     string href = m_links.back()->href();
     endLink();
@@ -311,7 +304,7 @@ void RichTextArea::handleNextEvent()
 {
   switch (m_nextEventType)
   {
-    case STATE_LINK:
+    case Link::STATE_LINK:
       if ( (*m_currentLink)->clicked() )
       {
         setTextColor(WidgetColors::LINK_CLICKED);
@@ -322,10 +315,10 @@ void RichTextArea::handleNextEvent()
       }
       m_nextEvent = (*m_currentLink)->textEnd();
       (*m_currentLink)->setClicked(false);
-      m_nextEventType = STATE_PLAIN;
+      m_nextEventType = Link::STATE_PLAIN;
       setUnderline();
       break;
-    case STATE_PLAIN:
+    case Link::STATE_PLAIN:
       setTextColor(0);
       setUnderline(false);
       if (m_currentLink != m_links.end())
@@ -340,14 +333,14 @@ void RichTextArea::handleNextEvent()
         }
       } else {
         m_nextEvent = m_documentSize;
-        m_nextEventType = STATE_PLAIN;
+        m_nextEventType = Link::STATE_PLAIN;
       }
       break;
-    case STATE_COLOR:
+    case Link::STATE_COLOR:
       setTextColor((*m_currentLink)->color());
       m_nextEvent = (*m_currentLink)->textEnd();
       (*m_currentLink)->setClicked(false);
-      m_nextEventType = STATE_PLAIN;
+      m_nextEventType = Link::STATE_PLAIN;
       setUnderline(false);
       break;
   }
@@ -405,7 +398,7 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   {
     m_currentLink = m_links.end();
     m_nextEvent = m_documentSize;
-    m_nextEventType = STATE_PLAIN;
+    m_nextEventType = Link::STATE_PLAIN;
   }
   m_paintPosition = 0;
   m_lineNumber = 0;
@@ -502,7 +495,7 @@ void RichTextArea::checkSkippedLines(int skipLines)
   {
     m_currentLink = m_links.end();
     m_nextEvent = m_documentSize;
-    m_nextEventType = STATE_PLAIN;
+    m_nextEventType = Link::STATE_PLAIN;
   }
 }
 
@@ -609,19 +602,15 @@ bool RichTextArea::touch(int x, int y)
       if (    ((unsigned int)charClicked) >= l->textStart()
           and ((unsigned int)charClicked) <= l->textEnd())
       {
-        if (l->eventType() == Link::STATE_LINK)
+        if (l->eventType() == Link::STATE_LINK and l->color() == WidgetColors::LINK_REGULAR)
         {
           l->setClicked();
-          if (m_linkListener)
-          {
-            m_linkListener->linkClicked(l);
-          }
-          break;
         }
-        else
+        if (m_linkListener)
         {
-          printf("Image clicked?\n");
+          m_linkListener->linkClicked(l);
         }
+        break;
       }
     }
     return true;
