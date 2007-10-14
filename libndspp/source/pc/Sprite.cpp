@@ -501,7 +501,11 @@ void Sprite::update() const
   if (!valid()) return;
   SpriteEntry * oam = (SpriteEntry*)m_OAM;
   //DC_FlushRange(&s_sprites[m_screen][m_index],sizeof(SpriteEntry));
-  dmaCopy(&s_sprites[m_screen][m_index], &oam[m_index], sizeof(SpriteEntry));
+  if (memcmp(&s_sprites[m_screen][m_index], &oam[m_index], sizeof(SpriteEntry)) != 0)
+  {
+    dmaCopy(&s_sprites[m_screen][m_index], &oam[m_index], sizeof(SpriteEntry));
+    SDLhandler::instance().setDirty();
+  }
 }
 
 void Sprite::initialise(bool sync)
@@ -529,19 +533,19 @@ void Sprite::copyOAM(int screen)
 {
   if (screen == 0 || screen == 2) {
     //DC_FlushRange(s_sprites[0],128*sizeof(SpriteEntry));
+    if (memcmp(s_sprites[0], OAM_SUB, 128 * sizeof(SpriteEntry)) != 0)
+    {
+      SDLhandler::instance().setDirty();
+    }
     dmaCopy(s_sprites[0], OAM, 128 * sizeof(SpriteEntry));
-    /*pSpriteEntry oam = (pSpriteEntry)OAM;
-    for (int i = 0; i < 128; i++) {
-      oam[i] = s_sprites[m_screen][i];
-    }*/
   }
   if (screen == 1 || screen == 2) {
     //DC_FlushRange(s_sprites[1],128*sizeof(SpriteEntry));
+    if (memcmp(s_sprites[1], OAM_SUB, 128 * sizeof(SpriteEntry)) != 0)
+    {
+      SDLhandler::instance().setDirty();
+    }
     dmaCopy(s_sprites[1], OAM_SUB, 128 * sizeof(SpriteEntry));
-    /*pSpriteEntry oam = (pSpriteEntry)OAM_SUB;
-    for (int i = 0; i < 128; i++) {
-      oam[i] = s_sprites[m_screen][i];
-    }*/
   }
 }
 

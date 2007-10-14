@@ -197,22 +197,22 @@ int SDLhandler::initSound(int freq, int format)
 }
 unsigned short * SDLhandler::backgroundPaletteMem()
 {
-  m_dirty = true;
+  setDirty();
   return m_backgroundPalette;
 }
 unsigned short * SDLhandler::subBackgroundPaletteMem()
 {
-  m_dirty = true;
+  setDirty();
   return m_subBackgroundPalette;
 }
 unsigned short * SDLhandler::spritePaletteMem()
 {
-  m_dirty = true;
+  setDirty();
   return m_spritePalette;
 }
 unsigned short * SDLhandler::subSpritePaletteMem()
 {
-  m_dirty = true;
+  setDirty();
   return m_subSpritePalette;
 }
 
@@ -457,7 +457,7 @@ void SDLhandler::loadPalette(const std::string & fileName)
 #endif
 unsigned short * SDLhandler::vramMain(int offset)
 {
-  m_dirty = true;
+  setDirty();
   return &m_vramMain[offset];
 }
 
@@ -467,7 +467,7 @@ bool SDLhandler::inGap(int y) const
 }
 
 unsigned short * SDLhandler::vramSub(int offset) {
-  m_dirty = true;
+  setDirty();
   return &m_vramSub[offset];
 }
 void SDLhandler::waitVsync()
@@ -598,11 +598,17 @@ void SDLhandler::mainOnBottom()
 
 unsigned short * SDLhandler::spriteGfx()
 {
+  setDirty();
   return m_spriteGfx;
 }
 
 unsigned short * SDLhandler::subSpriteGfx()
 {
+  setDirty();
   return m_subSpriteGfx;
 }
 
+void SDLhandler::setDirty()
+{
+  m_dirty = true;
+}

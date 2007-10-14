@@ -69,6 +69,7 @@ class SDLhandler
     unsigned short * spriteGfx();
     unsigned short * subSpriteGfx();
 
+    void setDirty();
     void setFade(int screen, int level);
     void setWhite(int screen, int level);
     void lcdSwap();
