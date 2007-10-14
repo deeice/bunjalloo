@@ -72,6 +72,8 @@ class Config
 
     bool useCache() const;
 
+    bool clearCache() const;
+
   private:
     static const std::string s_configFile;
     Document & m_document;
@@ -81,6 +83,7 @@ class Config
     int m_maxConnect;
     int m_toolbarTime;
     bool m_useCache;
+    bool m_clearCache;
 
     void configPathMember(const std::string & value, std::string & member);
     void handleCookies() const;

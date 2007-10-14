@@ -5,11 +5,12 @@
 
 const char * Cache::CACHE_DIR("/"DATADIR"/cache");
 
-Cache::Cache(Document & document, bool useCache):m_document(document),m_useCache(useCache)
+Cache::Cache(Document & document, bool useCache, bool clearCache)
+: m_document(document), m_useCache(useCache)
 {
   if (m_useCache)
   {
-    if ( nds::File::exists(CACHE_DIR) != nds::File::F_NONE)
+    if (clearCache and nds::File::exists(CACHE_DIR) != nds::File::F_NONE)
     {
       nds::File::rmrf(CACHE_DIR);
     }

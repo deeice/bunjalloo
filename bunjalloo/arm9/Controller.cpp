@@ -45,7 +45,7 @@ Controller::Controller()
   TextAreaFactory::setFont(new Font(m_config->font()));
   TextAreaFactory::usePaletteName(m_config->font()+".pal");
   m_view = new View(*m_document, *this);
-  m_cache = new Cache(*m_document, m_config->useCache());
+  m_cache = new Cache(*m_document, m_config->useCache(), m_config->clearCache());
 }
 
 Controller::~Controller()
