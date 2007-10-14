@@ -41,3 +41,4 @@ const unsigned short WidgetColors::SCROLLBAR_HANDLE_HELD = BRIGHT;
 
 const unsigned short WidgetColors::LINK_CLICKED = RGB5(19, 0,22);
 const unsigned short WidgetColors::LINK_REGULAR = RGB5( 0, 0,31);
+const unsigned short WidgetColors::LINK_IMAGE   = RGB5( 0,21, 0);

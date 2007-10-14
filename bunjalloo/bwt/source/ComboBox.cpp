@@ -162,12 +162,6 @@ void ComboBox::pressed(ButtonI * pressed)
   this->button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
 }
 
-ScrollPane * ComboBox::scrollPane() {
-  return (ScrollPane*)m_children.front();
-}
-const ScrollPane * ComboBox::scrollPane() const {
-  return (const ScrollPane*)m_children.front();
-}
 Button * ComboBox::button() {
   return (Button*)m_children.back();
 }

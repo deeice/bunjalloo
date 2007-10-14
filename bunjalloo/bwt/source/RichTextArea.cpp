@@ -170,7 +170,7 @@ void RichTextArea::endLink()
   }
 }
 
-void RichTextArea::setColor(unsigned short color)
+void RichTextArea::addImage(const std::string & src)
 {
   if (m_state == Link::STATE_LINK)
   {
@@ -179,18 +179,19 @@ void RichTextArea::setColor(unsigned short color)
     string href = m_links.back()->href();
     endLink();
     addLink(href);
-    m_links.back()->setColor(color);
+    m_links.back()->setColor(WidgetColors::LINK_IMAGE);
   }
   else
   {
-    Link * link = new Link(color);
+    Link * link = new Link(WidgetColors::LINK_IMAGE);
     link->setTextStart(m_documentSize);
     m_links.push_back(link);
     m_state = Link::STATE_COLOR;
   }
+  m_links.back()->setSrc(src);
 }
 
-void RichTextArea::endColor()
+void RichTextArea::endImage()
 {
   if (m_state == Link::STATE_COLOR)
   {
@@ -602,7 +603,7 @@ bool RichTextArea::touch(int x, int y)
       if (    ((unsigned int)charClicked) >= l->textStart()
           and ((unsigned int)charClicked) <= l->textEnd())
       {
-        if (l->eventType() == Link::STATE_LINK and l->color() == WidgetColors::LINK_REGULAR)
+        if (l->eventType() == Link::STATE_LINK)
         {
           l->setClicked();
         }

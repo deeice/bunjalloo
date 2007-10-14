@@ -199,7 +199,7 @@ bool ViewRender::applyFormat(const HtmlElement * element)
     UnicodeString imgText = extractImageText(element, hasAltText);
     if (not imgText.empty())
     {
-      doImage(imgText);
+      doImage(imgText, element->attribute("src"));
     }
   }
   else if (element->isa(HtmlConstants::SELECT_TAG))
@@ -271,11 +271,12 @@ void ViewRender::setBgColor(const HtmlElement * body)
   }
 }
 
-void ViewRender::doImage(const UnicodeString & imgStr)
+void ViewRender::doImage(const UnicodeString & imgStr,
+    const UnicodeString & src)
 {
-  textArea()->setColor(nds::Color(0,21,0));
+  textArea()->addImage(unicode2string(src));
   textArea()->appendText(imgStr);
-  textArea()->endColor();
+  textArea()->endImage();
 }
 
 void ViewRender::clearRadioGroups()

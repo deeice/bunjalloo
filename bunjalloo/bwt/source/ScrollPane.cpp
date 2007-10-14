@@ -413,6 +413,11 @@ void ScrollPane::setBackgroundColor(unsigned short color)
   m_backgroundColour = color;
 }
 
+unsigned short ScrollPane::backgroundColor() const
+{
+  return m_backgroundColour;
+}
+
 void ScrollPane::setPopup(Component * popup)
 {
   s_popup = popup;

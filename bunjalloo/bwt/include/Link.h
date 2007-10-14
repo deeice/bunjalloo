@@ -77,12 +77,16 @@ class Link
 
     inline unsigned short color() const;
     inline void setColor(unsigned short color);
+
+    std::string src() const;
+    void setSrc(const std::string & src);
   private:
     unsigned int m_textStart;
     unsigned int m_textEnd;
     unsigned short m_color;
     bool m_clicked;
     std::string m_anchor;
+    std::string m_src;
 };
 
 void Link::setTextStart(unsigned int startPosition)

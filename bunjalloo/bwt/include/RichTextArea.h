@@ -22,7 +22,7 @@
 #include "Link.h"
 
 class LinkListener;
-/** Class that adds clickable links, etc, to a standard TextArea. */
+/** Class that adds clickable Links, etc, to a standard TextArea. */
 class RichTextArea: public TextArea
 {
   public:
@@ -32,19 +32,20 @@ class RichTextArea: public TextArea
     /** Overridden from TextArea. */
     virtual void appendText(const UnicodeString & unicodeString);
 
-    /** Add a link to the text.
-     * @param href the document address to link to,
+    /** Add a Link to the text.
+     * @param href the document address to link to.
      */
     void addLink(const std::string & href);
 
     void add(Component * child);
 
-    /** End the link. */
+    /** End the Link. */
     void endLink();
 
-    void setColor(unsigned short color);
+    void addImage(const std::string & src);
 
-    void endColor();
+    /** End the image section.*/
+    void endImage();
 
     /** Add a listener for when a Link is clicked.
      */

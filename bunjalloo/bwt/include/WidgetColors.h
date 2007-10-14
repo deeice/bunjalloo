@@ -53,5 +53,7 @@ class WidgetColors
     static const unsigned short LINK_CLICKED;
     //!Link text under normal conditions.
     static const unsigned short LINK_REGULAR;
+    //!Link text that is an image.
+    static const unsigned short LINK_IMAGE;
 };
 #endif

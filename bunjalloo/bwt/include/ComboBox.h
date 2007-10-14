@@ -61,9 +61,19 @@ class ComboBox: public Component,
     int m_selectedIndex;
     bool m_open;
 
+  protected:
     inline ScrollPane * scrollPane();
     inline const ScrollPane * scrollPane() const;
     inline Button * button();
     
 };
+
+ScrollPane * ComboBox::scrollPane() {
+  return (ScrollPane*)m_children.front();
+}
+
+const ScrollPane * ComboBox::scrollPane() const {
+  return (const ScrollPane*)m_children.front();
+}
+
 #endif

@@ -90,6 +90,7 @@ class ScrollPane: public Component
      * @param color the color to use.
      */
     void setBackgroundColor(unsigned short color);
+    unsigned short backgroundColor() const;
 
     bool scrollBarHit(int x, int y);
 

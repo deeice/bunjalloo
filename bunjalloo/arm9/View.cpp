@@ -24,12 +24,14 @@
 #include "FormControl.h"
 #include "Keyboard.h"
 #include "Link.h"
+#include "LinkHandler.h"
 #include "TextField.h"
 #include "Toolbar.h"
 #include "ScrollPane.h"
 #include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
+#include "WidgetColors.h"
 
 using namespace std;
 const static int STEP(1);
@@ -44,7 +46,10 @@ View::View(Document & doc, Controller & c):
   m_toolbar(new Toolbar(doc, c, *this)),
   m_state(BROWSE),
   m_form(0),
-  m_dirty(true)
+  m_linkHandler(new LinkHandler(this)),
+  m_dirty(true),
+  m_lastX(0),
+  m_lastY(0)
 {
   m_scrollPane->setTopLevel();
   m_scrollPane->setLocation(0, 0);
@@ -62,6 +67,7 @@ View::~View()
   delete m_renderer;
   delete m_addressBar;
   delete m_toolbar;
+  delete m_linkHandler;
 }
 
 void View::notify()
@@ -159,8 +165,8 @@ void View::browse()
   if (keys & KEY_TOUCH)
   {
     touchPosition tp = touchReadXY();
-    int x = tp.px;
-    int y = tp.py+SCREEN_HEIGHT;
+    m_lastX = tp.px;
+    m_lastY = tp.py+SCREEN_HEIGHT;
 
     if (not m_keyboard->visible())
     {
@@ -168,14 +174,20 @@ void View::browse()
       {
         return;
       }
+      if ( m_linkHandler->visible())
+      {
+        m_dirty = m_linkHandler->touch(m_lastX, m_lastY);
+        if (m_dirty)
+          return;
+      }
     }
 
-    m_dirty = m_keyboard->touch(x, y);
+    m_dirty = m_keyboard->touch(m_lastX, m_lastY);
     if (not m_dirty)
-      m_dirty = m_scrollPane->touch(x, y);
+      m_dirty = m_scrollPane->touch(m_lastX, m_lastY);
     if (m_keyboard->visible())
       m_toolbar->setVisible(false);
-    else if (not m_scrollPane-> scrollBarHit(x, y))
+    else if (not m_scrollPane-> scrollBarHit(m_lastX, m_lastY))
       m_toolbar->setVisible(true);
   }
   if (m_refreshing > 0)
@@ -204,13 +216,29 @@ void View::pressed(ButtonI * button)
 
 void View::linkClicked(Link * link)
 {
-  m_linkHref = link->href();
-  /*
-  URI uri(m_document.uri());
-  cout << "Navigated to " << s << endl;
-  // TODO - "navigate or download"..
-  m_controller.doUri( uri.navigateTo(s).asString() );
-  */
+  // there are types of link
+  // 1) Anchor only
+  // 2) Image only
+  // 3) Image and anchor
+
+  bool isAnchor = link->eventType() == Link::STATE_LINK;
+  bool isImage  = link->color() == WidgetColors::LINK_IMAGE;
+
+  if (isAnchor and not isImage)
+  {
+    m_linkHref = link->href();
+  }
+  else if (isImage and not isAnchor)
+  {
+    // image link?
+    m_linkHref = link->src();
+  }
+  else // isAnchor and isImage
+  {
+    m_linkHandler->setLink(link);
+    m_linkHandler->setLocation(m_lastX, m_lastY);
+    m_linkHandler->setVisible();
+  }
 }
 
 void View::keyboard()
@@ -244,6 +272,7 @@ void View::tick()
     const static nds::Rectangle clip = {0, 0, nds::Canvas::instance().width(), nds::Canvas::instance().height()};
     m_scrollPane->paint(clip);
     m_keyboard->paint(clip);
+    m_linkHandler->paint(clip);
     nds::Canvas::instance().endPaint();
     m_dirty = false;
     m_toolbar->updateIcons();

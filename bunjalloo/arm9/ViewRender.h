@@ -48,7 +48,8 @@ class ViewRender
     void postFormat(const HtmlElement * element);
     void setBgColor(const HtmlElement * body);
     void renderSelect(const HtmlElement * body);
-    void doImage(const UnicodeString & unicode);
+    void doImage(const UnicodeString & unicode,
+        const UnicodeString & src);
     void renderInput(const HtmlElement * inputElement);
     void renderTextArea(const HtmlElement * inputElement);
     void clearRadioGroups();

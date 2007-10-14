@@ -22,7 +22,8 @@ Link::Link(const std::string & a) :
   m_textEnd(0),
   m_color(WidgetColors::LINK_REGULAR),
   m_clicked(false),
-  m_anchor(a)
+  m_anchor(a),
+  m_src("")
 { }
 
 Link::Link(unsigned short color) :
@@ -30,9 +31,20 @@ Link::Link(unsigned short color) :
   m_textEnd(0),
   m_color(color),
   m_clicked(false),
-  m_anchor("")
+  m_anchor(""),
+  m_src("")
 { }
 
+
+std::string Link::src() const
+{
+  return m_src;
+}
+
+void Link::setSrc(const std::string & src)
+{
+  m_src = src;
+}
 
 std::string Link::href() const
 {
