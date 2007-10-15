@@ -330,7 +330,6 @@ void ViewRender::render()
     Image * image(0);
     if (not filename.empty())
     {
-      printf("Image '%s'\n", filename.c_str());
       image = new Image(filename.c_str(), (Image::ImageType)mimeType);
     }
     ImageComponent * imageComponent = new ImageComponent(image);

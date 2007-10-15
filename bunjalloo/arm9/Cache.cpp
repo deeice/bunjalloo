@@ -75,7 +75,6 @@ bool Cache::load(const URI & uri)
     {
       m_document.reset();
       feed(cacheFile+".hdr");
-      printf("Cache hit %s\n", cacheFile.c_str());
       m_document.appendData("\r\n", 2);
       feed(cacheFile);
       return true;
