@@ -40,7 +40,7 @@ void drawImage(Canvas & canvas, Image & image, int startx, int starty)
 const char * filenames[] = {
   "test.png",
   "test.gif",
-  "test.jpeg"
+  "test.jpg"
 };
 
 int main(int argc, char * argv[])
