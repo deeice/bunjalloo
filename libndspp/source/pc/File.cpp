@@ -197,13 +197,11 @@ bool nds::File::mkdir(const char * path)
 int File::mkdir(const char * path, unsigned int mode)
 {
   std::string fullpath(toFat(path));
-  printf("Makeing dir %s\n", fullpath.c_str());
   return ::mkdir(fullpath.c_str(), mode);
 }
 
 bool File::unlink(const char * path)
 {
-  printf("rm %s\n", toFat(path).c_str());
   return ::unlink(toFat(path).c_str()) == 0;
   //return false;
 }

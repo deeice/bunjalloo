@@ -115,7 +115,6 @@ bool nds::File::mkdirCommon(const char * path)
   while (  pos != string::npos)
   {
     component = str.substr(0, pos+1);
-    printf("mkdir loop: %s\n", component.c_str());
     if (exists(component.c_str()) == F_NONE)
     {
       nds::File::mkdir(component.c_str(), 0777);
@@ -123,7 +122,6 @@ bool nds::File::mkdirCommon(const char * path)
     pos = str.find("/", pos+1);
   }
   component = str;
-  printf("mkdir end: %s\n", component.c_str());
   if (not component.empty() and component != "." and exists(component.c_str()) == F_NONE)
   {
       int result = nds::File::mkdir(component.c_str(), 0777);
