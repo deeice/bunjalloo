@@ -253,9 +253,11 @@ void Document::magicMimeType(const char * data, int length)
     {
       m_htmlDocument->parseContentType("image/gif");
     }
-    else
+    else if ((unsigned char)data[0] == 0xFF and (unsigned char)data[1] == 0xD8)
     {
-      // do nothing.
+      // naive check, but if it isn't a jpeg, then the proper
+      // isJpeg call will catch it...
+      m_htmlDocument->parseContentType("image/jpeg");
     }
   }
 }

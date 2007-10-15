@@ -38,7 +38,7 @@ def createEnv(buildTarget):
 
   env.Append( LIBPATH=['#/%s/lib'%libndsppDir])
   env.Prepend( LIBS=['ndspp-%s'%buildTarget])
-  env.Prepend( LIBS=['png','z','gif'])
+  env.Prepend( LIBS=['png','z','gif','tinyjpeg'])
   addObjCopyImageBuilders(env)
   return env
 

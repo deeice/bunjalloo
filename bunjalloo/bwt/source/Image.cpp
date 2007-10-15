@@ -19,6 +19,7 @@
 #include "File.h"
 #include "png.h"
 #include "gif_lib.h"
+#include "tinyjpeg.h"
 
 static const int PNG_BYTES_TO_CHECK = 8;
 
@@ -59,10 +60,75 @@ static bool isGif(const char *filename)
    return (strncmp(GIF_STAMP, buf, GIF_VERSION_POS) == 0);
 }
 
+class Array
+{
+  public:
+    Array(int size)
+      : m_array(new unsigned char[size]),
+      m_size(size)
+    {}
+
+    ~Array()
+    {
+      delete [] m_array;
+    }
+
+    inline operator unsigned char* () const
+    {
+      return m_array;
+    }
+
+    inline operator char* () const
+    {
+      return (char*)m_array;
+    }
+
+    inline unsigned char & operator[] (int i)
+    {
+      return m_array[i];
+    }
+
+    unsigned int length() const
+    {
+      return m_size;
+    }
+
+  private:
+    unsigned char * m_array;
+    unsigned int m_size;
+};
+
+static bool isJpeg(const char * filename)
+{
+  // this is crap. Have to read in the whole file to see if it a JPEG.
+  nds::File f;
+  f.open(filename, "rb");
+  if (f.is_open())
+  {
+    Array array(f.size());
+    // what if it runs out of memory? new does what?
+    f.read(array, array.length());
+    f.close();
+    struct jdec_private *jdec;
+    jdec = tinyjpeg_init();
+    if (jdec == 0)
+    {
+      return false;
+    }
+    if (tinyjpeg_parse_header(jdec, array, array.length())<0)
+    {
+      return false;
+    }
+    return true;
+  }
+  return false;
+}
+
 Image::ImageType Image::imageType(const char * filename)
 {
   if (isPng(filename)) return Image::ImagePNG;
   if (isGif(filename)) return Image::ImageGIF;
+  if (isJpeg(filename)) return Image::ImageJPEG;
   return Image::ImageUNKNOWN;
 }
 
@@ -388,6 +454,37 @@ void Image::readGif(const char * filename)
 
 void Image::readJpeg(const char * filename)
 {
+  m_valid = false;
+  nds::File f;
+  f.open(filename, "rb");
+  if (not f.is_open())
+  {
+    return;
+  }
+  Array array(f.size());
+  // what if it runs out of memory? new does what?
+  f.read(array, array.length());
+  f.close();
+  struct jdec_private *jdec;
+  jdec = tinyjpeg_init();
+  if (jdec == 0)
+  {
+    return;
+  }
+  if (tinyjpeg_parse_header(jdec, array, array.length())<0)
+  {
+    return;
+  }
+  tinyjpeg_get_size(jdec, &m_width, &m_height);
+  if (tinyjpeg_decode(jdec, TINYJPEG_FMT_RGB24) < 0)
+  {
+    return;
+  }
+  unsigned char * components[3];
+  tinyjpeg_get_components(jdec, components);
+  m_data = components[0];
+  m_channels = 3;
+  m_valid = true;
 }
 
 unsigned int Image::paletteSize() const

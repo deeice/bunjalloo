@@ -311,7 +311,9 @@ void ViewRender::render()
   m_textArea = 0;
   const HtmlElement * root = m_self->m_document.rootNode();
   HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
-  if (mimeType == HtmlDocument::IMAGE_PNG or mimeType == HtmlDocument::IMAGE_GIF)
+  if (mimeType == HtmlDocument::IMAGE_PNG
+      or mimeType == HtmlDocument::IMAGE_GIF
+      or mimeType == HtmlDocument::IMAGE_JPEG)
   {
     //textArea()->add();
     
