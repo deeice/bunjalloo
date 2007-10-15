@@ -42,9 +42,20 @@ URI::URI(const std::string & uriString, bool fix):
   setUri(uriString);
 }
 
+static void replace(std::string & spacey, const char * search, const char * replace)
+{
+  unsigned int space(spacey.find(search));
+  while (space != string::npos)
+  {
+    spacey.replace(space, 1, replace);
+    space = spacey.find(search, space);
+  }
+}
+
 void URI::setUri(const std::string & uriString)
 {
   string tmpUri = uriString;
+  replace(tmpUri, " ", "%20");
   unsigned int sep(tmpUri.find(":"));
   if (sep != string::npos)
   {
