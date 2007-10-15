@@ -242,3 +242,11 @@ void UriTest::testPort2()
   CPPUNIT_ASSERT_EQUAL( expectedPort, uri2.port());
 
 }
+
+void UriTest::testSpaces()
+{
+  URI uri("http://server/some file with spaces.jpeg");
+  string expectedFile = "/some%20file%20with%20spaces.jpeg";
+  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+}
