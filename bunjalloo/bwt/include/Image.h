@@ -93,6 +93,8 @@ class Image
     unsigned int m_channels;
     unsigned char * m_data;
     unsigned short * m_palette;
+    // dammit. jpeg implementation seeping out.
+    void * m_jdec;
 
     void readPng(const char *filename);
     void readGif(const char *filename);

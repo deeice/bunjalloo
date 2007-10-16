@@ -139,7 +139,8 @@ Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_height(0),
   m_channels(3),
   m_data(0),
-  m_palette(0)
+  m_palette(0),
+  m_jdec(0)
 {
   ImageType actualType(imageType(filename));
   if (actualType != type)
@@ -161,7 +162,8 @@ Image::Image(const char * filename, bool keepPalette):
   m_height(0),
   m_channels(3),
   m_data(0),
-  m_palette(0)
+  m_palette(0),
+  m_jdec(0)
 {
   ImageType type(imageType(filename));
   readImage(filename, type);
@@ -169,7 +171,14 @@ Image::Image(const char * filename, bool keepPalette):
 
 Image::~Image()
 {
-  free(m_data);
+  if (m_jdec)
+  {
+    tinyjpeg_free((struct jdec_private*)m_jdec);
+  }
+  else
+  {
+    free(m_data);
+  }
   free(m_palette);
 }
 
@@ -483,6 +492,7 @@ void Image::readJpeg(const char * filename)
   unsigned char * components[3];
   tinyjpeg_get_components(jdec, components);
   m_data = components[0];
+  m_jdec = jdec;
   m_channels = 3;
   m_valid = true;
 }
