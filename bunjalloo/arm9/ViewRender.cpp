@@ -311,6 +311,7 @@ void ViewRender::render()
   m_textArea = 0;
   const HtmlElement * root = m_self->m_document.rootNode();
   HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
+  bool useScrollPane(false);
   if (mimeType == HtmlDocument::IMAGE_PNG
       or mimeType == HtmlDocument::IMAGE_GIF
       or mimeType == HtmlDocument::IMAGE_JPEG)
@@ -334,11 +335,8 @@ void ViewRender::render()
     }
     ImageComponent * imageComponent = new ImageComponent(image);
     textArea()->add(imageComponent);
-      ScrollPane & scrollPane(*m_self->m_scrollPane);
-      scrollPane.setLocation(0,0);
-      scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-      scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-      scrollPane.scrollToPercent(0);
+    useScrollPane = true;
+
   }
   else
   {
@@ -348,12 +346,17 @@ void ViewRender::render()
     if (body->hasChildren())
     {
       walkTree(body);
-      ScrollPane & scrollPane(*m_self->m_scrollPane);
-      scrollPane.setLocation(0,0);
-      scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-      scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-      scrollPane.scrollToPercent(0);
+      useScrollPane = true;
     }
+  }
+
+  if (useScrollPane)
+  {
+    ScrollPane & scrollPane(*m_self->m_scrollPane);
+    scrollPane.setLocation(0,0);
+    scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+    scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+    scrollPane.scrollToPercent(0);
   }
 }
 

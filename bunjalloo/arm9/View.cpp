@@ -129,7 +129,6 @@ void View::browse()
 {
   u16 keys = keysDownRepeat();
   if (keys & KEY_START) {
-    // nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
     enterUrl();
   }
   if (keys & KEY_SELECT) {
@@ -137,21 +136,11 @@ void View::browse()
   }
   if (keys & KEY_DOWN) {
     // scroll down ...
-    /** FIXME - BWT
-    m_textArea->setStartLine(m_textArea->startLine()+STEP);
-    m_renderer->render();
-    */
     m_scrollPane->down();
     m_dirty = true;
   }
   if (keys & KEY_UP) {
     // scroll up ...
-    /** FIXME - BWT
-    if (m_textArea->startLine() > ((-SCREEN_HEIGHT / m_textArea->font().height()) - 1)) {
-      m_textArea->setStartLine(m_textArea->startLine()-STEP);
-      m_renderer->render();
-    }
-    */
     m_scrollPane->up();
     m_dirty = true;
   }
@@ -208,12 +197,8 @@ void View::pressed(ButtonI * button)
 {
   if (m_form)
     return;
-  // FIXME - BWT - callback for button presses
-  // Hmm, how to go from the button pressed to the form it lives in?
-  // Originally, each control had a HtmlElement associated with it.
+
   FormControl * formControl = (FormControl*)button;
-  // check for form click
-  // more complex than the link..
   m_form = formControl;
 }
 
