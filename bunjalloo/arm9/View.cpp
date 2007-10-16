@@ -132,6 +132,9 @@ void View::browse()
     // nds::Canvas::instance().fillRectangle(0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT, nds::Color(31,31,31));
     enterUrl();
   }
+  if (keys & KEY_SELECT) {
+    m_toolbar->cyclePosition();
+  }
   if (keys & KEY_DOWN) {
     // scroll down ...
     /** FIXME - BWT

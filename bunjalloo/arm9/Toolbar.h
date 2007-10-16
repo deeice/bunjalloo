@@ -27,6 +27,14 @@ class View;
 class Toolbar: public ViewI
 {
   public:
+    enum Position
+    {
+      TOP,
+      BOTTOM,
+      LEFT,
+      RIGHT
+    };
+
     Toolbar(Document & doc, Controller & cont, View & view);
     ~Toolbar();
 
@@ -38,6 +46,8 @@ class Toolbar: public ViewI
     bool touch(int x, int y);
 
     void updateIcons();
+
+    void cyclePosition();
 
     virtual void notify();
 
@@ -52,8 +62,10 @@ class Toolbar: public ViewI
     int m_timerReset;
     int m_timer;
     int m_angle;
+    Position m_position;
 
     void handlePress(int i);
+    void layout();
 
 };
 #endif

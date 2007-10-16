@@ -30,10 +30,14 @@
 
 using nds::Wifi9;
 
-static const int TOOLBAR_Y(192-17);
-static const int TOOLBAR_X(20);
+static const int TOOLBAR_Y(SCREEN_HEIGHT-17);
+static const int TOOLBAR_Y_VERT(5);
+static const int TOOLBAR_X(38);
+static const int TOOLBAR_X_RIGHT(26);
+static const int TOOLBAR_X_LEFT(10);
 static const int TOOLBAR_SEP(24);
 static const int TIMER_RESET(120);
+static const int TOOLBAR_SCREEN(0);
 
 static const int TILES_PER_ICON(8);
 enum ToolbarIcon
@@ -85,19 +89,18 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
   m_view(view),
   m_timerReset(TIMER_RESET),
   m_timer(m_timerReset),
-  m_angle(0)
+  m_angle(0),
+  m_position(BOTTOM)
 {
-  static const int screen(0);
   m_document.registerView(this);
   for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
   {
     // would be 4 tiles per sprite (16x16 = 4*8x8) 
     // but the tile count is for 4bpp tiles, 256 color 8bpp require twice as much vram.
-    nds::Sprite * sprite(new nds::Sprite(screen, 16, 16, i*TILES_PER_ICON, 256));
-    sprite->x(TOOLBAR_X + (i*TOOLBAR_SEP));
-    sprite->y(TOOLBAR_Y);
+    nds::Sprite * sprite(new nds::Sprite(TOOLBAR_SCREEN, 16, 16, i*TILES_PER_ICON, 256));
     m_sprites.push_back(sprite);
   }
+  layout();
 
   Image image("/"DATADIR"/fonts/toolbar.png", true);
   if (image.isValid())
@@ -105,11 +108,7 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
     const unsigned char * data = image.data();
     if (data)
     {
-      //nds::Canvas & canvas = nds::Canvas::instance();
-      //sprite.loadTileData(data, 8*16*16);
       unsigned short * oamData = m_sprites.front()->oamData();
-      //sprite.setAffine(256, 0, 0, 256);
-      //sprite.rotateScale(0);
 
       // need to load in 16x16 tile order
       int bytesPerRow = image.width();
@@ -150,12 +149,47 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
           }
         }
       }
-      nds::ObjectPalette p(screen);
+      nds::ObjectPalette p(TOOLBAR_SCREEN);
       p.load(image.palette(), image.paletteSize()*2);
     }
   }
   updateIcons();
   m_timerReset = m_controller.config().toolbarTimer();
+}
+
+void Toolbar::layout()
+{
+  for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
+  {
+    int x, y;
+    switch (m_position)
+    {
+      case LEFT:
+        y = TOOLBAR_Y_VERT + (i*TOOLBAR_SEP);
+        x = TOOLBAR_X_LEFT;
+        break;
+
+      case RIGHT:
+        y = TOOLBAR_Y_VERT + (i*TOOLBAR_SEP);
+        x = SCREEN_WIDTH - TOOLBAR_X_RIGHT;
+        break;
+
+      case TOP:
+        x = TOOLBAR_X + (i*TOOLBAR_SEP);
+        y = TOOLBAR_Y_VERT;
+        break;
+
+      default:
+      case BOTTOM:
+        x = TOOLBAR_X + (i*TOOLBAR_SEP);
+        y = TOOLBAR_Y;
+        break;
+    }
+    m_sprites[i]->x(x);
+    m_sprites[i]->y(y);
+  }
+  m_timer = m_timerReset;
+  setVisible();
 }
 
 static void deleteSprite(nds::Sprite * s)
@@ -195,7 +229,10 @@ void Toolbar::setVisible(bool visible)
 
 bool Toolbar::touch(int x, int y)
 {
-  const static nds::Rectangle touchZone = { TOOLBAR_X, TOOLBAR_Y, (SPRITE_END_OF_ENTRIES-1)*TOOLBAR_SEP, 18};
+  nds::Rectangle touchZone = { m_sprites[0]->x(), m_sprites[0]->y(),
+    m_sprites[SPRITE_END_OF_ENTRIES-1]->x() - m_sprites[0]->x() + m_sprites[0]->width(), 
+    m_sprites[SPRITE_END_OF_ENTRIES-1]->y() - m_sprites[0]->y() + m_sprites[0]->height()
+    };
   if (not visible())
   {
     return false;
@@ -303,4 +340,27 @@ void Toolbar::tick()
     spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
     for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
   }
+}
+
+void Toolbar::cyclePosition()
+{
+  switch (m_position)
+  {
+    case TOP:
+      m_position = RIGHT;
+      break;
+    case RIGHT:
+      m_position = BOTTOM;
+      break;
+    case BOTTOM:
+      m_position = LEFT;
+      break;
+    case LEFT:
+      m_position = TOP;
+      break;
+    default:
+      m_position = BOTTOM;
+      break;
+  }
+  layout();
 }
