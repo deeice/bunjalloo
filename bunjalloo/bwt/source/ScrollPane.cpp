@@ -229,8 +229,6 @@ void ScrollPane::paint(const nds::Rectangle & clip)
     nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
   }
 
-  // work out the total size of the scroll pane
-  showScrollBar(clip);
   nds::Rectangle realClip = clip;
   realClip.w -= m_scrollBar->width();
 
@@ -247,6 +245,11 @@ void ScrollPane::paint(const nds::Rectangle & clip)
     c->paint(thisClip);
     nds::Canvas::instance().setClip(realClip);
   }
+
+  // make sure scrollBar is drawn last, on top of everything.
+  nds::Canvas::instance().setClip(clip);
+  showScrollBar(clip);
+  nds::Canvas::instance().setClip(realClip);
 
   if (m_topLevel and s_popup != 0) {
     Rectangle bounds(s_popup->bounds());
