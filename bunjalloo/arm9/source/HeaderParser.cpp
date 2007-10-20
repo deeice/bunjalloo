@@ -262,6 +262,9 @@ void HeaderParser::value()
         rewind();
       } 
       break;
+    case '\n':
+      m_state = BEFORE_FIELD;
+      break;
     default:
       m_headerValue += m_value;
       break;
