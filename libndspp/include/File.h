@@ -74,7 +74,7 @@ namespace nds
       void open(const char * name, const char * mode="r");
 
       /** @return true if the file is open.*/
-      bool is_open();
+      bool is_open() const;
 
       /** closes the file.
        */
@@ -91,6 +91,8 @@ namespace nds
        * @param size the amount to write. If ommitted or negative, writes until 0 byte.
        */
       int write(const char * buffer, int size=-1);
+
+      bool eof() const;
 
       /** Get the size of the file in bytes.
        */

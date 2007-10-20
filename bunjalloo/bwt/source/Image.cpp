@@ -14,14 +14,21 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <memory>
 #include "libnds.h"
 #include "Image.h"
 #include "File.h"
 #include "png.h"
 #include "gif_lib.h"
-#include "tinyjpeg.h"
+#include "jpegdecoder.h"
 
+using std::auto_ptr;
 static const int PNG_BYTES_TO_CHECK = 8;
+static const int JPEG_BYTES_TO_CHECK = 11;
+static const u8 JPEG_SIGNATURE[11] = {
+  0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46,
+  0x49, 0x46, 0x00
+};
 
 static bool isPng(const char *filename)
 {
@@ -100,26 +107,20 @@ class Array
 
 static bool isJpeg(const char * filename)
 {
-  // this is crap. Have to read in the whole file to see if it a JPEG.
   nds::File f;
   f.open(filename, "rb");
   if (f.is_open())
   {
-    Array array(f.size());
-    // what if it runs out of memory? new does what?
+    Array array(JPEG_BYTES_TO_CHECK);
     f.read(array, array.length());
     f.close();
-    struct jdec_private *jdec;
-    jdec = tinyjpeg_init();
-    if (jdec == 0)
+    // skip 2 bytes.
+    array[4] = 0x00;
+    array[5] = 0x10;
+    if (memcmp((const char*)array, JPEG_SIGNATURE, JPEG_BYTES_TO_CHECK) == 0)
     {
-      return false;
+      return true;
     }
-    if (tinyjpeg_parse_header(jdec, array, array.length())<0)
-    {
-      return false;
-    }
-    return true;
   }
   return false;
 }
@@ -139,8 +140,7 @@ Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_height(0),
   m_channels(3),
   m_data(0),
-  m_palette(0),
-  m_jdec(0)
+  m_palette(0)
 {
   ImageType actualType(imageType(filename));
   if (actualType != type)
@@ -162,8 +162,7 @@ Image::Image(const char * filename, bool keepPalette):
   m_height(0),
   m_channels(3),
   m_data(0),
-  m_palette(0),
-  m_jdec(0)
+  m_palette(0)
 {
   ImageType type(imageType(filename));
   readImage(filename, type);
@@ -171,14 +170,7 @@ Image::Image(const char * filename, bool keepPalette):
 
 Image::~Image()
 {
-  if (m_jdec)
-  {
-    tinyjpeg_free((struct jdec_private*)m_jdec);
-  }
-  else
-  {
-    free(m_data);
-  }
+  free(m_data);
   free(m_palette);
 }
 
@@ -461,39 +453,110 @@ void Image::readGif(const char * filename)
   m_valid = true;
 }
 
+// create a new jpeg_decoder_file_stream
+class JpegFileStream:public jpeg_decoder_stream
+{
+  public:
+    JpegFileStream(const char * filename)
+    {
+      m_file.open(filename);
+    }
+
+    bool is_open() const
+    {
+      return m_file.is_open();
+    }
+
+    virtual int read(uchar *buf, int max_bytes_to_read, bool *Peof_flag)
+    {
+      *Peof_flag = false;
+      int read = m_file.read((char*)buf, max_bytes_to_read);
+      if (read < max_bytes_to_read)
+      {
+        *Peof_flag = m_file.eof();
+      }
+      return read;
+    }
+
+    virtual void attach(void)
+    {
+    }
+
+    virtual void detach(void)
+    {
+    }
+
+  private:
+    nds::File m_file;
+    int m_size;
+};
+
 void Image::readJpeg(const char * filename)
 {
   m_valid = false;
-  nds::File f;
-  f.open(filename, "rb");
-  if (not f.is_open())
+  auto_ptr<JpegFileStream> inputStream(new JpegFileStream(filename));
+  if (not inputStream->is_open())
   {
     return;
   }
-  Array array(f.size());
-  // what if it runs out of memory? new does what?
-  f.read(array, array.length());
-  f.close();
-  struct jdec_private *jdec;
-  jdec = tinyjpeg_init();
-  if (jdec == 0)
+  auto_ptr<jpeg_decoder> decoder( new jpeg_decoder(inputStream.get(), false));
+  if (decoder->get_error_code() != 0)
   {
     return;
   }
-  if (tinyjpeg_parse_header(jdec, array, array.length())<0)
+  m_width = decoder->get_width();
+  m_height = decoder->get_height();
+  m_channels = decoder->get_num_components();
+
+  if (decoder->begin())
   {
     return;
   }
-  tinyjpeg_get_size(jdec, &m_width, &m_height);
-  if (tinyjpeg_decode(jdec, TINYJPEG_FMT_RGB24) < 0)
+
+  m_data = (unsigned char*)malloc( m_width * m_height * m_channels);
+  if (!m_data)
   {
     return;
   }
-  unsigned char * components[3];
-  tinyjpeg_get_components(jdec, components);
-  m_data = components[0];
-  m_jdec = jdec;
-  m_channels = 3;
+
+  for (unsigned int line = 0; line < m_height; ++line)
+  {
+    void * lineOffset;
+    uint lineLength;
+    if (decoder->decode(&lineOffset, &lineLength))
+      break;
+
+    if (m_channels == 3)
+    {
+      uchar *sb = (uchar *)lineOffset;
+      uchar *db = &m_data[m_width*line*m_channels];
+      int src_bpp = decoder->get_bytes_per_pixel();
+      for (int x = m_width; x > 0; x--, sb += src_bpp, db += 3)
+      {
+        db[2] = sb[2];
+        db[1] = sb[1];
+        db[0] = sb[0];
+      }
+    }
+    else
+    {
+      //renderLine(lineOffset);
+      uchar *sb = (uchar *)lineOffset;
+      uchar *db = &m_data[m_width*line*m_channels];
+      for (int x = m_width; x > 0; x--, sb++, db += 3)
+      {
+        db[0] = sb[0];
+        db[1] = sb[0];
+        db[2] = sb[0];
+      }
+    }
+  }
+
+  if (decoder->get_error_code())
+  {
+    return;
+  }
+
   m_valid = true;
 }
 

@@ -32,8 +32,9 @@ class nds::FileImplementation
     int read(char * buffer, int amount=-1);
     int write(const char * buffer, int amount=-1);
     int size();
-    bool is_open();
+    bool is_open() const;
     void close();
+    bool eof() const;
 
   private:
     FILE * m_stream;
@@ -101,7 +102,7 @@ int FileImplementation::size()
   return fileSize;
 }
 
-bool FileImplementation::is_open()
+bool FileImplementation::is_open() const
 {
   return m_stream != 0;
 }
@@ -112,6 +113,10 @@ void FileImplementation::close()
   m_stream = 0;
 }
 
+bool FileImplementation::eof() const
+{
+  return feof(m_stream) != 0;
+}
 // File proxy as follows:
 File::File():m_details(new FileImplementation())
 {}
@@ -150,12 +155,17 @@ int File::write(const char * buffer, int amount)
   return m_details->write(buffer, amount);
 }
 
+bool File::eof() const
+{
+  return m_details->eof();
+}
+
 int File::size()
 {
   return m_details->size();
 }
 
-bool File::is_open()
+bool File::is_open() const
 {
   return m_details->is_open();
 }
