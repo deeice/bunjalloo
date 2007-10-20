@@ -34,6 +34,7 @@ class ParserTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testMetaIso );
   CPPUNIT_TEST( testSlashdot );
   CPPUNIT_TEST( testNumbers );
+  CPPUNIT_TEST( testNewline );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -49,6 +50,7 @@ public:
   void testMetaIso();
   void testSlashdot();
   void testNumbers();
+  void testNewline();
 
   void readFile(const char * fileName);
 private:

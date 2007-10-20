@@ -158,3 +158,12 @@ void ParserTest::testNumbers()
   int size = m_htmlParser->m_tags.size();
   CPPUNIT_ASSERT_EQUAL( 1 , size);
 }
+
+void ParserTest::testNewline()
+{
+  readFile("newline.txt");
+  // feed data in steps, to make sure we are initialising things correctly.
+  m_headerParser->feed(m_data, m_length);
+  int size = m_htmlParser->m_tags.size();
+  CPPUNIT_ASSERT_EQUAL( 1 , size);
+}
