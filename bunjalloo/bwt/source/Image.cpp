@@ -29,6 +29,8 @@ static const u8 JPEG_SIGNATURE[11] = {
   0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46,
   0x49, 0x46, 0x00
 };
+static const unsigned int MAX_IMAGE_WIDTH(250);
+static const unsigned int MAX_IMAGE_HEIGHT(SCREEN_HEIGHT*2);
 
 static bool isPng(const char *filename)
 {
@@ -117,7 +119,7 @@ static bool isJpeg(const char * filename)
     // skip 2 bytes.
     array[4] = 0x00;
     array[5] = 0x10;
-    if (memcmp((const char*)array, JPEG_SIGNATURE, JPEG_BYTES_TO_CHECK) == 0)
+    if (memcmp((const char*)array, JPEG_SIGNATURE, 2/* JPEG_BYTES_TO_CHECK*/) == 0)
     {
       return true;
     }
@@ -138,6 +140,7 @@ Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_paletteSize(0),
   m_channels(3),
   m_data(0),
   m_palette(0)
@@ -160,6 +163,7 @@ Image::Image(const char * filename, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_paletteSize(0),
   m_channels(3),
   m_data(0),
   m_palette(0)
@@ -190,9 +194,57 @@ unsigned int Image::height() const
 }
 
 // RGB data.
-const unsigned char * Image::data() const
+const unsigned short * Image::data() const
 {
   return m_data;
+}
+
+void Image::renderLine(const unsigned char * line, int n)
+{
+  // copy the data in m_channels format to the m_data at line n
+  int yScale = (m_height * 256) / m_realHeight;
+
+  // draw 0.. yScale, yScale*2, yScale*3 pixels
+  int lastN = n-1;
+  if ( ((lastN * yScale)/256) == ((n*yScale)/256))
+  {
+    return;
+  }
+
+  int xScale = (m_width * 256) / m_realWidth;
+
+  u16 *db = &m_data[m_width*m_currentLine];
+  if (m_paletteSize)
+  {
+    // has palette data - just copy 1 byte to data
+  }
+  else
+  {
+    for (int x = m_realWidth; x > 0; x--, line += m_bpp, db++)
+    {
+      int lastX = x-1;
+      if (((lastX * xScale)/256) == ((x*xScale)/256))
+      {
+        printf("skip line %d %X (%x %x %x)\n", n, db[0], line[0], line[1], line[2]);
+        continue;
+      }
+      if (m_channels == 3)
+      {
+        db[0] = RGB8(line[0], line[1], line[2]);
+      }
+      else
+      {
+        db[0] = RGB8(line[0], line[0], line[0]);
+      }
+      printf("Current line %d %X (%x %x %x)\n", n, db[0], line[0], line[1], line[2]);
+      /*
+         db[0] = line[0];
+         db[1] = line[1];
+         db[2] = line[2];
+         */
+    }
+  }
+  m_currentLine++;
 }
 
 static void user_read_fn(png_structp png_ptr, unsigned char *data, png_size_t size)
@@ -275,7 +327,7 @@ void Image::readPng(const char * filename)
    m_channels = png_get_channels(png_ptr, info_ptr);
    m_height = info_ptr->height;
    m_width = info_ptr->width;
-   m_data = (unsigned char*)malloc( info_ptr->rowbytes * m_height);
+   m_data = (unsigned short*)malloc( info_ptr->rowbytes * m_height);
    png_bytep * row_pointers = (png_bytep *)malloc(sizeof(png_bytep) * m_height);
    if (row_pointers == 0)
    {
@@ -437,8 +489,8 @@ void Image::readGif(const char * filename)
 
   // map ScreenBuffer to m_data
   ColorMapObject * ColorMap = (GifFile->Image.ColorMap ? GifFile->Image.ColorMap : GifFile->SColorMap);
-  m_data = (unsigned char * ) malloc(3*m_width*m_height);
-  unsigned char * dest = m_data;
+  m_data = (unsigned short * ) malloc(3*m_width*m_height);
+  unsigned short * dest = m_data;
   for (unsigned int i = 0; i < m_height; i++)
   {
     unsigned char * GifRow = &ScreenBuffer[i*m_width];
@@ -460,6 +512,10 @@ class JpegFileStream:public jpeg_decoder_stream
     JpegFileStream(const char * filename)
     {
       m_file.open(filename);
+    }
+
+    ~JpegFileStream()
+    {
     }
 
     bool is_open() const
@@ -491,6 +547,50 @@ class JpegFileStream:public jpeg_decoder_stream
     int m_size;
 };
 
+void Image::calculateScale()
+{
+  // calc the ratios
+  int xRatio = (m_realWidth * 256) / m_realHeight;
+  // e.g. 400x200 => xRatio = 2
+  int yRatio = (m_realHeight * 256) / m_realWidth;
+  // e.g. 400x200 => yRatio = 0.5
+
+  if (m_realWidth > MAX_IMAGE_WIDTH or m_realHeight > MAX_IMAGE_HEIGHT)
+  {
+    // scale so that fits on screen.
+    if (xRatio > yRatio)
+    {
+      if (m_realWidth > MAX_IMAGE_WIDTH)
+      {
+        m_width = MAX_IMAGE_WIDTH;
+        m_height = (m_width * yRatio)/256;
+      }
+      else
+      {
+        m_height = MAX_IMAGE_HEIGHT;
+        m_width = (m_height * xRatio)/256;
+      }
+    }
+    else
+    {
+      if (m_realHeight > MAX_IMAGE_HEIGHT)
+      {
+        m_height = MAX_IMAGE_HEIGHT;
+        m_width = (m_height * xRatio)/256;
+      }
+      else
+      {
+        m_width = MAX_IMAGE_WIDTH;
+        m_height = (m_width * yRatio)/256;
+      }
+    }
+  }
+  else
+  {
+    m_width = m_realWidth;
+    m_height = m_realHeight;
+  }
+}
 void Image::readJpeg(const char * filename)
 {
   m_valid = false;
@@ -504,28 +604,34 @@ void Image::readJpeg(const char * filename)
   {
     return;
   }
-  m_width = decoder->get_width();
-  m_height = decoder->get_height();
+  m_realWidth = decoder->get_width();
+  m_realHeight = decoder->get_height();
   m_channels = decoder->get_num_components();
+  m_bpp = decoder->get_bytes_per_pixel();
+  calculateScale();
 
   if (decoder->begin())
   {
     return;
   }
 
-  m_data = (unsigned char*)malloc( m_width * m_height * m_channels);
+  m_data = (unsigned short*)malloc( m_width * m_height * sizeof(u16));
   if (!m_data)
   {
     return;
   }
+  m_currentLine = 0;
 
-  for (unsigned int line = 0; line < m_height; ++line)
+  for (unsigned int line = 0; line < m_realHeight; ++line)
   {
     void * lineOffset;
     uint lineLength;
     if (decoder->decode(&lineOffset, &lineLength))
       break;
 
+    m_bpp = decoder->get_bytes_per_pixel();
+    renderLine((const unsigned char*)lineOffset, line);
+#if 0
     if (m_channels == 3)
     {
       uchar *sb = (uchar *)lineOffset;
@@ -540,7 +646,6 @@ void Image::readJpeg(const char * filename)
     }
     else
     {
-      //renderLine(lineOffset);
       uchar *sb = (uchar *)lineOffset;
       uchar *db = &m_data[m_width*line*m_channels];
       for (int x = m_width; x > 0; x--, sb++, db += 3)
@@ -550,6 +655,7 @@ void Image::readJpeg(const char * filename)
         db[2] = sb[0];
       }
     }
+#endif
   }
 
   if (decoder->get_error_code())

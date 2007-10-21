@@ -105,7 +105,7 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
   Image image("/"DATADIR"/fonts/toolbar.png", true);
   if (image.isValid())
   {
-    const unsigned char * data = image.data();
+    const unsigned short * data = image.data();
     if (data)
     {
       unsigned short * oamData = m_sprites.front()->oamData();
@@ -133,7 +133,7 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
               // index into oam:
               unsigned short * oamSlot = &oamData[oamIndex*8*8/2];
               oamIndex++;
-              const unsigned char * src = data + (tileY*8*bytesPerRow) + (tileX*8);
+              const unsigned short * src = data + (tileY*8*bytesPerRow) + (tileX*8);
               for (int row = 0; row < 8; row++)
               {
                 for (int col = 0; col < 4; col++, src+=2)

@@ -81,17 +81,27 @@ class Image
     /** Get the RGB or indexed image data.
      * @return pointer to the pixel data.
      */
-    const unsigned char * data() const;
+    const unsigned short * data() const;
 
   private:
 
     bool m_valid;
     bool m_keepPalette;
+    
+    // scaled w, h
     unsigned int m_width;
     unsigned int m_height;
+    unsigned int m_currentLine;
+
+    // actual w, h of image
+    unsigned int m_realWidth;
+    unsigned int m_realHeight;
+    // bits per pixel when decoding the line
+    unsigned int m_bpp;
+
     unsigned int m_paletteSize;
     unsigned int m_channels;
-    unsigned char * m_data;
+    unsigned short * m_data;
     unsigned short * m_palette;
 
     void readPng(const char *filename);
@@ -99,6 +109,10 @@ class Image
     void readJpeg(const char *filename);
     void readImage(const char *filename, ImageType type);
     static ImageType imageType(const char * filename);
+
+    /** Render line n from the given data. */
+    void renderLine(const unsigned char * line, int n);
+    void calculateScale();
 
 };
 #endif
