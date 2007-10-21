@@ -64,7 +64,8 @@ def addBinBuilder(env):
       else:
         return """ndstool -c %s -7 %s -9 %s > /dev/null """%(target[0], source[0], source[1], source[2])
     else:
-        return """ndstool -c %s -9 %s > /dev/null """%(target[0], source[0])
+        return """ndstool -c %s -7 %s -9 %s > /dev/null """%(target[0], os.environ[DEVKITPRO]+'/libnds/basic.arm7', source[0])
+
   bld = Builder(generator=generate_nds, suffix='.nds')
   env.Append( BUILDERS = { 'NdsTool': bld } )
 
