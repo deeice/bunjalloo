@@ -9,6 +9,7 @@ tests/element/tester
 tests/gui-test/gui-test.nds
 tests/images/images.nds
 tests/images/images
+tests/bwtimage/tester
 tests/parameters/tester
 tests/parser/tester
 tests/uri/tester
