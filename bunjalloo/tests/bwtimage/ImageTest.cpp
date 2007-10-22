@@ -35,22 +35,54 @@ void ImageTest::tearDown()
 void ImageTest::testWide()
 {
   m_image = new Image("inputs/wide.jpg");
-  /*
   CPPUNIT_ASSERT(m_image->isValid());
   int expected = 250;
   int result = m_image->width();
   CPPUNIT_ASSERT_EQUAL(expected, result);
-  */
 }
 
 void ImageTest::testTall()
 {
   m_image = new Image("inputs/tall.jpg");
-  /*
   CPPUNIT_ASSERT(m_image->isValid());
   int expected = 192*2;
   int result = m_image->height();
   CPPUNIT_ASSERT_EQUAL(expected, result);
-  */
+}
+
+void ImageTest::testWidePng()
+{
+  m_image = new Image("inputs/wide.png");
+  CPPUNIT_ASSERT(m_image->isValid());
+  int expected = 250;
+  int result = m_image->width();
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+}
+
+void ImageTest::testTallPng()
+{
+  m_image = new Image("inputs/tall.png");
+  CPPUNIT_ASSERT(m_image->isValid());
+  int expected = 192*2;
+  int result = m_image->height();
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+}
+
+void ImageTest::testWideGif()
+{
+  m_image = new Image("inputs/wide.gif");
+  CPPUNIT_ASSERT(m_image->isValid());
+  int expected = 250;
+  int result = m_image->width();
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+}
+
+void ImageTest::testTallGif()
+{
+  m_image = new Image("inputs/tall.gif");
+  CPPUNIT_ASSERT(m_image->isValid());
+  int expected = 192*2;
+  int result = m_image->height();
+  CPPUNIT_ASSERT_EQUAL(expected, result);
 }
 

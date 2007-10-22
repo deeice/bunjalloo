@@ -39,8 +39,8 @@ void drawImage(Canvas & canvas, Image & image, int startx, int starty)
 }
 
 const char * filenames[] = {
-  "test.png",
   "test.gif",
+  "test.png",
   "test.jpg"
 };
 
@@ -51,7 +51,7 @@ int main(int argc, char * argv[])
   Canvas & canvas = Canvas::instance();
   canvas.fillRectangle(0, 0, canvas.width(), canvas.height(), nds::Color(31,21,21));
   int y = 0;
-  for (int i = 2; i < 3; ++i)
+  for (int i = 0; i < 3; ++i)
   {
     Image img(filenames[i]);
     if (img.isValid())

@@ -26,6 +26,10 @@ class ImageTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST_SUITE( ImageTest );
     CPPUNIT_TEST( testWide );
     CPPUNIT_TEST( testTall );
+    CPPUNIT_TEST( testWidePng );
+    CPPUNIT_TEST( testTallPng );
+    CPPUNIT_TEST( testWideGif );
+    CPPUNIT_TEST( testTallGif );
     CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -33,6 +37,10 @@ class ImageTest : public CPPUNIT_NS::TestFixture
     void tearDown();
     void testWide();
     void testTall();
+    void testWidePng();
+    void testTallPng();
+    void testWideGif();
+    void testTallGif();
   private:
     Image * m_image;
 
