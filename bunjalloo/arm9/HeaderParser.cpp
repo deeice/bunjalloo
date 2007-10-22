@@ -194,7 +194,6 @@ void HeaderParser::parseError()
     return;
   }
   // woops "this should never happen" so catch it when it does.
-  assert(m_state != PARSE_ERROR);
   m_position = m_end;
 }
 
@@ -357,7 +356,6 @@ void HeaderParser::httpResponse()
     m_state = BEFORE_FIELD;
   } else {
     m_state = PARSE_ERROR;
-    assert(m_state != PARSE_ERROR);
   }
 }
   
