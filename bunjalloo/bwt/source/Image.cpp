@@ -29,6 +29,8 @@ static const u8 JPEG_SIGNATURE[11] = {
   0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46,
   0x49, 0x46, 0x00
 };
+static const unsigned int MAX_IMAGE_WIDTH(250);
+static const unsigned int MAX_IMAGE_HEIGHT(SCREEN_HEIGHT*2);
 
 static bool isPng(const char *filename)
 {
@@ -117,7 +119,7 @@ static bool isJpeg(const char * filename)
     // skip 2 bytes.
     array[4] = 0x00;
     array[5] = 0x10;
-    if (memcmp((const char*)array, JPEG_SIGNATURE, JPEG_BYTES_TO_CHECK) == 0)
+    if (memcmp((const char*)array, JPEG_SIGNATURE, 2/* JPEG_BYTES_TO_CHECK*/) == 0)
     {
       return true;
     }
@@ -138,6 +140,7 @@ Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_paletteSize(0),
   m_channels(3),
   m_data(0),
   m_palette(0)
@@ -160,6 +163,7 @@ Image::Image(const char * filename, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_paletteSize(0),
   m_channels(3),
   m_data(0),
   m_palette(0)
@@ -190,9 +194,57 @@ unsigned int Image::height() const
 }
 
 // RGB data.
-const unsigned char * Image::data() const
+const unsigned short * Image::data() const
 {
   return m_data;
+}
+
+void Image::renderLine(const unsigned char * line, int n)
+{
+  // copy the data in m_channels format to the m_data at line n
+  int yScale = (m_height * 256) / m_realHeight;
+
+  // draw 0.. yScale, yScale*2, yScale*3 pixels
+  int lastN = n-1;
+  if ( ((lastN * yScale)/256) == ((n*yScale)/256))
+  {
+    return;
+  }
+
+  int xScale = (m_width * 256) / m_realWidth;
+
+  //printf("m_currentLine %d\n", m_currentLine);
+  u16 *db = &m_data[m_width*m_currentLine];
+  for (int x = m_realWidth; x > 0; x--, line += m_bpp)
+  {
+    int lastX = x-1;
+    if (((lastX * xScale)/256) == ((x*xScale)/256))
+    {
+      continue;
+    }
+    if (m_channels >= 3)
+    {
+      // standard RGB or RGBA images.
+      db[0] = RGB8(line[0], line[1], line[2]);
+    }
+    else if (m_paletteSize == 0)
+    {
+      // Gray scale images.
+      db[0] = RGB8(line[0], line[0], line[0]);
+    }
+    else if (m_keepPalette)
+    {
+      // Palettized images, keep the palette indices.
+      db[0] = line[0];
+    }
+    else
+    {
+      // Palettized images, convert from palette to colour.
+      db[0] = m_palette[line[0]];
+    }
+    db++;
+  }
+  m_currentLine++;
 }
 
 static void user_read_fn(png_structp png_ptr, unsigned char *data, png_size_t size)
@@ -253,6 +305,7 @@ void Image::readPng(const char * filename)
    if(info_ptr->color_type == PNG_COLOR_TYPE_PALETTE) 
    {
      if (not m_keepPalette) {
+       m_paletteSize = 0;
        png_set_palette_to_rgb(png_ptr);
      }
      else
@@ -269,28 +322,29 @@ void Image::readPng(const char * filename)
      }
    }
 
-   png_set_interlace_handling(png_ptr);
+   int number_passes = png_set_interlace_handling(png_ptr);
    png_read_update_info(png_ptr, info_ptr);
 
-   m_channels = png_get_channels(png_ptr, info_ptr);
-   m_height = info_ptr->height;
-   m_width = info_ptr->width;
-   m_data = (unsigned char*)malloc( info_ptr->rowbytes * m_height);
-   png_bytep * row_pointers = (png_bytep *)malloc(sizeof(png_bytep) * m_height);
-   if (row_pointers == 0)
-   {
-     return;
-   }
-   for (unsigned int y = 0; y < m_height; y++)
-   {
-     row_pointers[y] = (png_bytep)(m_data + (info_ptr->rowbytes * y));
-   }
 
-   png_read_image(png_ptr, row_pointers);
+   m_realWidth =info_ptr->width; 
+   m_realHeight =info_ptr->height;
+   m_channels = png_get_channels(png_ptr, info_ptr);
+   m_bpp = m_channels;
+   calculateScale();
+   m_data = (unsigned short*)malloc( m_width * m_height * sizeof(u16));
+
+   png_bytep rowBuffer = (png_bytep)malloc(sizeof(png_bytep) * info_ptr->rowbytes);
+   for (int pass = 0; pass < number_passes; pass++)
+   {
+     for (unsigned int line = 0; line < m_realHeight; line++)
+     {
+       png_read_row(png_ptr, rowBuffer, png_bytep_NULL);
+       renderLine((const unsigned char*)rowBuffer, line);
+     }
+   }
+   free(rowBuffer);
 
    /* clean up after the read, and free any memory allocated - REQUIRED */
-   // clear up row pointers - now everything is in m_data
-   free(row_pointers);
    png_destroy_read_struct(&png_ptr, &info_ptr, png_infopp_NULL);
 
    /* that's it */
@@ -349,80 +403,113 @@ static const int InterlacedJumps[] = { 8, 8, 4, 2 };
 void Image::readGif(const char * filename)
 {
   m_valid = false;
-  GifClass GifFile(filename);
-  if (GifFile == 0)
+  GifClass gifFile(filename);
+  if (gifFile == 0)
   {
     return;
   }
-  m_width = GifFile->SWidth;
-  m_height = GifFile->SHeight;
-
-  // this code is adapted from giflib's gif2rgb.c utility program.
-  // ScreenBuffer holds the index into palette values.
-  // FIXME: this is not very good yet - if the image is too big, what then?
-  // also, it allocates 4 * the image width*height
-  unsigned char * ScreenBuffer = (unsigned char*)malloc( m_height * m_width );
-  if (ScreenBuffer == 0) {
+  m_realWidth = gifFile->SWidth;
+  m_realHeight = gifFile->SHeight;
+  m_channels = 1;
+  m_bpp = m_channels;
+  calculateScale();
+  m_data = (unsigned short*)malloc( m_width * m_height * sizeof(u16));
+  if (!m_data)
+  {
     return;
   }
-  GifFile.setScreenBuffer(ScreenBuffer);
 
-  for (int i = 0; i < GifFile->SWidth*GifFile->SHeight; i++)
+  // map ScreenBuffer to m_data
+  ColorMapObject * colorMap = (gifFile->Image.ColorMap ? gifFile->Image.ColorMap : gifFile->SColorMap);
+  m_paletteSize = colorMap->ColorCount;
+  m_palette = (unsigned short*)malloc(sizeof(unsigned short) * m_paletteSize);
+  if (!m_palette)
   {
-    ScreenBuffer[i] = GifFile->SBackGroundColor;
+    return;
   }
 
-  GifRecordType RecordType;
+  for (unsigned int i = 0; i < m_paletteSize; ++i)
+  {
+    GifColorType * colorMapEntry = &colorMap->Colors[i];
+    m_palette[i] = RGB8(colorMapEntry->Red, colorMapEntry->Green, colorMapEntry->Blue);
+  }
+
+  // initialise m_data to bg color
+  for (unsigned int i = 0; i < m_width * m_height; i++)
+  {
+    if (m_keepPalette)
+    {
+      m_data[i] = gifFile->SBackGroundColor;
+    }
+    else
+    {
+      m_data[i] = m_palette[gifFile->SBackGroundColor];
+    }
+  }
+
+  u8 * rowBuffer = new u8[m_realWidth];
+  GifRecordType recordType;
   do {
-    GifByteType *Extension;
-    int Row, Col, Width, Height, ExtCode;
-    if (DGifGetRecordType(GifFile, &RecordType) == GIF_ERROR) {
+    GifByteType *extension;
+    if (DGifGetRecordType(gifFile, &recordType) == GIF_ERROR) {
       return;
     }
-    switch (RecordType) {
+    switch (recordType) {
       case IMAGE_DESC_RECORD_TYPE:
-        if (DGifGetImageDesc(GifFile) == GIF_ERROR) {
-          return;
-        }
-        Row = GifFile->Image.Top; /* Image Position relative to Screen. */
-        Col = GifFile->Image.Left;
-        Width = GifFile->Image.Width;
-        Height = GifFile->Image.Height;
-
-        if ((GifFile->Image.Left + GifFile->Image.Width) > GifFile->SWidth 
-            or (GifFile->Image.Top + GifFile->Image.Height) > GifFile->SHeight)
         {
-          return;
-        }
-        if (GifFile->Image.Interlace) {
-          /* Need to perform 4 passes on the images: */
-          for (int i = 0; i < 4; i++)
-            for (int j = Row + InterlacedOffset[i]; j < Row + Height;
-                j += InterlacedJumps[i])
+          if (DGifGetImageDesc(gifFile) == GIF_ERROR) {
+            return;
+          }
+          int row = gifFile->Image.Top; /* Image Position relative to Screen. */
+          int col = gifFile->Image.Left;
+          int width = gifFile->Image.Width;
+          int height = gifFile->Image.Height;
+
+          if ((col + width) > gifFile->SWidth
+              or (row + height) > gifFile->SHeight)
+          {
+            return;
+          }
+          if (gifFile->Image.Interlace) {
+            /* Need to perform 4 passes on the images: */
+            for (int i = 0; i < 4; i++)
             {
-              if (DGifGetLine(GifFile, &ScreenBuffer[j*m_width +  Col],
-                    Width) == GIF_ERROR)
+              m_currentLine = 0;
+              for (int j = row + InterlacedOffset[i]; j < row + height;
+                  j += InterlacedJumps[i])
+              {
+                if (DGifGetLine(gifFile, rowBuffer, width) == GIF_ERROR)
+                {
+                  return;
+                }
+                //printf("renderLine j %d\n", j);
+                renderLine(rowBuffer, j-row);
+              }
+            }
+          }
+          else {
+            m_currentLine = 0;
+            for (int i = 0; i < height; i++, row++) {
+              if (DGifGetLine(gifFile, rowBuffer, width) == GIF_ERROR) 
               {
                 return;
               }
-            }
-        }
-        else {
-          for (int i = 0; i < Height; i++, Row++) {
-            if (DGifGetLine(GifFile, &ScreenBuffer[ Row*m_width+Col], Width) == GIF_ERROR) 
-            {
-              return;
+              //printf("renderLine i %d\n", i);
+              renderLine(rowBuffer, i);
             }
           }
         }
         break;
       case EXTENSION_RECORD_TYPE:
         /* Skip any extension blocks in file: */
-        if (DGifGetExtension(GifFile, &ExtCode, &Extension) == GIF_ERROR) {
-          return;
+        {
+          int extCode;
+          if (DGifGetExtension(gifFile, &extCode, &extension) == GIF_ERROR) {
+            return;
+          }
         }
-        while (Extension != NULL) {
-          if (DGifGetExtensionNext(GifFile, &Extension) == GIF_ERROR) {
+        while (extension != NULL) {
+          if (DGifGetExtensionNext(gifFile, &extension) == GIF_ERROR) {
             return;
           }
         }
@@ -433,23 +520,8 @@ void Image::readGif(const char * filename)
         break;
     }
   }
-  while (RecordType != TERMINATE_RECORD_TYPE);
+  while (recordType != TERMINATE_RECORD_TYPE);
 
-  // map ScreenBuffer to m_data
-  ColorMapObject * ColorMap = (GifFile->Image.ColorMap ? GifFile->Image.ColorMap : GifFile->SColorMap);
-  m_data = (unsigned char * ) malloc(3*m_width*m_height);
-  unsigned char * dest = m_data;
-  for (unsigned int i = 0; i < m_height; i++)
-  {
-    unsigned char * GifRow = &ScreenBuffer[i*m_width];
-    for (unsigned int j = 0; j < m_width; j++)
-    {
-      GifColorType * ColorMapEntry = &ColorMap->Colors[GifRow[j]];
-      *dest++ = ColorMapEntry->Red;
-      *dest++ = ColorMapEntry->Green;
-      *dest++ = ColorMapEntry->Blue;
-    }
-  }
   m_valid = true;
 }
 
@@ -460,6 +532,10 @@ class JpegFileStream:public jpeg_decoder_stream
     JpegFileStream(const char * filename)
     {
       m_file.open(filename);
+    }
+
+    ~JpegFileStream()
+    {
     }
 
     bool is_open() const
@@ -491,6 +567,51 @@ class JpegFileStream:public jpeg_decoder_stream
     int m_size;
 };
 
+void Image::calculateScale()
+{
+  // calc the ratios
+  int xRatio = (m_realWidth * 256) / m_realHeight;
+  // e.g. 400x200 => xRatio = 2
+  int yRatio = (m_realHeight * 256) / m_realWidth;
+  // e.g. 400x200 => yRatio = 0.5
+  m_currentLine = 0;
+
+  if (m_realWidth > MAX_IMAGE_WIDTH or m_realHeight > MAX_IMAGE_HEIGHT)
+  {
+    // scale so that fits on screen.
+    if (xRatio > yRatio)
+    {
+      if (m_realWidth > MAX_IMAGE_WIDTH)
+      {
+        m_width = MAX_IMAGE_WIDTH;
+        m_height = (m_width * yRatio)/256;
+      }
+      else
+      {
+        m_height = MAX_IMAGE_HEIGHT;
+        m_width = (m_height * xRatio)/256;
+      }
+    }
+    else
+    {
+      if (m_realHeight > MAX_IMAGE_HEIGHT)
+      {
+        m_height = MAX_IMAGE_HEIGHT;
+        m_width = (m_height * xRatio)/256;
+      }
+      else
+      {
+        m_width = MAX_IMAGE_WIDTH;
+        m_height = (m_width * yRatio)/256;
+      }
+    }
+  }
+  else
+  {
+    m_width = m_realWidth;
+    m_height = m_realHeight;
+  }
+}
 void Image::readJpeg(const char * filename)
 {
   m_valid = false;
@@ -504,52 +625,31 @@ void Image::readJpeg(const char * filename)
   {
     return;
   }
-  m_width = decoder->get_width();
-  m_height = decoder->get_height();
+  m_realWidth = decoder->get_width();
+  m_realHeight = decoder->get_height();
   m_channels = decoder->get_num_components();
+  calculateScale();
 
   if (decoder->begin())
   {
     return;
   }
 
-  m_data = (unsigned char*)malloc( m_width * m_height * m_channels);
+  m_data = (unsigned short*)malloc( m_width * m_height * sizeof(u16));
   if (!m_data)
   {
     return;
   }
 
-  for (unsigned int line = 0; line < m_height; ++line)
+  for (unsigned int line = 0; line < m_realHeight; ++line)
   {
     void * lineOffset;
     uint lineLength;
     if (decoder->decode(&lineOffset, &lineLength))
       break;
 
-    if (m_channels == 3)
-    {
-      uchar *sb = (uchar *)lineOffset;
-      uchar *db = &m_data[m_width*line*m_channels];
-      int src_bpp = decoder->get_bytes_per_pixel();
-      for (int x = m_width; x > 0; x--, sb += src_bpp, db += 3)
-      {
-        db[2] = sb[2];
-        db[1] = sb[1];
-        db[0] = sb[0];
-      }
-    }
-    else
-    {
-      //renderLine(lineOffset);
-      uchar *sb = (uchar *)lineOffset;
-      uchar *db = &m_data[m_width*line*m_channels];
-      for (int x = m_width; x > 0; x--, sb++, db += 3)
-      {
-        db[0] = sb[0];
-        db[1] = sb[0];
-        db[2] = sb[0];
-      }
-    }
+    m_bpp = decoder->get_bytes_per_pixel();
+    renderLine((const unsigned char*)lineOffset, line);
   }
 
   if (decoder->get_error_code())
