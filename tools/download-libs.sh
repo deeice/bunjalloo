@@ -1,6 +1,6 @@
 #!/bin/sh
 
-LIBPNG=libpng-1.2.19
+LIBPNG=libpng-1.2.22
 ZLIB=zlib-1.2.3
 
 if [ ! -e ${LIBPNG}.tar.bz2 ] ; then wget ftp://ftp.simplesystems.org/pub/libpng/png/src/${LIBPNG}.tar.bz2 ; fi

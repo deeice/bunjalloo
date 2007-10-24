@@ -63,7 +63,7 @@ s32 getFreeSoundChannel() {
   return -1;
 }
 
-touchPosition first,tempPos;
+touchPosition tempPos;
 
 void VcountHandler() {
   static int lastbut = -1;
@@ -134,53 +134,6 @@ void WifiVblankHandler()
   VblankHandler();
   // update wireless in vblank
   Wifi_Update();
-}
-
-// Clock code is taken from libnds CVS
-void syncRTC() {
-  if (++IPC->time.rtc.seconds == 60 )
-  {
-    IPC->time.rtc.seconds = 0;
-    if (++IPC->time.rtc.minutes == 60) 
-    {
-      IPC->time.rtc.minutes  = 0;
-      if (++IPC->time.rtc.hours == 24) 
-      {
-        rtcGetTimeAndDate((uint8 *)&(IPC->time.rtc.year));
-      }
-    }
-  }
-
-}
-
-void initClockIRQ()
-{
-  REG_RCNT = 0x8100;
-  irqSet(IRQ_NETWORK, syncRTC);
-  // Reset the clock if needed
-  rtcReset();
-
-  uint8 command[4];
-  command[0] = READ_STATUS_REG2;
-  rtcTransaction(command, 1, &command[1], 1);
-
-  command[0] = WRITE_STATUS_REG2;
-  command[1] = 0x41;
-  rtcTransaction(command, 2, 0, 0);
-
-  command[0] = WRITE_INT_REG1;
-  command[1] = 0x01;
-  rtcTransaction(command, 2, 0, 0);
-
-  command[0] = WRITE_INT_REG2;
-  command[1] = 0x00;
-  command[2] = 0x21;
-  command[3] = 0x35;
-  rtcTransaction(command, 4, 0, 0);
-
-  // Read all time settings on first start
-  rtcGetTimeAndDate((uint8 *)&(IPC->time.rtc.year));
-
 }
 
 int main(int argc, char ** argv) {

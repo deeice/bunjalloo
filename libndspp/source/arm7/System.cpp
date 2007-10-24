@@ -20,7 +20,7 @@
 static void lidOpenHandler()
 {
   writePowerManagement(PM_CONTROL_REG,
-      PM_SOUND_PWR |
+      PM_SOUND_AMP |
       //PM_SOUND_VOL | // this turns sound *off*
       PM_BACKLIGHT_BOTTOM |
       PM_BACKLIGHT_TOP |

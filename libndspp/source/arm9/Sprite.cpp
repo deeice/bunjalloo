@@ -18,6 +18,7 @@
 #include <nds/memory.h>
 #include <nds/dma.h>
 #include <nds/arm9/video.h>
+#include <nds/arm9/sprite.h>
 #include <nds/arm9/cache.h>
 
 using namespace nds;

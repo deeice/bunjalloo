@@ -20,8 +20,8 @@
 #include "SDLhandler.h"
 
 using namespace nds;
-static unsigned int SUB_DISPLAY_CR(0);
-static unsigned int DISPLAY_CR(0);
+static unsigned long int SUB_DISPLAY_CR(0);
+static unsigned long int DISPLAY_CR(0);
 static unsigned short SUB_BLEND_CR;
 static unsigned short BLEND_CR;
 static unsigned short BLEND_Y;

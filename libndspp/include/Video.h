@@ -135,7 +135,7 @@ namespace nds
 
     private:
       //! the background register to use
-      volatile unsigned int & m_DISPCNT;
+      volatile unsigned long & m_DISPCNT;
       //! The screen used.
       int m_screen;
 

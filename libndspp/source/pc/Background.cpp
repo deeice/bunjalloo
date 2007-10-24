@@ -22,8 +22,8 @@
 #include <stdio.h>
 
 using namespace nds;
-static unsigned int SUB_DISPLAY_CR(0);
-static unsigned int DISPLAY_CR(0);
+static unsigned long int SUB_DISPLAY_CR(0);
+static unsigned long int DISPLAY_CR(0);
 
 #define BG_SIZE(m)		((m<<14))
 Background::Background(

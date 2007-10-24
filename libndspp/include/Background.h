@@ -195,7 +195,7 @@ namespace nds {
       } background_t;
 
       //! the background register to use
-      volatile unsigned int & m_DISPCNT;
+      volatile unsigned long int & m_DISPCNT;
       //! the current hardware state for this background
       background_t m_bg;
 

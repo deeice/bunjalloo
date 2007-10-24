@@ -17,6 +17,7 @@
 #include "Background.h"
 #include "Video.h"
 #include <nds/arm9/video.h>
+#include <nds/arm9/background.h>
 #include <stdio.h>
 
 using namespace nds;
