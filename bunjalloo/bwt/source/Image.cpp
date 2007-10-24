@@ -521,6 +521,7 @@ void Image::readGif(const char * filename)
     }
   }
   while (recordType != TERMINATE_RECORD_TYPE);
+  delete [] rowBuffer;
 
   m_valid = true;
 }
