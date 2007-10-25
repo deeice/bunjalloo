@@ -235,7 +235,9 @@ void Keyboard::applyResult()
 {
   UnicodeString tmp;
   m_textArea->text(tmp);
-  m_entry->setText(tmp);
+  if (m_entry) {
+    m_entry->setText(tmp);
+  }
 }
 
 void Keyboard::paint(const nds::Rectangle & clip)

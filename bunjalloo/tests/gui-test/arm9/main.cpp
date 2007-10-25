@@ -44,6 +44,7 @@ int main(int argc, char * argv[])
   TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
   Keyboard * keyBoard = new Keyboard();
   ScrollPane scrollPane;
+  keyBoard->setTopLevel(&scrollPane);
 #if 1
   TextField * tf = new TextField(string2unicode("Enter the value here. This line is too big to fit in"));
   TextField * passwd = new TextField(UnicodeString());
