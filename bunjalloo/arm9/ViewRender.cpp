@@ -372,7 +372,7 @@ void ViewRender::renderSelect(const HtmlElement * selectElement)
 
 
 // FIXME - where should this go?
-static const int MAX_SIZE(nds::Canvas::instance().width()-7);
+static const int MAX_SIZE(SCREEN_WIDTH-7);
 static const int MIN_SIZE(8);
 
 
