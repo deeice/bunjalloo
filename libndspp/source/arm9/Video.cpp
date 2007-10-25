@@ -69,13 +69,15 @@ void Video::blend(BLDMOD_MODE_t mode, int first, int second)
 void Video::clear()
 {
   // clear vram 
-  unsigned int * vram = (unsigned int*)VRAM_CR;
+  /*
+  vuint32 * vram = &VRAM_CR;
   for (int i = 0; i < 0x3100/8; ++i) {
     *vram++ = 0;
     *vram++ = 0;
     *vram++ = 0;
     *vram++ = 0;
   }
+  */
 
   for (int i = 0; i < 256; ++i) {
     BG_PALETTE[i] = 0;
