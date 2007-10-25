@@ -153,7 +153,6 @@ extern "C" {
 ## Build everything for a particular target.
 def build(buildTarget):
   """ build a particular build target """
-  subdirs = []
   sourceDirectory = buildTarget
 
   if buildTarget != 'arm7':
@@ -164,15 +163,13 @@ def build(buildTarget):
   if buildTarget != 'arm7':
     addProjectDirs(env, buildTarget)
 
-  subdirs.append(sourceDirectory)
-
-  env['SOURCE_DIRS'] = subdirs
+  env['SOURCE_DIRS'] = sourceDirectory
   env['PLATFORM_NAME'] = buildTarget
   env['SOURCE_NAME'] = sourceDirectory
 
   env['BWT_SOURCE'] = [ os.path.basename(filename) for filename in glob.glob('bwt/source/*.cpp')]
-  for subdir in subdirs:
-    env['%s_SOURCE'%(subdir.upper())] = [ os.path.basename(filename) for filename in glob.glob('%s/*.c*'%subdir)]
+  env['%s_SOURCE'%(sourceDirectory.upper())] = [
+      os.path.basename(filename) for filename in glob.glob('%s/*.c*'%sourceDirectory)]
 
   # export the env to the SConscripts
   Export('env')

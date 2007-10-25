@@ -81,7 +81,6 @@ void TextContainer::layout()
     textArea()->setSize(textArea()->textSize(m_text), textArea()->font().height());
   }
   UnicodeString appendText;
-  appendText.clear();
   UnicodeString::const_iterator it(m_text.begin());
   int size(0);
   for (; it != m_text.end() and size <= textArea()->width(); ++it)

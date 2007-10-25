@@ -113,8 +113,5 @@ void Canvas::endPaint()
   BG3_CR ^= BG_BMP_BASE( 128 / 16 );
 
   // copy sub screen - buffer size * 2 since is 16 bit
-  //memcpy(m_frontMain, m_backMain, SCREEN_WIDTH*SCREEN_HEIGHT*2);
   memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
-
-  //memcpy(m_backMain, m_frontMain, SCREEN_WIDTH*SCREEN_HEIGHT*2);
 }
