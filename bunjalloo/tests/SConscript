@@ -16,6 +16,7 @@ mainObj = testEnv.Object('Main.cpp')
 Export('mainObj')
 
 # find the test directories
+aliases = []
 dirs = [d for d in glob.glob(str(testEnv.Dir('#tests'))+'/*') if os.path.isdir(d)]
 for d in dirs:
   # find source code in the test directory
@@ -30,6 +31,9 @@ for d in dirs:
     testEnv['TESTER_SOURCES'] = files
     Export('testEnv')
     # build the tester..
-    SConscript( basedir+'/SConscript', duplicate=0)
+    test = SConscript( basedir+'/SConscript', duplicate=0)
+    aliases.append(env.Alias('test-%s'%basedir, test))
+
+env.Alias('tests', aliases)
 
 # vim: set filetype=python :

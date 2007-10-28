@@ -3,5 +3,6 @@ testerFile = testEnv['TESTER']
 files = testEnv['TESTER_SOURCES']
 o = testEnv.Object(files)
 tester = testEnv.Program(testerFile, Flatten([mainObj, o]))
-testEnv.Test('test.passed', tester)
+out = testEnv.Test('test.passed', tester)
+Return('out')
 # vim: set filetype=python :

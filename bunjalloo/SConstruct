@@ -202,26 +202,32 @@ def build(buildTarget):
     env['ICON'] = 'common/data/icon.bmp'
     env['BANNER'] = '%s;Web Browser;By Richard Quirk'
     env['DLDIFILE'] = '%s/data/ez5s.dldi'%(os.environ['HOME'])
-    env.NdsTool(executableName, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
+    nds = env.NdsTool(executableName, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
+    Default(nds)
     env.DldiPatch('%s-patched'%executableName, executableName)
 
   # build the tests
   if (buildTarget == 'pc'):
     # build tests
     SConscript('tests/SConscript', build_dir='/'.join([buildDir, 'tests']), duplicate=0)
-    env.Command('#/%s'%os.path.basename(str(prog[0])), prog, [Copy('$TARGET', '$SOURCE')])
+    Default(env.Command('#/%s'%os.path.basename(str(prog[0])), prog, [Copy('$TARGET', '$SOURCE')]))
+    Default('tests')
     filetypes = ['.cpp', '.c', '.h', '.inl', '.py']
     exclude = ['/build/']
     allFiles = [find('.', filetypes, exclude) , find('../libndspp', filetypes, exclude)]
-    env.CscopeFile('cscope', allFiles )
-    env.Cscope('cscope')
+    cs1 = env.CscopeFile('cscope', allFiles )
+    cs2 = env.Cscope('cscope')
+    env.Alias('cscope', [cs1,cs2])
   if (buildTarget != 'arm7'):
     SConscript('tests/gui-test/SConscript', build_dir='/'.join([buildDir, 'gui-test']), duplicate=0)
     SConscript('tests/images/SConscript', build_dir='/'.join([buildDir, 'images']), duplicate=0)
+    Default('images')
+    Default('gui-test')
 
 # build steps
 [ build(buildTarget) for buildTarget in buildTargets ]
 
 cmd = defaultEnv.Command('tags', '%s.nds'%executableName, 'ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ../libndspp')
+Default(cmd)
 
 # vim: set filetype=python :
