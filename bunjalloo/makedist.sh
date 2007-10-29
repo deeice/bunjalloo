@@ -34,9 +34,10 @@ while true ; do
     echo ""
     echo "Usage: $(basename $0) [OPTION]... "
     echo "Options available are:"
-    echo "-v, --version=VERSION    set the distro version number"
-    echo "-u, --upload             upload the files too"
-    echo "-h,--help                This message."
+    echo "-v, --version=VERSION    Set the distro version number"
+    echo "-u, --upload             Upload the files too"
+    echo "-t, --tag                Create a svn tag for the release"
+    echo "-h, --help               This message."
     exit 0
     ;;
     --) shift ;  break ;;
