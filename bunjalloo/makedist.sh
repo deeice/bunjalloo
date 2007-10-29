@@ -1,46 +1,75 @@
 #!/bin/bash
 SVN="svn"
-MV="mv"
 UPLOAD="googlecode_upload.py"
 
-trunk=https://quirkysoft.googlecode.com/svn/trunk
-tags=https://quirkysoft.googlecode.com/svn/tags
+repo=https://quirkysoft.googlecode.com/svn
+trunk=$repo/trunk
+tags=$repo/tags
 project=bunjalloo
+upload="no"
+tag="no"
+VERSION="0.4"
 
-$SVN up
-modifications=$($SVN status -q | wc -l)
-if [ $modifications != 0 ] ; then
-  echo "Modified files exist.. commit first before tagging stuff!"
+die() {
+  echo >&2 "$@"
   exit 1
+}
+
+TEMP=`getopt -o hutv: --long version:,upload,tag,help -- "$@"`
+    
+if [ $? != 0 ] ; then
+  echo "Try '$0 --help' for more information"
+  exit 1
+fi  
+
+eval set -- "$TEMP"
+
+while true ; do
+  case $1 in
+    -v|--ve|--ver|--vers|--versi|--versio|--version ) VERSION=$2 ; shift 2 ;;
+    -u|--up|--upl|--uplo|--uploa|--upload ) upload="yes" ; shift ;;
+    -t|--ta|--tag ) tag="yes" ; shift ;;
+    -h|--help )
+    echo "Create and optionally upload binary and source distribution files."
+    echo ""
+    echo "Usage: $(basename $0) [OPTION]... "
+    echo "Options available are:"
+    echo "-v, --version=VERSION    set the distro version number"
+    echo "-u, --upload             upload the files too"
+    echo "-h,--help                This message."
+    exit 0
+    ;;
+    --) shift ;  break ;;
+    *) echo "Internal error! " >&2 ; exit 1 ;;
+  esac
+done
+
+makedistdir=$(dirname $0)
+cd $makedistdir
+makedistdir=$(pwd)
+revision=$(git-svn find-rev HEAD)
+scons -Q dist version=$VERSION || die "Failed to build dist"
+zipname=$project-$VERSION.zip
+echo "Created $zipname"
+src=$project-src-$VERSION
+cd ..
+git-archive --prefix=$src/ HEAD bunjalloo libndspp | gzip > $src.tar.gz || die "Unable to create $src.tar.gz"
+mv $src.tar.gz $makedistdir/ || die "Unable to mv $src.tar.gz to $makedistdir"
+cd - > /dev/null
+echo "Created $src.tar.gz"
+
+if test "$tag" = "yes" ; then
+  tagname=${project}_${VERSION}_r${revision}
+  $SVN cp $trunk $tags/$tagname || die "Unable to make tag $tagname"
 fi
 
-read -p "Version? " release
-read -p "Summary? " summary
+if test "$upload" = "yes" ; then
+  $UPLOAD -s "Source code for $project release $VERSION" -p quirkysoft \
+     -l Type-Source,Program-Bunjalloo $src.tar.gz \
+    || die "Unable to upload $src.tar.gz"
 
-revision=$(svn info | grep ^Revision | cut -d: -f2 | tr -d ' ')
+  $UPLOAD -s "$summary" -p quirkysoft \
+   -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${zipname} \
+    || die "Unable to upload ${zipname}"
+fi
 
-distdir=${project}-${release}
-
-cp $project.nds $distdir/$project.nds
-cp data/ -rvfp $distdir/
-find $distdir -name '.svn' -type d | xargs rm -rf 
-cd $distdir
-zip -r $project.zip *
-cd -
-$MV $distdir/$project.zip $distdir.zip
-rm -rf $distdir
-
-$UPLOAD -s "$summary" -p quirkysoft -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${project}-${release}.zip
-tagname=${project}_${release}_r${revision}
-$SVN cp $trunk $tags/$tagname
-
-REP=${tags/https/http}/$tagname
-mkdir -p $distdir
-cd $distdir
-svn export ${REP}/${project}
-svn export ${REP}/libndspp
-cd ..
-tar czvf ${distdir}.tar.gz ${distdir}
-
-$MV ${project}-${release}.tar.gz ${project}-src-${release}.tar.gz
-$UPLOAD -s "Source code for release $release" -p quirkysoft -l Type-Source,Program-Bunjalloo ${project}-src-${release}.tar.gz

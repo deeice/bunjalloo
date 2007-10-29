@@ -12,16 +12,27 @@ libraryFiles = {
 
 # create the default environment with coloured output
 defaultEnv = Environment(CCFLAGS=commonFlags, CPPPATH=headers,
-    tools=['default', 'color'], toolpath = ['%s/ndspp-scons'%libndsppDir])
+    tools=['default', 'color'], toolpath = ['%s/ndspp-scons'%libndsppDir],
+    TARFLAGS='-c -z', TARSUFFIX='tar.gz')
 buildTargets = ['pc', 'arm9', 'arm7']
 
 # function definitions
+
+# create the dist files
+def dist():
+  project = 'bunjalloo'
+  version = ARGUMENTS.get('version','0.4')
+  distfile = '%s-%s.zip'%(project, version)
+  srcfile = '%s-src-%s'%(project, version)
+  defaultEnv['DIST_NAME'] = distfile
+  defaultEnv['DIST_SRC_NAME'] = srcfile
 
 ## create the environment for the chosen target
 # @param buildTarget the target build (pc, arm9, arm7)
 # @return the environment copied from defaultEnv
 def createEnv(buildTarget):
   global defaultEnv
+  dist()
   env = None
   if buildTarget.startswith('arm'):
     env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })],
@@ -40,6 +51,7 @@ def createEnv(buildTarget):
   env.Prepend( LIBS=['ndspp-%s'%buildTarget])
   env.Prepend( LIBS=['png','z','gif','jpgd'])
   addObjCopyImageBuilders(env)
+  env.Alias('dist', env['DIST_NAME'])
   return env
 
 ## Add the project directories to the given Environment.
@@ -204,6 +216,8 @@ def build(buildTarget):
     env['DLDIFILE'] = '%s/data/ez5s.dldi'%(os.environ['HOME'])
     nds = env.NdsTool(executableName, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
     Default(nds)
+    env.Zip(env['DIST_NAME'], nds)
+    env.Zip(env['DIST_NAME'], '#/data')
     env.DldiPatch('%s-patched'%executableName, executableName)
 
   # build the tests
