@@ -69,7 +69,7 @@ if test "$upload" = "yes" ; then
      -l Type-Source,Program-Bunjalloo $src.tar.gz \
     || die "Unable to upload $src.tar.gz"
 
-  $UPLOAD -s "$summary" -p quirkysoft \
+  $UPLOAD -s "$project release $VERSION" -p quirkysoft \
    -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${zipname} \
     || die "Unable to upload ${zipname}"
 fi
