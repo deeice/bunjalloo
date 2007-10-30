@@ -54,6 +54,8 @@ class ScrollPane: public Component
      */
     int scrollIncrement() const;
 
+    void pageUp();
+    void pageDown();
     /** Scroll the view up one amount.  */
     void up();
     /** Scroll the view down one amount.  */

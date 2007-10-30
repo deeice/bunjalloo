@@ -164,6 +164,14 @@ void ScrollPane::setSize(unsigned int w, unsigned int h)
 
 }
 
+void ScrollPane::pageUp()
+{
+  int initialScrollIncrement = m_scrollIncrement;
+  m_scrollIncrement = m_bounds.h - m_bounds.h/16;
+  up();
+  m_scrollIncrement = initialScrollIncrement;
+}
+
 void ScrollPane::up()
 {
   if (not m_canScrollUp)
@@ -179,6 +187,15 @@ void ScrollPane::up()
     c->setLocation(c->x(), newY);
   }
   calculateScrollBar();
+}
+
+
+void ScrollPane::pageDown()
+{
+  int initialScrollIncrement = m_scrollIncrement;
+  m_scrollIncrement = m_bounds.h - m_bounds.h/16;
+  down();
+  m_scrollIncrement = initialScrollIncrement;
 }
 
 void ScrollPane::down()

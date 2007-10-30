@@ -144,12 +144,23 @@ void View::browse()
     m_scrollPane->up();
     m_dirty = true;
   }
-  if ( (keys & KEY_LEFT) or (keys & KEY_L) ) {
+  if (keys & KEY_RIGHT) {
+    // scroll down ...
+    m_scrollPane->pageDown();
+    m_dirty = true;
+  }
+  if (keys & KEY_LEFT) {
+    // scroll up ...
+    m_scrollPane->pageUp();
+    m_dirty = true;
+  }
+  if (keys & KEY_L) {
     m_controller.previous();
   }
-  if ( (keys & KEY_RIGHT) or (keys & KEY_R) ) {
+  if (keys & KEY_R) {
     m_controller.next();
   }
+
   if (keys & KEY_A) {
     // render the node tree
     m_document.dumpDOM();
