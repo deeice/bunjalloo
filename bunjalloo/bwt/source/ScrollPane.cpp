@@ -378,6 +378,9 @@ void ScrollPane::scrollToPercent(int i)
 
 }
 
+// adjust the scroll to prevent the child components base going off the top of the
+// screen. For the top level pane, it allows a single small child component to be
+// drawn at the top of the bottom screen.
 void ScrollPane::adjustScroll(int & scrollIncrement)
 {
   if (m_children.empty())
@@ -386,8 +389,19 @@ void ScrollPane::adjustScroll(int & scrollIncrement)
     return;
   }
 
-  int offSet = (m_children.back()->bounds().bottom() - scrollIncrement) - m_bounds.bottom();
+  // calculate the new lower bound
+  int childLowBound = (m_children.back()->bounds().bottom() - scrollIncrement);
+
+  // calculate the difference between main lower bound and child lower bound
+  int offSet = childLowBound - bounds().bottom();
   int top = m_children.front()->bounds().top() - bounds().top();
+
+  // don't do anything if the child fits in the scroll area
+  if ( m_topLevel and (childLowBound - top) < bounds().bottom())
+  {
+    return;
+  }
+
   if (offSet < 0 and (top <= 0 or m_topLevel))
   {
     // scrolled too far.
