@@ -154,7 +154,8 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
     }
   }
   updateIcons();
-  m_timerReset = m_controller.config().toolbarTimer();
+  m_timerReset = 200;
+  m_controller.config().resource(Config::TOOLBAR_TIME, m_timerReset);
 }
 
 void Toolbar::layout()

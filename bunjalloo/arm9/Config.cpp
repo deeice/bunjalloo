@@ -20,23 +20,17 @@
 #include "File.h"
 #include "HtmlConstants.h"
 #include "HtmlElement.h"
-#include "ParameterSet.h"
 #include "URI.h"
 const std::string Config::s_configFile("/"DATADIR"/config.ini");
 
-static const char PROXY_STR[] = "proxy";
-static const char FONT_STR[] = "font";
-static const char COOKIE_STR[] = "cookiefile";
-static const char MAX_CONNECT[] = "timeout";
-static const char TOOLBAR_TIME[] = "toolbar";
-static const char USECACHE[] = "usecache";
-static const char CLEARCACHE[] = "clearcache";
+const char Config::PROXY_STR[] = "proxy";
+const char Config::FONT_STR[] = "font";
+const char Config::COOKIE_STR[] = "cookiefile";
+const char Config::MAX_CONNECT[] = "timeout";
+const char Config::TOOLBAR_TIME[] = "toolbar";
+const char Config::USECACHE[] = "usecache";
+const char Config::CLEARCACHE[] = "clearcache";
 using namespace std;
-
-std::string Config::font() const
-{
-  return m_font;
-}
 
 void Config::reload()
 {
@@ -47,7 +41,7 @@ void Config::reload()
     vector<string> lines;
     configFile.readlines(lines);
     for (vector<string>::iterator it(lines.begin());
-        it != lines.end(); 
+        it != lines.end();
         ++it)
     {
       string & line(*it);
@@ -66,50 +60,22 @@ void Config::reload()
 
 void Config::parseLine(ParameterSet & set)
 {
-  if ( set.hasParameter(PROXY_STR) ) 
+  const KeyValueMap& keyValueMap(set.keyValueMap());
+  for (KeyValueMap::const_iterator it(keyValueMap.begin());
+      it != keyValueMap.end();
+      ++it)
   {
-    set.parameter(PROXY_STR, m_proxy);
+    if (it->first == FONT_STR or it->first == COOKIE_STR)
+    {
+      string value;
+      configPathMember(it->second, value);
+      m_resources[it->first] = value;
+    }
+    else
+    {
+      m_resources[it->first] = it->second;
+    }
   }
-  if (set.hasParameter(FONT_STR))
-  {
-    string value;
-    set.parameter(FONT_STR, value);
-    configPathMember(value, m_font);
-  }
-  if (set.hasParameter(COOKIE_STR))
-  {
-    string value;
-    set.parameter(COOKIE_STR, value);
-    configPathMember(value, m_cookieList);
-  }
-
-  if (set.hasParameter(MAX_CONNECT))
-  {
-    string value;
-    set.parameter(MAX_CONNECT, value);
-    m_maxConnect = strtoul(value.c_str(), 0, 0);
-  }
-
-  if (set.hasParameter(TOOLBAR_TIME))
-  {
-    string value;
-    set.parameter(TOOLBAR_TIME, value);
-    m_toolbarTime = strtoul(value.c_str(), 0, 0);
-  }
-
-  if (set.hasParameter(USECACHE))
-  {
-    string value;
-    set.parameter(USECACHE, value);
-    m_useCache = strtoul(value.c_str(), 0, 0) != 0;
-  }
-  if (set.hasParameter(CLEARCACHE))
-  {
-    string value;
-    set.parameter(CLEARCACHE, value);
-    m_clearCache = strtoul(value.c_str(), 0, 0) != 0;
-  }
-
 }
 
 void Config::handleCookies() const
@@ -118,13 +84,15 @@ void Config::handleCookies() const
   // add it as an allowed one to CookieJar
   CookieJar * cookieJar(m_document.cookieJar());
   nds::File cookieList;
-  cookieList.open(m_cookieList.c_str());
+  string cookieFile;
+  resource(COOKIE_STR, cookieFile);
+  cookieList.open(cookieFile.c_str());
   if (cookieList.is_open())
   {
     vector<string> lines;
     cookieList.readlines(lines);
     for (vector<string>::iterator it(lines.begin());
-        it != lines.end(); 
+        it != lines.end();
         ++it)
     {
       string & line(*it);
@@ -138,12 +106,7 @@ void Config::handleCookies() const
 
 
 Config::Config(Document & doc):
-    m_document(doc),
-    m_font("font"),
-    m_cookieList("ckallow.lst"),
-    m_proxy(""),
-    m_useCache(false),
-    m_clearCache(false)
+    m_document(doc)
 {
   reload();
 }
@@ -168,38 +131,36 @@ void Config::configPathMember(const std::string & value, std::string & member)
   }
 }
 
-void Config::postConfiguration(const std::string & encodedString)
+bool Config::resource(const std::string & name, std::string & value) const
 {
-  ParameterSet set(encodedString, '&');
-  parseLine(set);
+  KeyValueMap::const_iterator it(m_resources.find(name));
+  if (it != m_resources.end())
+  {
+    value = it->second;
+    return true;
+  }
+  return false;
 }
 
-std::string Config::proxy() const
+bool Config::resource(const std::string & name, bool & value) const
 {
-  return m_proxy;
+  string valueString;
+  if (resource(name, valueString))
+  {
+    value = valueString == "true" or valueString == "1";
+    return true;
+  }
+  return false;
 }
 
-bool Config::useProxy() const
+bool Config::resource(const std::string & name, int & value) const
 {
-  return not m_proxy.empty();
+  string valueString;
+  if (resource(name, valueString))
+  {
+    value = strtol(valueString.c_str(), 0, 0);
+    return true;
+  }
+  return false;
 }
 
-unsigned int Config::maxConnections() const
-{
-  return m_maxConnect;
-}
-
-unsigned int Config::toolbarTimer() const
-{
-  return m_toolbarTime;
-}
-
-bool Config::useCache() const
-{
-  return m_useCache;
-}
-
-bool Config::clearCache() const
-{
-  return m_clearCache;
-}

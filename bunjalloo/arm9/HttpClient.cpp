@@ -46,12 +46,14 @@ HttpClient::HttpClient(const char * ip, int port, const URI & uri) :
 void HttpClient::setController(Controller * c)
 {
   m_self = c;
-  if (m_self->config().useProxy())
+  string proxy;
+  if (m_self->config().resource(Config::PROXY_STR, proxy))
   {
-    URI uri(m_self->config().proxy());
+    URI uri(proxy);
     setConnection(uri.server().c_str(), uri.port());
   }
-  m_maxConnectAttempts = m_self->config().maxConnections();
+  m_maxConnectAttempts = 60;
+  m_self->config().resource(Config::MAX_CONNECT, m_maxConnectAttempts);
   if (m_maxConnectAttempts == 0)
   {
     m_maxConnectAttempts = MAX_CONNECT_ATTEMPTS;
@@ -106,10 +108,11 @@ void HttpClient::get(const URI & uri)
     string cookieString;
     m_self->m_document->cookieJar()->cookiesForRequest(uri, cookieString);
 
+    string proxy;
     string s;
     s += uri.method();
     s += " ";
-    if (m_self->config().useProxy())
+    if (m_self->config().resource(Config::PROXY_STR, proxy))
     {
       // for proxy connection, need to send the whole request:
       s += uri.asString();

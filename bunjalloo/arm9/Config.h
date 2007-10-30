@@ -18,6 +18,7 @@
 #define Config_h_seen
 
 #include <string>
+#include "ParameterSet.h"
 
 class Document;
 class ParameterSet;
@@ -25,6 +26,13 @@ class ParameterSet;
 class Config
 {
   public:
+    static const char PROXY_STR[];
+    static const char FONT_STR[];
+    static const char COOKIE_STR[];
+    static const char MAX_CONNECT[];
+    static const char TOOLBAR_TIME[];
+    static const char USECACHE[];
+    static const char CLEARCACHE[];
 
     /** Initialise the config class. Set the document parser and the controller.
      * @param doc the document model of the configuration file.
@@ -35,55 +43,27 @@ class Config
     /** End of life time. */
     ~Config();
 
-    /** Get the font.
-     * @return the base name of the font
+    /** Get a configuration value as a string.
+     * @param name the name of the parameter.
+     * @param value the value of the parameter.
+     * @return true if the value is setm, false otherwise.
      */
-    std::string font() const;
+    bool resource(const std::string & name, std::string & value) const;
 
-    /** Get the proxy.
-     * @return the proxy string
-     */
-    std::string proxy() const;
+    /** Get a configuration value as a bool. */
+    bool resource(const std::string & name, bool & value) const;
 
-    /** Get the flag that says whether or not to use the proxy.
-     * @return true if we should use a proxy, false otherwise.
-     */
-    bool useProxy() const;
-
-    /** Get the value for the max connection attempts ("timeout")
-     * @return the value as an unsigned int
-     */
-    unsigned int maxConnections() const;
-
-    /** Get the value for the toolbar disappearing
-     * @return the value as an unsigned int
-     */
-    unsigned int toolbarTimer() const;
+    /** Get a configuration value as an int. */
+    bool resource(const std::string & name, int & value) const;
 
     /** Reload the config file.
      */
     void reload();
 
-    /** Post a configuration string from a form. The encodedString has the usual
-     * cgi format of param1=value&param2=value...
-     * @param encodedString contains a CGI-like string containing & seperated key, value pairs.
-     */
-    void postConfiguration(const std::string & encodedString);
-
-    bool useCache() const;
-
-    bool clearCache() const;
-
   private:
     static const std::string s_configFile;
     Document & m_document;
-    std::string m_font;
-    std::string m_cookieList;
-    std::string m_proxy;
-    int m_maxConnect;
-    int m_toolbarTime;
-    bool m_useCache;
-    bool m_clearCache;
+    KeyValueMap m_resources;
 
     void configPathMember(const std::string & value, std::string & member);
     void handleCookies() const;

@@ -42,10 +42,17 @@ Controller::Controller()
   : m_document(new Document()), m_wifiInit(false)
 {
   m_config = new Config(*m_document);
-  TextAreaFactory::setFont(new Font(m_config->font()));
-  TextAreaFactory::usePaletteName(m_config->font()+".pal");
+  string font;
+  m_config->resource(Config::FONT_STR, font);
+  TextAreaFactory::setFont(new Font(font));
+  TextAreaFactory::usePaletteName(font+".pal");
   m_view = new View(*m_document, *this);
-  m_cache = new Cache(*m_document, m_config->useCache(), m_config->clearCache());
+  bool useCache(false);
+  bool clearCache(false);
+  m_config->resource(Config::USECACHE, useCache);
+  m_config->resource(Config::CLEARCACHE, clearCache);
+
+  m_cache = new Cache(*m_document, useCache, clearCache);
 }
 
 Controller::~Controller()
@@ -164,7 +171,7 @@ void Controller::configureUrl(const std::string & fileName)
   if (position != string::npos)
   {
     string postedUrl = fileName.substr(position+1, fileName.length() - position - 1);
-    m_config->postConfiguration(postedUrl);
+    //m_config->postConfiguration(postedUrl);
   }
   else
   {
