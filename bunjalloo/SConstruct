@@ -1,5 +1,20 @@
+"""
+  Copyright (C) 2007 Richard Quirk
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""
 import os, os.path, glob, sys
-from walktree import find
 
 executableName = os.path.basename( os.getcwd())
 libndsppDir = '../libndspp'
@@ -161,6 +176,17 @@ extern "C" {
     return ( ['cscope.out', 'cscope.po.out', 'cscope.in.out'], source)
   cscopeBld = Builder(action='-cscope -b -k -q', suffix='.out', src_suffix='.files', emitter=cscope_emitter)
   env.Append(BUILDERS = {'Cscope' :  cscopeBld})
+
+def find(top='.', includes=[], excludes=[]):
+  result = []
+  for (root, dirs, files) in os.walk(top):
+    exclude = [ e for e in excludes if root.find(e) != -1]
+    if not exclude:
+      for child in files:
+        exclude = [ e for e in excludes if child.find(e) != -1]
+        if not exclude and ((not includes) or (includes and os.path.splitext(child)[1] in includes)):
+          result.append( os.path.join(root, child))
+  return result
 
 ## Build everything for a particular target.
 def build(buildTarget):
