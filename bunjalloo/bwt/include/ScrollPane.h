@@ -37,10 +37,10 @@ class ScrollPane: public Component
      * then nothing is done.
      */
     static void removePopup(Component * popup);
-    
+
     /** Initialise the ScrollPane.*/
     ScrollPane();
-    
+
     /** Delete the ScrollPanes child components.*/
     ~ScrollPane();
 

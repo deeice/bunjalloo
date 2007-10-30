@@ -316,8 +316,6 @@ void ViewRender::render()
       or mimeType == HtmlDocument::IMAGE_GIF
       or mimeType == HtmlDocument::IMAGE_JPEG)
   {
-    //textArea()->add();
-    
     URI uri(m_self->m_document.uri());
     string filename;
     if (uri.protocol() == URI::FILE_PROTOCOL)

@@ -31,14 +31,14 @@ using nds::Rectangle;
 
 ScrollPane::ScrollPane()
 :
-  m_scrollIncrement(1), 
+  m_scrollIncrement(1),
   m_topLevel(false),
   m_canScrollUp(false),
   m_canScrollDown(false),
   m_scrollBar(new ScrollBar),
   m_backgroundColour(nds::Color(31,31,31)),
   m_stretchChildren(false)
-{ 
+{
   m_scrollBar->setScrollable(this);
   m_preferredWidth = nds::Canvas::instance().width();
 }
@@ -86,8 +86,8 @@ void ScrollPane::layoutChildren()
     Component * c(*it);
     // printf("Child :");
     Rectangle childPrefSize(c->preferredSize());
-    childPrefSize.x = c->x(); 
-    childPrefSize.y = c->y(); 
+    childPrefSize.x = c->x();
+    childPrefSize.y = c->y();
     // printf("x %d y %d w %d h %d\n", childPrefSize.x, childPrefSize.y, childPrefSize.w, childPrefSize.h);
     if ( (childPrefSize.w + lastXPos) < childWidth )
     {
@@ -105,8 +105,8 @@ void ScrollPane::layoutChildren()
       yPos += childPrefSize.h+MIN_PADDING;
       rowHeight = childPrefSize.h;
     }
-    childPrefSize.x = c->x(); 
-    childPrefSize.y = c->y(); 
+    childPrefSize.x = c->x();
+    childPrefSize.y = c->y();
 
     if (childWidth <= childPrefSize.w)
       c->setSize(childWidth, childPrefSize.h);
@@ -149,7 +149,7 @@ void ScrollPane::calculateScrollBar()
   if ( (bound.bottom()) > botLimit)
   {
     m_canScrollDown = true;
-  } 
+  }
 }
 
 void ScrollPane::setSize(unsigned int w, unsigned int h)
