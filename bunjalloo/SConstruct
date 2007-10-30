@@ -218,6 +218,8 @@ def build(buildTarget):
     Default(nds)
     env.Zip(env['DIST_NAME'], nds)
     env.Zip(env['DIST_NAME'], '#/data')
+    env.Zip(env['DIST_NAME'], '#/README')
+    env.Zip(env['DIST_NAME'], '#/CREDITS')
     env.DldiPatch('%s-patched'%executableName, executableName)
 
   # build the tests

@@ -1,21 +1,22 @@
-README for Bunjalloo 0.1
+Bunjalloo
 
-What is Bunjalloo?
+http://code.google.com/p/quirkysoft
 
-Bunjalloo is a HTTP user agent (web browser) for the Nintendo DS.
-For more information see http://code.google.com/p/quirkysoft/
+==Installation==
 
-Availability
+Unzip the zip file to the root of your flash card.
 
-Bunjalloo is freely available.  See COPYRIGHT and
-http://code.google.com/p/quirkysoft/ for details.  
-Bunjalloo can be downloaded at
-http://code.google.com/p/quirkysoft/downloads/list
+Patch bunjalloo.nds for your flash card using the DLDI tool from
+http://chishm.drunkencoders.com/DLDI/
 
-Installation
+==Controls==
+Start - Enter a URL (show keyboard)
+Up/Down - Scroll screen up and down
+Right/R - Move forwards in the history
+Left/L - Move backwards in the history
+Touch - Follow link, enter data in forms, press keys, use icons
 
-Bunjalloo uses DLDI for viewing local files (file:// URL). To view remote
-http:// URLs, no patching is required. Bunjalloo can be run using Wireless
-Multiboot, without an attached cartridge.
+==Availability==  
+Bunjalloo is freely available under the GNU General Public License. See
+COPYRIGHT and http://code.google.com/p/quirkysoft/ for further details.
 
-As of veresion 0.2 DLDI patching is required

@@ -1,0 +1,13 @@
+Bunjalloo makes use of the following libraries:
+
+The 'zlib' general purpose compression library version 1.2.3, July 18th, 2005
+  Copyright (C) 1995-2005 Jean-loup Gailly and Mark Adler
+
+libpng versions 1.2.22, October 13, 2007,
+  Copyright (c) 2004, 2006-2007 Glenn Randers-Pehrson, et al
+
+Small JPEG Decoder Library v0.93b Dec. 28, 2001 
+  Copyright (C) 1994-2000 Rich Geldreich
+
+giflib version 4.1.2, a library for manipulating gif files. 
+  Toshio Kuratomi, Eric S. Raymond
