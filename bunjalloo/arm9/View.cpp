@@ -28,6 +28,7 @@
 #include "TextField.h"
 #include "Toolbar.h"
 #include "ScrollPane.h"
+#include "SearchEntry.h"
 #include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
@@ -37,7 +38,7 @@ using namespace std;
 const static int STEP(1);
 
 View::View(Document & doc, Controller & c):
-  m_document(doc), 
+  m_document(doc),
   m_controller(c),
   m_scrollPane(new ScrollPane),
   m_keyboard(new Keyboard),
@@ -47,6 +48,7 @@ View::View(Document & doc, Controller & c):
   m_state(BROWSE),
   m_form(0),
   m_linkHandler(new LinkHandler(this)),
+  m_search(0),
   m_dirty(true),
   m_lastX(0),
   m_lastY(0)
@@ -59,6 +61,11 @@ View::View(Document & doc, Controller & c):
   m_document.registerView(this);
   keysSetRepeat( 10, 5 );
   m_toolbar->setVisible();
+  string searchFile;
+  if (m_controller.config().resource(Config::SEARCHFILE_STR,searchFile))
+  {
+    m_search = new SearchEntry(searchFile);
+  }
 }
 
 View::~View()
@@ -68,6 +75,7 @@ View::~View()
   delete m_addressBar;
   delete m_toolbar;
   delete m_linkHandler;
+  delete m_search;
 }
 
 void View::notify()
@@ -282,6 +290,12 @@ void View::tick()
     string newAddress = unicode2string(m_keyboard->result());
     if (not newAddress.empty() and m_keyboard->selected() == Keyboard::OK)
     {
+      // check for search
+      string result;
+      if (m_search and m_search->checkSearch(newAddress, result))
+      {
+        newAddress = result;
+      }
       m_toolbar->setVisible(true);
       m_controller.doUri(newAddress);
     }
