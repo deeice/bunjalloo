@@ -1,8 +1,9 @@
 Import ('testEnv mainObj')
-testerFile = testEnv['TESTER']
-files = testEnv['TESTER_SOURCES']
-o = testEnv.Object(files)
-tester = testEnv.Program(testerFile, Flatten([mainObj, o]))
-out = testEnv.Test('test.passed', tester)
+env = testEnv.Copy()
+testerFile = env['TESTER']
+files = env['TESTER_SOURCES']
+o = env.Object(files)
+tester = env.Program(testerFile, Flatten([mainObj, o]))
+out = env.Test('test.passed', tester)
 Return('out')
 # vim: set filetype=python :
