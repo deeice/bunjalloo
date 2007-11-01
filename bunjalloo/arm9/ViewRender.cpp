@@ -144,7 +144,7 @@ void ViewRender::postFormat(const HtmlElement * element)
   else if (element->isa(HtmlConstants::P_TAG) or (element->tagName()[0] == 'h' and (element->tagName()[1] >= '1' and element->tagName()[1] <= '6')))
   {
     textArea()->insertNewline();
-  } 
+  }
   else if (element->isa(HtmlConstants::A_TAG))
   {
     textArea()->endLink();
@@ -190,7 +190,7 @@ bool ViewRender::applyFormat(const HtmlElement * element)
   else if (element->isa(HtmlConstants::BR_TAG))
   {
     textArea()->insertNewline();
-  } 
+  }
   else if (element->isa(HtmlConstants::IMG_TAG))
   {
     // hurrah for alt text. some people set it to "", which screws up any
@@ -210,12 +210,20 @@ bool ViewRender::applyFormat(const HtmlElement * element)
   else if (element->isa(HtmlConstants::INPUT_TAG))
   {
     renderInput(element);
-    return false; 
+    return false;
   }
   else if (element->isa(HtmlConstants::TEXTAREA_TAG))
   {
     renderTextArea(element);
-    return false; 
+    return false;
+  }
+  else if (element->isa(HtmlConstants::TITLE_TAG))
+  {
+    if (element->hasChildren())
+    {
+      applyFormat(element->firstChild());
+    }
+    return false;
   }
   return true;
 }
@@ -340,6 +348,8 @@ void ViewRender::render()
   {
     assert(root->isa(HtmlConstants::HTML_TAG));
     assert(root->hasChildren());
+    doTitle(root->firstChild());
+
     const HtmlElement * body = root->lastChild();
     if (body->hasChildren())
     {
@@ -355,6 +365,23 @@ void ViewRender::render()
     scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
     scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
     scrollPane.scrollToPercent(0);
+  }
+}
+
+void ViewRender::doTitle(const HtmlElement * head)
+{
+  const ElementList titles = head->elementsByTagName(HtmlConstants::TITLE_TAG);
+  if (not titles.empty())
+  {
+    m_textArea = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
+    m_textArea->setCentred();
+    m_textArea->setOutlined();
+    m_textArea->setSize(nds::Canvas::instance().width()-7, m_textArea->font().height());
+    m_self->m_scrollPane->add(m_textArea);
+    const HtmlElement * title =  titles.front();
+    const HtmlElement * titleText = title->firstChild();
+    applyFormat(titleText);
+    m_textArea = 0;
   }
 }
 
