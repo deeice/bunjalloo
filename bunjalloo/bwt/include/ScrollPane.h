@@ -75,6 +75,11 @@ class ScrollPane: public Component
      */
     void scrollToPercent(int value);
 
+    /** Get the current position as a fixed point percentage.
+     * @return the percentage of the screen scrolled.
+     */
+    int currentPosition() const;
+
     /** Set this to be the top level ScrollPane. The top level pane is special
      * as its scroll bar does not fill the whole height, but is shown only on
      * the bottom screen. The top level ScrollPane also handles the pop-up menu.

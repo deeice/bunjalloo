@@ -91,6 +91,7 @@ void View::notify()
         swiWaitForVBlank();
          */
         m_renderer->render();
+        m_scrollPane->scrollToPercent(m_document.position());
         m_dirty = true;
         string refresh;
         int refreshTime;
@@ -190,6 +191,10 @@ void View::browse()
     // render the node tree
     m_document.dumpDOM();
   }
+  if (m_dirty)
+  {
+    m_document.setPosition( m_scrollPane->currentPosition());
+  }
   if (keys & KEY_TOUCH)
   {
     touchPosition tp = touchReadXY();
@@ -211,8 +216,13 @@ void View::browse()
     }
 
     m_dirty = m_keyboard->touch(m_lastX, m_lastY);
-    if (not m_dirty)
+    if (not m_dirty) {
       m_dirty = m_scrollPane->touch(m_lastX, m_lastY);
+      if (m_dirty)
+      {
+        m_document.setPosition( m_scrollPane->currentPosition());
+      }
+    }
     if (m_keyboard->visible())
       m_toolbar->setVisible(false);
     else if (not m_scrollPane-> scrollBarHit(m_lastX, m_lastY))

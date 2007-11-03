@@ -152,6 +152,20 @@ void ScrollPane::calculateScrollBar()
   }
 }
 
+int ScrollPane::currentPosition() const
+{
+  if (m_children.empty())
+    return 0;
+  int total = m_scrollBar->total() - m_scrollBar->visibleRange();
+  int value = m_scrollBar->value();
+  if (total > 0)
+  {
+    int pc = (256 * value) / total;
+    return pc;
+  }
+  return 0;
+}
+
 void ScrollPane::setSize(unsigned int w, unsigned int h)
 {
   Component::setSize(w,h);

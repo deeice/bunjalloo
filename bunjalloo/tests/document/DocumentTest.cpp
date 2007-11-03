@@ -592,3 +592,31 @@ void DocumentTest::testActiveFormatters()
   int expectedDepth = 1;
   CPPUNIT_ASSERT_EQUAL(expectedDepth, depth);
 }
+
+void DocumentTest::testHistory()
+{
+  readFile("attrib.html");
+  m_document->setUri("attrib.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setPosition(10);
+  m_document->setStatus(Document::LOADED);
+  const HtmlElement * root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+
+  delete [] m_data;
+  readFile("anchor.html");
+  m_document->setUri("anchor.html");
+  m_document->appendLocalData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  root = m_document->rootNode();
+  CPPUNIT_ASSERT(root != 0);
+  CPPUNIT_ASSERT(root->isa("html"));
+  CPPUNIT_ASSERT_EQUAL(0, m_document->position());
+
+  string prev = m_document->gotoPreviousHistory();
+
+  string expected = "attrib.html";
+  CPPUNIT_ASSERT_EQUAL(expected, prev);
+  CPPUNIT_ASSERT_EQUAL(10, m_document->position());
+}

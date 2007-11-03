@@ -44,15 +44,15 @@ Document::~Document()
 void Document::setUri(const std::string & uriString)
 {
   // m_uri = uriString;
-  if (m_history.empty() or uriString != *m_historyPosition)
+  if (m_history.empty() or uriString != currentHistoryUri())
   {
     // refreshing the same page
-    vector<string>::iterator currPosition(m_historyPosition);
+    HistoryVector::iterator currPosition(m_historyPosition);
     if (hasNextHistory()) {
       ++currPosition;
       m_history.erase(currPosition, m_history.end());
     }
-    m_history.push_back(uriString);
+    m_history.push_back(HistoryEntry(uriString,0));
     m_historyPosition = m_history.end();
     --m_historyPosition;
   }
@@ -69,7 +69,7 @@ void Document::setUri(const std::string & uriString)
 
 const std::string & Document::uri() const
 {
-  return *m_historyPosition;
+  return currentHistoryUri();
 }
 
 // const char * Document::asText() const
@@ -144,7 +144,7 @@ void Document::appendData(const char * data, int size)
     }
     if (not m_headerParser->redirect().empty())
     {
-      *m_historyPosition = m_headerParser->redirect();
+      currentHistoryUri() = m_headerParser->redirect();
     }
   }
   notifyAll();
@@ -179,12 +179,12 @@ Document::Status Document::status() const
 
 bool Document::hasPreviousHistory() const
 {
-  vector<string>::iterator currPosition(m_historyPosition);
+  HistoryVector::iterator currPosition(m_historyPosition);
   return currPosition != m_history.begin();
 }
 bool Document::hasNextHistory() const
 {
-  vector<string>::iterator currPosition(m_historyPosition);
+  HistoryVector::iterator currPosition(m_historyPosition);
   if (currPosition == m_history.end())
   {
     return false;
@@ -198,7 +198,7 @@ std::string Document::gotoPreviousHistory()
   if (hasPreviousHistory())
   {
     --m_historyPosition;
-    return *m_historyPosition;
+    return currentHistoryUri();
   }
   return "";
 }
@@ -208,7 +208,7 @@ std::string Document::gotoNextHistory()
   if (hasNextHistory())
   {
     ++m_historyPosition;
-    return *m_historyPosition;
+    return currentHistoryUri();
   }
   return "";
 }
@@ -261,3 +261,35 @@ void Document::magicMimeType(const char * data, int length)
     }
   }
 }
+
+void Document::setPosition(int position)
+{
+  currentHistoryPosition() = position;
+}
+
+int Document::position() const
+{
+  return currentHistoryPosition();
+}
+
+std::string & Document::currentHistoryUri()
+{
+  return m_historyPosition->first;
+}
+
+const std::string & Document::currentHistoryUri() const
+{
+  return m_historyPosition->first;
+}
+
+int & Document::currentHistoryPosition()
+{
+  return m_historyPosition->second;
+}
+
+const int & Document::currentHistoryPosition() const
+{
+  return m_historyPosition->second;
+}
+
+

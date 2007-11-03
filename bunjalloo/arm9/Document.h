@@ -141,6 +141,17 @@ class Document
     {
       return m_htmlDocument;
     }
+
+    /** Set the user defined position of the document.
+     * @param position the position of the document
+     */
+    void setPosition(int position);
+
+    /** Get the user defined position of the document.
+     * @return the position of the document
+     */
+    int position() const;
+
   private:
     //std::string m_uri;
     Status m_status;
@@ -149,13 +160,22 @@ class Document
     CookieJar*    m_cookieJar;
     HtmlDocument* m_htmlDocument;
     HeaderParser* m_headerParser;
-    std::vector<std::string> m_history;
-    std::vector<std::string>::iterator m_historyPosition;
+    //! Store history entry as the url and user defined scroll position.
+    typedef std::pair<std::string, int> HistoryEntry;
+    typedef std::vector<HistoryEntry> HistoryVector;
+
+    HistoryVector m_history;
+    HistoryVector::iterator m_historyPosition;
 
     //! Notify all registered views that there are model changes.
     void notifyAll() const;
 
     void magicMimeType(const char * data, int length);
+    inline std::string & currentHistoryUri();
+    inline const std::string & currentHistoryUri() const;
+    inline int & currentHistoryPosition();
+    inline const int & currentHistoryPosition() const;
+
     //! No copies.
     Document (const Document&);
     const Document& operator=(const Document&);
