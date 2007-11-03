@@ -125,7 +125,8 @@ void Controller::saveAs(const char * fileName)
   // save the current document as fileName
   // simply copy from the cache.
   string cachedFile = m_cache->fileName(m_document->uri());
-  if (nds::File::exists(cachedFile.c_str()))
+  if (nds::File::exists(cachedFile.c_str()) == nds::File::F_REG
+      and nds::File::exists(fileName) == nds::File::F_NONE)
   {
     bool ok = nds::File::cp(cachedFile.c_str(), fileName);
   }

@@ -41,9 +41,9 @@ namespace nds
 
       enum FileType
       {
+        F_NONE,//!< non existant
         F_REG, //!< regular file
-        F_DIR, //!< directory
-        F_NONE //!< non existant
+        F_DIR  //!< directory
       };
       /** See if a file or directory exists.
        * @param path the file path
