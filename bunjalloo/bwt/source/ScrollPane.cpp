@@ -428,7 +428,7 @@ void ScrollPane::adjustScroll(int & scrollIncrement)
   int top = m_children.front()->bounds().top() - bounds().top();
 
   // don't do anything if the child fits in the scroll area
-  if ( m_topLevel and (childLowBound - top) < bounds().bottom())
+  if ( m_topLevel and ( m_children.front()->bounds().bottom() - m_children.front()->bounds().top()  ) < bounds().bottom())
   {
     return;
   }
