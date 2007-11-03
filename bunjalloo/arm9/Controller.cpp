@@ -120,6 +120,10 @@ void Controller::reload()
   doUri(m_document->uri());
 }
 
+void Controller::saveAs()
+{
+}
+
 void Controller::previous() 
 {
   string ph = m_document->gotoPreviousHistory();

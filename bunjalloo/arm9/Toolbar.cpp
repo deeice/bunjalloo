@@ -55,7 +55,7 @@ enum ToolbarIcon
   ICON_BOOKMARK,
   ICON_GO_URL,
   ICON_UNUSED_1,
-  ICON_UNUSED_2,
+  ICON_SAVE_AS,
 
   ICON_NOT_CONNECTED,
   ICON_CONNECTED,
@@ -72,7 +72,7 @@ enum ToolbarSpriteID
   SPRITE_REFRESH,
 
   SPRITE_GO_URL,
-  SPRITE_BOOKMARK,
+  SPRITE_SAVE_AS,
 
   SPRITE_CONNECT_STATUS,
 
@@ -274,7 +274,8 @@ void Toolbar::handlePress(int i)
     case SPRITE_REFRESH:
       m_controller.reload();
       break;
-    case SPRITE_BOOKMARK:
+    case SPRITE_SAVE_AS:
+      m_controller.saveAs();
       break;
     case SPRITE_GO_URL:
       m_view.enterUrl();
@@ -291,7 +292,7 @@ void Toolbar::updateIcons()
   m_sprites[SPRITE_STOP]->tile( TILES_PER_ICON * ( m_document.status() != Document::LOADED ? ICON_STOP: ICON_STOP_DISABLE));
   m_sprites[SPRITE_REFRESH]->tile( TILES_PER_ICON * ICON_REFRESH);
   m_sprites[SPRITE_GO_URL]->tile( TILES_PER_ICON * ICON_GO_URL);
-  m_sprites[SPRITE_BOOKMARK]->tile( TILES_PER_ICON * ICON_SPINNER_INACTIVE);
+  m_sprites[SPRITE_SAVE_AS]->tile( TILES_PER_ICON * ICON_SAVE_AS);
   bool wifiInit = m_controller.wifiInitialised();
   ToolbarIcon wifiIcon(ICON_NOT_CONNECTED);
   if (wifiInit)

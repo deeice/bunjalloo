@@ -42,7 +42,10 @@ class Controller
 
     /** Refresh the page - reload from http not from cache.  */
     void reload();
-    
+
+    /** Save the current page as...  */
+    void saveAs();
+
     void previous();
     void next();
     void stop();
