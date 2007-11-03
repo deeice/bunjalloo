@@ -246,7 +246,7 @@ def build(buildTarget):
     env.Zip(env['DIST_NAME'], '#/data')
     env.Zip(env['DIST_NAME'], '#/README')
     env.Zip(env['DIST_NAME'], '#/CREDITS')
-    env.DldiPatch('%s-patched'%executableName, executableName)
+    Default(env.DldiPatch('%s-patched'%executableName, executableName))
 
   # build the tests
   if (buildTarget == 'pc'):
