@@ -155,14 +155,12 @@ void HtmlDocument::inHead(const std::string & tag, const AttributeVector & attrs
 
   if (   tag == "script"
       or tag == "style"
-      or tag == "title"
+      or tag == HtmlConstants::TITLE_TAG
      )
   {
     HtmlElement * element = ElementFactory::create(tag, attrs);
-    // insertElement(element);
     m_head->append(element);
-    // m_openElements.push_back(element); // no, this is an error, do not push
-    if (tag == "title") {
+    if (tag == HtmlConstants::TITLE_TAG) {
       setContentModel(RCDATA);
     }
     if (tag == "style" or tag == "script") {
@@ -172,7 +170,7 @@ void HtmlDocument::inHead(const std::string & tag, const AttributeVector & attrs
     m_state = MAIN_WAITING_TOKEN;
   }
   else if (
-         tag == "base" 
+         tag == "base"
       or tag == "link"
       or tag == HtmlConstants::META_TAG
       )
@@ -218,7 +216,7 @@ void HtmlDocument::inHead(const std::string & tag)
     {
       handleEndTag(HtmlConstants::HEAD_TAG);
     }
-    else 
+    else
     {
       m_insertionMode = AFTER_HEAD;
     }
@@ -241,12 +239,12 @@ void HtmlDocument::afterHead(const std::string & tag, const AttributeVector & at
     insertElement(element);
     m_insertionMode = IN_FRAMESET;
   }
-  else if (   tag == "base" 
+  else if (   tag == "base"
       or tag == "link"
       or tag == HtmlConstants::META_TAG
       or tag == "script"
       or tag == "style"
-      or tag == "title"
+      or tag == HtmlConstants::TITLE_TAG
      )
   {
     // Woops, parse error - reprocess
@@ -270,12 +268,12 @@ void HtmlDocument::afterHead(const std::string & tag)
 
 void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs)
 {
-  if (   tag == "base" 
+  if (   tag == "base"
       or tag == "link"
       or tag == HtmlConstants::META_TAG
       or tag == "script"
       or tag == "style"
-      or tag == "title"
+      or tag == HtmlConstants::TITLE_TAG
      )
   {
     // Parse error.. or not. Process as if in IN_HEAD mode

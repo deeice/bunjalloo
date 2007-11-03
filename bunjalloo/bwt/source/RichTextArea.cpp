@@ -28,7 +28,9 @@ RichTextArea::RichTextArea(Font * font) :
   TextArea(font),
   m_documentSize(0),
   m_state(Link::STATE_PLAIN),
-  m_linkListener(0)
+  m_linkListener(0),
+  m_centred(false),
+  m_outlined(false)
 {
 }
 
@@ -247,6 +249,19 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
   unsigned int lastPosition = unicodeString.find_last_not_of(delimeter);
   unsigned int i = 0;
   bool hasComponent(lineHasComponent(m_lineNumber));
+  bool centred(m_centred);
+  // can't centre the line if there is a component on it
+  if (hasComponent)
+  {
+    centred = false;
+  }
+  if (centred)
+  {
+    // find size of line, change m_cursorx accordingly
+    int w = textSize(unicodeString.substr(0, lastPosition));
+    m_cursorx = (m_bounds.w - w)/2;
+  }
+
   /*
   printf("hasComponent %s , m_currentChildIndex %d string %d\n", hasComponent?"Yes":"no", m_currentChildIndex, 
       unicodeString.size());
@@ -256,7 +271,7 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
   if (unicodeString.size() == 0 and hasComponent)
   {
     // how to factor this loop?
-    while (hasComponent and m_currentChildIndex < m_childPositions.size() 
+    while (hasComponent and m_currentChildIndex < m_childPositions.size()
         and m_paintPosition == m_childPositions[m_currentChildIndex])
     {
       Component * c(m_children[m_currentChildIndex]);
@@ -275,7 +290,7 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
   for (; it != unicodeString.end() ; ++it, ++i)
   {
     // check for components
-    while (hasComponent and m_currentChildIndex < m_childPositions.size() 
+    while (hasComponent and m_currentChildIndex < m_childPositions.size()
         and m_paintPosition == m_childPositions[m_currentChildIndex])
     {
       Component * c(m_children[m_currentChildIndex]);
@@ -438,6 +453,16 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   }
 
   //TextArea::paint(clip);
+  if (m_outlined)
+  {
+    nds::Canvas::instance().
+      drawRectangle(
+            m_bounds.x,
+            m_bounds.y,
+            m_bounds.w,
+            m_bounds.h+1,
+            WidgetColors::BUTTON_SHADOW);
+  }
 
   for (; it != m_document.end() and (m_cursory < m_bounds.bottom()) and (m_cursory < clip.bottom()); ++it)
   {
@@ -445,7 +470,7 @@ void RichTextArea::paint(const nds::Rectangle & clip)
     incrLine();
   }
   for (std::vector<Component*>::iterator it(m_children.begin());
-      it != m_children.end(); 
+      it != m_children.end();
       ++it)
   {
     Component * c(*it);
@@ -632,3 +657,24 @@ void RichTextArea::insertNewline()
   RichTextArea::appendText(string2unicode("\n"));
   setParseNewline(pnl);
 }
+
+bool RichTextArea::centred() const
+{
+  return m_centred;
+}
+
+void RichTextArea::setCentred(bool centre)
+{
+  m_centred = centre;
+}
+
+bool RichTextArea::outlined() const
+{
+  return m_outlined;
+}
+
+void RichTextArea::setOutlined(bool outline)
+{
+  m_outlined = outline;
+}
+

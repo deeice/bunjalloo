@@ -54,6 +54,12 @@ class RichTextArea: public TextArea
     /** Insert a new line - usefull for when we don't parse new lines
      */
     void insertNewline();
+
+    bool centred() const;
+    void setCentred(bool centre=true);
+    bool outlined() const;
+    void setOutlined(bool outline=true);
+
     virtual int linesToSkip() const;
 
     virtual void paint(const nds::Rectangle & clip);
@@ -87,6 +93,8 @@ class RichTextArea: public TextArea
 
     unsigned int m_currentChildIndex;
     std::vector<unsigned int> m_childPositions;
+    bool m_centred;
+    bool m_outlined;
 
     /** Delete the links */
     void removeClickables();
