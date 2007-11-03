@@ -21,6 +21,7 @@
 #include "Config.h"
 #include "Controller.h"
 #include "Document.h"
+#include "File.h"
 #include "FormControl.h"
 #include "Keyboard.h"
 #include "Link.h"
@@ -136,7 +137,13 @@ void View::enterUrl()
 void View::saveAs()
 {
   // save file as ???
-  m_addressBar->setText(string2unicode(m_document.uri()));
+  URI uri(m_document.uri());
+  string fileName(nds::File::base(uri.fileName().c_str()));
+  if (fileName.empty())
+  {
+    fileName = "index.html";
+  }
+  m_addressBar->setText(string2unicode(fileName));
   m_keyboard->editText(m_addressBar);
   m_toolbar->setVisible(false);
   m_state = SAVE_AS;

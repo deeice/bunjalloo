@@ -100,10 +100,10 @@ HtmlDocument::~HtmlDocument()
   reset();
 }
 
-void HtmlDocument::reset() 
+void HtmlDocument::reset()
 {
   m_data.clear();
-  
+
   delete rootNode();
   m_openElements.clear();
 
@@ -111,7 +111,7 @@ void HtmlDocument::reset()
   /*for_each(m_activeFormatters.begin(), m_activeFormatters.end(), ElementFactory::remove);*/
   m_activeFormatters.clear();
 
-  m_dataGot = 0; 
+  m_dataGot = 0;
   m_state = INITIAL;
   m_mimeType = TEXT_PLAIN;
 }

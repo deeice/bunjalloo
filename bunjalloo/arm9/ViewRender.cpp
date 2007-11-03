@@ -336,6 +336,12 @@ void ViewRender::render()
     useScrollPane = true;
 
   }
+  else if (mimeType == HtmlParser::OTHER)
+  {
+    string notViewable("Content not viewable");
+    textArea()->appendText(string2unicode(notViewable));
+    useScrollPane = true;
+  }
   else
   {
     assert(root->isa(HtmlConstants::HTML_TAG));
