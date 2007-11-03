@@ -237,3 +237,8 @@ void nds::File::ls(const char * path, std::vector<std::string> & entries)
     ::closedir(dir);
   }
 }
+
+bool nds::File::cp(const char *src, const char *dst)
+{
+  return cpCommon(toFat(src).c_str(), toFat(dst).c_str());
+}

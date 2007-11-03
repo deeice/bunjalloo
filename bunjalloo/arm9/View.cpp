@@ -129,7 +129,17 @@ void View::enterUrl()
   m_addressBar->setText(string2unicode(m_document.uri()));
   m_keyboard->editText(m_addressBar);
   m_toolbar->setVisible(false);
-  m_state = KEYBOARD;
+  m_state = ENTER_URL;
+  m_dirty = true;
+}
+
+void View::saveAs()
+{
+  // save file as ???
+  m_addressBar->setText(string2unicode(m_document.uri()));
+  m_keyboard->editText(m_addressBar);
+  m_toolbar->setVisible(false);
+  m_state = SAVE_AS;
   m_dirty = true;
 }
 
@@ -268,7 +278,8 @@ void View::tick()
     case BROWSE:
       browse();
       break;
-    case KEYBOARD:
+    case ENTER_URL:
+    case SAVE_AS:
       keyboard();
       break;
   }
@@ -285,20 +296,12 @@ void View::tick()
     m_toolbar->updateIcons();
   }
 
-  if (m_state == KEYBOARD and not m_keyboard->visible()) {
-    m_state = BROWSE;
-    string newAddress = unicode2string(m_keyboard->result());
-    if (not newAddress.empty() and m_keyboard->selected() == Keyboard::OK)
-    {
-      // check for search
-      string result;
-      if (m_search and m_search->checkSearch(newAddress, result))
-      {
-        newAddress = result;
-      }
-      m_toolbar->setVisible(true);
-      m_controller.doUri(newAddress);
-    }
+  if (m_state == ENTER_URL and not m_keyboard->visible()) {
+    doEnterUrl();
+  }
+
+  if (m_state == SAVE_AS and not m_keyboard->visible()) {
+    doSaveAs();
   }
 
   // clicked a link:
@@ -321,3 +324,33 @@ void View::tick()
     m_state = BROWSE;
   }
 }
+
+void View::doEnterUrl()
+{
+  m_state = BROWSE;
+  string newAddress = unicode2string(m_keyboard->result());
+  if (not newAddress.empty() and m_keyboard->selected() == Keyboard::OK)
+  {
+    // check for search
+    string result;
+    if (m_search and m_search->checkSearch(newAddress, result))
+    {
+      newAddress = result;
+    }
+    m_toolbar->setVisible(true);
+    m_controller.doUri(newAddress);
+  }
+}
+
+void View::doSaveAs()
+{
+  m_state = BROWSE;
+  string fileName = unicode2string(m_keyboard->result());
+  if (not fileName.empty() and m_keyboard->selected() == Keyboard::OK)
+  {
+    // check for search
+    m_toolbar->setVisible(true);
+    m_controller.saveAs(fileName.c_str());
+  }
+}
+

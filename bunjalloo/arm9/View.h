@@ -64,12 +64,16 @@ class View : public ViewI, public ButtonListener, public LinkListener
 
     void enterUrl();
 
+    /** Save the current page as...  */
+    void saveAs();
+
   private:
 
     enum InputState
     {
       BROWSE,
-      KEYBOARD
+      ENTER_URL,
+      SAVE_AS
     };
 
     Document & m_document;
@@ -92,6 +96,9 @@ class View : public ViewI, public ButtonListener, public LinkListener
 
     void browse();
     void keyboard();
+
+    void doEnterUrl();
+    void doSaveAs();
 
 };
 #endif

@@ -275,7 +275,7 @@ void Toolbar::handlePress(int i)
       m_controller.reload();
       break;
     case SPRITE_SAVE_AS:
-      m_controller.saveAs();
+      m_view.saveAs();
       break;
     case SPRITE_GO_URL:
       m_view.enterUrl();

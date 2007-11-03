@@ -44,7 +44,7 @@ class Controller
     void reload();
 
     /** Save the current page as...  */
-    void saveAs();
+    void saveAs(const char * fileName);
 
     void previous();
     void next();

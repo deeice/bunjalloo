@@ -173,3 +173,40 @@ bool nds::File::rmrf(const char * path)
     }
   }
 }
+
+bool nds::File::cpCommon(const char * src, const char * dst)
+{
+  bool ok = true;
+  FILE *in = fopen(src, "rb");
+  if (in != 0)
+  {
+    FILE *out = fopen(dst, "wb");
+    if (out != 0)
+    {
+      int ch = 0;
+      while((ch = getc(in)) != EOF)
+      {
+        putc(ch, out);
+      }
+      if (ferror(in) or ferror(out))
+      {
+        ok = false;
+      }
+      if (fclose(out) != 0)
+      {
+        ok = false;
+      }
+    }
+    else
+    {
+      ok = false;
+    }
+    fclose(in);
+  }
+  else
+  {
+    ok = false;
+  }
+  return ok;
+}
+

@@ -26,13 +26,13 @@ namespace nds
   class File
   {
     public:
-      
+
       /** Get the base name of the file.
        * @param path the file path
        * @return the base name of the file - e.g for /path/to/file returns "file".
        */
       static const char * base(const char * path);
-      
+
       /** Get the directory of the file.
        * @param path the file path
        * @return the directory of the file - e.g for /path/to/file returns "/path/to", for "file" returns "."
@@ -59,6 +59,8 @@ namespace nds
 
       static bool unlink(const char * path);
       static bool rmrf(const char * path);
+
+      static bool cp(const char * src, const char * dst);
 
       // entries is a list of basename files in the directory
       static void ls(const char * path, std::vector<std::string> & entries);
@@ -113,6 +115,7 @@ namespace nds
       static FileType existsCommon(const char * path);
       static bool mkdirCommon(const char * path);
       static int mkdir(const char * path, unsigned int mode);
+      static bool cpCommon(const char * src, const char * dst);
   };
 }
 
