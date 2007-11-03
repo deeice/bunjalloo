@@ -358,7 +358,7 @@ void HeaderParser::httpResponse()
     m_state = PARSE_ERROR;
   }
 }
-  
+
 void HeaderParser::fireData()
 {
   rewind();
@@ -370,7 +370,7 @@ void HeaderParser::fireData()
       m_chunkLengthString = "";
       m_chunkLength = 0;
     }
-    else 
+    else
     {
       m_chunkLength -= length;
     }
