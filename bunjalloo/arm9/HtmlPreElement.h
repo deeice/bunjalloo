@@ -23,13 +23,13 @@ class HtmlPreElement: public HtmlElement
 {
 
   public:
-    HtmlPreElement(const std::string & tagName) 
-      : HtmlElement(tagName) 
+    HtmlPreElement(const std::string & tagName)
+      : HtmlElement(tagName)
     {
       m_block = true;
     }
 
     virtual void appendText(unsigned int value);
-  
+
 };
 #endif

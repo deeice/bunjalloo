@@ -16,7 +16,7 @@
 */
 #include "HtmlMetaElement.h"
 
-HtmlMetaElement::HtmlMetaElement(const std::string & tagName) 
+HtmlMetaElement::HtmlMetaElement(const std::string & tagName)
 : HtmlElement(tagName)
 {}
 

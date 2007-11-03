@@ -22,7 +22,7 @@ class HtmlBodyElement : public HtmlElement
 {
   public:
 
-    HtmlBodyElement(const std::string & tagName) 
+    HtmlBodyElement(const std::string & tagName)
       : HtmlElement(tagName)
     {}
 

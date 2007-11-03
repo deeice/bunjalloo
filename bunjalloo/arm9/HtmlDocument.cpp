@@ -42,7 +42,7 @@ void HtmlDocument::walkNode(const HtmlElement * node)
       walkNode(*it);
     }
     m_depth--;
-  } 
+  }
   else
   {
     cout << node->tagName() << endl;;
@@ -86,8 +86,8 @@ void HtmlDocument::dumpDOM()
 }
 #endif
 
-HtmlDocument::HtmlDocument(): 
-  m_dataGot(0), 
+HtmlDocument::HtmlDocument():
+  m_dataGot(0),
   m_state(INITIAL),
   m_head(0),
   m_form(0)
@@ -130,7 +130,7 @@ void HtmlDocument::beforeHead(const std::string & tag, const AttributeVector & a
     m_head = ElementFactory::create(tag, attrs);
     insertElement(m_head);
     m_insertionMode = IN_HEAD;
-  } 
+  }
   else
   {
     // push false head tag and reparse this tag (in IN_HEAD mode now)
@@ -352,7 +352,7 @@ void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs
     insertElement(ElementFactory::create(tag, attrs));
     setContentModel(PLAINTEXT);
   }
-  else if (tag[0] == 'h' and 
+  else if (tag[0] == 'h' and
       (tag[1] >= '1' and tag[1] <= '6')
       )
   {
@@ -579,7 +579,7 @@ void HtmlDocument::inBody(const std::string & tag)
       m_openElements.pop_back();
     }
   }
-  else if (tag[0] == 'h' and 
+  else if (tag[0] == 'h' and
       (tag[1] >= '1' and tag[1] <= '6')
       )
   {
@@ -776,7 +776,7 @@ void HtmlDocument::inSelect(const std::string & tag)
   }
 }
 
-void HtmlDocument::afterBody(const std::string & tag, 
+void HtmlDocument::afterBody(const std::string & tag,
                              const AttributeVector & attrs)
 {
   m_insertionMode = IN_BODY;
@@ -795,7 +795,7 @@ void HtmlDocument::afterBody(const std::string & tag)
 }
 
 // main phase start tag
-void HtmlDocument::mainPhase(const std::string & tag, 
+void HtmlDocument::mainPhase(const std::string & tag,
                              const AttributeVector & attrs)
 {
   if (tag == HtmlConstants::HTML_TAG)
@@ -1013,7 +1013,7 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
       // WTF is this?
       if (EOF == (int)ucodeChar) {
         mainPhase(ucodeChar);
-      } 
+      }
       else
       {
         m_dataGot++;
@@ -1024,7 +1024,7 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
       if (EOF == (int)ucodeChar) {
         m_openElements.pop_back();
         mainPhase(ucodeChar);
-      } 
+      }
       else
       {
         m_dataGot++;
@@ -1081,7 +1081,7 @@ bool HtmlDocument::inScope(const std::string & element, bool inTableScope) const
 
 HtmlElement* HtmlDocument::activeFormatContains(const std::string & tagName)
 {
-  
+
   ElementList::iterator it = m_activeFormatters.begin();
   for (; it != m_activeFormatters.end(); ++it)
   {
@@ -1146,7 +1146,7 @@ void HtmlDocument::generateImpliedEndTags(const std::string & except)
 
 bool HtmlDocument::isFormatting(HtmlElement * node)
 {
-  return node->isa(HtmlConstants::A_TAG) 
+  return node->isa(HtmlConstants::A_TAG)
     or node->isa(HtmlConstants::B_TAG)
     or node->isa("big")
     or node->isa("em")
@@ -1168,7 +1168,7 @@ bool HtmlDocument::isPhrasing(HtmlElement * node)
 
 void HtmlDocument::reconstructActiveFormatters()
 {
-  if (m_activeFormatters.size() == 0) 
+  if (m_activeFormatters.size() == 0)
   {
     return;
   }
@@ -1205,7 +1205,7 @@ void HtmlDocument::reconstructActiveFormatters()
       //7. Let entry be the element one later than entry in the list of active formatting elements.
       it = currentIt;
       entry = *it;
-    } 
+    }
     else
     {
       it = currentIt;
@@ -1216,7 +1216,7 @@ void HtmlDocument::reconstructActiveFormatters()
     insertElement(clone);
     //10 Replace the entry for entry in the list with an entry for clone.
     *it = clone;
-    //11 If the entry for clone in the list of active formatting elements is not the last entry in the list, return to step 7. 
+    //11 If the entry for clone in the list of active formatting elements is not the last entry in the list, return to step 7.
   }
 }
 
@@ -1252,9 +1252,9 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
    * Let the formatting element be the last element in the list of active
    * formatting elements that:
    *
-   * * is between the end of the list and the last scope marker in the 
+   * * is between the end of the list and the last scope marker in the
    * list, if any, or the start of the list otherwise, and
-   * * has the same tag name as the token. 
+   * * has the same tag name as the token.
    *
    * If there is no such node, or, if that node is also in the stack of open
    * elements but the element is not in scope, then this is a parse error. Abort
@@ -1273,8 +1273,8 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     // FIXME - scope for buttons.
     HtmlElement * formattingElement(0);
     {
-      ElementList::reverse_iterator activeFormat = 
-        find_if( m_activeFormatters.rbegin(), 
+      ElementList::reverse_iterator activeFormat =
+        find_if( m_activeFormatters.rbegin(),
             m_activeFormatters.rend(),
             bind2nd( mem_fun(&HtmlElement::isa_ptr), &tag)
             );
@@ -1285,8 +1285,8 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
       }
       formattingElement = *activeFormat;
     }
-    ElementVector::iterator openElement = find(m_openElements.begin(), 
-        m_openElements.end(), 
+    ElementVector::iterator openElement = find(m_openElements.begin(),
+        m_openElements.end(),
         formattingElement);
     if (openElement == m_openElements.end())
     {
@@ -1320,7 +1320,7 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     }
     if (furthestBlock == 0)
     {
-      /* 
+      /*
          3. If there is no furthest block, then the UA must skip the subsequent steps
          and instead just pop all the nodes from the bottom of the stack of open
          elements, from the current node up to the formatting element, and remove
@@ -1354,8 +1354,8 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     /* 6.  Let a bookmark note the position of the formatting element in the
      * list of active formatting elements relative to the elements on either
      * side of it in the list.*/
-    ElementList::iterator bookmarkIt = find(m_activeFormatters.begin(), 
-        m_activeFormatters.end(), 
+    ElementList::iterator bookmarkIt = find(m_activeFormatters.begin(),
+        m_activeFormatters.end(),
         formattingElement);
     Bookmark marker;
     createBookmark(marker, bookmarkIt);
@@ -1369,8 +1369,8 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
        *   1. Let node be the element immediately prior to node in the stack of
        *      open elements.
        */
-      ElementVector::iterator priorNode = find(m_openElements.begin(), 
-          m_openElements.end(), 
+      ElementVector::iterator priorNode = find(m_openElements.begin(),
+          m_openElements.end(),
           node);
       --priorNode;
       node = *priorNode;
@@ -1379,7 +1379,7 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
        *      remove node from the stack of open elements and then go back to step 1.
        */
       ElementList::iterator activeFormat = find(m_activeFormatters.begin(),
-          m_activeFormatters.end(), 
+          m_activeFormatters.end(),
           node);
       if (activeFormat == m_activeFormatters.end())
       {
@@ -1402,7 +1402,7 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
        */
       if (lastNode == furthestBlock)
       {
-        // move bookmark 
+        // move bookmark
         createBookmark(marker, activeFormat);
         //bookmark = activeFormat;
         //++bookmark; // or --?
@@ -1416,11 +1416,11 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
       if (node->hasChildren())
       {
         HtmlElement * clone = node->clone();
-        ElementVector::iterator nodeOnOE = find(m_openElements.begin(), 
-            m_openElements.end(), 
+        ElementVector::iterator nodeOnOE = find(m_openElements.begin(),
+            m_openElements.end(),
             node);
         *nodeOnOE = clone;
-        ElementList::iterator nodeOnAF = find(m_activeFormatters.begin(), 
+        ElementList::iterator nodeOnAF = find(m_activeFormatters.begin(),
             m_activeFormatters.end(),
             node);
         *nodeOnAF = clone;
@@ -1478,7 +1478,7 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     }
     else
     {
-      if (marker.before != 0) 
+      if (marker.before != 0)
       {
         ElementList::iterator b4 = find(m_activeFormatters.begin(), m_activeFormatters.end(), marker.before);
         if (b4 != m_activeFormatters.end())
@@ -1506,8 +1506,8 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
      * in a more deeply nested position than) the position of the furthest
      * block in that stack.  */
     removeFromOpenElements(formattingElement);
-    ElementVector::iterator clonePosition = find(m_openElements.begin(), 
-        m_openElements.end(), 
+    ElementVector::iterator clonePosition = find(m_openElements.begin(),
+        m_openElements.end(),
         furthestBlock);
     ++clonePosition;
     m_openElements.insert(clonePosition, clone);

@@ -37,7 +37,7 @@ void FormControl::walkForm(const HtmlElement * formElement)
   if (not name.empty() )
   {
     UnicodeString value = formElement->attribute("value");
-    m_processedData += 
+    m_processedData +=
   }
   if (formElement->hasChildren())
   {
@@ -136,7 +136,7 @@ void FormControl::input(Controller & controller, URI & uri)
 
         case HtmlInputElement::IMAGE:
           includeValue = m_element == element;
-          if (includeValue) 
+          if (includeValue)
           {
             if (needAmp) {
               processedData += '&';

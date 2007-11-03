@@ -229,8 +229,8 @@ void HeaderParser::endingHeaders()
 
 bool HeaderParser::isFieldValue() const
 {
-  return (m_value == '-' 
-      or m_value == '_' 
+  return (m_value == '-'
+      or m_value == '_'
       or ::isalnum(m_value));
 
 }
@@ -295,10 +295,10 @@ void HeaderParser::value()
     case '\r':
       m_state = BEFORE_FIELD;
       next();
-      // allow \n or \r\n 
+      // allow \n or \r\n
       if (m_value != '\n') {
         rewind();
-      } 
+      }
       break;
     case '\n':
       m_state = BEFORE_FIELD;

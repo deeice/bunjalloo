@@ -95,7 +95,7 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
   m_document.registerView(this);
   for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
   {
-    // would be 4 tiles per sprite (16x16 = 4*8x8) 
+    // would be 4 tiles per sprite (16x16 = 4*8x8)
     // but the tile count is for 4bpp tiles, 256 color 8bpp require twice as much vram.
     nds::Sprite * sprite(new nds::Sprite(TOOLBAR_SCREEN, 16, 16, i*TILES_PER_ICON, 256));
     m_sprites.push_back(sprite);
@@ -231,7 +231,7 @@ void Toolbar::setVisible(bool visible)
 bool Toolbar::touch(int x, int y)
 {
   nds::Rectangle touchZone = { m_sprites[0]->x(), m_sprites[0]->y(),
-    m_sprites[SPRITE_END_OF_ENTRIES-1]->x() - m_sprites[0]->x() + m_sprites[0]->width(), 
+    m_sprites[SPRITE_END_OF_ENTRIES-1]->x() - m_sprites[0]->x() + m_sprites[0]->width(),
     m_sprites[SPRITE_END_OF_ENTRIES-1]->y() - m_sprites[0]->y() + m_sprites[0]->height()
     };
   if (not visible())
@@ -242,7 +242,7 @@ bool Toolbar::touch(int x, int y)
   {
     m_timer = m_timerReset;
     int index = 0;
-    for (SpriteVector::iterator it(m_sprites.begin()); 
+    for (SpriteVector::iterator it(m_sprites.begin());
         it != m_sprites.end();
         ++it, ++index)
     {

@@ -24,7 +24,7 @@
 class ButtonGroup: public ButtonListener
 {
   public:
-    
+
     /** Add a ButtonI to the group.
      * @param button the button to add.
      */

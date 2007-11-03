@@ -57,7 +57,7 @@ class Image
      * @return the image width in pixels.
      */
     unsigned int width() const;
-    
+
     /** Get the height.
      * @return the image height in pixels.
      */
@@ -70,13 +70,13 @@ class Image
     unsigned int paletteSize() const;
 
     unsigned int channels() const;
-    
-    /** Get a pointer to the palette data. 
+
+    /** Get a pointer to the palette data.
      * @return the pointer to the palette data.
      * @see paletteSize()
      */
     const unsigned short * palette() const;
-    
+
 
     /** Get the RGB or indexed image data.
      * @return pointer to the pixel data.
@@ -87,7 +87,7 @@ class Image
 
     bool m_valid;
     bool m_keepPalette;
-    
+
     // scaled w, h
     unsigned int m_width;
     unsigned int m_height;

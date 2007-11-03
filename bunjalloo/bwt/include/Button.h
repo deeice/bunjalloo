@@ -30,9 +30,9 @@ class Button: public TextContainer, public ButtonI
   public:
     /** Creates a new empty Button. */
     Button();
-    /** Creates a new Button with the given label. 
+    /** Creates a new Button with the given label.
      * @param label the text label that is to be shown.
-     */ 
+     */
     Button(const UnicodeString & label);
 
     /** Set whether to paint decoration - the shadow and highlight, plus

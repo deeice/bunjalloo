@@ -55,18 +55,18 @@ class HtmlParser
      */
     void setEncoding(Encoding enc);
 
-    /** Get the current encoding. 
+    /** Get the current encoding.
      * @return the current Encoding.
      */
     Encoding encoding() const;
 
-    /** Parse the content-type value and act accordingly. 
+    /** Parse the content-type value and act accordingly.
      * May set teh model to plain text or the decoding to iso-8851.
      * @param value the content-type value.
      */
     void parseContentType(const std::string & value);
 
-    /** Parse the refresh value and act accordingly. 
+    /** Parse the refresh value and act accordingly.
      * Refresh the page and possibly go to a new url.
      * @param value the refresh value.
      */
@@ -110,7 +110,7 @@ class HtmlParser
      * @param tag the tag name (lowercase).
      * @param attrs a vector of attributes for the tag.
      **/
-    virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs); 
+    virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs);
     /** Called when an end tag is found.
      * @param tag the tag name (lowercase).
      */

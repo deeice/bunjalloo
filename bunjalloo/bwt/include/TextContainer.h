@@ -33,13 +33,13 @@ class TextContainer: public Component
 
     /** Create an empty container.*/
     TextContainer();
-    
+
     /** Create a container with the given text.
      * @param text the text to display
      */
     TextContainer(const UnicodeString & text);
 
-    /** Set the text contents. 
+    /** Set the text contents.
      * @param text the new text contents.
      */
     void setText(const UnicodeString & text);

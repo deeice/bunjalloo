@@ -21,7 +21,7 @@
 class HtmlFormElement:public HtmlElement
 {
   public:
-    HtmlFormElement(const std::string & tagName) 
+    HtmlFormElement(const std::string & tagName)
       : HtmlElement(tagName)
     {}
 

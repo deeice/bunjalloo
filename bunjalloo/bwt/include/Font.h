@@ -38,7 +38,7 @@ class Font
       const unsigned char * data;
     };
 
-    /** Construct a font from a file name. The filename should be the base name, 
+    /** Construct a font from a file name. The filename should be the base name,
      * .pal, .img and .map extensions are added to read in the appropriate sections.
      * @param fileName the base file name to use.
      */
@@ -61,9 +61,9 @@ class Font
      * @param encoding the type of encoding used - utf-8 or iso_8859-1.
      */
     void textSize(const char * text,
-        int textLength, 
-        int & width, 
-        int & height, 
+        int textLength,
+        int & width,
+        int & height,
         const std::string & encoding="utf-8") const;
     void glyph(unsigned int glyphId, Glyph & g) const;
 

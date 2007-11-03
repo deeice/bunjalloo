@@ -36,7 +36,7 @@ static const unicodeint intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000
 static const UnicodeString s_delimiters(intDelimiters,6);
 static const int INDENT(16);
 
-TextArea::TextArea(Font * font) : 
+TextArea::TextArea(Font * font) :
   m_appendPosition(0),
   m_font(0),
   m_palette(0),
@@ -82,8 +82,8 @@ void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
   {
     // draw underline
     Canvas::instance().horizontalLine(xPosition,
-                                      yPosition+m_font->height()-1, 
-                                      g.width, 
+                                      yPosition+m_font->height()-1,
+                                      g.width,
                                       m_palette[m_paletteLength-1]);
 
   }
@@ -186,7 +186,7 @@ void TextArea::setCursor(int x, int y)
 
 void TextArea::incrLine()
 {
-  m_cursorx = m_initialCursorx; 
+  m_cursorx = m_initialCursorx;
   m_cursory += m_font->height();
 }
 
@@ -340,7 +340,7 @@ void TextArea::setTextColor(unsigned short color)
 
     // y |       ____   y = mx+c
     //  c|___----
-    //   |___________ 
+    //   |___________
     //                x
     //  c = initial colour      (intercept)
     //  m = 31 - initial  / 32  (gradient)

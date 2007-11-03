@@ -23,7 +23,7 @@ class ButtonListener;
 class ButtonI
 {
   public:
-    
+
     /** Set the initial state of the class.*/
     ButtonI(): m_selected(false),m_listener(0){}
 

@@ -21,7 +21,7 @@
 class HtmlOptionElement : public HtmlElement
 {
   public:
-    HtmlOptionElement(const std::string & tagName) 
+    HtmlOptionElement(const std::string & tagName)
       : HtmlElement(tagName), m_selected(false) { }
 
     virtual void setAttribute(const std::string & name, const UnicodeString & value);

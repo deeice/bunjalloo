@@ -29,7 +29,7 @@ class ScrollBar: public Component
 {
 
   public:
-    
+
     /** Draw a small arrow pointing downwards.
      * @param x the on screen x position of the arrow.
      * @param y the on screen y position of the arrow.
@@ -41,7 +41,7 @@ class ScrollBar: public Component
      * @param y the on screen y position of the arrow.
      */
     static void drawUpArrow(int x, int y);
-    
+
     /** Sets up the ScrollBar.*/
     ScrollBar();
 

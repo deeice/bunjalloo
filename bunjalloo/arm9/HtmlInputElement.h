@@ -21,7 +21,7 @@
 class HtmlInputElement:public HtmlElement
 {
   public:
-    HtmlInputElement(const std::string & tagName) 
+    HtmlInputElement(const std::string & tagName)
       : HtmlElement(tagName), m_checked(false), m_hasAltText(false)
     {}
 
@@ -37,7 +37,7 @@ class HtmlInputElement:public HtmlElement
     };
     InputType inputType() const;
 
-    virtual void setAttribute(const std::string & name, 
+    virtual void setAttribute(const std::string & name,
         const UnicodeString & value);
     bool checked() const;
     void setChecked(bool checked);

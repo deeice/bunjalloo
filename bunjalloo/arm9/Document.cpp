@@ -79,7 +79,7 @@ const UnicodeString & Document::asText() const
 }
 
 
-void Document::dumpDOM() 
+void Document::dumpDOM()
 {
   m_htmlDocument->dumpDOM();
 }
@@ -90,7 +90,7 @@ const HtmlElement * Document::rootNode() const
   return m_htmlDocument->rootNode();
 }
 
-void Document::reset() 
+void Document::reset()
 {
   m_status = NOTHING;
   m_htmlDocument->reset();
@@ -142,7 +142,7 @@ void Document::appendData(const char * data, int size)
     {
       m_htmlDocument->setDataGot(0);
     }
-    if (not m_headerParser->redirect().empty()) 
+    if (not m_headerParser->redirect().empty())
     {
       *m_historyPosition = m_headerParser->redirect();
     }

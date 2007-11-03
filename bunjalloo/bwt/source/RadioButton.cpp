@@ -24,7 +24,7 @@ RadioButton::RadioButton():ToggleButton()
   setSize(18, 18);
 }
 
-const unsigned char * RadioButton::getGfxData() 
+const unsigned char * RadioButton::getGfxData()
 {
   if (selected())
   {

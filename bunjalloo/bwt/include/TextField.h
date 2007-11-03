@@ -40,7 +40,7 @@ class TextField: public TextContainer, public TextEntryI
     {
       TextContainer::setText(text);
     }
-    virtual bool isMultiLine() const 
+    virtual bool isMultiLine() const
     {
       return false;
     }

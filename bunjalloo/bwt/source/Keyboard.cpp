@@ -96,7 +96,7 @@ Keyboard::Keyboard():
   text = LETTERS;
   y += KEY_HEIGHT;
   createRow(x, y, text, ROW1_LENGTH);
-  
+
   // ASDFG
   x += KEY_WIDTH/2;
   y += KEY_HEIGHT;
@@ -122,56 +122,56 @@ Keyboard::Keyboard():
   // shift, capsLock, tab, enter, backspace, delete, altkeys, space
   // backspace - at the end of the Q-P row, 2 keys wide
   createSpecialKey(INITIAL_X+(ROW1_LENGTH)*(KEY_WIDTH), INITIAL_Y+KEY_HEIGHT,
-      KEY_WIDTH*2, KEY_HEIGHT, 
-      BACKSPACE_STR, 
+      KEY_WIDTH*2, KEY_HEIGHT,
+      BACKSPACE_STR,
       m_backspaceKey);
 
   // enter - at the end of the A-L row, 2.5 keys wide.
   createSpecialKey(INITIAL_X+(ROW2_LENGTH)*(KEY_WIDTH)+KEY_WIDTH/2, INITIAL_Y+(KEY_HEIGHT*2),
-      KEY_WIDTH*5/2, KEY_HEIGHT, 
-      ENTER_STR, 
+      KEY_WIDTH*5/2, KEY_HEIGHT,
+      ENTER_STR,
       m_enterKey);
-  
+
   // m_clearKey - at the end of the space and final row
   createSpecialKey(INITIAL_X+KEY_WIDTH/2+(KEY_WIDTH)*ROW3_LENGTH-1, INITIAL_Y+(KEY_HEIGHT*4),
-      (KEY_WIDTH*3/2), KEY_HEIGHT, 
-      CLEAR_STR, 
+      (KEY_WIDTH*3/2), KEY_HEIGHT,
+      CLEAR_STR,
       m_clearKey);
 
   // spaceKey - in between the final 4 chars on the final row
   createSpecialKey(INITIAL_X+(KEY_WIDTH*3/2)+(KEY_WIDTH)*2-1, INITIAL_Y+(KEY_HEIGHT*4),
-      (KEY_WIDTH)*5, KEY_HEIGHT, 
-      SPACE_STR, 
+      (KEY_WIDTH)*5, KEY_HEIGHT,
+      SPACE_STR,
       m_spaceKey);
 
   // ok key - floating after the keyboard
   createSpecialKey(INITIAL_X+KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*5)+KEY_HEIGHT/3,
-      (KEY_WIDTH)*3, KEY_HEIGHT, 
-      OK_STR, 
+      (KEY_WIDTH)*3, KEY_HEIGHT,
+      OK_STR,
       m_ok);
 
   // cancel key - floating after the keyboard
   createSpecialKey(INITIAL_X+KEY_WIDTH*8, INITIAL_Y+(KEY_HEIGHT*5)+KEY_HEIGHT/3,
-      (KEY_WIDTH)*3, KEY_HEIGHT, 
-      CANCEL_STR, 
+      (KEY_WIDTH)*3, KEY_HEIGHT,
+      CANCEL_STR,
       m_cancel);
 
   // caps - at the start of the a-l row. 1.5 keys wide
   createSpecialKey(INITIAL_X-KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*2),
-      (KEY_WIDTH*3/2), KEY_HEIGHT, 
-      CAPS_STR, 
+      (KEY_WIDTH*3/2), KEY_HEIGHT,
+      CAPS_STR,
       m_capsLockKey);
 
   // shift - at the start of the z-m row, 2 keys wide.
   createSpecialKey(INITIAL_X-KEY_WIDTH, INITIAL_Y+(KEY_HEIGHT*3),
-      KEY_WIDTH*2-1, KEY_HEIGHT, 
-      SHIFT_STR, 
+      KEY_WIDTH*2-1, KEY_HEIGHT,
+      SHIFT_STR,
       m_shiftKey);
 
   // m_extraKey
   createSpecialKey(INITIAL_X-(KEY_WIDTH/2)-2, INITIAL_Y+(KEY_HEIGHT*4),
-      (KEY_WIDTH*2), KEY_HEIGHT, 
-      EXTRA_STR, 
+      (KEY_WIDTH*2), KEY_HEIGHT,
+      EXTRA_STR,
       m_extraKey);
 
   // By adding the m_scrollPane to the Component::m_children it gets deleted

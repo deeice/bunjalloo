@@ -90,7 +90,7 @@ unsigned int HtmlBodyElement::bgColor() const
   }
   else
   {
-    int index(0); 
+    int index(0);
     for (;;)
     {
       if (s_colorMap[index].name == 0)

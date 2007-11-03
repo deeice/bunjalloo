@@ -50,7 +50,7 @@ class Range
     unsigned int m_upper;
 };
 
-Font::Font(const unsigned char * imageData, 
+Font::Font(const unsigned char * imageData,
     const unsigned char * mapData):
   m_width(8),
   m_height(8),

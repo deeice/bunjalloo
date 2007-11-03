@@ -24,7 +24,7 @@ class HtmlElement;
 class CookieJar;
 class URI;
 
-/** Parse the headers and chunks from a HTTP GET request. 
+/** Parse the headers and chunks from a HTTP GET request.
  * The payload is then passed on to the HtmlParser.
  */
 class HeaderParser

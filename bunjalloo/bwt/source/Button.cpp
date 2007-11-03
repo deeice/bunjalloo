@@ -87,7 +87,7 @@ bool Button::touch(int x, int y)
       listener()->pressed(this);
     }
     return true;
-  } 
+  }
   else if (listener() == 0)
   {
     setSelected(false);

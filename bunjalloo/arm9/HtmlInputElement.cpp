@@ -74,14 +74,14 @@ void HtmlInputElement::setChecked(bool checked)
   m_checked = checked;
 }
 
-void HtmlInputElement::setAttribute(const std::string & name, 
+void HtmlInputElement::setAttribute(const std::string & name,
         const UnicodeString & value)
 {
   HtmlElement::setAttribute(name, value);
   if (name == "checked")
   {
     m_checked = true;
-    
+
   }
   else if (name == "alt")
   {

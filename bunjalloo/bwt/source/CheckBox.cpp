@@ -24,7 +24,7 @@ CheckBox::CheckBox():ToggleButton()
   setSize(18, 18);
 }
 
-const unsigned char * CheckBox::getGfxData() 
+const unsigned char * CheckBox::getGfxData()
 {
   if (selected())
   {

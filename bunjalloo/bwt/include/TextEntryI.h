@@ -51,7 +51,7 @@ class TextEntryI
       return m_listener;
     }
 
-    /** Get the echo text availability of this TextEntryI. 
+    /** Get the echo text availability of this TextEntryI.
      * Password fields should return false.
      */
     inline virtual bool echoText() const

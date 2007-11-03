@@ -21,11 +21,11 @@
 class HtmlTextAreaElement:public HtmlElement
 {
   public:
-    HtmlTextAreaElement(const std::string & tagName) 
+    HtmlTextAreaElement(const std::string & tagName)
       : HtmlElement(tagName), m_rows(0), m_cols(0)
     {}
 
-    virtual void setAttribute(const std::string & name, 
+    virtual void setAttribute(const std::string & name,
         const UnicodeString & value);
     int rows() const;
     int cols() const;

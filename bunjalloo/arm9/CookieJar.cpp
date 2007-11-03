@@ -72,7 +72,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
   {
     paramSet.parameter(PATH_STR, path);
   }
-  
+
   for (KeyValueMap::const_iterator it(keyValueMap.begin()); it != keyValueMap.end(); ++it)
   {
     string name = it->first;
@@ -149,7 +149,7 @@ void CookieJar::setAcceptCookies(const std::string & domain, bool accept)
     m_acceptedDomains.erase(domain);
   }
 
-  if (accept) 
+  if (accept)
   {
     m_acceptedDomains[domain] = accept;
   }

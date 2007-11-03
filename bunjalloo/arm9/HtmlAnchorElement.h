@@ -21,7 +21,7 @@
 class HtmlAnchorElement : public HtmlElement
 {
   public:
-    HtmlAnchorElement(const std::string & tagName) 
+    HtmlAnchorElement(const std::string & tagName)
       : HtmlElement(tagName) {}
 
     HtmlElement * clone() const;

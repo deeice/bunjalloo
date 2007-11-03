@@ -67,7 +67,7 @@ class HtmlParserImpl
       START_END
     };
 
-    HtmlParserImpl(HtmlParser & self) 
+    HtmlParserImpl(HtmlParser & self)
       : m_self(self) ,
       m_encoding(HtmlParser::ISO_ENCODING)
     {}
@@ -136,7 +136,7 @@ class HtmlParserImpl
     string m_leftOvers;
 
     //! URL for refresh header.
-    string m_refresh; 
+    string m_refresh;
     //! time for refresh header.
     int m_refreshTime;
 
@@ -253,7 +253,7 @@ void HtmlParserImpl::emit(unsigned int toEmit)
   last = toEmit;
   if (toEmit == '\r') {
     toEmit = '\n';
-  } 
+  }
   //if (toEmit == '\t')// or toEmit == NBSP)
   //{
   //  toEmit = ' ';
@@ -274,8 +274,8 @@ void HtmlParserImpl::handleTagOpen()
     next();
     if (m_value == '/') {
       m_state = CLOSE_TAG_OPEN;
-    } 
-    else 
+    }
+    else
     {
       rewind();
       emit('<');
@@ -371,8 +371,8 @@ void HtmlParserImpl::handleCloseTagOpen()
     m_tagTokenType = END;
     m_currentTagToken = ::tolower(m_value);
     m_state = TAG_NAME;
-  } 
-  else 
+  }
+  else
   {
     switch (m_value) {
       case '>':
@@ -522,7 +522,7 @@ void HtmlParserImpl::handleAttributeName()
     case '<':
     case EOF:
       // parse error - carry on, reconsume in data state. FALL THROUGH!
-      rewind(); 
+      rewind();
     case '>':
       shouldEmit = true;
       m_state = DATA;
@@ -577,7 +577,7 @@ void HtmlParserImpl::handleAfterAttributeName()
     case '<':
     case EOF:
       // parse error - carry on, reconsume in data state. FALL THROUGH!
-      rewind(); 
+      rewind();
     case '>':
       emitTagToken();
       m_state = DATA;
@@ -627,7 +627,7 @@ void HtmlParserImpl::handleBeforeAttributeValue()
     case '<':
     case EOF:
       // parse error - carry on, reconsume in data state. FALL THROUGH!
-      rewind(); 
+      rewind();
     case '>':
       emitTagToken();
       m_state = DATA;
@@ -666,7 +666,7 @@ void HtmlParserImpl::handleAttributeValueQuote()
         m_state = DATA;
         break;
       default:
-        if (m_attribute) { 
+        if (m_attribute) {
           m_attribute->value += m_value;
         }
         break;
@@ -775,8 +775,8 @@ unsigned int HtmlParserImpl::consumeEntity()
       m_position = start;
       return 0;
     }
-  } 
-  else 
+  }
+  else
   {
     // parse until ';' or "forever" then check the string against the table of 259 entities.
     // TODO
@@ -903,8 +903,8 @@ void HtmlParserImpl::handleMarkupDeclarationOpen()
     // comment state.
     m_commentToken = "";
     m_state = COMMENT;
-  } 
-  else 
+  }
+  else
   {
     string next7 = asUnconsumedCharString(7);
     if (next7.empty())
@@ -916,7 +916,7 @@ void HtmlParserImpl::handleMarkupDeclarationOpen()
     {
       consume(7);
       m_state = DOCTYPE;
-    } 
+    }
     else
     {
       // parse error
@@ -990,8 +990,8 @@ void HtmlParserImpl::handleDoctype()
   if (isWhitespace(m_value))
   {
     m_state = BEFORE_DOCTYPE_NAME;
-  } 
-  else 
+  }
+  else
   {
     // Parse error. Reconsume the current character.
     rewind();
@@ -1005,14 +1005,14 @@ void HtmlParserImpl::handleBeforeDoctypeName()
   if (isWhitespace(m_value))
   {
     m_state = BEFORE_DOCTYPE_NAME;
-  } 
-  else 
+  }
+  else
   {
     if (islower(m_value)) {
       m_doctypeTokenIsError = true;
       m_doctypeToken = ::toupper(m_value);
       m_state = DOCTYPE_NAME;
-    } 
+    }
     else
     {
       string empty("");
@@ -1042,7 +1042,7 @@ void HtmlParserImpl::handleDoctypeName()
   if (isWhitespace(m_value))
   {
     m_state = AFTER_DOCTYPE_NAME;
-  } 
+  }
   else
   {
     if (::islower(m_value))
@@ -1051,7 +1051,7 @@ void HtmlParserImpl::handleDoctypeName()
       m_doctypeToken += ::toupper(m_value);
     }
     else {
-      switch (m_value) 
+      switch (m_value)
       {
         case '>':
           emitDoctype(m_doctypeToken, m_doctypeTokenIsError);
@@ -1078,8 +1078,8 @@ void HtmlParserImpl::handleAfterDoctypeName()
   {
     // stay in this state
     m_state = AFTER_DOCTYPE_NAME;
-  } 
-  else 
+  }
+  else
   {
     switch (m_value)
     {
@@ -1147,7 +1147,7 @@ void HtmlParserImpl::handleData()
     // tag open state
     m_state = TAG_OPEN;
   }
-  else 
+  else
   {
     // anything else. ??
     emit(m_value);

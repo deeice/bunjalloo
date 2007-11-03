@@ -26,11 +26,11 @@ class Component
   public:
     /** Set up the Component.*/
     Component();
-    
+
     /** End of the Component life - removes (deletes) all its child
      * Components.*/
     virtual ~Component();
-    
+
     /** Paint the widget, clipping it to the given area.
      * @param clip the area to clip painting to.
      */
@@ -103,7 +103,7 @@ class Component
     inline void setVisible(bool visible=true);
 
     /** Get the number of children that this Component has.
-     * @return the number of child components 
+     * @return the number of child components
      */
     unsigned int childCount() const;
 
@@ -116,7 +116,7 @@ class Component
   protected:
     /** Holds the position and size. */
     nds::Rectangle m_bounds;
-    
+
     /** The width that this component would like to be. */
     int m_preferredWidth;
 

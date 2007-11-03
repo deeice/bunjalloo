@@ -300,9 +300,9 @@ void Image::readPng(const char * filename)
    // alpha images require this:
    if (info_ptr->color_type & PNG_COLOR_MASK_ALPHA)
      png_set_strip_alpha(png_ptr);
-   
+
    // paletted images require this:
-   if(info_ptr->color_type == PNG_COLOR_TYPE_PALETTE) 
+   if(info_ptr->color_type == PNG_COLOR_TYPE_PALETTE)
    {
      if (not m_keepPalette) {
        m_paletteSize = 0;
@@ -326,7 +326,7 @@ void Image::readPng(const char * filename)
    png_read_update_info(png_ptr, info_ptr);
 
 
-   m_realWidth =info_ptr->width; 
+   m_realWidth =info_ptr->width;
    m_realHeight =info_ptr->height;
    m_channels = png_get_channels(png_ptr, info_ptr);
    m_bpp = m_channels;
@@ -490,7 +490,7 @@ void Image::readGif(const char * filename)
           else {
             m_currentLine = 0;
             for (int i = 0; i < height; i++, row++) {
-              if (DGifGetLine(gifFile, rowBuffer, width) == GIF_ERROR) 
+              if (DGifGetLine(gifFile, rowBuffer, width) == GIF_ERROR)
               {
                 return;
               }

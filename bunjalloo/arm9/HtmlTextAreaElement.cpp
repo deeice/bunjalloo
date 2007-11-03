@@ -31,7 +31,7 @@ const UnicodeString * HtmlTextAreaElement::attributePtr(const std::string & name
   return 0;
 }
 
-void HtmlTextAreaElement::setAttribute(const std::string & name, 
+void HtmlTextAreaElement::setAttribute(const std::string & name,
     const UnicodeString & value)
 {
   HtmlElement::setAttribute(name, value);

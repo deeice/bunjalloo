@@ -154,7 +154,7 @@ void PSImpl::inValue()
       m_value = 0;
     }
   }
-  else 
+  else
   {
     // whitespace
     /*if (m_state == VALUE_UNQUOTED)

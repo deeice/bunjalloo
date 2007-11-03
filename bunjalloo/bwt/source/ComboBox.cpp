@@ -107,7 +107,7 @@ void ComboBox::setLocation(unsigned int x, unsigned int y)
 void ComboBox::setSize(unsigned int w, unsigned int h)
 {
   Component::setSize(w, h);
-  
+
   scrollPane()->setSize(w, scrollPane()->preferredSize().h);
   m_preferredHeight = button()->preferredSize().h;
   m_preferredWidth = w+COMBO_DD_BAR_WIDTH;

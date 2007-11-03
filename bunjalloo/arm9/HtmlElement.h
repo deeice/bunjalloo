@@ -26,13 +26,13 @@ class HtmlElement /* : public Element */
 
   public:
 
-    /** Constructor. 
+    /** Constructor.
      * @param tagName the name of the tag for this element.
      */
-    HtmlElement(const std::string & tagName) 
+    HtmlElement(const std::string & tagName)
       : m_tagName(tagName),
         m_parent(0),
-        m_block(false) 
+        m_block(false)
     {}
 
     //! Destructor.
@@ -43,7 +43,7 @@ class HtmlElement /* : public Element */
      * @param value the value
      */
     virtual void setAttribute(const std::string & name, const UnicodeString & value);
-    
+
     /** Get an attribute value.
      * @param name the attribute name.
      * @return the attribute value as a string.
@@ -86,12 +86,12 @@ class HtmlElement /* : public Element */
      */
     inline bool hasChildren() const;
 
-    /** Fetch the first child. 
+    /** Fetch the first child.
      * @return the first child of this node or null of no children.
      */
     inline HtmlElement * firstChild() const;
 
-    /** Fetch the last child. 
+    /** Fetch the last child.
      * @return the last child of this node or null of no children.
      */
     inline HtmlElement * lastChild() const;

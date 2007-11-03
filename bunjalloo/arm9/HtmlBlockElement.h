@@ -21,11 +21,11 @@ class HtmlBlockElement: public HtmlElement
 {
 
   public:
-    HtmlBlockElement(const std::string & tagName) 
-      : HtmlElement(tagName) 
+    HtmlBlockElement(const std::string & tagName)
+      : HtmlElement(tagName)
     {
       m_block = true;
     }
-  
+
 };
 #endif

@@ -28,7 +28,7 @@ class ScrollPane;
 class EditableTextArea: public TextArea, public TextEntryI
 {
   public:
-    /** Create a new instance. 
+    /** Create a new instance.
      * @param font the font to be used.
      */
     EditableTextArea(Font * font);
@@ -44,7 +44,7 @@ class EditableTextArea: public TextArea, public TextEntryI
 
     /** Get the current caret line number.
      * @return the line number where the caret is located.
-     */ 
+     */
     int caretLine() const;
     /** Set the parent ScrollPane that holds this EditableTextArea.
      * @param scrollPane the parent

@@ -78,7 +78,7 @@ void RichTextArea::appendText(const UnicodeString & unicodeString)
 void RichTextArea::add(Component * child)
 {
   Component::add(child);
-  
+
   Rectangle bounds(child->preferredSize());
   child->setSize(bounds.w, bounds.h);
   int w = bounds.w;
@@ -115,7 +115,7 @@ void RichTextArea::add(Component * child)
   m_lineHeight[m_document.size()-1] = std::max(child->height(), font().height());
   m_childPositions.push_back(m_documentSize);
   m_preferredHeight += m_lineHeight[m_document.size()-1] - font().height();
-  // problems here - 
+  // problems here -
   // setSize should update the child sizes and text positions
   // setLocation should update the child locations
   // on paint, should constantly look for next child component while printing text
@@ -130,7 +130,7 @@ void RichTextArea::setLocation(unsigned int x, unsigned int y)
   Component::setLocation(x, y);
   if (dx == 0 and dy == 0)
     return;
-  
+
   for (std::vector<Component*>::iterator it(m_children.begin());
       it != m_children.end();
       ++it)
@@ -263,7 +263,7 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
   }
 
   /*
-  printf("hasComponent %s , m_currentChildIndex %d string %d\n", hasComponent?"Yes":"no", m_currentChildIndex, 
+  printf("hasComponent %s , m_currentChildIndex %d string %d\n", hasComponent?"Yes":"no", m_currentChildIndex,
       unicodeString.size());
   */
   // this is for the case of components alone on a line, still need to jump past them
@@ -532,7 +532,7 @@ int RichTextArea::lineAt(int y) const
   for (; dy > 0;)
   {
     LineHeightMap::const_iterator it(m_lineHeight.find(lineNum));
-    
+
     if (m_lineHeight.end() != it)
     {
       dy -= it->second;

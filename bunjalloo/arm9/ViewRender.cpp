@@ -118,8 +118,8 @@ void ViewRender::postFormat(const HtmlElement * element)
     textArea()->decreaseIndent();
     // only add an extra \n if the ul is a top level one
     const HtmlElement * next = element->parent()->nextSibling(element);
-    if ( next 
-        and not next->isa(HtmlConstants::LI_TAG) 
+    if ( next
+        and not next->isa(HtmlConstants::LI_TAG)
         and not element->isBlock() )
         //and not (element->parent()->isa(HtmlConstants::LI_TAG) or element->parent()->isa(HtmlConstants::UL_TAG) or element->parent()->isa(HtmlConstants::OL_TAG)))
     {
@@ -426,7 +426,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
     case HtmlInputElement::SUBMIT:
       {
         bool hasAltText = ((HtmlInputElement*)inputElement)->hasAltText();
-        FormControl * submitButton = new FormControl(inputElement, 
+        FormControl * submitButton = new FormControl(inputElement,
             type == HtmlInputElement::SUBMIT?(
             inputElement->attribute("value").empty()?
             string2unicode("Submit"):
@@ -453,7 +453,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         text->setSize(size, text->preferredSize().h);
         /*m_self->m_scrollPane->add(text);*/
         textArea()->add(text);
-      } 
+      }
       break;
     case HtmlInputElement::PASSWORD:
       {

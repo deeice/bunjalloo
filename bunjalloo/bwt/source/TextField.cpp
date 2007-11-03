@@ -26,7 +26,7 @@ const static nds::Color SHADOW(28,28,28);
 
 TextField::TextField(const UnicodeString & text) :
   TextContainer(text)
-{ 
+{
 }
 
 void TextField::paint(const nds::Rectangle & clip)

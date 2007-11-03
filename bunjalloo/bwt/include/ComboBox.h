@@ -25,7 +25,7 @@ class Button;
 /** A ComboBox is an item that shows a button with the initial value, and a
  * drop down list with potential values. When the button is clicked, the menu
  * is shown.*/
-class ComboBox: public Component, 
+class ComboBox: public Component,
                 private ButtonListener
 {
   public:
@@ -34,7 +34,7 @@ class ComboBox: public Component,
 
     /** End of the objects existence.*/
     //~ComboBox();
-    
+
     /** Add an item to the list. If it is the first item, it is selected.
      * @param item the text to add.
      */
@@ -65,7 +65,7 @@ class ComboBox: public Component,
     inline ScrollPane * scrollPane();
     inline const ScrollPane * scrollPane() const;
     inline Button * button();
-    
+
 };
 
 ScrollPane * ComboBox::scrollPane() {

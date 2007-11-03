@@ -21,12 +21,12 @@
 class HtmlImageElement : public HtmlElement
 {
   public:
-    HtmlImageElement(const std::string & tagName) 
+    HtmlImageElement(const std::string & tagName)
       : HtmlElement(tagName),m_hasAltText(false)
     {}
 
     HtmlElement * clone() const;
-    virtual void setAttribute(const std::string & name, 
+    virtual void setAttribute(const std::string & name,
         const UnicodeString & value);
     bool hasAltText() const;
   protected:

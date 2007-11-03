@@ -105,7 +105,7 @@ URI::Protocol_t URI::protocol() const
 
 bool URI::isValid() const
 {
-  if (m_address == "") 
+  if (m_address == "")
   {
     return false;
   }
@@ -234,19 +234,19 @@ URI URI::navigateTo(const std::string & newFile ) const
   tmp.setUri(newFile);
   if (tmp.isValid())
   {
-    if ((protocol() == HTTP_PROTOCOL or protocol() == HTTPS_PROTOCOL) 
+    if ((protocol() == HTTP_PROTOCOL or protocol() == HTTPS_PROTOCOL)
         and (tmp.protocol() != HTTP_PROTOCOL and tmp.protocol() != HTTPS_PROTOCOL))
     {
       // Security problem - remote files shouldn't be able to link to local one.
       return *this;
     }
     // else FILE / CONFIG can link to HTTP.
-    // return the new URI 
+    // return the new URI
     tmp.m_fix = m_fix;
     return tmp;
   }
   tmp = *this;
-  // first change this: www.server.com/foo/bar -> navigateTo("/path/to/file") 
+  // first change this: www.server.com/foo/bar -> navigateTo("/path/to/file")
   // should go to www.server.com/path/to/file
   // string newURI(m_protocol);
   // newURI += "://";
@@ -318,7 +318,7 @@ URI URI::navigateTo(const std::string & newFile ) const
   {
     newURI += "/";
   }
-  
+
   tmp.setUri(newURI);
   return tmp;
 }

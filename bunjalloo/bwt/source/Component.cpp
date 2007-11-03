@@ -24,7 +24,7 @@ static void deleteChild(Component * child)
   delete child;
 }
 
-Component::Component() : 
+Component::Component() :
   m_bounds(),
   m_preferredWidth(NO_PREFERRED_SIZE),
   m_preferredHeight(NO_PREFERRED_SIZE),
@@ -57,7 +57,7 @@ void Component::add(Component * child)
   }
 }
 
-/** Handle a touch event. 
+/** Handle a touch event.
  * @param x the x position.
  * @param y the y position.
  * @return true to consume the event. Component touch returns true.

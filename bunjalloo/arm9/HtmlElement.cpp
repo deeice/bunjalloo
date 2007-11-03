@@ -127,7 +127,7 @@ void HtmlElement::dump() const
   {
     dumper += *it;
   }
-  
+
   wcout << dumper << endl;
 }
 #endif

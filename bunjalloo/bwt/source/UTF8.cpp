@@ -115,7 +115,7 @@ checkLength:
       {
     returnValue = MALFORMED;
   }
-  if (returnValue != MALFORMED and 
+  if (returnValue != MALFORMED and
       ( ( returnValue >= 0xd800 and returnValue <= 0xdfff)
         or returnValue == 0xfffe
         or returnValue == 0xffff

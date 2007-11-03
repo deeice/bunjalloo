@@ -235,8 +235,8 @@ void EditableTextArea::appendText(const UnicodeString & unicodeString)
     if (unicodeString.length() == 1 and unicodeString[0] == '\n')
     {
       m_appendedNewLine = true;
-    } 
-    else 
+    }
+    else
     {
       m_appendedNewLine = false;
       m_caretChar++;
@@ -335,7 +335,7 @@ bool EditableTextArea::touch(int x, int y)
 {
   // if inside a scrollPane, check relative to the bounds of parent
   // otherwise check our bounds.
-  if ( (m_scrollPane and m_scrollPane->bounds().hit(x, y) and m_bounds.hit(x, y) ) 
+  if ( (m_scrollPane and m_scrollPane->bounds().hit(x, y) and m_bounds.hit(x, y) )
       or (not m_scrollPane and m_bounds.hit(x, y)))
   {
     if (listener())
@@ -371,9 +371,9 @@ bool EditableTextArea::caretVisible() const
   if (m_caretLine != -1)
   {
     int caretLinePos(m_bounds.top() + m_caretLine*font().height());
-    if (caretLinePos <= m_bounds.bottom() 
+    if (caretLinePos <= m_bounds.bottom()
         and m_scrollPane
-        and caretLinePos <= m_scrollPane->bounds().bottom() 
+        and caretLinePos <= m_scrollPane->bounds().bottom()
         and caretLinePos > m_scrollPane->bounds().top())
     {
       return true;

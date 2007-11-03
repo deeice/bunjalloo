@@ -138,7 +138,7 @@ class TextArea : public Component
     int m_cursory;
     int m_initialCursorx;
 
-    const UnicodeString nextWord(const UnicodeString & unicodeString, 
+    const UnicodeString nextWord(const UnicodeString & unicodeString,
         int currPosition) const;
     void advanceWord(const UnicodeString & unicodeString, int wordLength,
         int & currPosition, UnicodeString::const_iterator & it) const;
@@ -164,7 +164,7 @@ class TextArea : public Component
 
     void printAt(Font::Glyph & g, int xPosition, int yPosition);
     inline void checkLetter(Font::Glyph & g);
-    
+
 
 
 };

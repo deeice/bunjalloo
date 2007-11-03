@@ -53,12 +53,12 @@ class HttpClient: public nds::Client
 
     /** Has the fetching finished?.
      * @return true if it has, false otherwise.
-     */ 
+     */
     bool finished() const;
 
   protected:
     void handle(void * bufferIn, int amountRead);
-    
+
 
     void debug(const char * s);
 

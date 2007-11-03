@@ -45,19 +45,19 @@ class Document
      * @param uriString a string representing the URI.
      */
     void setUri(const std::string & uriString);
-    
+
     /** Append data to the model.
      * @param data pointer to the data to add.
      * @param size the amount of data in bytes.
      */
-    void appendData(const char * data, int size); 
+    void appendData(const char * data, int size);
 
     /** Append data from a local source to the model. This bypasses the HeaderParser.
      * @param data pointer to the data to add.
      * @param size the amount of data in bytes.
      */
     void appendLocalData(const char * data, int size);
-    
+
     /** Fetch the current URI.
      * @return the URI.
      */
@@ -79,16 +79,16 @@ class Document
      * @return the current status.
      */
     Status status() const;
-    
+
     /** Set the status.
      * @param newStatus the new status.
      */
     void setStatus(Status newStatus);
-    
+
     /** Reset the internal state of the model.
      */
     void reset();
-    
+
     /** Get the percentage of the page that has loaded. Note that for chunked pages this returns the
      * percentage of the chunk loaded.
      * @return the percentage of the page (or chunk) loaded

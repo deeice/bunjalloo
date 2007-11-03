@@ -32,7 +32,7 @@ using nds::Wifi9;
 static const int MAX_CONNECT_ATTEMPTS(10);
 extern const char * VERSION;
 
-HttpClient::HttpClient(const char * ip, int port, const URI & uri) : 
+HttpClient::HttpClient(const char * ip, int port, const URI & uri) :
   nds::Client(uri.server().c_str(),port), m_total(0), m_finished(false), m_connectAttempts(0),
   m_uri(uri),
   m_state(WIFI_OFF),
@@ -76,7 +76,7 @@ bool HttpClient::finished() const
   return m_finished;
 }
 
-void HttpClient::finish() { 
+void HttpClient::finish() {
   //printf("%d\n",m_total);
   if (m_total == 0)
   {
@@ -96,7 +96,7 @@ void HttpClient::debug(const char * s)
     log.write(s);
     log.write("\n");
     // printf("debug:%s\n",s);
-  } 
+  }
   //m_self->m_document->appendLocalData(s, strlen(s));
 }
 
