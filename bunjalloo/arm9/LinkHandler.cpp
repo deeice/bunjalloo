@@ -30,7 +30,7 @@ LinkHandler::LinkHandler(LinkListener * parent):
 {
   setVisible(false);
   addItem(string2unicode("url"));
-  addItem(string2unicode("image"));
+  addItem(string2unicode("image "));
   m_preferredHeight = scrollPane()->height();
 }
 
