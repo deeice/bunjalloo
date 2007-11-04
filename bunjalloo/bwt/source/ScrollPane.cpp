@@ -380,6 +380,8 @@ void ScrollPane::scrollToPercent(int i)
   // 0 is the top
   // 100 is the bottom ( y of last child is at view height ).
   // 50 is in the middle
+  if (m_children.empty())
+    return;
 
   int topLimit = m_scrollBar->y();
   int total = m_scrollBar->total() - m_scrollBar->visibleRange();
