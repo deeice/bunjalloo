@@ -32,7 +32,8 @@ def generate(env, **kw):
         (blue, sourceTxt, black,
          green,('%s,%s'%(black, green)).join( [ os.path.basename(str(f)) for f in targets] ), black ))
 
-  env.Append(PRINT_CMD_LINE_FUNC=print_cmd_line)
+  if not os.environ.has_key('NO_SCONS_COLOR'):
+    env.Append(PRINT_CMD_LINE_FUNC=print_cmd_line)
 
 def exists(env):
   return 1
