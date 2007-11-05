@@ -176,6 +176,7 @@ const std::string URI::fileName() const
     case FILE_PROTOCOL:
     case CONFIG_PROTOCOL:
       return m_address;
+    case HTTPS_PROTOCOL:
     case HTTP_PROTOCOL:
       {
         // strip off server

@@ -85,6 +85,8 @@ class HttpClient: public nds::Client
 
     void wifiConnection();
     void get(const URI & uri);
+
+    void proxyConnect();
     void readFirst();
     void readAll();
     void finish();

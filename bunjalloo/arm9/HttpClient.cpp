@@ -52,6 +52,9 @@
 #include "File.h"
 #include "Wifi9.h"
 #include "matrixSsl.h"
+#ifdef ARM9
+#define snprintf sniprintf
+#endif
 
 using namespace std;
 using nds::Wifi9;
@@ -249,6 +252,7 @@ int SslClient::read()
   {
     return HttpClient::CONNECTION_CLOSED;
   }
+  printf("SslClient::read - read %d, now handleRaw...\n", result);
   m_httpClient.handleRaw(buf, result);
   return result;
 }
@@ -603,7 +607,10 @@ void HttpClient::handle(void * bufferIn, int amountRead)
   }
   else
   {
-    handleRaw(bufferIn, amountRead);
+    if (m_state != SSL_HANDSHAKE)
+    {
+      handleRaw(bufferIn, amountRead);
+    }
   }
 }
 
@@ -611,7 +618,7 @@ void HttpClient::handleRaw(void * bufferIn, int amountRead)
 {
   char * buffer = (char*)bufferIn;
   buffer[amountRead] = 0;
-  //printf("%s", buffer);
+  // printf("%s", buffer);
   m_controller->m_document->appendData(buffer, amountRead);
   m_total += amountRead;
   //printf("0x0x End of buffer x0x0", buffer);
@@ -646,6 +653,32 @@ void HttpClient::debug(const char * s)
   //m_controller->m_document->appendLocalData(s, strlen(s));
 }
 
+void HttpClient::proxyConnect()
+{
+  string proxy;
+  if (isSsl() and m_controller->config().resource(Config::PROXY_STR, proxy))
+  {
+    // need to trick the proxy into providing the TCP/IP tunnel.
+    string s;
+    s += "CONNECT ";
+    s += m_uri.server();
+    s += ":";
+    char buffer[256];
+    snprintf(buffer,256, "%d", m_uri.port());
+    s += buffer;
+    s += " HTTP/1.1\r\n";
+    s += "Proxy-Connection: keep-alive\r\n";
+    s += "Host:";
+    s += m_uri.server();
+    s += "\r\n\r\n";
+    write(s.c_str(), s.length());
+    // read the response - it doesn't interest us much (yet)
+    m_hasSsl = false;
+    read();
+    m_hasSsl = true;
+  }
+}
+
 // GET stuff
 void HttpClient::get(const URI & uri)
 {
@@ -658,7 +691,7 @@ void HttpClient::get(const URI & uri)
     string s;
     s += uri.method();
     s += " ";
-    if (m_controller->config().resource(Config::PROXY_STR, proxy))
+    if (not isSsl() and m_controller->config().resource(Config::PROXY_STR, proxy))
     {
       // for proxy connection, need to send the whole request:
       s += uri.asString();
@@ -668,7 +701,6 @@ void HttpClient::get(const URI & uri)
       s += uri.fileName();
     }
     s += " HTTP/1.1\r\n";
-    printf(s.c_str());
     s += "Host:" + uri.server()+"\r\n";
     s += "Connection: close\r\n";
     s += "Accept-charset: ISO-8859-1,UTF-8\r\n";
@@ -676,11 +708,12 @@ void HttpClient::get(const URI & uri)
     // -- RFC2616-sec14
     s += "Accept-encoding: gzip,deflate\r\n";
     s += "Accept: text/html\r\n";
-    s += "User-Agent: Bunjalloo (";
+    s += "User-Agent: Mozilla/5.0 (X11)\r\n";
+    /*s += "User-Agent: Bunjalloo (";
     s += nds::System::uname();
     s += ";r";
     s += VERSION;
-    s += ")\r\n";
+    s += ")\r\n";*/
     s += cookieString;
     if (uri.requestHeader().empty())
     {
@@ -783,6 +816,7 @@ void HttpClient::handleNextState()
 
     case SSL_HANDSHAKE:
       {
+        proxyConnect();
         int result = m_sslClient->sslConnect();
         if (result == -1)
         {
@@ -835,6 +869,7 @@ bool HttpClient::hasPage() const
 
 void HttpClient::readFirst()
 {
+  printf("Read First\n");
   int read;
   if (isSsl())
   {
@@ -894,6 +929,7 @@ void HttpClient::readFirst()
 
 void HttpClient::readAll()
 {
+  printf("Read All\n");
   int read;
   if (isSsl())
   {
