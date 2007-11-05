@@ -31,7 +31,7 @@ processorCCFlags = {
   'arm7': ' -mcpu=arm7tdmi -mtune=arm7tdmi'
 }
 
-processorLDFlags = ' -specs=ds_arm%c.specs -g -mno-fpu -Wl,-Map,${TARGET.base}.map'
+processorLDFlags = ' -specs=ds_arm%c.specs -g -mno-fpu -Wl,-Map,${TARGET.base}.map  -Wl,-gc-sections'
 
 cxxFlags = ' -fno-rtti -fno-exceptions '
 extraflags = ' -Wno-strict-aliasing \
