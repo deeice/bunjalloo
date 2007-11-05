@@ -139,7 +139,6 @@ void irqInit();
 #define glClearColor(r,g,b)  glClearColor(r,g,b,0)
 #define glPopMatrix(i)  glPopMatrix()
 
-void swiWaitForVBlank();
 void glReset(void);
 
 #define COPY_MODE_HWORD  (0)
