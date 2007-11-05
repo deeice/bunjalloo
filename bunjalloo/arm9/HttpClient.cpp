@@ -708,12 +708,11 @@ void HttpClient::get(const URI & uri)
     // -- RFC2616-sec14
     s += "Accept-encoding: gzip,deflate\r\n";
     s += "Accept: text/html\r\n";
-    s += "User-Agent: Mozilla/5.0 (X11)\r\n";
-    /*s += "User-Agent: Bunjalloo (";
+    s += "User-Agent: Bunjalloo (";
     s += nds::System::uname();
-    s += ";r";
+    s += ";v";
     s += VERSION;
-    s += ")\r\n";*/
+    s += ")\r\n";
     s += cookieString;
     if (uri.requestHeader().empty())
     {
