@@ -113,7 +113,7 @@ class SslClient
 
 };
 
-const int SslClient::SSL_BUFFER_SIZE(1024);
+const int SslClient::SSL_BUFFER_SIZE(BUFSIZ);
 const int SslClient::SOCKET_ERROR(-1);
 
 int32 SslClient::certChecker(sslCertInfo_t * cert, void * arg)
@@ -160,11 +160,13 @@ int SslClient::sslConnect()
   if (matrixSslNewSession(&m_conn->ssl,
         s_sslKeys, &m_sessionId, m_cipherSuite) < 0)
   {
+    printf("Starting session error\n");
     return -1;
   }
   matrixSslSetCertValidator(m_conn->ssl, SslClient::certChecker, s_sslKeys);
 
-  return sslHandshake();
+  int result = sslHandshake();
+  return result;
 }
 
 int SslClient::sslHandshake()
@@ -189,17 +191,28 @@ int SslClient::sslHandshake()
   }
   // write the hello bytes.
   int written = writeBuffer(&m_conn->outsock);
+  printf("Written %d bytes in Hello\n", written);
   if (written < 0)
   {
     return -1;
   }
   m_conn->outsock.start = m_conn->outsock.end = m_conn->outsock.buf;
 
+  printf("Read back hello respose\n");
   // read back the data.
   m_state = WAITING_HELLO_RESPONSE;
   char buf[SSL_BUFFER_SIZE];
 
-  return sslRead(buf, SSL_BUFFER_SIZE);
+  int result(-1);
+  do
+  {
+    printf("Read hello response\n");
+    result = sslRead(buf, SSL_BUFFER_SIZE);
+    printf("hello response read - result %d\n", result);
+  } while (result == 0 and not matrixSslHandshakeIsComplete(m_conn->ssl));
+
+  printf("hello response ended - result %d\n", result);
+  return result;
 }
 
 int SslClient::writeBuffer(sslBuf_t * out)
@@ -208,11 +221,21 @@ int SslClient::writeBuffer(sslBuf_t * out)
   int bytes;
   s = out->start;
   while (out->start < out->end) {
-    bytes = m_httpClient.write(out->start, (int)(out->end - out->start));
-    if (bytes == SOCKET_ERROR) {
+    if (m_httpClient.isConnected())
+    {
+      bytes = m_httpClient.write(out->start, (int)(out->end - out->start));
+      if (bytes == SOCKET_ERROR) {
+        printf("writeBuffer error\n");
+        return -1;
+      }
+      if (bytes == 0)
+        break;
+      out->start += bytes;
+    }
+    else
+    {
       return -1;
     }
-    out->start += bytes;
   }
   return (int)(out->start - s);
 
@@ -221,7 +244,13 @@ int SslClient::writeBuffer(sslBuf_t * out)
 int SslClient::read()
 {
   char buf[SSL_BUFFER_SIZE];
-  return sslRead(buf, SSL_BUFFER_SIZE);
+  int result = sslRead(buf, SSL_BUFFER_SIZE);
+  if (result < 0)
+  {
+    return HttpClient::CONNECTION_CLOSED;
+  }
+  m_httpClient.handleRaw(buf, result);
+  return result;
 }
 
 int SslClient::write(const char * buf, int len)
@@ -297,6 +326,7 @@ int SslClient::sslRead(char * buf, int len)
   unsigned char	error, alertLevel, alertDescription, performRead;
 
   if (m_conn->ssl == NULL || len <= 0) {
+    printf("sslRead failed - ssl nul or len <= 0\n");
     return -1;
   }
   /* If inbuf is valid, then we have previously decoded data that must be
@@ -332,10 +362,27 @@ int SslClient::sslRead(char * buf, int len)
 readMore:
   if (m_conn->insock.end == m_conn->insock.start || performRead) {
     performRead = 1;
+    m_lastRead = 0;
     int result = m_httpClient.read();
+    printf("httpClient.read result %d\n", result);
+
+    switch (result)
+    {
+      case HttpClient::READ_ERROR:
+        goto readMore;
+        break;
+      case HttpClient::RETRY_LATER:
+        goto readMore;
+        break;
+      case HttpClient::CONNECTION_CLOSED:
+        return -1;
+      default:
+        break;
+    };
     // read() causes this->handle() to be called.
     if (m_lastRead == SOCKET_ERROR or result == HttpClient::READ_ERROR) {
       // *status = getSocketError();
+      printf("sslRead failed - m_lastRead %d result %d\n", m_lastRead, result);
       return -1;
     }
     if (m_lastRead == 0 or result == HttpClient::CONNECTION_CLOSED) {
@@ -343,6 +390,7 @@ readMore:
       return 0;
     }
     m_conn->insock.end += m_lastRead;
+    printf("readMore result - m_lastRead %d result %d\n", m_lastRead, result);
   }
   /* Define a temporary sslBuf */
   m_conn->inbuf.start = m_conn->inbuf.end = m_conn->inbuf.buf = (unsigned char*)malloc(len);
@@ -420,7 +468,7 @@ decodeMore:
          We try a single hail-mary send of the data, and then close the socket.
          Since we're closing on error, we don't worry too much about a clean flush.  */
     case SSL_ERROR:
-      // fprintf(stderr, "SSL: Closing on protocol error %d\n", error);
+      fprintf(stderr, "SSL: Closing on protocol error %d\n", error);
       if (m_conn->inbuf.start < m_conn->inbuf.end) {
         // setSocketNonblock(m_conn->fd);
         /*bytes = send(m_conn->fd, (char *)m_conn->inbuf.start, 
@@ -450,6 +498,7 @@ decodeMore:
       if (m_conn->insock.start == m_conn->insock.buf && m_conn->insock.end == 
           (m_conn->insock.buf + m_conn->insock.size)) {
         if (m_conn->insock.size > SSL_MAX_BUF_SIZE) {
+          printf("size > SSL_MAX_BUF_SIZE\n");
           goto readError;
         }
         m_conn->insock.size *= 2;
@@ -493,6 +542,7 @@ readError:
   if (m_conn->inbuf.buf == (unsigned char*)buf) {
     m_conn->inbuf.buf = NULL;
   }
+  printf("sslRead failed - readError\n");
   return -1;
 }
 
@@ -553,13 +603,18 @@ void HttpClient::handle(void * bufferIn, int amountRead)
   }
   else
   {
-    char * buffer = (char*)bufferIn;
-    buffer[amountRead] = 0;
-    //printf("%s", buffer);
-    m_controller->m_document->appendData(buffer, amountRead);
-    m_total += amountRead;
-    //printf("0x0x End of buffer x0x0", buffer);
+    handleRaw(bufferIn, amountRead);
   }
+}
+
+void HttpClient::handleRaw(void * bufferIn, int amountRead)
+{
+  char * buffer = (char*)bufferIn;
+  buffer[amountRead] = 0;
+  //printf("%s", buffer);
+  m_controller->m_document->appendData(buffer, amountRead);
+  m_total += amountRead;
+  //printf("0x0x End of buffer x0x0", buffer);
 }
 
 bool HttpClient::finished() const
@@ -581,12 +636,12 @@ void HttpClient::finish() {
 
 void HttpClient::debug(const char * s)
 {
-  if (0) {
+  if (1) {
     nds::File log;
     log.open("bunjalloo.log", "a");
     log.write(s);
     log.write("\n");
-    // printf("debug:%s\n",s);
+    printf("debug:%s\n",s);
   }
   //m_controller->m_document->appendLocalData(s, strlen(s));
 }
@@ -613,6 +668,7 @@ void HttpClient::get(const URI & uri)
       s += uri.fileName();
     }
     s += " HTTP/1.1\r\n";
+    printf(s.c_str());
     s += "Host:" + uri.server()+"\r\n";
     s += "Connection: close\r\n";
     s += "Accept-charset: ISO-8859-1,UTF-8\r\n";
@@ -636,7 +692,16 @@ void HttpClient::get(const URI & uri)
     }
     if (isSsl())
     {
-      m_sslClient->write(s.c_str(), s.length());
+      debug("Write SSL");
+      int result = m_sslClient->write(s.c_str(), s.length());
+      if (result < 0)
+      {
+        debug("Write SSL failed -1");
+      }
+      else
+      {
+        debug("Write SSL >= 0");
+      }
     }
     else
     {
@@ -717,8 +782,18 @@ void HttpClient::handleNextState()
       break;
 
     case SSL_HANDSHAKE:
-      m_sslClient->sslConnect();
-      m_state = GET_URL;
+      {
+        int result = m_sslClient->sslConnect();
+        if (result == -1)
+        {
+          debug("SSL_HANDSHAKE failed");
+          m_state = FAILED;
+        }
+        else {
+          debug("SSL_HANDSHAKE OK!");
+          m_state = GET_URL;
+        }
+      }
       break;
 
     case GET_URL:

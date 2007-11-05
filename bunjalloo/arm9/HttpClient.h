@@ -58,6 +58,12 @@ class HttpClient: public nds::Client
      */
     bool finished() const;
 
+    /** Handle raw data - not encrypted
+     * @param bufferIn the data
+     * @param amountRead the amount read in bytes
+     */
+    void handleRaw(void * bufferIn, int amountRead);
+
   protected:
     void handle(void * bufferIn, int amountRead);
 
