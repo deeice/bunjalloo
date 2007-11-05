@@ -116,7 +116,7 @@ class SslClient
 
 };
 
-const int SslClient::SSL_BUFFER_SIZE(BUFSIZ);
+const int SslClient::SSL_BUFFER_SIZE(HttpClient::BUFFER_SIZE);
 const int SslClient::SOCKET_ERROR(-1);
 
 int32 SslClient::certChecker(sslCertInfo_t * cert, void * arg)
@@ -150,8 +150,8 @@ void SslClient::handle(void * bufferIn, int amountRead)
   if (toRead > amountRead) {
     toRead = amountRead;
   }
-  m_lastRead = toRead;
-  ::memcpy(m_conn->insock.end, bufferIn, toRead);
+  m_lastRead = amountRead;
+  ::memcpy(m_conn->insock.end, bufferIn, amountRead);
 }
 
 int SslClient::sslConnect()
@@ -195,21 +195,23 @@ int SslClient::sslHandshake()
   // write the hello bytes.
   int written = writeBuffer(&m_conn->outsock);
   printf("Written %d bytes in Hello\n", written);
+  m_httpClient.print("sslHandshake - after write");
   if (written < 0)
   {
     return -1;
   }
   m_conn->outsock.start = m_conn->outsock.end = m_conn->outsock.buf;
 
-  printf("Read back hello respose\n");
+  m_httpClient.print("Read back hello respose\n");
   // read back the data.
   m_state = WAITING_HELLO_RESPONSE;
   char buf[SSL_BUFFER_SIZE];
 
   int result(-1);
+  m_lastRead = 0;
   do
   {
-    printf("Read hello response\n");
+    m_httpClient.print("Read hello respose");
     result = sslRead(buf, SSL_BUFFER_SIZE);
     printf("hello response read - result %d\n", result);
   } while (result == 0 and not matrixSslHandshakeIsComplete(m_conn->ssl));
@@ -247,6 +249,7 @@ int SslClient::writeBuffer(sslBuf_t * out)
 int SslClient::read()
 {
   char buf[SSL_BUFFER_SIZE];
+  m_lastRead = 0;
   int result = sslRead(buf, SSL_BUFFER_SIZE);
   if (result < 0)
   {
@@ -330,7 +333,7 @@ int SslClient::sslRead(char * buf, int len)
   unsigned char	error, alertLevel, alertDescription, performRead;
 
   if (m_conn->ssl == NULL || len <= 0) {
-    printf("sslRead failed - ssl nul or len <= 0\n");
+    m_httpClient.print("sslRead failed - ssl nul or len <= 0\n");
     return -1;
   }
   /* If inbuf is valid, then we have previously decoded data that must be
@@ -363,38 +366,68 @@ int SslClient::sslRead(char * buf, int len)
      Have encrypted data already cached in m_conn->insock, but might as well read more
      if we can.  */
   performRead = 0;
+  int totalReadHack = 0;
 readMore:
   if (m_conn->insock.end == m_conn->insock.start || performRead) {
     performRead = 1;
-    m_lastRead = 0;
     int result = m_httpClient.read();
-    printf("httpClient.read result %d\n", result);
-
+    /*
     switch (result)
     {
       case HttpClient::READ_ERROR:
-        goto readMore;
+        {
+          m_httpClient.print("sslRead - READ_ERROR");
+          if (totalReadHack > 0)
+          {
+            m_httpClient.print("return 0");
+            return -1;
+          }
+          else
+          {
+            swiWaitForVBlank();
+            swiWaitForVBlank();
+            totalReadHack++;
+            m_httpClient.print("sslRead - readMore");
+            goto readMore;
+          }
+        }
         break;
       case HttpClient::RETRY_LATER:
-        goto readMore;
+        {
+          swiWaitForVBlank();
+          swiWaitForVBlank();
+          swiWaitForVBlank();
+          totalReadHack++;
+          m_httpClient.print("RETRY_LATER goto readMore");
+          goto readMore;
+        }
         break;
       case HttpClient::CONNECTION_CLOSED:
+        m_httpClient.print("CONNECTION_CLOSED");
         return -1;
+        break;
       default:
         break;
     };
+    totalReadHack++;
+    */
+
     // read() causes this->handle() to be called.
-    if (m_lastRead == SOCKET_ERROR or result == HttpClient::READ_ERROR) {
+    if (m_lastRead == SOCKET_ERROR and result == HttpClient::READ_ERROR) {
       // *status = getSocketError();
       printf("sslRead failed - m_lastRead %d result %d\n", m_lastRead, result);
+      m_httpClient.print("sslRead failed - SOCKET_ERROR and READ_ERROR");
       return -1;
     }
-    if (m_lastRead == 0 or result == HttpClient::CONNECTION_CLOSED) {
+    if (m_lastRead == 0 and result == HttpClient::CONNECTION_CLOSED) {
       // *status = SSLSOCKET_EOF;
+      m_httpClient.print("sslRead failed - lastRead 0 and CONNECTION_CLOSED");
       return 0;
     }
     m_conn->insock.end += m_lastRead;
-    printf("readMore result - m_lastRead %d result %d\n", m_lastRead, result);
+    char debugBuffer[512];
+    snprintf(debugBuffer, 512, "readMore result - m_lastRead %d result %d\n", m_lastRead, result);
+    m_httpClient.print(debugBuffer);
   }
   /* Define a temporary sslBuf */
   m_conn->inbuf.start = m_conn->inbuf.end = m_conn->inbuf.buf = (unsigned char*)malloc(len);
@@ -437,7 +470,7 @@ decodeMore:
          to the outgoing data buffer and flush it out.
          */
     case SSL_SEND_RESPONSE:
-      printf("SSL_SEND_RESPONSE...\n");
+      m_httpClient.print("SSL_SEND_RESPONSE...");
       bytes = m_httpClient.write((char *)m_conn->inbuf.start,
                                  (int)(m_conn->inbuf.end - m_conn->inbuf.start));
       if (bytes == SOCKET_ERROR) {
@@ -502,15 +535,15 @@ decodeMore:
          here so that we CAN read more data when called the next time.
          */
     case SSL_PARTIAL:
-      printf("SSL_PARTIAL...\n");
-      if (m_conn->insock.start == m_conn->insock.buf && m_conn->insock.end == 
+      m_httpClient.print("SSL_PARTIAL...");
+      if (m_conn->insock.start == m_conn->insock.buf && m_conn->insock.end ==
           (m_conn->insock.buf + m_conn->insock.size)) {
         if (m_conn->insock.size > SSL_MAX_BUF_SIZE) {
-          printf("size > SSL_MAX_BUF_SIZE\n");
+          m_httpClient.print("size > SSL_MAX_BUF_SIZE\n");
           goto readError;
         }
         m_conn->insock.size *= 2;
-        m_conn->insock.start = m_conn->insock.buf = 
+        m_conn->insock.start = m_conn->insock.buf =
           (unsigned char *)realloc(m_conn->insock.buf, m_conn->insock.size);
         m_conn->insock.end = m_conn->insock.buf + (m_conn->insock.size / 2);
       }
@@ -518,8 +551,10 @@ decodeMore:
         performRead = 1;
         free(m_conn->inbuf.buf);
         m_conn->inbuf.buf = NULL;
+        m_httpClient.print("SSL_PARTIAL...readMore");
         goto readMore;
       } else {
+        m_httpClient.print("SSL_PARTIAL...readZero (end)");
         goto readZero;
       }
       /*
@@ -646,6 +681,10 @@ void HttpClient::finish() {
   }
 }
 
+void HttpClient::print(const char * s)
+{
+  debug(s);
+}
 void HttpClient::debug(const char * s)
 {
   if (1) {

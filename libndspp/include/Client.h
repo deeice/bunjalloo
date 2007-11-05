@@ -22,6 +22,7 @@ namespace nds {
   class Client
   {
     public:
+      static const int BUFFER_SIZE;
 
       /*!@brief Create a TCP client that connects to an IP address and port
        * @param ip IP address to connect to.

@@ -64,6 +64,8 @@ class HttpClient: public nds::Client
      */
     void handleRaw(void * bufferIn, int amountRead);
 
+    void print(const char * s);
+
   protected:
     void handle(void * bufferIn, int amountRead);
 
