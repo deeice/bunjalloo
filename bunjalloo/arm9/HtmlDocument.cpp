@@ -780,7 +780,10 @@ void HtmlDocument::inSelect(const std::string & tag)
 void HtmlDocument::afterBody(const std::string & tag,
                              const AttributeVector & attrs)
 {
+  // oops, regain the body and retry
+  m_openElements.push_back(currentNode()->lastChild());
   m_insertionMode = IN_BODY;
+  mainPhase(tag, attrs);
 }
 
 void HtmlDocument::afterBody(const std::string & tag)
@@ -792,6 +795,8 @@ void HtmlDocument::afterBody(const std::string & tag)
   else
   {
     m_insertionMode = IN_BODY;
+    m_openElements.push_back(currentNode()->lastChild());
+    mainPhase(tag);
   }
 }
 

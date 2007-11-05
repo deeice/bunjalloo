@@ -53,6 +53,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testUnicode2String);
   CPPUNIT_TEST( testActiveFormatters);
   CPPUNIT_TEST( testHistory);
+  CPPUNIT_TEST( testBodyEnd);
   CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -88,6 +89,7 @@ class DocumentTest : public CPPUNIT_NS::TestFixture
   void testUnicode2String();
   void testActiveFormatters();
   void testHistory();
+  void testBodyEnd();
 
   private:
   Document * m_document;
