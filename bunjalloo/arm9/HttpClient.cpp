@@ -412,6 +412,7 @@ decodeMore:
        Successfully decoded a record that did not return data or require a response.
        */
     case SSL_SUCCESS:
+      printf("SSL_SUCCESS no data...\n");
       return 0;
       /*
          Successfully decoded an application data record, and placed in tmp buf
@@ -423,6 +424,7 @@ decodeMore:
          It is possible that len > data in buffer if the encoded record
          was longer than len, but the decoded record isn't!
          */
+      printf("Process Data...\n");
       rc = (int)(m_conn->inbuf.end - m_conn->inbuf.start);
       rc = min(rc, len);
       memcpy(buf, m_conn->inbuf.start, rc);
@@ -435,6 +437,7 @@ decodeMore:
          to the outgoing data buffer and flush it out.
          */
     case SSL_SEND_RESPONSE:
+      printf("SSL_SEND_RESPONSE...\n");
       bytes = m_httpClient.write((char *)m_conn->inbuf.start,
                                  (int)(m_conn->inbuf.end - m_conn->inbuf.start));
       if (bytes == SOCKET_ERROR) {
@@ -499,6 +502,7 @@ decodeMore:
          here so that we CAN read more data when called the next time.
          */
     case SSL_PARTIAL:
+      printf("SSL_PARTIAL...\n");
       if (m_conn->insock.start == m_conn->insock.buf && m_conn->insock.end == 
           (m_conn->insock.buf + m_conn->insock.size)) {
         if (m_conn->insock.size > SSL_MAX_BUF_SIZE) {
@@ -523,6 +527,7 @@ decodeMore:
          data.  Increase the size of the buffer and call decode again
          */
     case SSL_FULL:
+      printf("SSL_FULL...\n");
       m_conn->inbuf.size *= 2;
       if (m_conn->inbuf.buf != (unsigned char*)buf) {
         free(m_conn->inbuf.buf);
