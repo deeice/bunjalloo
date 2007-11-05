@@ -21,6 +21,7 @@
 #include "URI.h"
 
 class Controller;
+class SslClient;
 
 class HttpClient: public nds::Client
 {
@@ -30,6 +31,7 @@ class HttpClient: public nds::Client
       WIFI_OFF,         //!< Initial state.
       CONNECT_WIFI,     //!< Wifi is being started.
       CONNECT_SOCKET,   //!< Can use sockets, connect to server
+      SSL_HANDSHAKE,    //!< Have connected to server, using HTTPS, do SSL handshake.
       GET_URL,          //!< Have connected to server, get url.
       READING_FIRST,    //!< Sent Rqst, see if there is a response.
       READING_ALL,      //!< Response OK, read all data.
@@ -70,14 +72,17 @@ class HttpClient: public nds::Client
     int  m_reconnects;
     URI m_uri;
     ConnectionState m_state;
-    Controller * m_self;
+    Controller * m_controller;
     int  m_maxConnectAttempts;
+    bool m_hasSsl;
+    SslClient * m_sslClient;
 
     void wifiConnection();
     void get(const URI & uri);
     void readFirst();
     void readAll();
     void finish();
+    inline bool isSsl() const;
 };
 
 #endif

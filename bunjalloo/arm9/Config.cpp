@@ -26,6 +26,7 @@ const std::string Config::s_configFile("/"DATADIR"/config.ini");
 const char Config::PROXY_STR[] = "proxy";
 const char Config::FONT_STR[] = "font";
 const char Config::COOKIE_STR[] = "cookiefile";
+const char Config::CERT_FILE[] = "cafile";
 const char Config::SEARCHFILE_STR[] = "searchfile";
 const char Config::MAX_CONNECT[] = "timeout";
 const char Config::TOOLBAR_TIME[] = "toolbar";
@@ -66,7 +67,10 @@ void Config::parseLine(ParameterSet & set)
       it != keyValueMap.end();
       ++it)
   {
-    if (it->first == FONT_STR or it->first == COOKIE_STR or it->first == SEARCHFILE_STR)
+    if (it->first == FONT_STR
+        or it->first == COOKIE_STR
+        or it->first == SEARCHFILE_STR
+        or it->first == CERT_FILE)
     {
       string value;
       configPathMember(it->second, value);

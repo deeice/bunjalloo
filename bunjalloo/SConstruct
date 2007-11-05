@@ -64,7 +64,7 @@ def createEnv(buildTarget):
 
   env.Append( LIBPATH=['#/%s/lib'%libndsppDir])
   env.Prepend( LIBS=['ndspp-%s'%buildTarget])
-  env.Prepend( LIBS=['png','z','gif','jpgd'])
+  env.Prepend( LIBS=['png','z','gif','jpgd','matrixsslstatic'])
   addObjCopyImageBuilders(env)
   env.Alias('dist', env['DIST_NAME'])
   return env
