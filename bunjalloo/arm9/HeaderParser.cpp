@@ -57,7 +57,6 @@ void HeaderParser::reset()
   m_chunkLength = 0;
   m_chunkLengthString = "";
   m_htmlParser->setToStart();
-  m_uri.setUri("");
 }
 
 void HeaderParser::setUri(const std::string & uri)
