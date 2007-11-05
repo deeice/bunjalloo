@@ -250,3 +250,11 @@ void UriTest::testSpaces()
   CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
   CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
 }
+
+void UriTest::testHttps()
+{
+  URI uri("https://server/filename.html");
+  string expectedFile = "/filename.html";
+  CPPUNIT_ASSERT_EQUAL( URI::HTTPS_PROTOCOL, uri.protocol());
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+}
