@@ -11,3 +11,6 @@ Small JPEG Decoder Library v0.93b Dec. 28, 2001
 
 giflib version 4.1.2, a library for manipulating gif files. 
   Toshio Kuratomi, Eric S. Raymond
+
+MatrixSSL 1.8.3 embedded, open source SSL implementation
+  Copyright (c) PeerSec Networks, 2002-2007.
