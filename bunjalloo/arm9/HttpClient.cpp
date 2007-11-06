@@ -362,7 +362,7 @@ retryEncode:
 int SslClient::sslRead(char * buf, int len)
 {
   int bytes, rc, remaining;
-  unsigned char	error, alertLevel, alertDescription, performRead;
+  unsigned char error, alertLevel, alertDescription, performRead;
 
   if (m_conn->ssl == 0 || len <= 0) {
     m_httpClient.print("sslRead failed - ssl nul or len <= 0\n");
@@ -398,52 +398,10 @@ int SslClient::sslRead(char * buf, int len)
      Have encrypted data already cached in m_conn->insock, but might as well read more
      if we can.  */
   performRead = 0;
-  int totalReadHack = 0;
 readMore:
   if (m_conn->insock.end == m_conn->insock.start || performRead) {
     performRead = 1;
     int result = m_httpClient.read();
-    /*
-    switch (result)
-    {
-      case HttpClient::READ_ERROR:
-        {
-          m_httpClient.print("sslRead - READ_ERROR");
-          if (totalReadHack > 0)
-          {
-            m_httpClient.print("return 0");
-            return -1;
-          }
-          else
-          {
-            swiWaitForVBlank();
-            swiWaitForVBlank();
-            totalReadHack++;
-            m_httpClient.print("sslRead - readMore");
-            goto readMore;
-          }
-        }
-        break;
-      case HttpClient::RETRY_LATER:
-        {
-          swiWaitForVBlank();
-          swiWaitForVBlank();
-          swiWaitForVBlank();
-          totalReadHack++;
-          m_httpClient.print("RETRY_LATER goto readMore");
-          goto readMore;
-        }
-        break;
-      case HttpClient::CONNECTION_CLOSED:
-        m_httpClient.print("CONNECTION_CLOSED");
-        return -1;
-        break;
-      default:
-        break;
-    };
-    totalReadHack++;
-    */
-
     // read() causes this->handle() to be called.
     if (m_lastRead == SOCKET_ERROR and result == HttpClient::READ_ERROR) {
       // *status = getSocketError();
