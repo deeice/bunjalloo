@@ -133,7 +133,9 @@ void SslClient::freeConnection()
     return;
   }
 
-  matrixSslDeleteSession(m_conn->ssl);
+  /*
+  matrixSslFreeSessionId(&m_sessionId);
+  matrixSslDeleteSession(m_conn->ssl); // mem leak, but this crashes
   m_conn->ssl = 0;
   if (m_conn->insock.buf) {
     free(m_conn->insock.buf);
@@ -147,6 +149,8 @@ void SslClient::freeConnection()
     free(m_conn->inbuf.buf);
     m_conn->inbuf.buf = 0;
   }
+  */
+  // none of the above works > 1 time.
   free(m_conn);
   m_conn = 0;
 }
