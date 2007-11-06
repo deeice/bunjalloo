@@ -115,6 +115,7 @@ class SslClient
 
     int sslRead(char * buf, int len);
 
+    void freeConnection();
 };
 
 const int SslClient::SSL_BUFFER_SIZE(HttpClient::BUFFER_SIZE);
@@ -122,10 +123,32 @@ const int SslClient::SOCKET_ERROR(-1);
 
 SslClient::~SslClient()
 {
-  if (m_conn)
+  freeConnection();
+}
+
+void SslClient::freeConnection()
+{
+  if (not m_conn)
   {
-    free(m_conn);
+    return;
   }
+
+  matrixSslDeleteSession(m_conn->ssl);
+  m_conn->ssl = 0;
+  if (m_conn->insock.buf) {
+    free(m_conn->insock.buf);
+    m_conn->insock.buf = 0;
+  }
+  if (m_conn->outsock.buf) {
+    free(m_conn->outsock.buf);
+    m_conn->outsock.buf = 0;
+  }
+  if (m_conn->inbuf.buf) {
+    free(m_conn->inbuf.buf);
+    m_conn->inbuf.buf = 0;
+  }
+  free(m_conn);
+  m_conn = 0;
 }
 
 int32 SslClient::certChecker(sslCertInfo_t * cert, void * arg)
@@ -135,7 +158,7 @@ int32 SslClient::certChecker(sslCertInfo_t * cert, void * arg)
   /* Make sure we are checking the last cert in the chain */
   next = cert;
   keys = (sslKeys_t*)arg;
-  while (next->next != NULL) {
+  while (next->next != 0) {
     next = next->next;
   }
 #if ENFORCE_CERT_VALIDATION
@@ -195,7 +218,7 @@ int SslClient::sslHandshake()
   m_conn->inbuf.size = 0;
   m_conn->inbuf.start =
     m_conn->inbuf.end =
-    m_conn->inbuf.buf = NULL;
+    m_conn->inbuf.buf = 0;
 
   int bytes = matrixSslEncodeClientHello(m_conn->ssl, &m_conn->outsock, m_cipherSuite);
   if (bytes < 0) {
@@ -341,7 +364,7 @@ int SslClient::sslRead(char * buf, int len)
   int bytes, rc, remaining;
   unsigned char	error, alertLevel, alertDescription, performRead;
 
-  if (m_conn->ssl == NULL || len <= 0) {
+  if (m_conn->ssl == 0 || len <= 0) {
     m_httpClient.print("sslRead failed - ssl nul or len <= 0\n");
     return -1;
   }
@@ -357,7 +380,7 @@ int SslClient::sslRead(char * buf, int len)
       return bytes;
     }
     free(m_conn->inbuf.buf);
-    m_conn->inbuf.buf = NULL;
+    m_conn->inbuf.buf = 0;
   }
   /*
      Pack the buffered socket data (if any) so that start is at zero.
@@ -559,7 +582,7 @@ decodeMore:
       if (!performRead) {
         performRead = 1;
         free(m_conn->inbuf.buf);
-        m_conn->inbuf.buf = NULL;
+        m_conn->inbuf.buf = 0;
         m_httpClient.print("SSL_PARTIAL...readMore");
         goto readMore;
       } else {
@@ -575,7 +598,7 @@ decodeMore:
       m_conn->inbuf.size *= 2;
       if (m_conn->inbuf.buf != (unsigned char*)buf) {
         free(m_conn->inbuf.buf);
-        m_conn->inbuf.buf = NULL;
+        m_conn->inbuf.buf = 0;
       }
       m_conn->inbuf.start = m_conn->inbuf.end = m_conn->inbuf.buf = 
         (unsigned char *)malloc(m_conn->inbuf.size);
@@ -588,12 +611,12 @@ decodeMore:
      */
 readZero:
   if (m_conn->inbuf.buf == (unsigned char*)buf) {
-    m_conn->inbuf.buf = NULL;
+    m_conn->inbuf.buf = 0;
   }
   return 0;
 readError:
   if (m_conn->inbuf.buf == (unsigned char*)buf) {
-    m_conn->inbuf.buf = NULL;
+    m_conn->inbuf.buf = 0;
   }
   printf("sslRead failed - readError\n");
   return -1;
@@ -638,7 +661,7 @@ void HttpClient::setController(Controller * c)
   if (m_hasSsl and s_sslKeys == 0 and m_controller->config().resource(Config::CERT_FILE, caFile))
   {
     // initialise keys - this is a one off deal
-    if (matrixSslReadKeys(&s_sslKeys, NULL, NULL, NULL, caFile.c_str()) < 0)
+    if (matrixSslReadKeys(&s_sslKeys, 0, 0, 0, caFile.c_str()) < 0)
     {
       m_hasSsl = false;
     }
