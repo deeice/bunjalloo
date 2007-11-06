@@ -69,6 +69,7 @@ class SslClient
     SslClient(HttpClient & httpClient)
       : m_httpClient(httpClient), m_conn(0), m_sessionId(0), m_cipherSuite(0)
     {}
+    ~SslClient();
 
     enum SslConnectionState
     {
@@ -118,6 +119,14 @@ class SslClient
 
 const int SslClient::SSL_BUFFER_SIZE(HttpClient::BUFFER_SIZE);
 const int SslClient::SOCKET_ERROR(-1);
+
+SslClient::~SslClient()
+{
+  if (m_conn)
+  {
+    free(m_conn);
+  }
+}
 
 int32 SslClient::certChecker(sslCertInfo_t * cert, void * arg)
 {
@@ -609,6 +618,11 @@ HttpClient::HttpClient(const char * ip, int port, const URI & uri) :
   {
     m_hasSsl = true;
   }
+}
+
+HttpClient::~HttpClient()
+{
+  delete m_sslClient;
 }
 
 void HttpClient::setController(Controller * c)

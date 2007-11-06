@@ -32,6 +32,8 @@ class ParameterSet
      */
     ParameterSet(const std::string & keyValueString, char sep=';');
 
+    ~ParameterSet();
+
     /** Check if this set has the requested parameter.
      * @param key the name of the parameter to check.
      * @return true if the parameter is in the set.

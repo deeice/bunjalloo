@@ -41,6 +41,7 @@ class HttpClient: public nds::Client
 
 
     HttpClient(const char * ip, int port, const URI & uri);
+    ~HttpClient();
     void setController(Controller * c);
 
     /** Has the connection and web page fetch succeeded.

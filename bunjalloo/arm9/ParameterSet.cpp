@@ -226,6 +226,11 @@ ParameterSet::ParameterSet(const std::string & keyValueString, char sep):
 {
 }
 
+ParameterSet::~ParameterSet()
+{
+  delete m_psImpl;
+}
+
 bool ParameterSet::hasParameter(const std::string & key) const
 {
   KeyValueMap::const_iterator it(m_psImpl->m_keyValueMap.find(key));
