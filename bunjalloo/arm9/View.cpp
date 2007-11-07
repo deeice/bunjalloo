@@ -51,6 +51,7 @@ View::View(Document & doc, Controller & c):
   m_linkHandler(new LinkHandler(this)),
   m_search(0),
   m_dirty(true),
+  m_refreshing(0),
   m_lastX(0),
   m_lastY(0)
 {

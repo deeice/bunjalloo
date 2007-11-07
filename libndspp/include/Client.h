@@ -44,7 +44,7 @@ namespace nds {
       /*! @brief Read bytes from the server address and port.
        * @return the number of bytes read. -1 for an error. It may be one of the ReadError codes above.
        */
-      int read();
+      int read(int max=BUFFER_SIZE);
 
       /*! @brief Disconnect from the server.*/
       void disconnect();

@@ -67,7 +67,7 @@ class SslClient
 {
   public:
     SslClient(HttpClient & httpClient)
-      : m_httpClient(httpClient), m_conn(0), m_sessionId(0), m_cipherSuite(0)
+      : m_httpClient(httpClient), m_conn(0), m_sessionId(NULL), m_cipherSuite(0)
     {}
     ~SslClient();
 
@@ -102,7 +102,7 @@ class SslClient
       int       outBufferCount;
     };
     sslConn_t * m_conn;
-    sslSessionId_t m_sessionId;
+    sslSessionId_t *m_sessionId;
     short m_cipherSuite;
     SslConnectionState m_state;
     int m_lastRead;
@@ -133,8 +133,7 @@ void SslClient::freeConnection()
     return;
   }
 
-  /*
-  matrixSslFreeSessionId(&m_sessionId);
+  matrixSslFreeSessionId(m_sessionId);
   matrixSslDeleteSession(m_conn->ssl); // mem leak, but this crashes
   m_conn->ssl = 0;
   if (m_conn->insock.buf) {
@@ -149,7 +148,6 @@ void SslClient::freeConnection()
     free(m_conn->inbuf.buf);
     m_conn->inbuf.buf = 0;
   }
-  */
   // none of the above works > 1 time.
   free(m_conn);
   m_conn = 0;
@@ -197,7 +195,7 @@ int SslClient::sslConnect()
     m_conn = (sslConn_t*)calloc(sizeof(sslConn_t), 1);
   }
   if (matrixSslNewSession(&m_conn->ssl,
-        s_sslKeys, &m_sessionId, m_cipherSuite) < 0)
+        s_sslKeys, m_sessionId, m_cipherSuite) < 0)
   {
     // printf("Starting session error\n");
     return -1;
@@ -405,7 +403,7 @@ int SslClient::sslRead(char * buf, int len)
 readMore:
   if (m_conn->insock.end == m_conn->insock.start || performRead) {
     performRead = 1;
-    int result = m_httpClient.read();
+    int result = m_httpClient.read((int)((m_conn->insock.buf + m_conn->insock.size) - m_conn->insock.end));
     // read() causes this->handle() to be called.
     if (m_lastRead == SOCKET_ERROR and result == HttpClient::READ_ERROR) {
       // *status = getSocketError();

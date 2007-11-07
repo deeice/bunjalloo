@@ -253,8 +253,10 @@ unsigned int Client::write(const void * data, unsigned int length)
   return total;
 }
 
-int Client::read()
+int Client::read(int max)
 {
+  if (max > BUFFER_SIZE)
+    max = BUFFER_SIZE;
   fd_set rfds;
   timeval timeout;
   int retval;
@@ -290,7 +292,7 @@ int Client::read()
   }
   char buffer[BUFFER_SIZE];
   errno = 0;
-  int amountRead = ::recv(m_tcp_socket, buffer, BUFFER_SIZE, 0 /*MSG_DONTWAIT*/);
+  int amountRead = ::recv(m_tcp_socket, buffer, max, 0 /*MSG_DONTWAIT*/);
   tmperr = errno;
   if (amountRead < 0) {
     debug("Error on recv");
