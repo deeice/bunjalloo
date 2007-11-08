@@ -158,34 +158,37 @@ void View::browse()
   if (keys & KEY_START) {
     enterUrl();
   }
-  if (keys & KEY_SELECT) {
-    m_toolbar->cyclePosition();
-  }
-  if (keys & KEY_DOWN) {
-    // scroll down ...
-    m_scrollPane->down();
-    m_dirty = true;
-  }
-  if (keys & KEY_UP) {
-    // scroll up ...
-    m_scrollPane->up();
-    m_dirty = true;
-  }
-  if (keys & KEY_RIGHT) {
-    // scroll down ...
-    m_scrollPane->pageDown();
-    m_dirty = true;
-  }
-  if (keys & KEY_LEFT) {
-    // scroll up ...
-    m_scrollPane->pageUp();
-    m_dirty = true;
-  }
-  if (keys & KEY_L) {
-    m_controller.previous();
-  }
-  if (keys & KEY_R) {
-    m_controller.next();
+  if (not m_keyboard->visible())
+  {
+    if (keys & KEY_SELECT) {
+      m_toolbar->cyclePosition();
+    }
+    if (keys & KEY_DOWN) {
+      // scroll down ...
+      m_scrollPane->down();
+      m_dirty = true;
+    }
+    if (keys & KEY_UP) {
+      // scroll up ...
+      m_scrollPane->up();
+      m_dirty = true;
+    }
+    if (keys & KEY_RIGHT) {
+      // scroll down ...
+      m_scrollPane->pageDown();
+      m_dirty = true;
+    }
+    if (keys & KEY_LEFT) {
+      // scroll up ...
+      m_scrollPane->pageUp();
+      m_dirty = true;
+    }
+    if (keys & KEY_L) {
+      m_controller.previous();
+    }
+    if (keys & KEY_R) {
+      m_controller.next();
+    }
   }
 
   if (keys & KEY_A) {
