@@ -16,6 +16,7 @@
 */
 #include "Cookie.h"
 #include "CookieJar.h"
+#include "File.h"
 #include "ParameterSet.h"
 #include "URI.h"
 
@@ -69,26 +70,40 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
     // this server is blocked.
     return;
   }
+  string lowCaseRequest(request);
+  transform(lowCaseRequest.begin(), lowCaseRequest.end(), lowCaseRequest.begin(), ::tolower);
 
   ParameterSet paramSet(request);
-  const KeyValueMap & keyValueMap(paramSet.keyValueMap());
-  if ( paramSet.hasParameter(PATH_STR) )
+  ParameterSet lowCaseParamSet(lowCaseRequest);
+
+  if ( lowCaseParamSet.hasParameter(PATH_STR) )
   {
-    paramSet.parameter(PATH_STR, path);
+    lowCaseParamSet.parameter(PATH_STR, path);
   }
-  if ( paramSet.hasParameter(DOMAIN_STR) )
+  else
   {
-    paramSet.parameter(DOMAIN_STR, domain);
+    // sort out basename
+    if (path[path.length()-1] != '/')
+    {
+      path = nds::File::dirname(path.c_str());
+    }
   }
-  if ( paramSet.hasParameter(SECURE_STR) )
+  if ( lowCaseParamSet.hasParameter(DOMAIN_STR) )
+  {
+    lowCaseParamSet.parameter(DOMAIN_STR, domain);
+  }
+  if ( lowCaseParamSet.hasParameter(SECURE_STR) )
   {
     secure = true;
   }
 
+  const KeyValueMap & keyValueMap(paramSet.keyValueMap());
   for (KeyValueMap::const_iterator it(keyValueMap.begin()); it != keyValueMap.end(); ++it)
   {
     string name = it->first;
-    if (name == PATH_STR or name == SECURE_STR)
+    string lowCaseName(name);
+    transform(lowCaseName.begin(), lowCaseName.end(), lowCaseName.begin(), ::tolower);
+    if (lowCaseName == PATH_STR or lowCaseName == SECURE_STR)
     {
       continue;
     }
