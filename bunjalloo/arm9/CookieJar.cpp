@@ -24,6 +24,7 @@ using namespace std;
 static const char * PATH_STR("path");
 static const char * DOMAIN_STR("domain");
 static const char * SECURE_STR("secure");
+static const char * EXPIRES_STR("expires");
 
 CookieJar::CookieJar()
 {
@@ -41,7 +42,7 @@ CookieJar::~CookieJar()
 }
 
 
-bool CookieJar::hasCookieForDomain(const URI & uri, const string & name) const
+Cookie * CookieJar::hasCookieForDomain(const URI & uri, const string & name) const
 {
   vector<Cookie *>::const_iterator it(m_cookies.begin());
   vector<Cookie *>::const_iterator end(m_cookies.end());
@@ -50,10 +51,10 @@ bool CookieJar::hasCookieForDomain(const URI & uri, const string & name) const
     Cookie * c(*it);
     if (c->matchesDomain(uri.server()) and c->name() == name)
     {
-      return true;
+      return c;
     }
   }
-  return false;
+  return 0;
 }
 
 void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
@@ -103,19 +104,24 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
     string name = it->first;
     string lowCaseName(name);
     transform(lowCaseName.begin(), lowCaseName.end(), lowCaseName.begin(), ::tolower);
-    if (lowCaseName == PATH_STR or lowCaseName == SECURE_STR)
+    if (lowCaseName == PATH_STR or lowCaseName == SECURE_STR
+        or lowCaseName == EXPIRES_STR or lowCaseName == DOMAIN_STR)
     {
       continue;
     }
-    if (hasCookieForDomain(uri, name))
+    Cookie * existingCookie = hasCookieForDomain(uri, name);
+    if (existingCookie != 0)
     {
-      continue;
+      // replace with new value
+      existingCookie->setValue(it->second);
     }
-
-    string value = it->second;
-    Cookie * cookie = new Cookie(name, value, port, domain, path, secure);
-    // printf("set cookie for %s: %s = %s\n", domain.c_str(), name.c_str(), value.c_str());
-    m_cookies.push_back(cookie);
+    else
+    {
+      string value = it->second;
+      Cookie * cookie = new Cookie(name, value, port, domain, path, secure);
+      // printf("set cookie for %s: %s = %s\n", domain.c_str(), name.c_str(), value.c_str());
+      m_cookies.push_back(cookie);
+    }
   }
 }
 

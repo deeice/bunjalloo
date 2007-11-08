@@ -63,9 +63,9 @@ class CookieJar
     /** Check if there is a cookie for this domain already in the jar.
      * @param uri the URL of the cookie.
      * @param name the cookie name.
-     * @return true if there is a cookie from the domain with the given name, false otherwise.
+     * @return pointer to a cookie from the domain with the given name, 0 otherwise.
      */
-    bool hasCookieForDomain(const URI & uri, const std::string & name) const;
+    Cookie * hasCookieForDomain(const URI & uri, const std::string & name) const;
 
     /** Check if we should accept cookies from the given domain.
      * @param domain the domain that has sent the cookie.

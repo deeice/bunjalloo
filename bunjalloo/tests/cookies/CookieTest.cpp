@@ -124,7 +124,7 @@ void CookieTest::testSubDomain()
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   expectedHeader = "";
-  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(URI("sub.domain.com"),"subcount"));
+  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(URI("sub.domain.com"),"subcount") != 0);
   CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
 
 
@@ -136,8 +136,8 @@ void CookieTest::testSubDomain()
   uri.setUri("http://some.domain.com");
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
-  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(URI("domain.com"),"topcount"));
-  CPPUNIT_ASSERT(not m_cookieJar->hasCookieForDomain(URI("domain.com"),"subcount"));
+  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(URI("domain.com"),"topcount") != 0);
+  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(URI("domain.com"),"subcount") == 0);
   CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
 
   // test that for domain.com it includes the top level cookie
@@ -185,7 +185,7 @@ void CookieTest::testPath()
   resultHeader = "";
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   expectedHeader = "Cookie: topcount=2\r\n";
-  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(uri,"topcount"));
+  CPPUNIT_ASSERT(m_cookieJar->hasCookieForDomain(uri,"topcount") != 0);
   CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
 
   // test adding some unrelated site's cookie
@@ -240,3 +240,28 @@ void CookieTest::testSecure()
   m_cookieJar->cookiesForRequest(uri, resultHeader);
   CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
 }
+
+void CookieTest::testExpireRenew()
+{
+  // make sure that we renew cookies
+  m_cookieJar->setAcceptCookies("domain.com");
+
+  URI uri("https://sub.domain.com/accounts/foo");
+  string requestHeader = "LSID=EXPIRED;Secure\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  string expectedHeader = "Cookie: LSID=EXPIRED\r\n";
+  string resultHeader;
+  m_cookieJar->cookiesForRequest(uri, resultHeader);
+  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+
+  // now renew it
+  uri.setUri("https://sub.domain.com/accounts/foo");
+  requestHeader = "LSID=newval;secure\r\n";
+  m_cookieJar->addCookieHeader(uri, requestHeader);
+  expectedHeader = "Cookie: LSID=newval\r\n";
+  resultHeader = "";
+  m_cookieJar->cookiesForRequest(uri, resultHeader);
+  CPPUNIT_ASSERT_EQUAL(expectedHeader, resultHeader);
+
+}
+

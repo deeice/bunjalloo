@@ -32,6 +32,7 @@ class CookieTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testPath );
     CPPUNIT_TEST( testSecure );
     CPPUNIT_TEST( testGoogleLogin );
+    CPPUNIT_TEST( testExpireRenew );
     CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -46,6 +47,7 @@ class CookieTest : public CPPUNIT_NS::TestFixture
     void testPath();
     void testSecure();
     void testGoogleLogin();
+    void testExpireRenew();
 
   private:
     CookieJar * m_cookieJar;

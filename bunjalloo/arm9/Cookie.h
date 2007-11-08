@@ -40,7 +40,12 @@ class Cookie
         m_domain(domain),
         m_path(path),
         m_secure(secure)
-    {}
+    {
+      if (m_domain[0] == '.')
+      {
+        m_domain = CookieJar::topLevel(m_domain);
+      }
+    }
 
     bool matchesDomain(const std::string & domain) const
     {
@@ -55,6 +60,11 @@ class Cookie
     const std::string & value() const
     {
       return m_value;
+    }
+
+    void setValue(const std::string & value)
+    {
+      m_value = value;
     }
 
     bool secure() const
