@@ -290,6 +290,10 @@ int SslClient::read()
     return HttpClient::CONNECTION_CLOSED;
   }
   //printf("SslClient::read - read %d, now handleRaw...\n", result);
+  if (result == 0)
+  {
+    return HttpClient::READ_ERROR;
+  }
   m_httpClient.handleRaw(buf, result);
   return result;
 }
