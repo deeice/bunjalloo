@@ -36,6 +36,7 @@ class Keys
     void setRepeat(int setDelay, int setRepeat);
     int touchX() const;
     int touchY() const;
+    int keysRealKeyboard() const;
 
   private:
     static const int KEY_COUNT = 14;
@@ -52,6 +53,7 @@ class Keys
     bool m_keys[KEY_COUNT];
     int m_touchX;
     int m_touchY;
+    int m_keypress;
 
     unsigned int keyRegister();
 

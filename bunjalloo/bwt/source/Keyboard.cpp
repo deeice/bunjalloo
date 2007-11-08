@@ -460,6 +460,18 @@ bool Keyboard::tick()
     return false;
   }
 
+#ifndef ARM9
+  static int pressed = 0;
+  unicodeint sdlKeyPress[2] = { keysRealKeyboard(), 0};
+  if ((not pressed) and sdlKeyPress[0])
+  {
+    pressed = 30;
+    appendText(UnicodeString(sdlKeyPress));
+    return true;
+  }
+  if (pressed)
+    pressed--;
+#endif
   if (m_ticks>0)
   {
     m_ticks--;

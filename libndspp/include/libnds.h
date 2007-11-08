@@ -168,6 +168,7 @@ void scanKeys();
 u32 keysDown();
 u32 keysHeld();
 u32 keysDownRepeat();
+u32 keysRealKeyboard();
 void keysSetRepeat( u8 setDelay, u8 setRepeat );
 //!     Obtains the current touchscreen co-ordinates.
 typedef struct {

@@ -86,15 +86,17 @@ void Keys::handleKeyEvent(SDL_KeyboardEvent & event)
         m_keys[i] = true;
       }
     }
+    m_keypress = event.keysym.sym;
   }
   else if (event.type == SDL_KEYUP)
-  {  
+  {
     // unset in key array
     for (int i = 0; i < KEY_COUNT; i++) {
       if (s_keyCodes[i] == event.keysym.sym) {
         m_keys[i] = false;
       }
     }
+    m_keypress = 0;
   }
 }
 
@@ -158,6 +160,10 @@ void Keys::setRepeat(int setDelay, int setRepeat)
   m_count  = setDelay;
   m_heldRepeat = 0;
 }
+int Keys::keysRealKeyboard() const
+{
+  return m_keypress;
+}
 
 // static functions that emulate libnds
 void scanKeys()
@@ -180,6 +186,12 @@ void keysSetRepeat( u8 setDelay, u8 setRepeat )
 {
   Keys::instance().setRepeat(setDelay, setRepeat);
 }
+
+u32 keysRealKeyboard()
+{
+  return Keys::instance().keysRealKeyboard();
+}
+
 touchPosition touchReadXY()
 {
   touchPosition position;
