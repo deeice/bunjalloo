@@ -21,6 +21,8 @@
 
 using namespace std;
 static const char * PATH_STR("path");
+static const char * DOMAIN_STR("domain");
+static const char * SECURE_STR("secure");
 
 CookieJar::CookieJar()
 {
@@ -55,10 +57,12 @@ bool CookieJar::hasCookieForDomain(const URI & uri, const string & name) const
 
 void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
 {
+  // printf("addCookieHeader: %s \nFrom: %s\n",request.c_str(), uri.asString().c_str());
   int port = uri.port();
   string domain = uri.server();
-  bool domainInitialDot = false; // FIXME! what does it mean??
+  string top(topLevel(domain));
   string path = uri.fileName();
+  bool secure(false);
 
   if (not acceptCookies(domain))
   {
@@ -72,11 +76,19 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
   {
     paramSet.parameter(PATH_STR, path);
   }
+  if ( paramSet.hasParameter(DOMAIN_STR) )
+  {
+    paramSet.parameter(DOMAIN_STR, domain);
+  }
+  if ( paramSet.hasParameter(SECURE_STR) )
+  {
+    secure = true;
+  }
 
   for (KeyValueMap::const_iterator it(keyValueMap.begin()); it != keyValueMap.end(); ++it)
   {
     string name = it->first;
-    if (name == PATH_STR)
+    if (name == PATH_STR or name == SECURE_STR)
     {
       continue;
     }
@@ -86,7 +98,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
     }
 
     string value = it->second;
-    Cookie * cookie = new Cookie(name, value, port, domain, domainInitialDot, path);
+    Cookie * cookie = new Cookie(name, value, port, domain, path, secure);
     // printf("set cookie for %s: %s = %s\n", domain.c_str(), name.c_str(), value.c_str());
     m_cookies.push_back(cookie);
   }
@@ -101,6 +113,7 @@ void CookieJar::clear(const std::string & domain,
 void CookieJar::cookiesForRequest(const URI & request,
     std::string & headers) const
 {
+  // printf("cookiesForRequest: %s \n",request.asString().c_str());
   string domain(request.server());
   // find a cookie in the jar that corresponds to the requested domain...
   string tmp("Cookie: ");
@@ -110,7 +123,29 @@ void CookieJar::cookiesForRequest(const URI & request,
   for (; it != m_cookies.end(); ++it)
   {
     Cookie *c(*it);
+    if (c->name() == DOMAIN_STR)
+    {
+      continue;
+    }
+
     if (c->matchesDomain(domain)) {
+      if (not c->path().empty())
+      {
+        // check to see if the requested path is a sub dir of path
+        string value = c->path();
+        string file = request.fileName();
+        size_t pos = file.find(value);
+        if (pos != 0)
+        {
+          continue;
+        }
+      }
+      // do not send secure cookies to unsecure domains
+      if (c->secure() and request.protocol() != URI::HTTPS_PROTOCOL)
+      {
+        continue;
+      }
+
       if (needSep)
       {
         tmp += sep;
@@ -133,10 +168,35 @@ void CookieJar::cookiesForRequest(const URI & request,
     tmp += "\r\n";
     headers = tmp;
   }
+  // printf("Return: %s\n", headers.c_str());
+}
+
+std::string CookieJar::topLevel(const std::string & sub)
+{
+  // given foo.blahblah.com, return blahblah.com
+  size_t pos = sub.rfind(".");
+  if (pos == string::npos or pos == 0)
+  {
+    return sub;
+  }
+  pos = sub.rfind(".", pos-1);
+  if (pos == string::npos)
+  {
+    return sub;
+  }
+  return sub.substr(pos+1, sub.length()-pos-1);
 }
 
 bool CookieJar::acceptCookies(const std::string & domain) const
 {
+
+  // first get the top level domain of "domain".
+  string top(topLevel(domain));
+  AcceptedDomainMap::const_iterator topIt(m_acceptedDomains.find(top));
+  if (topIt != m_acceptedDomains.end())
+  {
+    return true;
+  }
   AcceptedDomainMap::const_iterator it(m_acceptedDomains.find(domain));
   return (it != m_acceptedDomains.end());
 }

@@ -340,7 +340,8 @@ bool URI::operator!=(const URI & other)
 
 static bool isEscapable(unsigned int value)
 {
-  return ::isblank(value) or value == '&' or value == '#' or value == '?';
+  return ::isblank(value) or value == '&' or value == '#' or value == '?'
+    or value == '=' or value == '/' or value == ':' or value == '@';
 }
 
 UnicodeString URI::escape(const UnicodeString & input)

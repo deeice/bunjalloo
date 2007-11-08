@@ -18,6 +18,7 @@
 #define Cookie_h_seen
 
 #include <string>
+#include "CookieJar.h"
 
 class Cookie
 {
@@ -30,20 +31,20 @@ class Cookie
            const std::string & value,
            int                 port,
            const std::string & domain,
-           bool                domainInitialDot,
-           const std::string & path
+           const std::string & path,
+           bool secure
         )
       : m_name(name),
         m_value(value),
         m_port(port),
         m_domain(domain),
-        m_domainInitialDot(domainInitialDot),
-        m_path(path)
+        m_path(path),
+        m_secure(secure)
     {}
 
     bool matchesDomain(const std::string & domain) const
     {
-      return domain == m_domain;
+      return (domain == m_domain or CookieJar::topLevel(domain) == m_domain);
     }
 
     const std::string & name() const
@@ -56,13 +57,23 @@ class Cookie
       return m_value;
     }
 
+    bool secure() const
+    {
+      return m_secure;
+    }
+
+    const std::string & path() const
+    {
+      return m_path;
+    }
+
   private:
     std::string m_name;
     std::string m_value;
     int         m_port;
     std::string m_domain;
-    bool        m_domainInitialDot;
     std::string m_path;
+    bool m_secure;
 
 };
 #endif

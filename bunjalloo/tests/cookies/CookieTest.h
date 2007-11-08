@@ -27,14 +27,25 @@ class CookieTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testBasic );
     CPPUNIT_TEST( testRepeats );
     CPPUNIT_TEST( testAccept );
+    CPPUNIT_TEST( testSubDomain );
+    CPPUNIT_TEST( testCalcTopLevel );
+    CPPUNIT_TEST( testPath );
+    CPPUNIT_TEST( testSecure );
+    CPPUNIT_TEST( testGoogleLogin );
     CPPUNIT_TEST_SUITE_END();
 
   public:
+    void setUp();
+    void tearDown();
+
     void testBasic();
     void testRepeats();
     void testAccept();
-    void setUp();
-    void tearDown();
+    void testSubDomain();
+    void testCalcTopLevel();
+    void testPath();
+    void testSecure();
+    void testGoogleLogin();
 
   private:
     CookieJar * m_cookieJar;

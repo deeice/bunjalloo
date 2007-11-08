@@ -27,6 +27,13 @@ class URI;
 class CookieJar
 {
   public:
+
+    /** Given a sub domain, find the top level domain.
+     * @param sub the sub domain
+     * @return the top level domain, or an @a sub if unable to work it out
+     */
+    static std::string topLevel(const std::string & sub);
+
     /** Create a cookie holder. */
     CookieJar();
 
