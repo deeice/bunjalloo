@@ -99,7 +99,7 @@ void View::notify()
         m_document.refresh(refresh, refreshTime);
         if (not refresh.empty() and refreshTime >= 0)
         {
-          m_refreshing = refreshTime * 30;
+          m_refreshing = (refreshTime+1) * 30;
         }
         else
         {
