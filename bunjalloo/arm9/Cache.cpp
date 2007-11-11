@@ -81,6 +81,17 @@ void Cache::feed(const std::string & filename)
   }
 }
 
+void Cache::remove(const URI & uri)
+{
+  if (m_useCache)
+  {
+    m_document.setCacheFile("");
+    std::string cacheFile(uri2CacheFile(uri));
+    nds::File::rmrf(cacheFile.c_str());
+    nds::File::rmrf((cacheFile+".hdr").c_str());
+  }
+}
+
 bool Cache::load(const URI & uri)
 {
   if (m_useCache)

@@ -77,6 +77,8 @@ class HeaderParser
 
     void setCacheFile(const std::string & cacheFile);
 
+    bool shouldCache() const;
+
   private:
     enum HeaderState
     {
@@ -104,6 +106,7 @@ class HeaderParser
     std::string m_redirect;
     bool m_chunked;
     bool m_gzip;
+    bool m_cache;
     int m_chunkLength;
     std::string m_chunkLengthString;
     unsigned int m_httpStatusCode;

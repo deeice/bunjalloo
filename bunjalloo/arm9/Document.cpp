@@ -292,4 +292,8 @@ const int & Document::currentHistoryPosition() const
   return m_historyPosition->second;
 }
 
+bool Document::shouldCache() const
+{
+  return m_headerParser->shouldCache();
+}
 

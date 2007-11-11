@@ -33,6 +33,7 @@ static const unsigned int WINSIZE(16384);
 HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
   m_uri(*(new URI())),
   m_gzip(false),
+  m_cache(true),
   m_expected(0),
   m_htmlParser(htmlParser),
   m_cookieJar(cookieJar),
@@ -153,6 +154,16 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   }
   else if (field == "refresh") {
     m_htmlParser->parseRefresh(value);
+  }
+  else if (field == "cache-control")
+  {
+    if (value.find("no-cache") != string::npos)
+    {
+      if (not m_cacheFile.empty())
+      {
+        m_cache = false;
+      }
+    }
   }
   else if (field == "set-cookie")
   {
@@ -415,6 +426,7 @@ void HeaderParser::setCacheFile(const std::string & cacheFile)
   {
     nds::File f;
     f.open(cacheFile.c_str(), "w");
+    m_cache = true;
   }
 }
 
@@ -426,4 +438,9 @@ void HeaderParser::addToCacheFile(const std::string & text)
     f.open(m_cacheFile.c_str(), "a");
     f.write(text.c_str());
   }
+}
+
+bool HeaderParser::shouldCache() const
+{
+  return m_cache;
 }

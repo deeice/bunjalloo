@@ -46,6 +46,8 @@ class Cache
      */
     bool load(const URI & uri);
 
+    void remove(const URI & uri);
+
     std::string fileName(const URI & uri) const;
 
     /** Remove the given uri form the cache.

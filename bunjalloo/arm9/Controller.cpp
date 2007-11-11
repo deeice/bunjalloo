@@ -37,9 +37,10 @@ static const char s_errorText[] = {
 };
 
 const static char * LICENCE_URL = "file:///licence";
+const static int MAX_REDIRECTS(7);
 
 Controller::Controller()
-  : m_document(new Document()), m_wifiInit(false)
+  : m_document(new Document()), m_wifiInit(false),m_redirected(0),m_maxRedirects(MAX_REDIRECTS)
 {
   m_config = new Config(*m_document);
   string font;
@@ -53,6 +54,7 @@ Controller::Controller()
   m_config->resource(Config::CLEARCACHE, clearCache);
 
   m_cache = new Cache(*m_document, useCache, clearCache);
+  m_config->resource("redirects", m_maxRedirects);
 }
 
 Controller::~Controller()
@@ -249,12 +251,17 @@ void Controller::fetchHttp(const URI & uri)
 
   if (hasPage)
   {
-    URI docUri(m_document->uri());
-    if (docUri != uri)
+    // check the caching status
+    if (not m_document->shouldCache())
     {
-      //m_redirects[uri.asString()] = docUri.asString();
-      // redirected
-      //client.disconnect(); // < check that there are no regressions from this change for caching!
+      // oops, remove it
+      m_cache->remove(uri);
+    }
+    URI docUri(m_document->uri());
+    if (docUri != uri and m_redirected < m_maxRedirects)
+    {
+      // redirected.
+      m_redirected++;
       swiWaitForVBlank();
       swiWaitForVBlank();
       m_document->reset();
@@ -262,6 +269,7 @@ void Controller::fetchHttp(const URI & uri)
     }
     else
     {
+      m_redirected = 0;
       m_document->setStatus(Document::LOADED);
     }
   }

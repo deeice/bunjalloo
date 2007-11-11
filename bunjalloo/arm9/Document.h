@@ -137,6 +137,8 @@ class Document
 
     void setCacheFile(const std::string & cacheFile);
 
+    bool shouldCache() const;
+
     HtmlDocument * htmlDocument() const
     {
       return m_htmlDocument;

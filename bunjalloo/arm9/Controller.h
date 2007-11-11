@@ -68,6 +68,8 @@ class Controller
     Cache * m_cache;
     bool m_wifiInit;
     bool m_stop;
+    int m_redirected;
+    int m_maxRedirects;
 
 
     void localFile(const std::string &);
