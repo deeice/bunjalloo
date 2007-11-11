@@ -416,6 +416,7 @@ void RichTextArea::paint(const nds::Rectangle & clip)
     m_nextEvent = m_documentSize;
     m_nextEventType = Link::STATE_PLAIN;
   }
+  nds::Canvas::instance().setClip(clip);
   m_paintPosition = 0;
   m_lineNumber = 0;
   // work out what happens when we skip lines.
@@ -459,8 +460,8 @@ void RichTextArea::paint(const nds::Rectangle & clip)
       drawRectangle(
             m_bounds.x,
             m_bounds.y,
-            m_bounds.w,
-            m_bounds.h+1,
+            m_bounds.w-1,
+            m_bounds.h,
             WidgetColors::BUTTON_SHADOW);
   }
 
