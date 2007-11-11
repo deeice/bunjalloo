@@ -44,6 +44,15 @@ void ParamSetTest::testQuote()
   paramSet.parameter(key, result);
   CPPUNIT_ASSERT(paramSet.hasParameter(key));
   CPPUNIT_ASSERT_EQUAL(expected, result);
+
+  string refresh="0; url='redirected.html'";
+  ParameterSet paramSet2(refresh);
+  expected = "redirected.html";
+  key = "url";
+  result = "";
+  CPPUNIT_ASSERT(paramSet2.hasParameter(key));
+  paramSet2.parameter(key, result);
+  CPPUNIT_ASSERT_EQUAL(expected, result);
 }
 
 void ParamSetTest::testDoubleQuote()

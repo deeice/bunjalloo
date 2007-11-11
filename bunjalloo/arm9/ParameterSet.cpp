@@ -67,6 +67,7 @@ class PSImpl
     void afterName();
     void beforeValue();
     void inValue();
+    void handleState();
 
 };
 
@@ -104,6 +105,10 @@ void PSImpl::afterName()
   {
     m_state = BEFORE_VALUE;
   }
+  else if (m_value == m_sep)
+  {
+    addCurrentParam();
+  }
 }
 
 void PSImpl::beforeValue()
@@ -128,7 +133,9 @@ void PSImpl::beforeValue()
 
 void PSImpl::addCurrentParam()
 {
-  m_keyValueMap[m_paramName] = m_paramValue;
+  if (not m_paramName.empty()) {
+    m_keyValueMap[m_paramName] = m_paramValue;
+  }
   m_paramName.clear();
   m_paramValue.clear();
   m_state = BEFORE_NAME;
@@ -179,28 +186,33 @@ void PSImpl::doParse()
       m_value = 0;
       break;
     }
-    switch (m_state)
-    {
-      case BEFORE_NAME:
-        beforeName();
-        break;
-      case IN_NAME:
-        inName();
-        break;
-      case AFTER_NAME:
-        afterName();
-        break;
-      case BEFORE_VALUE:
-        beforeValue();
-        break;
-      case VALUE_DOUBLE_QUOTE:
-      case VALUE_SINGLE_QUOTE:
-      case VALUE_UNQUOTED:
-        inValue();
-        break;
-    }
+    handleState();
   }
   cleanup();
+}
+
+void PSImpl::handleState()
+{
+  switch (m_state)
+  {
+    case BEFORE_NAME:
+      beforeName();
+      break;
+    case IN_NAME:
+      inName();
+      break;
+    case AFTER_NAME:
+      afterName();
+      break;
+    case BEFORE_VALUE:
+      beforeValue();
+      break;
+    case VALUE_DOUBLE_QUOTE:
+    case VALUE_SINGLE_QUOTE:
+    case VALUE_UNQUOTED:
+      inValue();
+      break;
+  }
 }
 
 void PSImpl::cleanup()
@@ -208,14 +220,7 @@ void PSImpl::cleanup()
   if ( not m_paramName.empty() ) {
     if (m_value != 0)
     {
-      if (m_state == IN_NAME)
-      {
-        inName();
-      }
-      else
-      {
-        m_paramValue += m_value;
-      }
+      handleState();
     }
     addCurrentParam();
   }
