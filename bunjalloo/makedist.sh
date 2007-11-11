@@ -8,7 +8,7 @@ tags=$repo/tags
 project=bunjalloo
 upload="no"
 tag="no"
-VERSION="0.4"
+VERSION="0.5"
 
 die() {
   echo >&2 "$@"
