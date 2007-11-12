@@ -263,7 +263,9 @@ def build(buildTarget):
   if (buildTarget != 'arm7'):
     SConscript('tests/gui-test/SConscript', build_dir='/'.join([buildDir, 'gui-test']), duplicate=0)
     SConscript('tests/images/SConscript', build_dir='/'.join([buildDir, 'images']), duplicate=0)
+    SConscript('tests/sprite/SConscript', build_dir='/'.join([buildDir, 'sprite']), duplicate=0)
     Default('images')
+    Default('sprite')
     Default('gui-test')
 
 # build steps
