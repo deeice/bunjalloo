@@ -85,6 +85,7 @@ class HttpClient: public nds::Client
     int  m_maxConnectAttempts;
     bool m_hasSsl;
     SslClient * m_sslClient;
+    bool m_log;
 
     void wifiConnection();
     void get(const URI & uri);
