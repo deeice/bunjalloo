@@ -254,8 +254,16 @@ unsigned int Client::write(const void * data, unsigned int length)
 
 int Client::read(int max)
 {
-  if (max > BUFFER_SIZE)
+  if (max > BUFFER_SIZE) {
     max = BUFFER_SIZE;
+  }
+#if DEBUG_WITH_SSTREAM
+  {
+  stringstream dbg;
+  dbg << "Client::read " << max << " bytes";
+  debug(dbg.str().c_str());
+  }
+#endif
   fd_set rfds;
   timeval timeout;
   int retval;
