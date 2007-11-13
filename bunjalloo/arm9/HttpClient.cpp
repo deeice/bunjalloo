@@ -504,7 +504,9 @@ decodeMore:
     case SSL_ERROR:
       {
         char buffer[256];
-        snprintf(buffer, 256, "Closing on protocol error %d\n", error);
+        snprintf(buffer, 256, "Closing on protocol error %d", error);
+        m_httpClient.print(buffer);
+
         if (m_conn->inbuf.start < m_conn->inbuf.end) {
           // setSocketNonblock(m_conn->fd);
           /*bytes = send(m_conn->fd, (char *)m_conn->inbuf.start, 

@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#define DEBUG_WITH_SSTREAM 0
+#define DEBUG_WITH_SSTREAM 1
 #include "Client.h"
 #include "Client_platform.h"
 #include <sys/socket.h>
