@@ -24,6 +24,7 @@
 
 class Button;
 class EditableTextArea;
+class RichTextArea;
 class ScrollPane;
 /** Show a virtual keyboard. Accepts touch input and keypad input. */
 class Keyboard : public Component, public TextListener, public ButtonListener
@@ -70,6 +71,8 @@ class Keyboard : public Component, public TextListener, public ButtonListener
       return m_selectedStatus;
     }
 
+    void setTitle(const UnicodeString & title);
+
   private:
     bool m_extra;
     bool m_shift;
@@ -79,12 +82,11 @@ class Keyboard : public Component, public TextListener, public ButtonListener
 
     ScrollPane * m_scrollPane;
     EditableTextArea * m_textArea;
+    RichTextArea * m_richTextArea;
     Button * m_shiftKey;
     Button * m_capsLockKey;
-    // Button * m_tabKey;
     Button * m_enterKey;
     Button * m_backspaceKey;
-    // Button * m_deleteKey;
     Button * m_spaceKey;
     Button * m_extraKey;
     Button * m_ok;
