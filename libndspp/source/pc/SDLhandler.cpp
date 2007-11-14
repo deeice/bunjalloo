@@ -104,6 +104,16 @@ int SDLhandler::totalHeight()
 
 int SDLhandler::init()
 {
+  char *gap(getenv("NDS_GAP"));
+  if (gap)
+  {
+    int h = strtol(gap, 0, 0);
+    if (h > 0) 
+    {
+      GAP.h = h;
+    }
+  }
+
   char msg[256];
   int initFlags = SDL_INIT_VIDEO | SDL_INIT_TIMER;
   if (m_hasSound) {
