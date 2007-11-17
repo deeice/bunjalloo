@@ -18,6 +18,7 @@
 #include "Keyboard.h"
 #include "TextAreaFactory.h"
 #include "EditableTextArea.h"
+#include "RichTextArea.h"
 #include "ScrollPane.h"
 #include "Button.h"
 #include "Canvas.h"
@@ -73,6 +74,7 @@ Keyboard::Keyboard():
   m_ticks(0),
   m_scrollPane(new ScrollPane),
   m_textArea((EditableTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_EDIT)),
+  m_richTextArea((RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH)),
   m_shiftKey(new Button),
   m_capsLockKey(new Button),
   // m_tabKey(new Button),
@@ -177,9 +179,13 @@ Keyboard::Keyboard():
   // By adding the m_scrollPane to the Component::m_children it gets deleted
   // in the destructor.
   add(m_scrollPane);
+  add(m_richTextArea);
 }
+
 void Keyboard::initUI()
 {
+  m_richTextArea->setCentred();
+  m_richTextArea->setOutlined();
   m_textArea->setParentScroller(m_scrollPane);
   m_scrollPane->add(m_textArea);
   m_scrollPane->setTopLevel(false);
@@ -493,4 +499,12 @@ bool Keyboard::tick()
 bool Keyboard::multiLine() const
 {
   return m_entry->isMultiLine();
+}
+
+void Keyboard::setTitle(const UnicodeString & title)
+{
+  m_richTextArea->clearText();
+  m_richTextArea->appendText(title);
+  m_richTextArea->setLocation(0, SCREEN_HEIGHT -  m_richTextArea->preferredSize().h-GAP);
+  m_richTextArea->setSize(nds::Canvas::instance().width()-1,m_richTextArea->preferredSize().h);
 }
