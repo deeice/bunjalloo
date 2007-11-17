@@ -100,6 +100,12 @@ namespace nds
        */
       void setWhite(int level);
 
+      /** Set the blend mode for alpha or object mode.
+       * @param A the A set of backgrounds
+       * @param B the B set of backgrounds
+       */
+      void setBlendAB(int A, int B);
+
       /*!@brief fade from normal to black.
        * @param fadeout true to fade to black, false to fade back in
        * @param speed the speed of the fade out, higher value is slower

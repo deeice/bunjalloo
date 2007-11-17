@@ -110,10 +110,25 @@ void Video::setFade(int level)
   blend( BLDMOD_FADE,
          BLDMOD_BG0 | BLDMOD_BG1 | BLDMOD_BG2| BLDMOD_OBJ ,
          BLDMOD_BD );
-  if (m_screen)
+  if (m_screen) {
     SUB_BLEND_Y = level;
-  else
+  }
+  else {
     BLEND_Y = level;
+  }
+
+}
+
+void Video::setBlendAB(int A, int B)
+{
+  A &= 0xf;
+  B &= 0xf;
+  if (m_screen) {
+    SUB_BLEND_AB = (A)|((B)<<8);
+  }
+  else {
+    BLEND_AB = (A)|((B)<<8);
+  }
 }
 
 void Video::setMode(unsigned int mode)

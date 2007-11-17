@@ -1,0 +1,31 @@
+Import ('env')
+import os.path
+
+# copy the env since we change it by adding the font path
+testEnv = env.Copy()
+
+# get the build target (pc, arm9, arm7) and the source dir (arm9 or 7)
+buildTarget =  testEnv['PLATFORM_NAME']
+sourceDirectory = testEnv['SOURCE_NAME']
+targets = []
+if (buildTarget == 'arm9'):
+  # find out the program name (based on this directory's name)
+  programName = os.path.basename(str(Dir('.').abspath))
+  Export('testEnv')
+  # create the font files
+  program = testEnv.Program( '%s/%s'%(sourceDirectory, programName), [ '%s/%s'%(sourceDirectory, 'main.cpp') ])
+  if (buildTarget != 'pc'):
+    env.SideEffect(str(program[0])+'.map', program)
+    env.Elf2Arm('%s.arm'%str(program[0]),  program)
+
+  # only create the .nds for the arm9 build target
+  prog = '/%s/%s'%(buildTarget,programName)
+  if (buildTarget == 'arm9'):
+    nds = testEnv.NdsTool( programName, ['#/build%s.arm'%(2*prog)])
+    targets.append(testEnv.Command( '/'.join([ str(Dir('.').srcnode().abspath), programName+'.nds' ]),
+                   nds,
+                   [Copy('$TARGET', '$SOURCE')]
+                   ))
+
+env.Alias('sprite',targets)
+# vim: set filetype=python :

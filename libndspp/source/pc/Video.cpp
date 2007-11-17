@@ -183,6 +183,11 @@ void Video::setWhite(int level)
   SDLhandler::instance().setWhite(m_screen, level);
 }
 
+void Video::setBlendAB(int A, int B)
+{
+  // ???
+}
+
 void Video::whiteout(bool towhite, unsigned int speed)
 {
   for (int loop = 0; loop < 17; loop++) {
