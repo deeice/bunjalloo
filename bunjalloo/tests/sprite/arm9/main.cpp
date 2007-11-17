@@ -118,7 +118,6 @@ int main(void) {
     // would be 4 tiles per sprite (16x16 = 4*8x8) 
     // but the tile count is for 4bpp tiles, 256 color 8bpp require twice as much vram.
     nds::Sprite * sprite(new nds::Sprite(screen, 16, 16, i*8, 256));
-    sprite->tile(i*8);
     sprite->x(i*16);
     sprite->y(i*16);
     sprites.push_back(sprite);
@@ -129,7 +128,6 @@ int main(void) {
     const unsigned short * data = image.data();
     if (data)
     {
-      //sprite.loadTileData(data, 8*16*16);
       unsigned short * oamData = sprites.front()->oamData();
       loadImage(image, oamData);
 
@@ -140,7 +138,6 @@ int main(void) {
       for ( int i = 0; i < size ; ++i)
       {
         nds::Sprite * sprite(sprites[i]);
-        sprite->tile(i*8);
         sprite->enable();
         sprite->update();
       }
@@ -148,20 +145,15 @@ int main(void) {
       bigSprite.update();
     }
   }
-  nds::Sprite * spinner(sprites[7]);
-  spinner->enable();
   nds::Sprite * white(sprites[0]);
   white->translucent(true);
   white->update();
-  nds::Video & main(nds::Video::instance(1));
+  nds::Video & main(nds::Video::instance(screen));
   main.blend(nds::Video::BLDMOD_OBJECT,
       0,
-      nds::Video::BLDMOD_BG2 | nds::Video::BLDMOD_BG1 | nds::Video::BLDMOD_BG0 | nds::Video::BLDMOD_BD
+      nds::Video::BLDMOD_BG3|nds::Video::BLDMOD_BG2 | nds::Video::BLDMOD_BG1 | nds::Video::BLDMOD_BG0 | nds::Video::BLDMOD_BD
       );
 
-  spinner->rotateScale(true);
-  spinner->rotate(0);
-  spinner->setAffine(256, 0, 0, 256);
   int affine = 0;
   int fadeLvl = 0;
   while(1)
@@ -169,16 +161,31 @@ int main(void) {
     affine+=32;
     affine &= 0x1ff;
     // Compute sin and cos
-    s16 angleSin = SIN[affine] / 16;
-    s16 angleCos = COS[affine] / 16;
-    spinner->setAffine(angleCos,
-                       angleSin,
-                       -angleSin,
-                       angleCos);
-    swiWaitForVBlank();
+    nds::Sprite * spinner(sprites[7]);
+    spinner->rotateScale(true);
+    spinner->rotate(1);
+    u16 cosAng = COS[affine] / 16;
+    u16 sinAng = SIN[affine] / 16;
+    spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
     fadeLvl++;
-    main.setBlendAB(10,fadeLvl);
-    nds::Sprite::copyOAM(2);
+    fadeLvl&=0xf;
+    main.setBlendAB(fadeLvl^0xf,fadeLvl);
+    for (int i = 0; i < 12; ++i)
+    {
+      nds::Sprite * s(sprites[i]);
+      int y = s->y();
+      if (y == SCREEN_HEIGHT-16)
+      {
+        y = 0;
+      }
+      else
+      {
+        y++;
+      }
+      s->y(y);
+      s->update();
+    }
+    swiWaitForVBlank();
   }
 
   return 0;

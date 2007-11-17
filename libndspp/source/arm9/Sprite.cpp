@@ -24,7 +24,9 @@
 using namespace nds;
 
 static SpriteEntry s_sprites[2][128];
-static pSpriteRotation s_affine = (pSpriteRotation)(s_sprites);
+static pSpriteRotation s_affine[2] = { (pSpriteRotation)(&s_sprites[0]),
+  (pSpriteRotation)(&s_sprites[1])
+};
 bool Sprite::s_used[2][128];
 
 Sprite::Sprite(int screen):
@@ -475,10 +477,10 @@ void Sprite::getAffine(
 {
   if (!valid()) return;
   int r(rotate());
-  pa = s_affine[r].hdx;
-  pb = s_affine[r].hdy;
-  pc = s_affine[r].vdx;
-  pd = s_affine[r].vdy;
+  pa = s_affine[m_screen][r].hdx;
+  pb = s_affine[m_screen][r].hdy;
+  pc = s_affine[m_screen][r].vdx;
+  pd = s_affine[m_screen][r].vdy;
 }
 void Sprite::setAffine( 
     signed short pa,
@@ -488,10 +490,10 @@ void Sprite::setAffine(
 {
   if (!valid()) return;
   int r(rotate());
-  s_affine[r].hdx = pa;
-  s_affine[r].hdy = pb;
-  s_affine[r].vdx = pc;
-  s_affine[r].vdy = pd;
+  s_affine[m_screen][r].hdx = pa;
+  s_affine[m_screen][r].hdy = pb;
+  s_affine[m_screen][r].vdx = pc;
+  s_affine[m_screen][r].vdy = pd;
 }
 
 void Sprite::update() const
