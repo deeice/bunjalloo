@@ -292,7 +292,12 @@ int SslClient::read()
   //printf("SslClient::read - read %d, now handleRaw...\n", result);
   if (result == 0)
   {
-    return HttpClient::READ_ERROR;
+    if (m_httpClient.state() == HttpClient::READING_FIRST)
+      return HttpClient::READ_ERROR;
+    else if (m_lastRead)
+      return HttpClient::RETRY_LATER;
+    else
+      return HttpClient::READ_ERROR;
   }
   m_httpClient.handleRaw(buf, result);
   return result;
