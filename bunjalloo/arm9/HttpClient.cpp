@@ -71,11 +71,6 @@ class SslClient
     {}
     ~SslClient();
 
-    enum SslConnectionState
-    {
-      WAITING_HELLO_RESPONSE
-    };
-
     // set up session, handshake etc.
     int sslConnect();
 
@@ -104,7 +99,6 @@ class SslClient
     sslConn_t * m_conn;
     sslSessionId_t *m_sessionId;
     short m_cipherSuite;
-    SslConnectionState m_state;
     int m_lastRead;
 
     static int32 certChecker(sslCertInfo_t * cert, void * arg);
@@ -238,7 +232,6 @@ int SslClient::sslHandshake()
 
   m_httpClient.print("Read back hello respose\n");
   // read back the data.
-  m_state = WAITING_HELLO_RESPONSE;
   char buf[SSL_BUFFER_SIZE];
 
   int result(-1);
@@ -595,7 +588,8 @@ HttpClient::HttpClient(const char * ip, int port, const URI & uri) :
   m_uri(uri),
   m_state(WIFI_OFF),
   m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
-  m_sslClient(new SslClient(*this))
+  m_sslClient(new SslClient(*this)),
+  m_log(false)
 {
   debug("In HttpClient, uri.server.c_str:");
   debug(uri.server().c_str());
@@ -625,6 +619,7 @@ void HttpClient::setController(Controller * c)
     URI uri(proxy);
     setConnection(uri.server().c_str(), uri.port());
   }
+  m_controller->config().resource("logger", m_log);
   string caFile;
   if (m_hasSsl and s_sslKeys == 0 and m_controller->config().resource(Config::CERT_FILE, caFile))
   {
@@ -692,7 +687,7 @@ void HttpClient::print(const char * s)
 }
 void HttpClient::debug(const char * s)
 {
-  if (0) {
+  if (m_log) {
     nds::File log;
     log.open("bunjalloo.log", "a");
     log.write(s);
@@ -993,10 +988,8 @@ void HttpClient::readAll()
       m_state = FINISHED;
       break;
     case CONNECTION_CLOSED:
-      debug("readAll returned 0 - FINISH or wait?");
+      debug("readAll returned 0 - set to FINISHED");
       m_state = FINISHED;
-      //swiWaitForVBlank();
-      //swiWaitForVBlank();
       break;
 
     case RETRY_LATER:

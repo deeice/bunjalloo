@@ -165,7 +165,6 @@ void Client::connect()
     htons(m_port),    /* port in network byte order */
     {inet_addr(m_ip)} /* internet address - network byte order */
   };
-  debug(m_ip);
 
   // is it an ip address?
   std::string serverName(m_ip);
