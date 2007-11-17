@@ -34,6 +34,7 @@ SDL_Rect SDLhandler::GAP = { 0, 192, SDLhandler::WIDTH, 0};
 
 SDLhandler::SDLhandler():
     m_screen(0),
+    m_alpha(255),
     m_vblank(0),
     m_scale(1),
     m_frames(0),
@@ -142,6 +143,21 @@ int SDLhandler::init()
     printf(msg);
     return 2;
   }
+
+  for (int i = 0; i < 4; ++i)
+  {
+    m_layer[i] = SDL_CreateRGBSurface(SDL_SWSURFACE, m_scale*WIDTH, m_scale*totalHeight(),
+        16, 0x0000F000, 0x00000F00, 0x000000F0, 0x0000000F);
+    //SDL_SetAlpha(m_layer[i], SDL_SRCALPHA|SDL_RLEACCEL, 0);
+    if (m_layer[i] == NULL)
+    {
+      sprintf (msg, "Couldn't create 16 bit video surface: %s\n",
+          SDL_GetError ());
+      printf(msg);
+      return 2;
+    }
+  }
+
   SDL_WM_SetCaption ("SDL Application", NULL);
 
   /*
@@ -301,7 +317,7 @@ Uint32 SDLhandler::decodeColor(unsigned short rgb16)
     green = (int)(m_whiteLevel * (256/16));
     blue = (int)(m_whiteLevel * (256/16));
   }
-  return SDL_MapRGB(m_screen->format, red, blue, green);
+  return SDL_MapRGBA(m_layer[0]->format, red, blue, green, m_alpha);
 }
 
 /*
@@ -387,6 +403,11 @@ void SDLhandler::clear()
   drawGap();
 }
 
+void SDLhandler::setAlpha(int alpha)
+{
+  m_alpha = alpha;
+}
+
 void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palette)
 {
   if (layer == 0 or layer == 2) {
@@ -428,10 +449,10 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
         colour = m_subBackgroundPaletteSDL[palette];
         break;
       case 2:
-        colour = m_spritePaletteSDL[palette];
+        colour = decodeColor(m_spritePalette[palette]);
         break;
       case 3:
-        colour = m_subSpritePaletteSDL[palette];
+        colour = decodeColor(m_subSpritePalette[palette]);
         break;
 
       default:
@@ -443,7 +464,9 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
   if (layer == 2 )
     printf("Fill @%d,%d pal %d col %x lay %d\n", rect.x, origY,palette, colour, layer);
 #endif
-  SDL_FillRect (m_screen, &rect, colour);
+  //SDL_FillRect (m_screen, &rect, colour);
+  SDL_FillRect (m_layer[layer], &rect, colour);
+
 }
 
 #if 0
@@ -492,12 +515,12 @@ void SDLhandler::waitVsync()
       m_fadeLevel = m_fadeLevelMain;
       m_whiteLevel = m_whiteLevelMain;
       m_backgroundPaletteSDL[i] = decodeColor(m_backgroundPalette[i]);
-      m_spritePaletteSDL[i] = decodeColor(m_spritePalette[i]);
+      //m_spritePaletteSDL[i] = decodeColor(m_spritePalette[i]);
 
       m_fadeLevel = m_fadeLevelSub;
       m_whiteLevel = m_whiteLevelSub;
       m_subBackgroundPaletteSDL[i] = decodeColor(m_subBackgroundPalette[i]);
-      m_subSpritePaletteSDL[i] = decodeColor(m_subSpritePalette[i]);
+      //m_subSpritePaletteSDL[i] = decodeColor(m_subSpritePalette[i]);
 #if 0
       if (m_backgroundPaletteSDL[i] or
           m_subBackgroundPaletteSDL[i] or
@@ -516,6 +539,10 @@ void SDLhandler::waitVsync()
     BackgroundHandler::render();
     SpriteHandler::render();
 
+    for (int i = 0; i < 4; ++i)
+    {
+      SDL_BlitSurface(m_layer[i], 0, m_screen, 0);
+    }
     SDL_Flip(m_screen);
   }
   SDL_Event event;

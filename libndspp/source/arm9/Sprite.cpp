@@ -450,7 +450,7 @@ bool Sprite::translucent() const
   return s_sprites[m_screen][m_index].attribute[0]&ATTR0_TYPE_BLENDED;
 }
 
-void Sprite::translucent(bool b)
+void Sprite::setTranslucent(bool b)
 { 
   if (!valid()) return;
   setAttrBit(0,ATTR0_TYPE_BLENDED,b);

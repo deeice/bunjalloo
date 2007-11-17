@@ -27,7 +27,7 @@ static SpriteEntry OAM[128];
 static SpriteEntry OAM_SUB[128];
 
 static SpriteEntry s_sprites[2][128];
-static pSpriteRotation s_affine = (pSpriteRotation)(s_sprites);
+static pSpriteRotation s_affine = (pSpriteRotation)(&s_sprites[0]);
 bool Sprite::s_used[2][128];
 
 Sprite::Sprite(int screen):
@@ -452,7 +452,7 @@ bool Sprite::translucent() const
   return s_sprites[m_screen][m_index].attribute[0]&ATTR0_TYPE_BLENDED;
 }
 
-void Sprite::translucent(bool b)
+void Sprite::setTranslucent(bool b)
 { 
   if (!valid()) return;
   setAttrBit(0,ATTR0_TYPE_BLENDED,b);
@@ -611,6 +611,10 @@ unsigned short Sprite::attribute(int i) const
 
 void Sprite::draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char * gfx)
 {
+  if (translucent())
+  {
+    SDLhandler::instance().setAlpha(128);
+  }
   for (int j = 0; j < 8; j++) {
     for (int i = 0; i < 8; i++) {
       int x = i + xi*8;
@@ -625,6 +629,10 @@ void Sprite::draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char
         SDLhandler::instance().drawPixel(xPos+x, yPos+y, 2+m_screen, pix);
       }
     }
+  }
+  if (translucent())
+  {
+    SDLhandler::instance().setAlpha(255);
   }
 }
 void Sprite::render()

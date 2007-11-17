@@ -27,6 +27,7 @@
 #include "Toolbar.h"
 #include "View.h"
 #include "Wifi9.h"
+#include "Video.h"
 
 using nds::Wifi9;
 
@@ -92,6 +93,9 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
   m_angle(0),
   m_position(BOTTOM)
 {
+  nds::Video & main(nds::Video::instance(0));
+  main.blend(nds::Video::BLDMOD_OBJECT, 0, nds::Video::BLDMOD_BG3);
+  main.setBlendAB(16,4);
   m_document.registerView(this);
   for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
   {
@@ -263,6 +267,7 @@ void Toolbar::handlePress(int i)
   switch ((ToolbarSpriteID)i)
   {
     case SPRITE_BACK:
+      m_sprites[SPRITE_BACK]->setTranslucent(true);
       m_controller.previous();
       break;
     case SPRITE_FORWARD:
@@ -318,6 +323,7 @@ void Toolbar::updateIcons()
   }
   m_sprites[SPRITE_CONNECT_STATUS]->tile( TILES_PER_ICON * wifiIcon);
   m_sprites[SPRITE_SPINNER]->tile( TILES_PER_ICON * ( m_document.status() == Document::LOADED ? ICON_SPINNER_INACTIVE: ICON_SPINNER));
+  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setTranslucent), false));
 }
 
 void Toolbar::tick()

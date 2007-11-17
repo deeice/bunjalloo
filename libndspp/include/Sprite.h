@@ -220,7 +220,7 @@ namespace nds {
       //! returns true if the translucent flag is set. @see mode
       bool translucent() const;
       //! set or unset the translucent flag. @see mode
-      void translucent(bool);
+      void setTranslucent(bool);
       //! returns true if the object window flag is set. @see mode
       bool window() const;
       //! set or unset the object window flag. @see mode

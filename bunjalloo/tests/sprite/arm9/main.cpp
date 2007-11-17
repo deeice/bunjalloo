@@ -146,7 +146,7 @@ int main(void) {
     }
   }
   nds::Sprite * white(sprites[0]);
-  white->translucent(true);
+  white->setTranslucent(true);
   white->update();
   nds::Video & main(nds::Video::instance(screen));
   main.blend(nds::Video::BLDMOD_OBJECT,

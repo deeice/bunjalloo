@@ -41,6 +41,8 @@ class SDLhandler
      */
     void drawPixel(int x, int y, unsigned int layer, unsigned int palette);
 
+    void setAlpha(int alpha);
+
 #if 0
     /** Load a GBA style palette.
      */
@@ -84,6 +86,8 @@ class SDLhandler
     static int totalHeight();
 
     SDL_Surface *m_screen;
+    SDL_Surface *m_layer[4];
+    int m_alpha;
     SDL_TimerID m_vblank;
     int m_scale;
     int m_frames;
