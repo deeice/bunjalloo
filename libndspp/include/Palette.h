@@ -16,20 +16,13 @@
 */
 #ifndef Palette_h_seen
 #define Palette_h_seen
-
-
+// tolua_begin
 namespace nds
 {
   //! Representation of color
   class Color
   {
     public:
-      /*! @brief Create a color using a NDS format short
-      * @param c 15 bit color value. Red value is stored in the lowest 5
-      *          bits, then green then blue. The bits are like this: RRRRRGGGGGBBBBB.
-      */
-      Color(unsigned short c);
-
       /*! @brief Create a color using red, green, blue
        * @param red component, allowed values 0-31.
        * @param green component, allowed values 0-31.
@@ -37,6 +30,36 @@ namespace nds
        */
       Color(int red, int green, int blue);
 
+      /*! @brief Create a color using a NDS format short
+      * @param c 15 bit color value. Red value is stored in the lowest 5
+      *          bits, then green then blue. The bits are like this: RRRRRGGGGGBBBBB.
+      */
+      Color(unsigned short c);
+
+      /*! @brief Set the red, green and blue components.
+       * @param red component
+       * @param green component
+       * @param blue component
+       */
+      void set(int red, int green, int blue);
+
+      /*! @brief operator to cast to an unsigned short
+      * @returns NDS representation of color.
+      */
+      inline operator unsigned short () const;
+      /*! @brief operator to cast to an unsigned short
+      * @returns NDS representation of color.
+      */
+      inline int toInt() const
+      {
+        return this->operator unsigned short ();
+      }
+#ifdef TOLUA
+      tolua_property__overload unsigned int red;
+      tolua_property__overload unsigned int green;
+      tolua_property__overload unsigned int blue;
+#endif
+// tolua_end
       //! get the red component of the color
       inline unsigned int red() const;
       //! set the red component of the color
@@ -50,21 +73,10 @@ namespace nds
       //! set the blue component of the color
       inline void blue(unsigned int);
 
-      /*! @brief Set the red, green and blue components.
-       * @param red component
-       * @param green component
-       * @param blue component
-       */
-      void set(int red, int green, int blue);
-
-      /*! @brief operator to cast to an unsigned short
-      * @returns NDS representation of color.
-      */
-      inline operator unsigned short () const;
-      
     private:
       //! NDS format color
       unsigned short m_c;
+// tolua_begin
   };
   /*! @brief Wraps the Background palette memory 
    */
@@ -76,22 +88,29 @@ namespace nds
        */
       Palette(int screen);
 
+// tolua_end
       /*! @brief 16 color palette.
        * @param screen the screen for the palette. 0 for main screen, 1 for sub screen
        * @param palette index of the 16 color palette (0-15)
        */
       Palette(int screen, int palette);
 
-      /*! @brief get the color at an index.
-       * @param i color index.
-       * @returns Color representation of the NDS color.
-       */
-      inline const Color operator[] (int i) const;
+// tolua_begin
       /*! @brief get reference to color at an index
        * @param i color index
        * @returns unsigned short representation of the NDS color.
        */
       inline unsigned short & operator[] (int i);
+      /*! @brief get the color at an index.
+       * @param i color index.
+       * @returns Color representation of the NDS color.
+       */
+      inline const Color operator[] (int i) const;
+
+      /*! @brief Sets all the colors in the palette to black (0,0,0)
+       */
+      void clear();
+// tolua_end
 
       /*! @brief Load palette data.
        * @param palette pointer to palette data
@@ -100,17 +119,14 @@ namespace nds
        */
       void load(const unsigned short * palette, unsigned int length=0);
 
-      /*! @brief Sets all the colors in the palette to black (0,0,0)
-       */
-      void clear();
-
     protected:
       //! pointer to palette memory
       unsigned short *m_p;
-      
+
     private:
       //! is 16 color palette or not
       bool m_16;
+// tolua_begin
   };
 
   //! Object (sprite) palette
@@ -121,13 +137,14 @@ namespace nds
        * @param screen the screen for the palette. 0 for main screen, 1 for sub screen.
        */
       ObjectPalette(int screen);
-      
+
+// tolua_end
       /*! @brief 16 color object/sprite palette.
        * @param screen the screen for the palette. 0 for main screen, 1 for sub screen.
        * @param palette index of the 16 color palette (0-15).
        */
       ObjectPalette(int screen, int palette);
-  };
+  }; //tolua_export
   #include "Palette.inl"
-};
+}; //tolua_export
 #endif

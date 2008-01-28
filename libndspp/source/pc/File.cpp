@@ -35,10 +35,11 @@ class nds::FileImplementation
     bool is_open() const;
     void close();
     bool eof() const;
+    void * file() const;
 
   private:
     FILE * m_stream;
-  
+
 };
 
 // delegate class:
@@ -53,6 +54,10 @@ void FileImplementation::open(const char * name, const char * mode)
   m_stream = fopen(name, mode);
 }
 
+void * FileImplementation::file() const
+{
+  return m_stream;
+}
 
 FileImplementation::~FileImplementation()
 {
@@ -241,4 +246,9 @@ void nds::File::ls(const char * path, std::vector<std::string> & entries)
 bool nds::File::cp(const char *src, const char *dst)
 {
   return cpCommon(toFat(src).c_str(), toFat(dst).c_str());
+}
+
+void * File::file() const
+{
+  return m_details->file();
 }

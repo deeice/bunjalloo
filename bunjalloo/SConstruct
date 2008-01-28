@@ -29,6 +29,8 @@ libraryFiles = {
 defaultEnv = Environment(CCFLAGS=commonFlags, CPPPATH=headers,
     tools=['default', 'color'], toolpath = ['%s/ndspp-scons'%libndsppDir],
     TARFLAGS='-c -z', TARSUFFIX='tar.gz')
+devkitArmBin = ( os.path.sep.join( [ os.environ['DEVKITARM'], 'bin'] ) )
+defaultEnv.PrependENVPath('PATH', devkitArmBin)
 buildTargets = ['pc', 'arm9', 'arm7']
 
 # function definitions
@@ -57,14 +59,14 @@ def createEnv(buildTarget):
     env = defaultEnv.Copy()
     env.Append(OBJCOPY = 'objcopy')
     env.Append(OBJCOPYFLAGS = ' -I binary -O elf32-i386 -B i386 ')
-    env.Prepend( LIBS=['SDL'])
+    env.Prepend( LIBS=['SDL', 'GL'])
     for i in ['CC', 'CXX', 'OBJCOPY']:
       if os.environ.has_key(i) and os.environ[i]:
         env[i] = os.environ[i]
 
   env.Append( LIBPATH=['#/%s/lib'%libndsppDir])
+  env.Prepend( LIBS=['png','z','gif','jpeg','matrixsslstatic'])
   env.Prepend( LIBS=['ndspp-%s'%buildTarget])
-  env.Prepend( LIBS=['png','z','gif','jpgd','matrixsslstatic'])
   addObjCopyImageBuilders(env)
   env.Alias('dist', env['DIST_NAME'])
   return env

@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "libnds.h"
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
@@ -49,7 +51,8 @@ SDLhandler::SDLhandler():
     m_fadeLevelSub(0),
     m_whiteLevel(0),
     m_whiteLevelMain(0),
-    m_whiteLevelSub(0)
+    m_whiteLevelSub(0),
+    m_threeD(false)
 {
   init();
   m_vramMain = new unsigned short[0x16000];
@@ -103,6 +106,29 @@ int SDLhandler::totalHeight()
    return HEIGHT+GAP.h;
 }
 
+void SDLhandler::initGL( )
+{
+  int h = totalHeight();
+  int y = 0;
+  if (m_threeD)
+  {
+    if (!m_mainOnTop)
+    {
+      y = 192 + GAP.h;
+    }
+    h = 192;
+  }
+  glViewport( 0, y, WIDTH, h );
+  /*
+  GLfloat ratio = ( GLfloat )256. / ( GLfloat )192.*2;
+  gluPerspective( 70.0f, ratio, 0.1f, 100.0f );
+  */
+  glMatrixMode( GL_PROJECTION );
+  glLoadIdentity( );
+  glOrtho(0, WIDTH, y+h, y, -1.0, 1.0);
+  glMatrixMode( GL_MODELVIEW );
+  glLoadIdentity( );
+}
 int SDLhandler::init()
 {
   char *gap(getenv("NDS_GAP"));
@@ -112,15 +138,6 @@ int SDLhandler::init()
     if (h > 0)
     {
       GAP.h = h;
-    }
-  }
-  char *scale(getenv("NDS_SCALE"));
-  if (scale)
-  {
-    int s = strtol(scale, 0, 0);
-    if (s > 0)
-    {
-      m_scale = s;
     }
   }
 
@@ -138,13 +155,13 @@ int SDLhandler::init()
   }
 
   atexit (SDL_Quit);
-  int flags = SDL_SWSURFACE;
+  int flags = SDL_SWSURFACE | SDL_OPENGL | SDL_GL_DOUBLEBUFFER;
   if (m_isFullScreen) {
     flags |= SDL_FULLSCREEN;
   } else {
     flags |= SDL_RESIZABLE;
   }
-  m_screen = SDL_SetVideoMode (m_scale*WIDTH,m_scale*totalHeight(), 16, flags);
+  m_screen = SDL_SetVideoMode (m_scale*WIDTH,m_scale*totalHeight(), 32, flags);
   if (m_screen == NULL)
   {
     sprintf (msg, "Couldn't set 16 bit video mode: %s\n",
@@ -153,7 +170,7 @@ int SDLhandler::init()
     return 2;
   }
 
-  for (int i = 0; i < 2; ++i)
+  for (int i = 0; i < 4; ++i)
   {
     m_layer[i] = SDL_CreateRGBSurface(SDL_SWSURFACE, m_scale*WIDTH, m_scale*totalHeight(),
         16, 0x0000F000, 0x00000F00, 0x000000F0, 0x0000000F);
@@ -179,7 +196,7 @@ int SDLhandler::init()
   }
   */
 
-
+  initGL();
   return 0;
 }
 
@@ -354,14 +371,21 @@ void SDLhandler::setPaletteData(const unsigned short * palette, int size)
 */
 
 void SDLhandler::drawGap() {
+  /*
+  glColor3b(200, 200, 200);
+  glBegin(GL_QUADS);
+    glVertex3f(-1.0f,0.2f,0.0f);
+    glVertex3f(1.0f,0.2f,0.0f);
+    glVertex3f(1.0f,-0.2f,0.0f);
+    glVertex3f(-1.0f,-0.2f,0.0f);
+  glEnd();
+  */
+  /*
   int fadeLevel = m_fadeLevel;
   m_fadeLevel = 0;
-  SDL_Rect rect = GAP;
-  rect.w *= m_scale;
-  rect.h *= m_scale;
-  rect.y *= m_scale;
-  SDL_FillRect (m_layer[0], &rect, decodeColor( (20|(20<<5)|(20<<10)) ) );
+  SDL_FillRect (m_screen, &GAP, decodeColor( (20|(20<<5)|(20<<10)) ) );
   m_fadeLevel = fadeLevel;
+  */
 }
 
 void SDLhandler::clear()
@@ -388,7 +412,6 @@ void SDLhandler::clear()
         drawPixel(x, y, 0, vram[x+y*SCREEN_WIDTH]);
       }
     }
-    SDL_FillRect (m_layer[1], &rect, 0);
   }
   if (m_mainOnTop) {
     colour = m_subBackgroundPaletteSDL[0];
@@ -412,11 +435,7 @@ void SDLhandler::clear()
         drawPixel(x, y, 1, vram[x+y*SCREEN_WIDTH]);
       }
     }
-    SDL_FillRect (m_layer[1], &rect, 0);
   }
-  // "clear" sprites and screen by blitting background to them
-  SDL_BlitSurface(m_layer[0], 0, m_screen, 0);
-  SDL_BlitSurface(m_layer[0], 0, m_layer[1], 0);
 
   drawGap();
 }
@@ -478,13 +497,7 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
         break;
     }
   }
-#if 0
-  if (layer == 2 )
-    printf("Fill @%d,%d pal %d col %x lay %d\n", rect.x, origY,palette, colour, layer);
-#endif
-  //SDL_FillRect (m_screen, &rect, colour);
-  SDL_FillRect (m_layer[layer&2?1:0], &rect, colour);
-
+  SDL_FillRect (m_layer[layer], &rect, colour);
 }
 
 #if 0
@@ -521,11 +534,61 @@ unsigned short * SDLhandler::vramSub(int offset) {
   setDirty();
   return &m_vramSub[offset];
 }
+
+int powerOfTwo( int value )
+{
+  int result = 1 ;
+  while ( result < value )
+    result *= 2 ;
+  return result;
+}
+
+
+int SDLhandler::uploadTextureFromSurface(
+    SDL_Surface * sourceSurface,
+    int colorKeyRed, int colorKeyGreen, int colorKeyBlue )
+{
+
+  /*
+   * Use the surface width and height expanded to powers of 2 :
+   * (one may call also gluScaleImage.
+   */
+
+  // Set up so that colorkey pixels become transparent :
+  //Uint32 colorkey = SDL_MapRGBA( sourceSurface->format, colorKeyRed, colorKeyGreen, colorKeyBlue, 0 ) ;
+  //SDL_SetColorKey( sourceSurface, SDL_SRCCOLORKEY, colorkey ) ;
+
+  // Create an OpenGL texture for the image
+
+  GLuint textureID ;
+  glGenTextures( 1, &textureID ) ;
+  glBindTexture( GL_TEXTURE_2D, textureID ) ;
+
+  /* Map the alpha surface to the texture */
+  glTexImage2D( GL_TEXTURE_2D,
+      0,
+      GL_RGBA,
+      sourceSurface->w, sourceSurface->h,
+      0,
+      GL_RGBA,
+      GL_UNSIGNED_BYTE,
+      sourceSurface->pixels ) ;
+  /* Prepare the filtering of the texture image */
+#if 1
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST ) ;
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST ) ;
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT ) ;
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT ) ;
+#endif
+
+  return textureID ;
+
+}
 void SDLhandler::waitVsync()
 {
   int tmpGF = m_frames;
 
-  if (m_dirty) 
+  if (m_dirty)
   {
     // pallete conversions:
     for (int i = 0; i < 256; i++)
@@ -557,11 +620,86 @@ void SDLhandler::waitVsync()
     BackgroundHandler::render();
     SpriteHandler::render();
 
-    for (int i = 0; i < 2; ++i)
+    // blit doesn't work with open gl - have to upload as a texture
+    //SDL_Flip(m_screen);
+    SDL_Surface * alphaImage = SDL_CreateRGBSurface( SDL_SWSURFACE, m_layer[0]->w,
+        512, 32,
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN // OpenGL RGBA masks
+      0x000000FF,
+      0x0000FF00,
+      0x00FF0000,
+      0xFF000000
+#else
+      0xFF000000,
+      0x00FF0000,
+      0x0000FF00,
+      0x000000FF
+#endif
+      );
+    for (int i = 0; i < 4; ++i)
     {
-      SDL_BlitSurface(m_layer[i], 0, m_screen, 0);
+      SDL_BlitSurface(m_layer[i], 0, alphaImage, 0);
     }
-    SDL_Flip(m_screen);
+
+    // get the user viewport and project
+    GLint viewport[4];
+    GLdouble projection[16];
+    GLdouble modelview[16];
+    if (m_threeD)
+    {
+      glGetIntegerv(GL_VIEWPORT,viewport);
+      glGetDoublev(GL_PROJECTION_MATRIX,projection);
+      glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+    }
+
+    initGL();
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    glMatrixMode( GL_TEXTURE ) ;
+    glEnable( GL_TEXTURE_2D );
+    // glLoadIdentity() ;
+    GLuint texture = uploadTextureFromSurface(alphaImage, 0, 0, 0);
+    SDL_FreeSurface( alphaImage ) ;
+    glMatrixMode( GL_MODELVIEW ) ;
+    // glLoadIdentity( );
+
+    float y = 0.;
+    float h = (float)m_layer[0]->h;
+    if (m_threeD)
+    {
+      if (!m_mainOnTop)
+        y = (float)(192+GAP.h);
+      h = 192.;
+    }
+    glColor3f(1.0, 1.0, 1.0);
+
+    //printf("Draw non-threed layer at 0, %f, size 256, %f\n", y, h);
+    float one = ((float)h)/512.;
+    glBegin(GL_QUADS);
+      glTexCoord2f(0.0f, 0.0f);
+      glVertex2f  (0.0f,y);
+      glTexCoord2f(1.0f, 0.0f);
+      glVertex2f  (256.0f, y);
+      glTexCoord2f(1.0f, one);
+      glVertex2f  (256.0f, y+h);
+      glTexCoord2f(0.0f, one);
+      glVertex2f  (0.0f, y+h);
+    glEnd();
+    glDeleteTextures(1, &texture);
+    glDisable( GL_TEXTURE_2D );
+    //printf("Write to %f %f\n", y, h);
+
+    glFlush();
+    if (m_threeD)
+    {
+      glMatrixMode( GL_PROJECTION );
+      glLoadMatrixd(projection);
+      glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+    }
+    else
+    {
+      // 3D progs should call glFlush(0) but non 3D ones should not have to
+      SDL_GL_SwapBuffers();
+    }
   }
   SDL_Event event;
   while( SDL_PollEvent( &event ) ) {
@@ -638,17 +776,27 @@ void SDLhandler::setWhite(int screen, int level)
     m_whiteLevelMain = level;
 }
 
+void SDLhandler::clear3D()
+{
+  if (SDLhandler::instance().m_threeD) {
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+  }
+}
+
 void SDLhandler::lcdSwap()
 {
   m_mainOnTop = not m_mainOnTop;
+  clear3D();
 }
 void SDLhandler::mainOnTop()
 {
   m_mainOnTop = true;
+  clear3D();
 }
 void SDLhandler::mainOnBottom()
 {
   m_mainOnTop = false;
+  clear3D();
 }
 
 unsigned short * SDLhandler::spriteGfx()
@@ -666,4 +814,9 @@ unsigned short * SDLhandler::subSpriteGfx()
 void SDLhandler::setDirty()
 {
   m_dirty = true;
+}
+
+void SDLhandler::setThreeD(bool td)
+{
+  m_threeD = td;
 }

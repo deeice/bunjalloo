@@ -103,8 +103,8 @@ Arena::Arena():
   m_playerCount(0), m_roundNumber(0),m_highlightCreations(HIGHLIGHT_INIT)
 {
   initialiseMap();
-  m_bg->enable();
-  m_alternateBg->enable();
+  m_bg->setEnabled();
+  m_alternateBg->setEnabled();
 }
 Arena::~Arena()
 {
@@ -267,8 +267,8 @@ void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2,
   for (int y=1; y < height; y++) {
     mapData[X_LIMIT+y*32] = ARENA_VERT_EDGE_TILE|TILE_FLIP_HORZ|(pal<<12);
   }
-  bg->xScroll(0);
-  bg->yScroll(0);
+  bg->setXScroll(0);
+  bg->setYScroll(0);
   bg->update();
 }
 int Arena::players() const
@@ -402,8 +402,8 @@ void Arena::display() {
   clear();
   Graphics::instance().clearPalettes();
   Graphics::loadAllPalettes();
-  m_bg->xScroll(0);
-  m_bg->yScroll(0);
+  m_bg->setXScroll(0);
+  m_bg->setYScroll(0);
   m_bg->update();
   initialiseMap();
   gameBorder();
@@ -429,10 +429,10 @@ void Arena::initialiseCursor(int x, int y, Cursor_t type)
 {
   if (type != CURSOR_NOT_DRAWN) {
     drawCursor(type);
-    m_cursor->enable();
+    m_cursor->setEnabled();
     m_cursor->update();
   } else {
-    m_cursor->enable(false);
+    m_cursor->setEnabled(false);
   }
   setCursor(x, y);
 }
@@ -547,7 +547,7 @@ void Arena::drawCursor(Cursor_t type)
 
 void Arena::enableCursor(bool enable)
 {
-  m_cursor->enable(enable);
+  m_cursor->setEnabled(enable);
   m_cursor->update();
 }
 

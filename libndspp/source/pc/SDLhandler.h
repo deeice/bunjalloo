@@ -75,9 +75,14 @@ class SDLhandler
     void setFade(int screen, int level);
     void setWhite(int screen, int level);
     void lcdSwap();
+    void setThreeD(bool td);
     void mainOnTop();
     void mainOnBottom();
 
+    bool isMainOnTop() const
+    {
+      return m_mainOnTop;
+    }
   private:
     static SDL_Rect GAP;
 
@@ -86,7 +91,7 @@ class SDLhandler
     static int totalHeight();
 
     SDL_Surface *m_screen;
-    SDL_Surface *m_layer[2];
+    SDL_Surface *m_layer[4];
     int m_alpha;
     SDL_TimerID m_vblank;
     int m_scale;
@@ -117,13 +122,20 @@ class SDLhandler
     int m_whiteLevelSub;
 
     bool m_dirty;
+    bool m_threeD;
 
     SDLhandler();
     ~SDLhandler();
 
     int init();
+    void initGL();
     void drawGap();
     void clear();
     bool inGap(int y) const;
+    int uploadTextureFromSurface(
+        SDL_Surface * sourceSurface,
+        int colorKeyRed, int colorKeyGreen, int colorKeyBlue );
+
+    static void clear3D();
 };
 #endif

@@ -40,7 +40,7 @@ LDFLAGS	=	-specs=ds_arm9.specs -g $(ARCH) -mno-fpu -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=  -lndspp9 -lnds9 -ldswifi9 \
+LIBS	:=  -lndspp-arm9 -lnds9 -ldswifi9 \
             $(foreach dir,$(PALETTES),-l$(shell basename $(dir))) \
 	    -lsnd
  

@@ -60,7 +60,7 @@ void Graphics::initialiseScreen()
   Video & subScreen  = Video::instance(1);
   subScreen.setMode(0);
   mainScreen.setMode(0);
-  mainScreen.enableObjects();
+  mainScreen.setObjectsEnabled();
   mainScreen.setFade(16);
   subScreen.setToTop();
 

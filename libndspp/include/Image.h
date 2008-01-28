@@ -16,7 +16,9 @@
 */
 #ifndef Image_h_seen
 #define Image_h_seen
+#include <stdint.h>
 
+// tolua_begin
 class Image
 {
   public:
@@ -75,14 +77,14 @@ class Image
      * @return the pointer to the palette data.
      * @see paletteSize()
      */
-    const unsigned short * palette() const;
-
+    const uint16_t *palette() const;
 
     /** Get the RGB or indexed image data.
      * @return pointer to the pixel data.
      */
-    const unsigned short * data() const;
+    const uint16_t * data() const;
 
+    //tolua_end
   private:
 
     bool m_valid;
@@ -114,5 +116,5 @@ class Image
     void renderLine(const unsigned char * line, int n);
     void calculateScale();
 
-};
+}; //tolua_export
 #endif

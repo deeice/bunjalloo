@@ -22,9 +22,9 @@ LDFLAGS	=	-g -Wl,-Map,$(notdir $*.map)
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:= -lpthread -lpcnds \
+LIBS	:= -lpthread -lndspp-pc \
             $(foreach dir,$(PALETTES),-l$(shell basename $(dir))) \
-	    -lsnd `sdl-config --libs`
+	    -lsnd `sdl-config --libs` -lGL
  
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -96,7 +96,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 # main targets
 #---------------------------------------------------------------------------------
 
-$(ARM9ELF)	:	$(OFILES) $(TOPDIR)/../libndspp/lib/libpcnds.a
+$(ARM9ELF)	:	$(OFILES) $(TOPDIR)/../libndspp/lib/libndspp-pc.a
 	@echo linking $(notdir $@)
 	$(LD)  $(LDFLAGS) $(OFILES) $(LIBPATHS) $(LIBS) -o $@
 

@@ -29,9 +29,9 @@ static unsigned long int DISPLAY_CR(0);
 Background::Background(
     int screen,
     int number,
-    int charBlock, 
-    int screenBlock, 
-    int priority): 
+    int charBlock,
+    int screenBlock,
+    int priority):
   m_DISPCNT(screen?SUB_DISPLAY_CR:DISPLAY_CR)
 {
   m_bg.screen = screen;
@@ -44,7 +44,7 @@ Background::Background(
 }
 Background::~Background()
 {
-  enable(false);
+  setEnabled(false);
   BackgroundHandler::remove(this);
 }
 
@@ -63,17 +63,17 @@ unsigned char Background::charBaseBlock() const
 {
   return m_bg.charBaseBlock;
 };
-void Background::charBaseBlock(unsigned char var)
+void Background::setCharBaseBlock(unsigned char var)
 {
   if (var > 31) return;
   m_bg.charBaseBlock = var;
   updateTileMapData();
 };
-unsigned char Background::color() const
+int Background::color() const
 {
   return (m_bg.flags & BG_256_COLOR)?256:16;
 };
-void Background::color(unsigned char var)
+void Background::setColor(int var)
 {
   switch(var) {
     case 16:
@@ -93,7 +93,7 @@ static inline unsigned long BG_ON(int n) {
   return (1 << (8+n));
 };
 
-void Background::enable(bool enable)
+void Background::setEnabled(bool enable)
 {
   if (enable)
   {
@@ -124,7 +124,7 @@ unsigned short Background::flags() const
 {
   return m_bg.flags;
 };
-void Background::flags(unsigned short var)
+void Background::setFlags(unsigned short var)
 {
   m_bg.flags = var;// &(3|BG_MOSAIC_ON|BG_16_COLOR|BG_256_COLOR|BG_WRAP_ON|);
 };
@@ -132,7 +132,7 @@ unsigned char Background::number() const
 {
   return m_bg.number;
 };
-void Background::number(unsigned char var)
+void Background::setNumber(unsigned char var)
 {
   if (var > 3) return;
   m_bg.number = var;
@@ -141,7 +141,7 @@ unsigned char Background::screenBaseBlock() const
 {
   return m_bg.screenBaseBlock;
 };
-void Background::screenBaseBlock(unsigned char var)
+void Background::setScreenBaseBlock(unsigned char var)
 {
   if (var > 31) return;
   m_bg.screenBaseBlock = var;
@@ -151,7 +151,7 @@ Background::SIZE Background::size() const
 {
   return static_cast<Background::SIZE>((m_bg.flags&BG_SIZE(3))>>14);
 };
-void Background::size(Background::SIZE var)
+void Background::setSize(Background::SIZE var)
 {
   unsigned int i = static_cast<unsigned int>(var);
   if (i > 3)
@@ -176,13 +176,13 @@ void Background::update()
 {
   // update flags
   if (enabled())
-    enable();
+    setEnabled();
 }
 bool Background::wraparound() const
 {
   return (m_bg.flags&BG_WRAP_ON)!=0;
 };
-void Background::wraparound(bool var)
+void Background::setWraparound(bool var)
 {
   m_bg.flags &= ~BG_WRAP_ON;
   m_bg.flags |= var?BG_WRAP_ON:0;
@@ -191,7 +191,7 @@ bool Background::mosaic() const
 {
   return (m_bg.flags&BG_MOSAIC_ON)!=0;
 };
-void Background::mosaic(bool var)
+void Background::setMosaic(bool var)
 {
   m_bg.flags &= ~BG_MOSAIC_ON;
   m_bg.flags |= var?BG_MOSAIC_ON:0;
@@ -200,7 +200,7 @@ signed short Background::xScroll() const
 {
   return m_bg.xScroll;
 };
-void Background::xScroll(signed short var)
+void Background::setXScroll(signed short var)
 {
   m_bg.xScroll = var;
 };
@@ -208,7 +208,7 @@ signed short Background::yScroll() const
 {
   return m_bg.yScroll;
 };
-void Background::yScroll(signed short var)
+void Background::setYScroll(signed short var)
 {
   m_bg.yScroll = var;
 };
@@ -216,7 +216,7 @@ signed int Background::DX() const
 {
   return m_bg.DX;
 };
-void Background::DX(signed int var)
+void Background::setDX(signed int var)
 {
   m_bg.DX = var;
 };
@@ -224,7 +224,7 @@ signed int Background::DY() const
 {
   return m_bg.DY;
 };
-void Background::DY(signed int var)
+void Background::setDY(signed int var)
 {
   m_bg.DY = var;
 };
@@ -232,7 +232,7 @@ signed short Background::PA() const
 {
   return m_bg.PA;
 };
-void Background::PA(signed short var)
+void Background::setPA(signed short var)
 {
   m_bg.PA = var;
 };
@@ -240,7 +240,7 @@ signed short Background::PB() const
 {
   return m_bg.PB;
 };
-void Background::PB(signed short var)
+void Background::setPB(signed short var)
 {
   m_bg.PB = var;
 };
@@ -248,7 +248,7 @@ signed short Background::PC() const
 {
   return m_bg.PC;
 };
-void Background::PC(signed short var)
+void Background::setPC(signed short var)
 {
   m_bg.PC = var;
 };
@@ -256,7 +256,7 @@ signed short Background::PD() const
 {
   return m_bg.PD;
 };
-void Background::PD(signed short var)
+void Background::setPD(signed short var)
 {
   m_bg.PD = var;
 };

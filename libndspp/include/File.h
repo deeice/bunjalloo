@@ -20,9 +20,10 @@
 #include <string>
 #include <vector>
 
-namespace nds
-{
+namespace nds   // tolua_export
+{               // tolua_export
   class FileImplementation;
+  // tolua_begin
   class File
   {
     public:
@@ -108,6 +109,10 @@ namespace nds
       /** Closes the file.*/
       void close();
 
+      /** Hack to get underlying FILE* object
+       * */
+      void * file() const;
+      // tolua_end
     private:
       FileImplementation * m_details;
       File(const File &);
@@ -116,7 +121,7 @@ namespace nds
       static bool mkdirCommon(const char * path);
       static int mkdir(const char * path, unsigned int mode);
       static bool cpCommon(const char * src, const char * dst);
-  };
-}
+  }; // tolua_export
+} // tolua_export
 
 #endif

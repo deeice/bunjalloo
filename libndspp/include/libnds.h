@@ -20,7 +20,7 @@
 // wrapper functions and defines to emulate NDS calls.
 typedef unsigned char           u8;
 typedef unsigned short int      u16;
-typedef unsigned int            u32;
+typedef unsigned int            u32; // tolua_export
 typedef unsigned long long int  u64;
 
 typedef signed char             s8;
@@ -107,11 +107,11 @@ typedef struct sSpriteRotation {
   unsigned short filler4[3];
   short vdy;
 } SpriteRotation, * pSpriteRotation;
-void swiWaitForVBlank();
+void swiWaitForVBlank(); // tolua_export
 
 void dmaCopy(const void * source, void * destination, unsigned int length);
 
-#define POWER_ALL 
+#define POWER_ALL
 #define POWER_ALL_2D
 void powerON(void);
 
@@ -128,25 +128,12 @@ void powerON(void);
 #define IRQ_VBLANK 0
 void irqInit();
 
-#define glViewPort glViewport
-#define POLY_ALPHA(x)
-#define POLY_CULL_NONE
-
-#define glPolyFmt(n) 
-
-#include <GL/gl.h>
-#include <GL/glu.h>
-#define glClearColor(r,g,b)  glClearColor(r,g,b,0)
-#define glPopMatrix(i)  glPopMatrix()
-
-void glReset(void);
-
 #define COPY_MODE_HWORD  (0)
 #define COPY_MODE_WORD  (1<<26)
 #define COPY_MODE_COPY  (0)
 #define COPY_MODE_FILL  (1<<24)
 void swiCopy(const void * source, void * dest, int flags);
-
+// tolua_begin
 //!	Bit values for the keypad buttons.
 typedef enum KEYPAD_BITS {
   KEY_A      = BIT(0),  //!< Keypad A button.
@@ -168,7 +155,6 @@ void scanKeys();
 u32 keysDown();
 u32 keysHeld();
 u32 keysDownRepeat();
-u32 keysRealKeyboard();
 void keysSetRepeat( u8 setDelay, u8 setRepeat );
 //!     Obtains the current touchscreen co-ordinates.
 typedef struct {
@@ -179,6 +165,8 @@ typedef struct {
 } touchPosition;
 
 touchPosition touchReadXY();
+// tolua_end
+u32 keysRealKeyboard();
 
 void irqSet(int irq, VoidFunctionPointer fp);
 
@@ -190,6 +178,29 @@ extern short SIN[512];
 
 // ARM9, ARM7
 #else
-#include <nds.h>
+#include <nds/jtypes.h>
+#include <nds/bios.h>
+#include <nds/card.h>
+#include <nds/dma.h>
+#include <nds/interrupts.h>
+#include <nds/ipc.h>
+#include <nds/memory.h>
+#include <nds/system.h>
+#include <nds/timers.h>
+#include <nds/arm9/background.h>
+#include <nds/arm9/cache.h>
+#include <nds/arm9/console.h>
+#include <nds/arm9/exceptions.h>
+#include <nds/arm9/image.h>
+#include <nds/arm9/input.h>
+#include <nds/arm9/math.h>
+#include <nds/arm9/pcx.h>
+#include <nds/arm9/rumble.h>
+#include <nds/arm9/sound.h>
+#include <nds/arm9/trig_lut.h>
+#include <nds/arm9/video.h>
+// No! #include <nds/arm9/videoGL.h>
+// No! #include <nds/arm9/boxtest.h>
+#include <nds/arm9/sprite.h>
 #endif
 #endif

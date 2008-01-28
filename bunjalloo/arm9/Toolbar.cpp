@@ -190,8 +190,8 @@ void Toolbar::layout()
         y = TOOLBAR_Y;
         break;
     }
-    m_sprites[i]->x(x);
-    m_sprites[i]->y(y);
+    m_sprites[i]->setX(x);
+    m_sprites[i]->setY(y);
   }
   m_timer = m_timerReset;
   setVisible();
@@ -220,7 +220,7 @@ bool Toolbar::visible() const
 void Toolbar::setVisible(bool visible)
 {
   m_visible = visible;
-  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::enable), m_visible));
+  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setEnabled), m_visible));
   for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
   if (m_visible)
   {
@@ -292,12 +292,12 @@ void Toolbar::handlePress(int i)
 
 void Toolbar::updateIcons()
 {
-  m_sprites[SPRITE_BACK]->tile( TILES_PER_ICON * ( m_document.hasPreviousHistory() ? ICON_BACK: ICON_BACK_DISABLE));
-  m_sprites[SPRITE_FORWARD]->tile( TILES_PER_ICON * ( m_document.hasNextHistory() ? ICON_FORWARD: ICON_FORWARD_DISABLE));
-  m_sprites[SPRITE_STOP]->tile( TILES_PER_ICON * ( m_document.status() != Document::LOADED ? ICON_STOP: ICON_STOP_DISABLE));
-  m_sprites[SPRITE_REFRESH]->tile( TILES_PER_ICON * ICON_REFRESH);
-  m_sprites[SPRITE_GO_URL]->tile( TILES_PER_ICON * ICON_GO_URL);
-  m_sprites[SPRITE_SAVE_AS]->tile( TILES_PER_ICON * ICON_SAVE_AS);
+  m_sprites[SPRITE_BACK]->setTile( TILES_PER_ICON * ( m_document.hasPreviousHistory() ? ICON_BACK: ICON_BACK_DISABLE));
+  m_sprites[SPRITE_FORWARD]->setTile( TILES_PER_ICON * ( m_document.hasNextHistory() ? ICON_FORWARD: ICON_FORWARD_DISABLE));
+  m_sprites[SPRITE_STOP]->setTile( TILES_PER_ICON * ( m_document.status() != Document::LOADED ? ICON_STOP: ICON_STOP_DISABLE));
+  m_sprites[SPRITE_REFRESH]->setTile( TILES_PER_ICON * ICON_REFRESH);
+  m_sprites[SPRITE_GO_URL]->setTile( TILES_PER_ICON * ICON_GO_URL);
+  m_sprites[SPRITE_SAVE_AS]->setTile( TILES_PER_ICON * ICON_SAVE_AS);
   bool wifiInit = m_controller.wifiInitialised();
   ToolbarIcon wifiIcon(ICON_NOT_CONNECTED);
   if (wifiInit)
@@ -321,8 +321,8 @@ void Toolbar::updateIcons()
         break;
     }
   }
-  m_sprites[SPRITE_CONNECT_STATUS]->tile( TILES_PER_ICON * wifiIcon);
-  m_sprites[SPRITE_SPINNER]->tile( TILES_PER_ICON * ( m_document.status() == Document::LOADED ? ICON_SPINNER_INACTIVE: ICON_SPINNER));
+  m_sprites[SPRITE_CONNECT_STATUS]->setTile( TILES_PER_ICON * wifiIcon);
+  m_sprites[SPRITE_SPINNER]->setTile( TILES_PER_ICON * ( m_document.status() == Document::LOADED ? ICON_SPINNER_INACTIVE: ICON_SPINNER));
   for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setTranslucent), false));
 }
 
@@ -341,8 +341,8 @@ void Toolbar::tick()
     m_angle+=32;
     m_angle &= 0x1ff;
     nds::Sprite * spinner(m_sprites[SPRITE_SPINNER]);
-    spinner->rotateScale(true);
-    spinner->rotate(1);
+    spinner->setRotateScale(true);
+    spinner->setRotate(1);
     u16 cosAng = COS[m_angle] / 16;
     u16 sinAng = SIN[m_angle] / 16;
     spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);

@@ -36,8 +36,8 @@ Video::Video(int screen):
   powerON(POWER_ALL_2D);
   m_DISPCNT = 0;
   clear();
-  enableObjects();
-  objectMapDimensions(1);
+  setObjectsEnabled();
+  setObjectMapDimensions(1);
   setBanks();
 }
 
@@ -99,7 +99,7 @@ void Video::clear()
   Sprite::disableAll(m_screen);
 }
 
-void Video::enableObjects(bool enable)
+void Video::setObjectsEnabled(bool enable)
 {
   /*
   m_DISPCNT &= ~DISPLAY_SPR_ACTIVE;
@@ -151,7 +151,7 @@ unsigned int Video::mode() const
   return m_DISPCNT & (1|2|3|4|5|6);
 }
 
-void Video::objectMapDimensions(int dimensions)
+void Video::setObjectMapDimensions(int dimensions)
 {
   /*
   unsigned short save = m_DISPCNT;
@@ -201,17 +201,11 @@ void Video::whiteout(bool towhite, unsigned int speed)
   }
 }
 
-void Video::threeD(bool td)
+void Video::setThreeD(bool td)
 {
-  if (td) {
-    // textures? should enable a vram bank for textures too
-    powerON(POWER_ALL);
-    //m_DISPCNT |= ENABLE_3D;
-  } else {
-    /*
-    powerOFF(POWER_3D_CORE|POWER_MATRIX);
-    m_DISPCNT &= ~ENABLE_3D;
-    */
+  if (m_screen == 0)
+  {
+    SDLhandler::instance().setThreeD(td);
   }
 }
 
@@ -281,5 +275,16 @@ void Video::setToBottom()
   } else {
     // we are the main screen.
     SDLhandler::instance().mainOnBottom();
+  }
+}
+
+bool Video::onTop() const
+{
+  if (m_screen) {
+    // we are the sub screen - on top if main is not
+    return not SDLhandler::instance().isMainOnTop();
+  } else {
+    // we are the main screen.
+    return SDLhandler::instance().isMainOnTop();
   }
 }

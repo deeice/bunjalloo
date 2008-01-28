@@ -36,7 +36,7 @@ Sprite::Sprite(int screen):
   m_used(s_used[screen==0?screen:1]),
   m_OAM(screen==0?(unsigned short*)OAM:(unsigned short*)OAM_SUB)
 {
-  initialise(); 
+  initialise();
 }
 
 Sprite::Sprite(int screen, int w, int h, int tile, int colors):
@@ -45,30 +45,30 @@ Sprite::Sprite(int screen, int w, int h, int tile, int colors):
   m_used(s_used[screen==0?screen:1]),
   m_OAM(screen==0?(unsigned short*)OAM:(unsigned short*)OAM_SUB)
 {
-  initialise(); 
-  this->color(colors);
-  this->tile(tile);
+  initialise();
+  this->setColors(colors);
+  this->setTile(tile);
   this->setSize(w,h);
 }
 
 Sprite::~Sprite()
 {
   // make sure sprite is not drawn
-  doubleSize(true);
-  rotateScale(false);
+  setDoubleSize(true);
+  setRotateScale(false);
   update();
   m_used[m_index] = false;
   SpriteHandler::remove(this);
 }
 
 int Sprite::y() const
-{ 
+{
   if (!valid()) return 0;
   // unpack y
   return OBJ_Y(s_sprites[m_screen][m_index].attribute[0]);
 }
 
-void Sprite::y(unsigned char y)
+void Sprite::setY(int y)
 { 
   if (!valid()) return;
   // pack y
@@ -97,7 +97,7 @@ void Sprite::setAttrBit(unsigned int attrn, unsigned int bits, bool set, unsigne
   attr |= set?bits:0;
 }
 
-void Sprite::rotateScale(bool s)
+void Sprite::setRotateScale(bool s)
 { 
   if (!valid()) return;
   setAttrBit(0,ATTR0_ROTSCALE,s);
@@ -109,7 +109,7 @@ bool Sprite::doubleSize() const
   return s_sprites[m_screen][m_index].attribute[0]&ATTR0_DISABLED;
 }
 
-void Sprite::doubleSize(bool s)
+void Sprite::setDoubleSize(bool s)
 { 
   if (!valid()) return;
   setAttrBit(0,ATTR0_DISABLED,s);
@@ -121,7 +121,7 @@ unsigned int Sprite::mode() const
   return ((s_sprites[m_screen][m_index].attribute[0]&(ATTR0_BMP))>>10);
 }
 
-void Sprite::mode(unsigned int mode)
+void Sprite::setMode(unsigned int mode)
 {
   if (!valid()) return;
   if (mode>3)
@@ -135,18 +135,18 @@ bool Sprite::mosaic() const
   return s_sprites[m_screen][m_index].attribute[0]&ATTR0_MOSAIC;
 }
 
-void Sprite::mosaic(bool m)
+void Sprite::setMosaic(bool m)
 { 
   if (!valid()) return;
   setAttrBit(0,ATTR0_MOSAIC,m);
 }
-unsigned int Sprite::color() const
+unsigned int Sprite::colors() const
 { 
   if (!valid()) return 0;
   return (s_sprites[m_screen][m_index].attribute[0]&ATTR0_COLOR_256)?256:16;
 }
 
-void Sprite::color(unsigned int col)
+void Sprite::setColors(unsigned int col)
 { 
   if (!valid()) return;
   switch (col)
@@ -169,7 +169,7 @@ unsigned int Sprite::x() const
   return OBJ_X(s_sprites[m_screen][m_index].attribute[1]);
 }
 
-void Sprite::x(unsigned int x)
+void Sprite::setX(unsigned int x)
 { 
   if (!valid()) return;
   SpriteEntry & sp = s_sprites[m_screen][m_index];
@@ -207,7 +207,7 @@ Sprite::SPRITE_SHAPE Sprite::shape() const
   return static_cast<Sprite::SPRITE_SHAPE>((s_sprites[m_screen][m_index].attribute[0]&OBJ_SHAPE(3))>>14);
 }
 
-void Sprite::shape(Sprite::SPRITE_SHAPE shape)
+void Sprite::setShape(Sprite::SPRITE_SHAPE shape)
 { 
   if (!valid()) return;
   unsigned int s = static_cast<unsigned int>(shape);
@@ -222,7 +222,7 @@ unsigned int Sprite::rotate() const
   return (s_sprites[m_screen][m_index].attribute[1]>>9)&15;
 }
 
-void Sprite::rotate(unsigned int rotate)
+void Sprite::setRotate(unsigned int rotate)
 { 
   if (!valid()) return;
   if (rotate > 15)
@@ -236,7 +236,7 @@ bool Sprite::hflip() const
   return (bool)(s_sprites[m_screen][m_index].attribute[1]&ATTR1_FLIP_X);
 }
 
-void Sprite::hflip(bool b)
+void Sprite::setHflip(bool b)
 { 
   if (!valid()) return;
   setAttrBit(1,ATTR1_FLIP_X,b);
@@ -248,7 +248,7 @@ bool Sprite::vflip() const
   return (s_sprites[m_screen][m_index].attribute[1]&ATTR1_FLIP_Y);
 }
 
-void Sprite::vflip(bool b)
+void Sprite::setVflip(bool b)
 {
   if (!valid()) return;
   setAttrBit(1,ATTR1_FLIP_Y,b);
@@ -384,7 +384,7 @@ unsigned int Sprite::width() const
   return w;
 }
 
-void Sprite::width(unsigned int width)
+void Sprite::setWidth(unsigned int width)
 { 
   if (!valid()) return;
   unsigned int w, h;
@@ -400,7 +400,7 @@ unsigned int Sprite::height() const
   return h;
 }
 
-void Sprite::height(unsigned int height)
+void Sprite::setHeight(unsigned int height)
 { 
   if (!valid()) return;
   unsigned int w, h;
@@ -416,7 +416,7 @@ unsigned int Sprite::tile() const
   return OBJ_CHAR(s_sprites[m_screen][m_index].attribute[2]);
 }
 
-void Sprite::tile(unsigned int t)
+void Sprite::setTile(unsigned int t)
 { 
   if (!valid()) return;
   setAttrBit(2,OBJ_CHAR(t),true,OBJ_CHAR(0xFFFF));
@@ -428,7 +428,7 @@ unsigned int Sprite::priority() const
   return (s_sprites[m_screen][m_index].attribute[2]&ATTR2_PRIORITY(3))>>10;
 }
 
-void Sprite::priority(unsigned int priority)
+void Sprite::setPriority(unsigned int priority)
 { 
   if (!valid()) return;
   setAttrBit(2,ATTR2_PRIORITY(priority&3),true,ATTR2_PRIORITY(3));
@@ -440,7 +440,7 @@ unsigned int Sprite::palette() const
   return (s_sprites[m_screen][m_index].attribute[2] & ATTR2_PALETTE(15))>>12;
 }
 
-void Sprite::palette(unsigned int palette)
+void Sprite::setPalette(unsigned int palette)
 { 
   if (!valid()) return;
   setAttrBit(2,ATTR2_PALETTE(palette&15),true,ATTR2_PALETTE(15));
@@ -464,7 +464,7 @@ bool Sprite::window() const
   return s_sprites[m_screen][m_index].attribute[0]&ATTR0_TYPE_WINDOWED;
 }
 
-void Sprite::window(bool b)
+void Sprite::setWindow(bool b)
 { 
   if (!valid()) return;
   setAttrBit(0,ATTR0_TYPE_WINDOWED,b);
@@ -574,7 +574,7 @@ void Sprite::loadTileMapData(const void * t, const void * m, unsigned int length
   const unsigned short* gfx = (const unsigned short*)t;
   const unsigned short* map = (const unsigned short*)m;
   unsigned int thisTile = this->tile();
-  if (this->color() == 256) {
+  if (this->colors() == 256) {
     thisTile /= 2;
   }
   // ???
@@ -583,9 +583,9 @@ void Sprite::loadTileMapData(const void * t, const void * m, unsigned int length
   if (m_screen) {
     oamRam = SDLhandler::instance().subSpriteGfx();
   }
-  
-  int amount = this->color()==256?64:32;
-  int stepSize = this->color()==256?32:16; 
+
+  int amount = this->colors()==256?64:32;
+  int stepSize = this->colors()==256?32:16;
   // get start address in screen
   for (unsigned int loop = 0; loop < length; loop++) {
     // id = <the tile id in the map file at this position>
@@ -621,7 +621,7 @@ void Sprite::draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char
       int y = j + yi*8;
       unsigned char pixelPair = *gfx++;
       int pix = pixelPair&0xf;
-      if (color() == 256)
+      if (colors() == 256)
       {
         pix = pixelPair;
       }

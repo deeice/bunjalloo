@@ -59,10 +59,11 @@ class nds::FileImplementation
     bool is_open() const;
     void close();
     bool eof() const;
+    void * file() const;
 
   private:
     FILE * m_stream;
-  
+
     FileImplementation(const FileImplementation&);
     const FileImplementation operator=(const FileImplementation&);
 };
@@ -72,6 +73,11 @@ FileImplementation::FileImplementation(): m_stream(0)
 {
   // make sure we have initialised the fat library.
   FatLibrary::instance();
+}
+
+void * FileImplementation::file() const
+{
+  return m_stream;
 }
 
 void FileImplementation::open(const char * name, const char * mode)
@@ -248,4 +254,9 @@ void nds::File::ls(const char * path, std::vector<std::string> & entries)
 bool nds::File::cp(const char *src, const char *dst)
 {
   return cpCommon(src, dst);
+}
+
+void * File::file() const
+{
+  return m_details->file();
 }

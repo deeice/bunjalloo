@@ -20,7 +20,9 @@
 #include "File.h"
 #include "png.h"
 #include "gif_lib.h"
-#include "jpegdecoder.h"
+extern "C" {
+#include "jpeglib.h"
+};
 
 using std::auto_ptr;
 static const int PNG_BYTES_TO_CHECK = 8;
@@ -527,16 +529,22 @@ void Image::readGif(const char * filename)
 }
 
 // create a new jpeg_decoder_file_stream
-class JpegFileStream:public jpeg_decoder_stream
+class JpegFileStream
 {
   public:
-    JpegFileStream(const char * filename)
+    JpegFileStream(const char * filename):m_scanLine(0)
     {
+      cinfo.err = jpeg_std_error(&jerr);
+      jpeg_create_decompress(&cinfo);
       m_file.open(filename);
     }
 
     ~JpegFileStream()
     {
+      free(m_scanLine);
+      jpeg_finish_decompress(&cinfo);
+      jpeg_destroy_decompress(&cinfo);
+
     }
 
     bool is_open() const
@@ -544,28 +552,48 @@ class JpegFileStream:public jpeg_decoder_stream
       return m_file.is_open();
     }
 
-    virtual int read(uchar *buf, int max_bytes_to_read, bool *Peof_flag)
+    bool begin()
     {
-      *Peof_flag = false;
-      int read = m_file.read((char*)buf, max_bytes_to_read);
-      if (read < max_bytes_to_read)
-      {
-        *Peof_flag = m_file.eof();
-      }
-      return read;
+      jpeg_stdio_src(&cinfo, (FILE*)m_file.file());
+      jpeg_read_header(&cinfo, TRUE);
+      jpeg_calc_output_dimensions(&cinfo);
+      m_scanLine = (unsigned char*)calloc(bytes_per_pixel()*width(), 1);
+      jpeg_start_decompress(&cinfo);
+      return true;
     }
 
-    virtual void attach(void)
+    int width() const
     {
+      return cinfo.output_width;
     }
 
-    virtual void detach(void)
+    int height() const
     {
+      return cinfo.output_height;
+    }
+
+    int components() const
+    {
+      return cinfo.output_components;
+    }
+
+    int bytes_per_pixel() const
+    {
+      return cinfo.output_components;
+    }
+
+    bool decode(void * &scanline)
+    {
+      jpeg_read_scanlines(&cinfo, &m_scanLine, 1);
+      scanline = m_scanLine;
+      return true;
     }
 
   private:
+    struct jpeg_decompress_struct cinfo;
+    struct jpeg_error_mgr jerr;
     nds::File m_file;
-    int m_size;
+    unsigned char * m_scanLine;
 };
 
 void Image::calculateScale()
@@ -621,20 +649,16 @@ void Image::readJpeg(const char * filename)
   {
     return;
   }
-  auto_ptr<jpeg_decoder> decoder( new jpeg_decoder(inputStream.get(), false));
-  if (decoder->get_error_code() != 0)
-  {
-    return;
-  }
-  m_realWidth = decoder->get_width();
-  m_realHeight = decoder->get_height();
-  m_channels = decoder->get_num_components();
-  calculateScale();
 
-  if (decoder->begin())
+  if (not inputStream->begin())
   {
     return;
   }
+
+  m_realWidth = inputStream->width();
+  m_realHeight = inputStream->height();
+  m_channels = inputStream->components();
+  calculateScale();
 
   m_data = (unsigned short*)malloc( m_width * m_height * sizeof(u16));
   if (!m_data)
@@ -644,18 +668,12 @@ void Image::readJpeg(const char * filename)
 
   for (unsigned int line = 0; line < m_realHeight; ++line)
   {
-    void * lineOffset;
-    uint lineLength;
-    if (decoder->decode(&lineOffset, &lineLength))
+    void * scanline;
+    if (not inputStream->decode(scanline))
       break;
 
-    m_bpp = decoder->get_bytes_per_pixel();
-    renderLine((const unsigned char*)lineOffset, line);
-  }
-
-  if (decoder->get_error_code())
-  {
-    return;
+    m_bpp = inputStream->bytes_per_pixel();
+    renderLine((const unsigned char*)scanline, line);
   }
 
   m_valid = true;

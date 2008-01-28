@@ -18,10 +18,12 @@
 #define Canvas_h_seen
 
 #include "Rectangle.h"
-namespace nds
-{
+
+namespace nds   // tolua_export
+{               // tolua_export
   class Background;
 
+// tolua_begin
   class Canvas
   {
     public:
@@ -35,8 +37,9 @@ namespace nds
       int height() const;
       void endPaint();
 
-      void setClip(const Rectangle & clip);
-      Rectangle clip() const;
+      void setClip(const nds::Rectangle & clip);
+      nds::Rectangle clip() const;
+// tolua_end
 
     private:
       Background * m_bgMain;
@@ -55,8 +58,8 @@ namespace nds
       Canvas(const Canvas &);
       const Canvas operator=(const Canvas &);
       unsigned short * vram(int y);
-      
 
-  };
-}
+
+  }; //tolua_export
+} //tolua_export
 #endif

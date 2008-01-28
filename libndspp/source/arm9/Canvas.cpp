@@ -48,8 +48,8 @@ Canvas::Canvas():
   Video & sub(Video::instance(1));
   sub.setMode(5);
   main.setMode(5);
-  main.enableObjects();
-  sub.enableObjects();
+  main.setObjectsEnabled();
+  sub.setObjectsEnabled();
 
   // redo the banks - we want enough VRAM for the main and sub screen
   // Can't use hardware double buffering on sub screen, have to fudge it.
@@ -63,8 +63,8 @@ Canvas::Canvas():
   /*vramSetBankF(VRAM_F_MAIN_SPRITE);
   vramSetBankG(VRAM_G_MAIN_SPRITE);*/
 
-  m_bgMain->enable();
-  m_bgSub->enable();
+  m_bgMain->setEnabled();
+  m_bgSub->setEnabled();
 
   m_bgMain->update();
   m_bgSub->update();

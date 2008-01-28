@@ -110,16 +110,16 @@ int main(void) {
   p[0] = nds::Color(31, 31, 31);
   nds::Canvas & canvas = nds::Canvas::instance();
   nds::Sprite bigSprite(screen, 64, 32, 0, 256);
-  bigSprite.x(32);
-  bigSprite.y(128);
+  bigSprite.setX(32);
+  bigSprite.setY(128);
   std::vector<nds::Sprite*> sprites;
   for (int i = 0; i < 12; i++)
   {
     // would be 4 tiles per sprite (16x16 = 4*8x8) 
     // but the tile count is for 4bpp tiles, 256 color 8bpp require twice as much vram.
     nds::Sprite * sprite(new nds::Sprite(screen, 16, 16, i*8, 256));
-    sprite->x(i*16);
-    sprite->y(i*16);
+    sprite->setX(i*16);
+    sprite->setY(i*16);
     sprites.push_back(sprite);
 
   }
@@ -138,10 +138,10 @@ int main(void) {
       for ( int i = 0; i < size ; ++i)
       {
         nds::Sprite * sprite(sprites[i]);
-        sprite->enable();
+        sprite->setEnabled();
         sprite->update();
       }
-      bigSprite.enable();
+      bigSprite.setEnabled();
       bigSprite.update();
     }
   }
@@ -162,8 +162,8 @@ int main(void) {
     affine &= 0x1ff;
     // Compute sin and cos
     nds::Sprite * spinner(sprites[7]);
-    spinner->rotateScale(true);
-    spinner->rotate(1);
+    spinner->setRotateScale(true);
+    spinner->setRotate(1);
     u16 cosAng = COS[affine] / 16;
     u16 sinAng = SIN[affine] / 16;
     spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
@@ -182,7 +182,7 @@ int main(void) {
       {
         y++;
       }
-      s->y(y);
+      s->setY(y);
       s->update();
     }
     swiWaitForVBlank();

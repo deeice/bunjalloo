@@ -17,6 +17,7 @@
 #ifndef Rectangle_h_seen
 #define Rectangle_h_seen
 
+// tolua_begin
 namespace nds
 {
   struct Rectangle
@@ -33,4 +34,5 @@ namespace nds
     Rectangle intersect(const Rectangle & r2) const;
   };
 }
+// tolua_end
 #endif

@@ -30,8 +30,8 @@ Video::Video(int screen):
   powerON(POWER_ALL_2D);
   m_DISPCNT = 0;
   clear();
-  enableObjects();
-  objectMapDimensions(1);
+  setObjectsEnabled();
+  setObjectMapDimensions(1);
   setBanks();
 }
 
@@ -78,7 +78,7 @@ void Video::clear()
   Sprite::disableAll(m_screen);
 }
 
-void Video::enableObjects(bool enable)
+void Video::setObjectsEnabled(bool enable)
 {
   m_DISPCNT &= ~DISPLAY_SPR_ACTIVE;
   m_DISPCNT |= (enable?DISPLAY_SPR_ACTIVE:0);
@@ -147,7 +147,7 @@ unsigned int Video::mode() const
   return m_DISPCNT & (1|2|3|4|5|6);
 }
 
-void Video::objectMapDimensions(int dimensions)
+void Video::setObjectMapDimensions(int dimensions)
 {
   unsigned short save = m_DISPCNT;
   m_DISPCNT &= ~DISPLAY_SPR_1D_LAYOUT;
@@ -191,15 +191,17 @@ void Video::whiteout(bool towhite, unsigned int speed)
   }
 }
 
-void Video::threeD(bool td)
+void Video::setThreeD(bool td)
 {
   if (td) {
     // textures? should enable a vram bank for textures too
     powerON(POWER_ALL);
-    m_DISPCNT |= ENABLE_3D;
+    m_DISPCNT |= ENABLE_3D|DISPLAY_BG0_ACTIVE;
+    vramSetBankA(VRAM_A_TEXTURE);
   } else {
+    vramSetBankA(VRAM_A_MAIN_BG);
     powerOFF(POWER_3D_CORE|POWER_MATRIX);
-    m_DISPCNT &= ~ENABLE_3D;
+    m_DISPCNT &= ~(ENABLE_3D|DISPLAY_BG0_ACTIVE);
   }
 }
 
@@ -264,5 +266,17 @@ void Video::setToBottom()
   } else {
     // we are the main screen.
     lcdMainOnBottom();
+  }
+}
+
+bool Video::onTop() const
+{
+  bool mot = REG_POWERCNT & POWER_SWAP_LCDS;
+  if (m_screen) {
+    // we are the sub screen - on top if main is not
+    return not mot;
+  } else {
+    // we are the main screen.
+    return mot;
   }
 }

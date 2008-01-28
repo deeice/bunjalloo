@@ -17,6 +17,7 @@
 #ifndef Video_h_seen
 #define Video_h_seen
 
+// tolua_begin
 namespace nds
 {
   /*! @brief Controls the video hardware */
@@ -30,36 +31,6 @@ namespace nds
        */
       static Video& instance(int screen=0);
 
-      /*! @brief Set the video mode.
-       * @param mode Mode value 0-6. Mode 6 is new on the DS.
-       */
-      void setMode(unsigned int mode);
-
-      /*! @brief get the video mode.
-       * @returns Mode value 0-6
-       */
-      unsigned int mode() const;
-
-      /*! @brief Enable or disable objects (sprites).
-       * @param enable true to enable objects, false to disable them
-       */
-      void enableObjects(bool enable=true);
-
-      /*! @brief Get the status of the objects (sprites)
-       * @returns true if objects enabled, false otherwise
-       */
-      bool objectsEnabled() const;
-      
-      /*! @brief Set the dimensions of the object map. May be 1D or 2D.
-       * @param dimensions 1 or 2 for 1D or 2D.
-       */
-      void objectMapDimensions(int dimensions);
-
-      /*! @brief get the dimensions of the object map. May be 1D or 2D.
-       * @returns dimensions 1 or 2 for 1D or 2D.
-       */
-      int objectMapDimensions() const;
-      
       /*! @brief clears video ram. */
       void clear();
 
@@ -87,14 +58,14 @@ namespace nds
        * @param mode the type of blending to perform
        */
       void blend(BLDMOD_MODE_t mode=BLDMOD_ALPHA,
-          int first=BLDMOD_BG1 | BLDMOD_BG0 | BLDMOD_BG2 | BLDMOD_OBJ, 
+          int first=BLDMOD_BG1 | BLDMOD_BG0 | BLDMOD_BG2 | BLDMOD_OBJ,
           int second=BLDMOD_BD);
-      
+
       /*!@brief set the fade level (BLDMOD_FADE)
        * @param level the level of fading - from 0-16. 0 being bright, 16 being fully black.
        */
       void setFade(int level);
-      
+
       /*!@brief set the white level (BLDMOD_WHITE)
        * @param level the level of white - from 0-16. 0 being normal, 16 being fully white.
        */
@@ -117,16 +88,6 @@ namespace nds
        */
       void whiteout(bool towhite=true, unsigned int speed=1);
 
-      /*! @brief Set 3D mode
-       * @param td if true sets 3D mode, if false does not
-       */
-      void threeD(bool td);
-
-      /*! @brief Get 3D mode
-       * @returns the current state of 3D. True if 3D is set false otherwise.
-       */
-      bool threeD() const;
-
       /*! @brief screen capture
        */
       void capture() const;
@@ -139,6 +100,52 @@ namespace nds
       //! Make this screen go to the bottom.
       void setToBottom();
 
+      bool onTop() const;
+
+#ifdef TOLUA
+      tolua_property__qt bool threeD;
+      tolua_property__qt int mode;
+      tolua_property__qt bool objectsEnabled;
+      tolua_property__qt int objectMapDimensions;
+#endif
+// tolua_end
+      /*! @brief Set 3D mode
+       * @param td if true sets 3D mode, if false does not
+       */
+      void setThreeD(bool td);
+      /*! @brief Get 3D mode
+       * @returns the current state of 3D. True if 3D is set false otherwise.
+       */
+      bool threeD() const;
+
+      /*! @brief Set the video mode.
+       * @param mode Mode value 0-6. Mode 6 is new on the DS.
+       */
+      void setMode(unsigned int mode);
+      /*! @brief get the video mode.
+       * @returns Mode value 0-6
+       */
+      unsigned int mode() const;
+
+      /*! @brief Enable or disable objects (sprites).
+       * @param enable true to enable objects, false to disable them
+       */
+      void setObjectsEnabled(bool enable=true);
+
+      /*! @brief Get the status of the objects (sprites)
+       * @returns true if objects enabled, false otherwise
+       */
+      bool objectsEnabled() const;
+
+      /*! @brief Set the dimensions of the object map. May be 1D or 2D.
+       * @param dimensions 1 or 2 for 1D or 2D.
+       */
+      void setObjectMapDimensions(int dimensions);
+
+      /*! @brief get the dimensions of the object map. May be 1D or 2D.
+       * @returns dimensions 1 or 2 for 1D or 2D.
+       */
+      int objectMapDimensions() const;
     private:
       //! the background register to use
       volatile unsigned long & m_DISPCNT;
@@ -152,8 +159,8 @@ namespace nds
 
       //! Set the default VRAM banks. Uses bank A for the main screen, bank C for the sub screen.
       void setBanks();
-    
-  }; 
-  
-};
+
+  }; // tolua_export
+
+} // tolua_export
 #endif

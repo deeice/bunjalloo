@@ -57,7 +57,7 @@ Text16::Text16(int screen):
   // total = 32*84
   u16 * tileData = m_bg->tileData();
   dmaCopy(_binary_chaosfont_raw_start,&tileData[realOffset],64*MAX_LETTERS);
-  m_bg->enable();
+  m_bg->setEnabled();
   
 }
 

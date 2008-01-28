@@ -20,7 +20,7 @@
 #ifdef ARM7
 #error Wifi9 is only available on the ARM9
 #endif
-
+//tolua_begin
 namespace nds
 {
   /*! @brief Wifi9 is a helper class for the arm9 dswifi code.
@@ -60,7 +60,7 @@ namespace nds
        * @returns true if connected, false otherwise.
        */
       bool connected() const;
-      
+
       /*! @brief disconnect from the AP.
        * This disconnects and also tells the arm7 code to do the same.
        */
@@ -68,6 +68,7 @@ namespace nds
 
       int signalStrength() const;
 
+//tolua_end
     private:
       bool m_connected;
       //! construct the class, calls initialise
@@ -75,6 +76,6 @@ namespace nds
       //! initialise the DS wifi hardware but do not connect.
       void initialise();
 
-  };
-};
+  }; // tolua_export
+}; // tolua_export
 #endif
