@@ -86,7 +86,7 @@ class SDLhandler
     static int totalHeight();
 
     SDL_Surface *m_screen;
-    SDL_Surface *m_layer[4];
+    SDL_Surface *m_layer[2];
     int m_alpha;
     SDL_TimerID m_vblank;
     int m_scale;

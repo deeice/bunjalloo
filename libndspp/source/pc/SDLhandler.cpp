@@ -109,9 +109,18 @@ int SDLhandler::init()
   if (gap)
   {
     int h = strtol(gap, 0, 0);
-    if (h > 0) 
+    if (h > 0)
     {
       GAP.h = h;
+    }
+  }
+  char *scale(getenv("NDS_SCALE"));
+  if (scale)
+  {
+    int s = strtol(scale, 0, 0);
+    if (s > 0)
+    {
+      m_scale = s;
     }
   }
 
@@ -144,7 +153,7 @@ int SDLhandler::init()
     return 2;
   }
 
-  for (int i = 0; i < 4; ++i)
+  for (int i = 0; i < 2; ++i)
   {
     m_layer[i] = SDL_CreateRGBSurface(SDL_SWSURFACE, m_scale*WIDTH, m_scale*totalHeight(),
         16, 0x0000F000, 0x00000F00, 0x000000F0, 0x0000000F);
@@ -347,7 +356,11 @@ void SDLhandler::setPaletteData(const unsigned short * palette, int size)
 void SDLhandler::drawGap() {
   int fadeLevel = m_fadeLevel;
   m_fadeLevel = 0;
-  SDL_FillRect (m_screen, &GAP, decodeColor( (20|(20<<5)|(20<<10)) ) );
+  SDL_Rect rect = GAP;
+  rect.w *= m_scale;
+  rect.h *= m_scale;
+  rect.y *= m_scale;
+  SDL_FillRect (m_layer[0], &rect, decodeColor( (20|(20<<5)|(20<<10)) ) );
   m_fadeLevel = fadeLevel;
 }
 
@@ -364,7 +377,7 @@ void SDLhandler::clear()
     colour = m_subBackgroundPaletteSDL[0];
   }
   if (Video::instance(0).mode() != 5) {
-    SDL_FillRect (m_screen, &rect, colour);
+    SDL_FillRect (m_layer[0], &rect, colour);
   }
   else
   {
@@ -375,6 +388,7 @@ void SDLhandler::clear()
         drawPixel(x, y, 0, vram[x+y*SCREEN_WIDTH]);
       }
     }
+    SDL_FillRect (m_layer[1], &rect, 0);
   }
   if (m_mainOnTop) {
     colour = m_subBackgroundPaletteSDL[0];
@@ -386,7 +400,7 @@ void SDLhandler::clear()
   rect.w = WIDTH;
   rect.h = HEIGHT/2;
   if (Video::instance(1).mode() != 5) {
-    SDL_FillRect (m_screen, &rect, colour);
+    SDL_FillRect (m_layer[0], &rect, colour);
   }
   else
   {
@@ -398,7 +412,11 @@ void SDLhandler::clear()
         drawPixel(x, y, 1, vram[x+y*SCREEN_WIDTH]);
       }
     }
+    SDL_FillRect (m_layer[1], &rect, 0);
   }
+  // "clear" sprites and screen by blitting background to them
+  SDL_BlitSurface(m_layer[0], 0, m_screen, 0);
+  SDL_BlitSurface(m_layer[0], 0, m_layer[1], 0);
 
   drawGap();
 }
@@ -465,7 +483,7 @@ void SDLhandler::drawPixel(int x, int y, unsigned int layer, unsigned int palett
     printf("Fill @%d,%d pal %d col %x lay %d\n", rect.x, origY,palette, colour, layer);
 #endif
   //SDL_FillRect (m_screen, &rect, colour);
-  SDL_FillRect (m_layer[layer], &rect, colour);
+  SDL_FillRect (m_layer[layer&2?1:0], &rect, colour);
 
 }
 
@@ -539,7 +557,7 @@ void SDLhandler::waitVsync()
     BackgroundHandler::render();
     SpriteHandler::render();
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < 2; ++i)
     {
       SDL_BlitSurface(m_layer[i], 0, m_screen, 0);
     }
