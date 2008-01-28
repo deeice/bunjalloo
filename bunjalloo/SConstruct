@@ -38,7 +38,7 @@ buildTargets = ['pc', 'arm9', 'arm7']
 # create the dist files
 def dist():
   project = 'bunjalloo'
-  version = ARGUMENTS.get('version','0.5')
+  version = ARGUMENTS.get('version','0.5.2')
   distfile = '%s-%s.zip'%(project, version)
   srcfile = '%s-src-%s'%(project, version)
   defaultEnv['DIST_NAME'] = distfile
