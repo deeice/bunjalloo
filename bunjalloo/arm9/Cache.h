@@ -19,6 +19,7 @@
 
 
 #include <string>
+#include <map>
 
 class Document;
 class URI;
@@ -58,6 +59,8 @@ class Cache
   private:
     Document & m_document;
     bool m_useCache;
+    typedef std::map<int, int> CachedMap;
+    CachedMap m_fileIds;
 
     void feed(const std::string & filename);
 };

@@ -24,6 +24,7 @@ const char * Cache::CACHE_DIR("/"DATADIR"/cache");
 Cache::Cache(Document & document, bool useCache, bool clearCache)
 : m_document(document), m_useCache(useCache)
 {
+  m_fileIds.clear();
   if (m_useCache)
   {
     if (clearCache and nds::File::exists(CACHE_DIR) != nds::File::F_NONE)
@@ -53,14 +54,8 @@ bool Cache::contains(const URI & uri) const
 {
   if (m_useCache)
   {
-    std::string cacheFile = "";
-    if (m_useCache)
-    {
-      if (nds::File::exists(uri2CacheFile(uri).c_str()) == nds::File::F_REG)
-      {
-        return true;
-      }
-    }
+    CachedMap::const_iterator pos(m_fileIds.find(uri.crc32int()));
+    return (pos != m_fileIds.end());
   }
   return false;
 }
@@ -89,6 +84,7 @@ void Cache::remove(const URI & uri)
     std::string cacheFile(uri2CacheFile(uri));
     nds::File::rmrf(cacheFile.c_str());
     nds::File::rmrf((cacheFile+".hdr").c_str());
+    m_fileIds.erase(uri.crc32int());
   }
 }
 
@@ -98,7 +94,7 @@ bool Cache::load(const URI & uri)
   {
     m_document.setCacheFile("");
     std::string cacheFile(uri2CacheFile(uri));
-    if (contains(uri))
+    if (contains(uri) and nds::File::exists(uri2CacheFile(uri).c_str()) == nds::File::F_REG)
     {
       m_document.reset();
       feed(cacheFile+".hdr");
@@ -108,20 +104,11 @@ bool Cache::load(const URI & uri)
     }
     else
     {
+      m_fileIds[uri.crc32int()] = 1;
       m_document.setCacheFile(cacheFile);
     }
   }
   return false;
-}
-
-void Cache::clean(const URI & uri)
-{
-  if (m_useCache)
-  {
-    std::string cacheFileName(uri2CacheFile(uri));
-    nds::File::unlink(cacheFileName.c_str());
-    nds::File::unlink((cacheFileName+".hdr").c_str());
-  }
 }
 
 std::string Cache::fileName(const URI & uri) const

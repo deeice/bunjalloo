@@ -35,7 +35,7 @@ class RichTextArea: public TextArea
     /** Add a Link to the text.
      * @param href the document address to link to.
      */
-    void addLink(const std::string & href);
+    void addLink(const std::string & href, bool viewed=false);
 
     void add(Component * child);
 

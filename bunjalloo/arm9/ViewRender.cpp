@@ -74,7 +74,9 @@ void ViewRender::preFormat(const HtmlElement * element)
   // FIXME - BWT changes - this needs rewriting!
   if (element->isa(HtmlConstants::A_TAG))
   {
-    textArea()->addLink( unicode2string(element->attribute("href")) );
+    URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(element->attribute("href")));
+    bool viewed = m_self->m_controller.cache()->contains(newUri);
+    textArea()->addLink( unicode2string(element->attribute("href")), viewed);
   }
   if (element->isa(HtmlConstants::FORM_TAG))
   {

@@ -398,10 +398,17 @@ std::string URI::requestHeader() const
   return m_requestHeader;
 }
 
-std::string URI::crc32() const
+unsigned int URI::crc32int() const
 {
   uLong crc = ::crc32(0, Z_NULL, 0);
   crc = ::crc32(crc, (const Bytef*)m_address.c_str(), m_address.length());
+  return crc;
+
+}
+
+std::string URI::crc32() const
+{
+  uLong crc(crc32int());
   char buffer[32];
   sprintf(buffer, "%08X", (unsigned int)crc);
   return buffer;

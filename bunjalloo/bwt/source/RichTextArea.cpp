@@ -141,12 +141,16 @@ void RichTextArea::setLocation(unsigned int x, unsigned int y)
   }
 }
 
-void RichTextArea::addLink(const std::string & href)
+void RichTextArea::addLink(const std::string & href, bool viewed)
 {
   Link * link = new Link(href);
   link->setTextStart(m_documentSize);
   m_links.push_back(link);
   m_state = Link::STATE_LINK;
+  if (viewed)
+  {
+    link->setColor(WidgetColors::LINK_CLICKED);
+  }
 }
 
 void RichTextArea::endLink()
