@@ -81,10 +81,15 @@ void LinkHandler::paint(const nds::Rectangle & clip)
   {
     return;
   }
-  scrollPane()->setLocation(m_bounds.x, m_bounds.bottom());
+  scrollPane()->setLocation(m_bounds.x, m_bounds.top());
   if (scrollPane()->bounds().bottom() > nds::Canvas::instance().height())
   {
     scrollPane()->setLocation(m_bounds.x, m_bounds.top() - scrollPane()->height());
+  }
+
+  if (scrollPane()->bounds().right() > nds::Canvas::instance().width())
+  {
+    scrollPane()->setLocation(m_bounds.x - scrollPane()->width(), scrollPane()->bounds().top());
   }
 
   nds::Rectangle scrollPaneClip(scrollPane()->bounds());
