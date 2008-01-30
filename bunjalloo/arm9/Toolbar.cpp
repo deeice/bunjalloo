@@ -322,7 +322,7 @@ void Toolbar::updateIcons()
     }
   }
   m_sprites[SPRITE_CONNECT_STATUS]->setTile( TILES_PER_ICON * wifiIcon);
-  m_sprites[SPRITE_SPINNER]->setTile( TILES_PER_ICON * ( m_document.status() == Document::LOADED ? ICON_SPINNER_INACTIVE: ICON_SPINNER));
+  m_sprites[SPRITE_SPINNER]->setEnabled( m_document.status() != Document::LOADED );
   for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setTranslucent), false));
 }
 
@@ -338,14 +338,17 @@ void Toolbar::tick()
   }
   if (visible())
   {
-    m_angle+=32;
-    m_angle &= 0x1ff;
-    nds::Sprite * spinner(m_sprites[SPRITE_SPINNER]);
-    spinner->setRotateScale(true);
-    spinner->setRotate(1);
-    u16 cosAng = COS[m_angle] / 16;
-    u16 sinAng = SIN[m_angle] / 16;
-    spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
+    if (m_document.status() != Document::LOADED)
+    {
+      m_angle+=32;
+      m_angle &= 0x1ff;
+      nds::Sprite * spinner(m_sprites[SPRITE_SPINNER]);
+      spinner->setRotateScale(true);
+      spinner->setRotate(1);
+      u16 cosAng = COS[m_angle] / 16;
+      u16 sinAng = SIN[m_angle] / 16;
+      spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
+    }
     for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
   }
 }
