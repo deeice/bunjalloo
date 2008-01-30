@@ -413,6 +413,7 @@ void SDLhandler::clear()
       }
     }
   }
+  SDL_BlitSurface(m_layer[0], 0, m_layer[2], 0);
   if (m_mainOnTop) {
     colour = m_subBackgroundPaletteSDL[0];
   } else {
@@ -423,7 +424,7 @@ void SDLhandler::clear()
   rect.w = WIDTH;
   rect.h = HEIGHT/2;
   if (Video::instance(1).mode() != 5) {
-    SDL_FillRect (m_layer[0], &rect, colour);
+    SDL_FillRect (m_layer[1], &rect, colour);
   }
   else
   {
@@ -436,6 +437,7 @@ void SDLhandler::clear()
       }
     }
   }
+  SDL_BlitSurface(m_layer[1], 0, m_layer[3], 0);
 
   drawGap();
 }
