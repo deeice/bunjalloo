@@ -32,6 +32,7 @@ class Toolbar;
 class ViewRender;
 class LinkHandler;
 class SearchEntry;
+class Stylus;
 
 /** Handle the displaying of HTML data.*/
 class View : public ViewI, public ButtonListener, public LinkListener
@@ -87,12 +88,11 @@ class View : public ViewI, public ButtonListener, public LinkListener
     FormControl * m_form;
     LinkHandler * m_linkHandler;
     SearchEntry * m_search;
+    Stylus * m_stylus;
     int m_preInputStartLine;
     bool m_dirty;
     std::string m_linkHref;
     int m_refreshing;
-    int m_lastX;
-    int m_lastY;
 
     void browse();
     void keyboard();

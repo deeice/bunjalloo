@@ -30,6 +30,7 @@
 #include "Toolbar.h"
 #include "ScrollPane.h"
 #include "SearchEntry.h"
+#include "Stylus.h"
 #include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
@@ -53,10 +54,9 @@ View::View(Document & doc, Controller & c):
   m_form(0),
   m_linkHandler(new LinkHandler(this)),
   m_search(0),
+  m_stylus(new Stylus),
   m_dirty(true),
-  m_refreshing(0),
-  m_lastX(0),
-  m_lastY(0)
+  m_refreshing(0)
 {
   m_scrollPane->setTopLevel();
   m_scrollPane->setLocation(0, 0);
@@ -82,6 +82,7 @@ View::~View()
   delete m_toolbar;
   delete m_linkHandler;
   delete m_search;
+  delete m_stylus;
 }
 
 void View::notify()
@@ -205,11 +206,15 @@ void View::browse()
   {
     m_document.setPosition( m_scrollPane->currentPosition());
   }
-  if (keys & KEY_TOUCH)
+
+  touchPosition tp = touchReadXY();
+  m_stylus->update(keys & KEY_TOUCH, tp.px, tp.py+SCREEN_HEIGHT);
+
+  if (m_stylus->clickType() == Stylus::CLICK)
   {
-    touchPosition tp = touchReadXY();
-    m_lastX = tp.px;
-    m_lastY = tp.py+SCREEN_HEIGHT;
+    int lastX, lastY;
+    m_stylus->startPoint(lastX, lastY);
+    m_stylus->reset();
 
     if (not m_keyboard->visible())
     {
@@ -219,15 +224,15 @@ void View::browse()
       }
       if ( m_linkHandler->visible())
       {
-        m_dirty = m_linkHandler->touch(m_lastX, m_lastY);
+        m_dirty = m_linkHandler->touch(lastX, lastY);
         if (m_dirty)
           return;
       }
     }
 
-    m_dirty = m_keyboard->touch(m_lastX, m_lastY);
+    m_dirty = m_keyboard->touch(lastX, lastY);
     if (not m_dirty) {
-      m_dirty = m_scrollPane->touch(m_lastX, m_lastY);
+      m_dirty = m_scrollPane->touch(lastX, lastY);
       if (m_dirty)
       {
         m_document.setPosition( m_scrollPane->currentPosition());
@@ -235,9 +240,10 @@ void View::browse()
     }
     if (m_keyboard->visible())
       m_toolbar->setVisible(false);
-    else if (not m_scrollPane-> scrollBarHit(m_lastX, m_lastY))
+    else if (not m_scrollPane-> scrollBarHit(lastX, lastY))
       m_toolbar->setVisible(true);
   }
+
   if (m_refreshing > 0)
   {
     m_refreshing--;
@@ -279,8 +285,10 @@ void View::linkClicked(Link * link)
   }
   else // isAnchor and isImage
   {
+    int lastX, lastY;
+    m_stylus->startPoint(lastX, lastY);
     m_linkHandler->setLink(link);
-    m_linkHandler->setLocation(m_lastX, m_lastY);
+    m_linkHandler->setLocation(lastX, lastY);
     m_linkHandler->setVisible();
   }
 }
