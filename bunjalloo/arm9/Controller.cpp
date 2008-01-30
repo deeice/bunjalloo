@@ -130,7 +130,7 @@ void Controller::saveAs(const char * fileName)
   if (nds::File::exists(cachedFile.c_str()) == nds::File::F_REG
       and nds::File::exists(fileName) == nds::File::F_NONE)
   {
-    bool ok = nds::File::cp(cachedFile.c_str(), fileName);
+    /*bool ok = */nds::File::cp(cachedFile.c_str(), fileName);
   }
 }
 
