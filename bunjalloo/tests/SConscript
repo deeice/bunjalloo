@@ -2,8 +2,6 @@ import glob, os.path
 Import('env')
 testEnv = env.Copy()
 
-# add bunjalloo lib - contains all testable code items except "Main.o"
-testEnv.Prepend(LIBS='bunjalloo')
 # unit tests need cppunit and dl
 testEnv.Append(LIBS=['cppunit','dl'])
 # add top level to lib path so that it "magically" searches in the right
