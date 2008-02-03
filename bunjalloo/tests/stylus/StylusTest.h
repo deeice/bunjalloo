@@ -24,11 +24,13 @@ class StylusTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST_SUITE( StylusTest );
   CPPUNIT_TEST( testClick );
   CPPUNIT_TEST( testHold );
+  CPPUNIT_TEST( testHoldAndMove );
   CPPUNIT_TEST_SUITE_END();
 
 public:
   void testClick();
   void testHold();
+  void testHoldAndMove();
 };
 
 #endif

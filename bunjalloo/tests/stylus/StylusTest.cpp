@@ -57,3 +57,39 @@ void StylusTest::testHold()
   CPPUNIT_ASSERT_EQUAL(Stylus::HELD, stylus.clickType());
 }
 
+void StylusTest::testHoldAndMove()
+{
+  Stylus stylus;
+  // unclick...
+  stylus.update(false, 1, 1);
+
+  // press...
+  stylus.update(true, 1, 1);
+  CPPUNIT_ASSERT_EQUAL(Stylus::WAFFLE, stylus.clickType());
+  int x, y;
+  stylus.startPoint(x, y);
+  CPPUNIT_ASSERT_EQUAL(1, x);
+  CPPUNIT_ASSERT_EQUAL(1, y);
+
+  // hold..
+  for (int i = 0; i < Stylus::HOLD_LIMIT; ++i)
+  {
+    stylus.update(true, i, i);
+  }
+  stylus.update(true, 99, 27);
+  stylus.startPoint(x, y);
+  CPPUNIT_ASSERT_EQUAL(1, x);
+  CPPUNIT_ASSERT_EQUAL(1, y);
+
+  stylus.endPoint(x, y);
+  CPPUNIT_ASSERT_EQUAL(99, x);
+  CPPUNIT_ASSERT_EQUAL(27, y);
+  CPPUNIT_ASSERT_EQUAL(Stylus::HELD, stylus.clickType());
+
+  // release
+  stylus.update(false, 1, 1);
+  CPPUNIT_ASSERT_EQUAL(Stylus::HELD, stylus.clickType());
+  stylus.endPoint(x, y);
+  CPPUNIT_ASSERT_EQUAL(99, x);
+  CPPUNIT_ASSERT_EQUAL(27, y);
+}
