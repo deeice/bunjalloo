@@ -40,7 +40,9 @@ static const int TOOLBAR_SEP(24);
 static const int TIMER_RESET(120);
 static const int TOOLBAR_SCREEN(0);
 
+// number of VRAM slots used per icon
 static const int TILES_PER_ICON(8);
+
 enum ToolbarIcon
 {
   ICON_BACK = 0,
@@ -50,18 +52,18 @@ enum ToolbarIcon
 
   ICON_BACK_DISABLE,
   ICON_FORWARD_DISABLE,
-  ICON_STOP_DISABLE,
+  ICON_PREFS,
   ICON_SPINNER,
 
   ICON_BOOKMARK,
   ICON_GO_URL,
-  ICON_UNUSED_1,
+  ICON_SEARCH,
   ICON_SAVE_AS,
 
   ICON_NOT_CONNECTED,
   ICON_CONNECTED,
   ICON_CONNECT_ERROR,
-  ICON_SPINNER_INACTIVE
+  ICON_HIDE_LEFT,
 
 };
 
@@ -69,8 +71,8 @@ enum ToolbarSpriteID
 {
   SPRITE_BACK,
   SPRITE_FORWARD,
-  SPRITE_STOP,
-  SPRITE_REFRESH,
+  SPRITE_STOP_REFRESH,
+  SPRITE_BOOKMARK,
 
   SPRITE_GO_URL,
   SPRITE_SAVE_AS,
@@ -273,11 +275,15 @@ void Toolbar::handlePress(int i)
     case SPRITE_FORWARD:
       m_controller.next();
       break;
-    case SPRITE_STOP:
-      m_controller.stop();
-      break;
-    case SPRITE_REFRESH:
-      m_controller.reload();
+    case SPRITE_STOP_REFRESH:
+      if (m_document.status() == Document::LOADED)
+      {
+        m_controller.reload();
+      }
+      else
+      {
+        m_controller.stop();
+      }
       break;
     case SPRITE_SAVE_AS:
       m_view.saveAs();
@@ -294,8 +300,8 @@ void Toolbar::updateIcons()
 {
   m_sprites[SPRITE_BACK]->setTile( TILES_PER_ICON * ( m_document.hasPreviousHistory() ? ICON_BACK: ICON_BACK_DISABLE));
   m_sprites[SPRITE_FORWARD]->setTile( TILES_PER_ICON * ( m_document.hasNextHistory() ? ICON_FORWARD: ICON_FORWARD_DISABLE));
-  m_sprites[SPRITE_STOP]->setTile( TILES_PER_ICON * ( m_document.status() != Document::LOADED ? ICON_STOP: ICON_STOP_DISABLE));
-  m_sprites[SPRITE_REFRESH]->setTile( TILES_PER_ICON * ICON_REFRESH);
+  m_sprites[SPRITE_STOP_REFRESH]->setTile( TILES_PER_ICON * ( m_document.status() != Document::LOADED ? ICON_STOP: ICON_REFRESH));
+  m_sprites[SPRITE_BOOKMARK]->setTile( TILES_PER_ICON * ICON_BOOKMARK);
   m_sprites[SPRITE_GO_URL]->setTile( TILES_PER_ICON * ICON_GO_URL);
   m_sprites[SPRITE_SAVE_AS]->setTile( TILES_PER_ICON * ICON_SAVE_AS);
   bool wifiInit = m_controller.wifiInitialised();
