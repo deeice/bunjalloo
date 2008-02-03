@@ -99,7 +99,7 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
 {
   nds::Video & main(nds::Video::instance(0));
   main.blend(nds::Video::BLDMOD_OBJECT, 0, nds::Video::BLDMOD_BG3);
-  main.setBlendAB(4,16);
+  main.setBlendAB(8,8);
   m_document.registerView(this);
   for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
   {
@@ -161,6 +161,7 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
       p.load(image.palette(), image.paletteSize()*2);
     }
   }
+  setHidden(false);
   updateIcons();
 }
 
@@ -222,6 +223,7 @@ void Toolbar::setVisible(bool visible)
 {
   m_visible = visible;
   for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setEnabled), m_visible));
+  m_sprites[SPRITE_SPINNER]->setEnabled( visible and (m_document.status() != Document::LOADED) );
   for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
 }
 
@@ -237,6 +239,7 @@ bool Toolbar::touch(int x, int y)
   }
   if (touchZone.hit(x, y))
   {
+    bool handled(false);
     int index = 0;
     for (SpriteVector::iterator it(m_sprites.begin());
         it != m_sprites.end();
@@ -247,14 +250,15 @@ bool Toolbar::touch(int x, int y)
       if (rect.hit(x, y))
       {
         handlePress(index);
+        handled = true;
       }
-      // if not hidden, only handle hide/show thing
+      // if hidden, only handle hide/show thing
       if (m_hidden and index)
       {
         break;
       }
     }
-    return true;
+    return handled;
   }
   return false;
 }
@@ -342,6 +346,7 @@ void Toolbar::tick()
       m_angle+=32;
       m_angle &= 0x1ff;
       nds::Sprite * spinner(m_sprites[SPRITE_SPINNER]);
+      spinner->setDoubleSize(false);
       spinner->setRotateScale(true);
       spinner->setRotate(1);
       u16 cosAng = COS[m_angle] / 16;
