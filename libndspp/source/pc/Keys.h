@@ -39,7 +39,7 @@ class Keys
     int keysRealKeyboard() const;
 
   private:
-    static const int KEY_COUNT = 14;
+    static const int KEY_COUNT = 13;
     static const SDLKey s_keyCodes[Keys::KEY_COUNT];
 
     unsigned int m_held;

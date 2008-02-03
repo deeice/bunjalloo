@@ -16,5 +16,6 @@ tests/parser/tester
 tests/uri/tester
 tests/utf8/tester
 tests/searcher/tester
+tests/stylus/tester
 walktree.pyc
 data/bunjalloo/cache

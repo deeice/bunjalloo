@@ -207,6 +207,8 @@ void View::browse()
     m_document.setPosition( m_scrollPane->currentPosition());
   }
 
+  // change to keys actually down, not repeating
+  keys = keysHeld();
   touchPosition tp = touchReadXY();
   m_stylus->update(keys & KEY_TOUCH, tp.px, tp.py+SCREEN_HEIGHT);
 
@@ -242,6 +244,11 @@ void View::browse()
       m_toolbar->setVisible(false);
     else if (not m_scrollPane-> scrollBarHit(lastX, lastY))
       m_toolbar->setVisible(true);
+  }
+  else if (m_stylus->clickType() == Stylus::HELD)
+  {
+    // show held menu...
+    m_stylus->reset();
   }
 
   if (m_refreshing > 0)

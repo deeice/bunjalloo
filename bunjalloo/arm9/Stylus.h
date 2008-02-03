@@ -8,6 +8,9 @@ class Stylus
 {
 
   public:
+    //! number of frames before a click turns into a hold.
+    const static int HOLD_LIMIT;
+
     /** Create the stylus object. */
     Stylus();
     /** End of its life.*/
@@ -17,6 +20,7 @@ class Stylus
     void reset();
 
     enum ClickType {
+      WAITING,        //!< Waiting for a new event.
       CANCEL,         //!< Cancelled the click, let go.
       WAFFLE,         //!< Still don't know what to do, will cancel.
       CLICK,          //!< Clicked normally (quick press and release).
@@ -52,6 +56,7 @@ class Stylus
     int m_startY;
     int m_lastX;
     int m_lastY;
+    int m_holding;
     ClickType m_state;
 
 };

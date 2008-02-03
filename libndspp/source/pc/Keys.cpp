@@ -32,6 +32,7 @@ const SDLKey Keys::s_keyCodes[Keys::KEY_COUNT] =
   SDLK_q,      // KEY_L 	  
   SDLK_a,      // KEY_X
   SDLK_s,      // KEY_Y
+  SDLK_UNKNOWN, // mouse btn
 };
 
 Keys::Keys():
@@ -119,15 +120,15 @@ void Keys::scan()
 
   if ( m_delay != 0 )
   {
-    if (m_held != m_heldLast) 
+    if (m_held != m_heldLast)
     {
       m_count = m_delay;
       m_heldRepeat = down();
     }
-    
+
     m_count--;
-    
-    if (m_count == 0) 
+
+    if (m_count == 0)
     {
       m_count = m_repeat;
       m_heldRepeat = m_held;
@@ -149,7 +150,6 @@ int Keys::repeat()
 {
   int tmp = m_heldRepeat;
   m_heldRepeat = 0;
-  m_keys[12] = false;
   return tmp;
 }
 
