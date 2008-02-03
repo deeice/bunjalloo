@@ -197,6 +197,7 @@ void Toolbar::layout()
     m_sprites[i]->setY(y);
   }
   setVisible();
+  setHidden(m_hidden);
 }
 
 static void deleteSprite(nds::Sprite * s)
@@ -397,6 +398,40 @@ void Toolbar::hideCursor()
   m_cursorSprite->update();
 }
 
+void Toolbar::setHiddenIconContract()
+{
+  nds::Sprite * hideToggle(m_sprites[SPRITE_HIDE]);
+  switch (m_position)
+  {
+    case LEFT:
+    case RIGHT:
+    case TOP:
+    case BOTTOM:
+      hideToggle->setX(0);
+      break;
+  }
+  hideToggle->setTranslucent(true);
+}
+
+void Toolbar::setHiddenIconExpand()
+{
+  nds::Sprite * hideToggle(m_sprites[SPRITE_HIDE]);
+  switch (m_position)
+  {
+    case LEFT:
+      hideToggle->setX(TOOLBAR_X_LEFT);
+      break;
+    case RIGHT:
+      hideToggle->setX(SCREEN_WIDTH - TOOLBAR_X_RIGHT);
+      break;
+    case TOP:
+    case BOTTOM:
+      hideToggle->setX(TOOLBAR_X);
+      break;
+  }
+  hideToggle->setTranslucent(false);
+}
+
 void Toolbar::setHidden(bool hidden)
 {
   for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setEnabled), !hidden));
@@ -407,13 +442,11 @@ void Toolbar::setHidden(bool hidden)
   hideToggle->setHflip(hidden);
   if (hidden)
   {
-    hideToggle->setX(0);
-    hideToggle->setTranslucent(true);
+    setHiddenIconContract();
   }
   else
   {
-    hideToggle->setX(TOOLBAR_X);
-    hideToggle->setTranslucent(false);
+    setHiddenIconExpand();
   }
   m_hidden = hidden;
 }

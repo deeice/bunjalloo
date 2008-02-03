@@ -73,5 +73,7 @@ class Toolbar: public ViewI
     void layout();
 
     void setHidden(bool hidden);
+    void setHiddenIconExpand();
+    void setHiddenIconContract();
 };
 #endif
