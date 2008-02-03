@@ -76,14 +76,14 @@ void Stylus::update(bool touch, int x, int y)
       m_state = CANCEL;
       return;
     }
-    if (m_holding == 0)
-    {
-      m_state = CANCEL;
-    }
-    else if (m_holding and (m_holding < HOLD_LIMIT))
+    if (m_holding and (m_holding < HOLD_LIMIT))
     {
       m_state = CLICK;
     }
-
+    else
+    {
+      m_state = CANCEL;
+      m_holding = 0;
+    }
   }
 }

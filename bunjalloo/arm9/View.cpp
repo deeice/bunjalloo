@@ -207,17 +207,39 @@ void View::browse()
     m_document.setPosition( m_scrollPane->currentPosition());
   }
 
-  // change to keys actually down, not repeating
-  keys = keysHeld();
-  touchPosition tp = touchReadXY();
-  m_stylus->update(keys & KEY_TOUCH, tp.px, tp.py+SCREEN_HEIGHT);
+  {
+    // change to keys actually down, not repeating
+    u16 held = keysHeld();
+    touchPosition tp = touchReadXY();
+    m_stylus->update(held & KEY_TOUCH, tp.px, tp.py+SCREEN_HEIGHT);
+  }
 
+  bool doClickCheck = false;
+  int lastX=-1, lastY=-1;
   if (m_stylus->clickType() == Stylus::CLICK)
   {
-    int lastX, lastY;
+    doClickCheck = true;
     m_stylus->startPoint(lastX, lastY);
     m_stylus->reset();
+  }
+  else if (m_stylus->clickType() == Stylus::HELD)
+  {
+    // show held menu...
+    bool hasRepeat = (keys & KEY_TOUCH);
+    m_stylus->startPoint(lastX, lastY);
+    // repeat has kicked in
+    doClickCheck = (hasRepeat and
+        (m_keyboard->visible() or m_scrollPane->scrollBarHit(lastX, lastY)));
+    if (doClickCheck and not m_keyboard->visible())
+    {
+      // must be scrollBarHit... allow scraping across the screen
+      int tmpx;
+      m_stylus->endPoint(tmpx, lastY);
+    }
+  }
 
+  if (doClickCheck)
+  {
     if (not m_keyboard->visible())
     {
       if ( m_toolbar->touch(lastX, lastY-SCREEN_HEIGHT) )
@@ -243,11 +265,7 @@ void View::browse()
     if (m_keyboard->visible())
       m_toolbar->setVisible(false);
   }
-  else if (m_stylus->clickType() == Stylus::HELD)
-  {
-    // show held menu...
-    m_stylus->reset();
-  }
+  // else --- add drag gestures, etc..
 
   if (m_refreshing > 0)
   {
