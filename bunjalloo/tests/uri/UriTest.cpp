@@ -241,6 +241,16 @@ void UriTest::testPort2()
   CPPUNIT_ASSERT_EQUAL( expectedServer, uri2.server());
   CPPUNIT_ASSERT_EQUAL( expectedPort, uri2.port());
 
+  // try breaking things
+  URI uri3("123.56.78.90/wherevr");
+  expectedPort = 80;
+  expectedServer = "123.56.78.90";
+  CPPUNIT_ASSERT_EQUAL( expectedServer, uri3.server());
+  CPPUNIT_ASSERT_EQUAL( expectedPort, uri3.port());
+  URI breakage(uri3.navigateTo("/search?q=label:c"));
+  string expectedFile("/search?q=label:c");
+  CPPUNIT_ASSERT_EQUAL( expectedServer, breakage.server());
+
 }
 
 void UriTest::testSpaces()

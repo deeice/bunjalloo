@@ -64,7 +64,7 @@ void URI::setUri(const std::string & uriString)
     if (tmpUri[sep+1] != '/')
     {
       // is it a port?
-      unsigned int nextSlash(tmpUri.find("/"));
+      unsigned int nextSlash(tmpUri.find("/", sep));
       if (nextSlash == string::npos) {
         sep = string::npos;
       } else {
