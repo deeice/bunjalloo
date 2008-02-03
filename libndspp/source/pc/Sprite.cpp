@@ -625,6 +625,11 @@ void Sprite::draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char
       {
         pix = pixelPair;
       }
+
+      if (hflip()) {
+	// horizontal tiles start at the end and work back
+        x = 7-i + xi*8;
+      }
       if (pix) {
         SDLhandler::instance().drawPixel(xPos+x, yPos+y, 2+m_screen, pix);
       }
@@ -659,7 +664,12 @@ void Sprite::render()
   {
     for (unsigned int x = 0; x < w/8; ++x)
     {
-      draw8x8Tile(xPos, yPos, x, y, (unsigned char*)&oamRam[position]);
+      int i = x;
+      if (hflip())
+      {
+        i = (w/8) - 1 - x;
+      }
+      draw8x8Tile(xPos, yPos, i, y, (unsigned char*)&oamRam[position]);
       position += 32;
     }
   }
