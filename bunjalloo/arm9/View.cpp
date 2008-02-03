@@ -220,7 +220,7 @@ void View::browse()
 
     if (not m_keyboard->visible())
     {
-      if ( m_toolbar->touch(tp.px, tp.py) )
+      if ( m_toolbar->touch(lastX, lastY-SCREEN_HEIGHT) )
       {
         return;
       }

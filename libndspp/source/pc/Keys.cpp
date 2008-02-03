@@ -68,6 +68,8 @@ void Keys::handleMouseEvent(SDL_MouseButtonEvent & event)
   else if (event.type == SDL_MOUSEBUTTONUP)
   {
     m_keys[12] = false;
+    m_touchX = 512;
+    m_touchY = 512;
   }
 }
 
