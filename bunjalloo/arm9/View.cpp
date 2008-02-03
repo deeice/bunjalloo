@@ -242,8 +242,6 @@ void View::browse()
     }
     if (m_keyboard->visible())
       m_toolbar->setVisible(false);
-    else if (not m_scrollPane-> scrollBarHit(lastX, lastY))
-      m_toolbar->setVisible(true);
   }
   else if (m_stylus->clickType() == Stylus::HELD)
   {
@@ -343,10 +341,12 @@ void View::tick()
     m_keyboard->setTitle(string2unicode(ENTER_TEXT_TITLE));
   }
   if (m_state == ENTER_URL and not m_keyboard->visible()) {
+    m_toolbar->setVisible(true);
     doEnterUrl();
   }
 
   if (m_state == SAVE_AS and not m_keyboard->visible()) {
+    m_toolbar->setVisible(true);
     doSaveAs();
   }
 

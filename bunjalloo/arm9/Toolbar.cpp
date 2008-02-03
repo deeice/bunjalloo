@@ -33,10 +33,10 @@ using nds::Wifi9;
 
 static const int TOOLBAR_Y(SCREEN_HEIGHT-17);
 static const int TOOLBAR_Y_VERT(5);
-static const int TOOLBAR_X(38);
+static const int TOOLBAR_X(18);
 static const int TOOLBAR_X_RIGHT(26);
 static const int TOOLBAR_X_LEFT(10);
-static const int TOOLBAR_SEP(24);
+static const int TOOLBAR_SEP(20);
 static const int TIMER_RESET(120);
 static const int TOOLBAR_SCREEN(0);
 
@@ -69,6 +69,8 @@ enum ToolbarIcon
 
 enum ToolbarSpriteID
 {
+  SPRITE_HIDE,
+
   SPRITE_BACK,
   SPRITE_FORWARD,
   SPRITE_STOP_REFRESH,
@@ -82,22 +84,22 @@ enum ToolbarSpriteID
   SPRITE_SPINNER,
 
   SPRITE_END_OF_ENTRIES,
+  SPRITE_CURSOR=SPRITE_END_OF_ENTRIES,
 
 };
 
 Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
   m_visible(false),
+  m_hidden(false),
   m_document(doc),
   m_controller(cont),
   m_view(view),
-  m_timerReset(TIMER_RESET),
-  m_timer(m_timerReset),
   m_angle(0),
   m_position(BOTTOM)
 {
   nds::Video & main(nds::Video::instance(0));
   main.blend(nds::Video::BLDMOD_OBJECT, 0, nds::Video::BLDMOD_BG3);
-  main.setBlendAB(16,4);
+  main.setBlendAB(4,16);
   m_document.registerView(this);
   for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
   {
@@ -160,8 +162,6 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
     }
   }
   updateIcons();
-  m_timerReset = 200;
-  m_controller.config().resource(Config::TOOLBAR_TIME, m_timerReset);
 }
 
 void Toolbar::layout()
@@ -195,7 +195,6 @@ void Toolbar::layout()
     m_sprites[i]->setX(x);
     m_sprites[i]->setY(y);
   }
-  m_timer = m_timerReset;
   setVisible();
 }
 
@@ -224,14 +223,6 @@ void Toolbar::setVisible(bool visible)
   m_visible = visible;
   for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setEnabled), m_visible));
   for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
-  if (m_visible)
-  {
-    m_timer = m_timerReset;
-  }
-  else
-  {
-    m_timer = 0;
-  }
 }
 
 bool Toolbar::touch(int x, int y)
@@ -246,7 +237,6 @@ bool Toolbar::touch(int x, int y)
   }
   if (touchZone.hit(x, y))
   {
-    m_timer = m_timerReset;
     int index = 0;
     for (SpriteVector::iterator it(m_sprites.begin());
         it != m_sprites.end();
@@ -258,6 +248,11 @@ bool Toolbar::touch(int x, int y)
       {
         handlePress(index);
       }
+      // if not hidden, only handle hide/show thing
+      if (m_hidden and index)
+      {
+        break;
+      }
     }
     return true;
   }
@@ -268,8 +263,10 @@ void Toolbar::handlePress(int i)
 {
   switch ((ToolbarSpriteID)i)
   {
+    case SPRITE_HIDE:
+      setHidden(!m_hidden);
+      break;
     case SPRITE_BACK:
-      m_sprites[SPRITE_BACK]->setTranslucent(true);
       m_controller.previous();
       break;
     case SPRITE_FORWARD:
@@ -298,12 +295,14 @@ void Toolbar::handlePress(int i)
 
 void Toolbar::updateIcons()
 {
+  m_sprites[SPRITE_HIDE]->setTile( TILES_PER_ICON * ICON_HIDE_LEFT);
   m_sprites[SPRITE_BACK]->setTile( TILES_PER_ICON * ( m_document.hasPreviousHistory() ? ICON_BACK: ICON_BACK_DISABLE));
   m_sprites[SPRITE_FORWARD]->setTile( TILES_PER_ICON * ( m_document.hasNextHistory() ? ICON_FORWARD: ICON_FORWARD_DISABLE));
   m_sprites[SPRITE_STOP_REFRESH]->setTile( TILES_PER_ICON * ( m_document.status() != Document::LOADED ? ICON_STOP: ICON_REFRESH));
   m_sprites[SPRITE_BOOKMARK]->setTile( TILES_PER_ICON * ICON_BOOKMARK);
   m_sprites[SPRITE_GO_URL]->setTile( TILES_PER_ICON * ICON_GO_URL);
   m_sprites[SPRITE_SAVE_AS]->setTile( TILES_PER_ICON * ICON_SAVE_AS);
+  m_sprites[SPRITE_SPINNER]->setTile( TILES_PER_ICON * ICON_SPINNER);
   bool wifiInit = m_controller.wifiInitialised();
   ToolbarIcon wifiIcon(ICON_NOT_CONNECTED);
   if (wifiInit)
@@ -329,19 +328,13 @@ void Toolbar::updateIcons()
   }
   m_sprites[SPRITE_CONNECT_STATUS]->setTile( TILES_PER_ICON * wifiIcon);
   m_sprites[SPRITE_SPINNER]->setEnabled( m_document.status() != Document::LOADED );
-  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setTranslucent), false));
+
+  m_sprites[SPRITE_HIDE]->setHflip(m_hidden);
+
 }
 
 void Toolbar::tick()
 {
-  if (m_timer)
-  {
-    m_timer--;
-    if (not m_timer)
-    {
-      setVisible(false);
-    }
-  }
   if (visible())
   {
     if (m_document.status() != Document::LOADED)
@@ -380,4 +373,42 @@ void Toolbar::cyclePosition()
       break;
   }
   layout();
+}
+
+void Toolbar::showCursor(int x, int y, int cursorid)
+{
+  // plonk a cursor at the given position
+  // coords in world space
+  y -= 192;
+  if (y < 0)
+    return;
+  m_cursorSprite->setEnabled();
+  m_cursorSprite->update();
+}
+
+void Toolbar::hideCursor()
+{
+  m_cursorSprite->setEnabled(false);
+  m_cursorSprite->update();
+}
+
+void Toolbar::setHidden(bool hidden)
+{
+  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setEnabled), !hidden));
+  m_sprites[SPRITE_SPINNER]->setEnabled( m_document.status() != Document::LOADED );
+  for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
+  nds::Sprite * hideToggle(m_sprites[SPRITE_HIDE]);
+  hideToggle->setEnabled();
+  hideToggle->setHflip(hidden);
+  if (hidden)
+  {
+    hideToggle->setX(0);
+    hideToggle->setTranslucent(true);
+  }
+  else
+  {
+    hideToggle->setX(TOOLBAR_X);
+    hideToggle->setTranslucent(false);
+  }
+  m_hidden = hidden;
 }

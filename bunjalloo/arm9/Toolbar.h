@@ -51,21 +51,27 @@ class Toolbar: public ViewI
 
     virtual void notify();
 
+    void showCursor(int x, int y, int cursorid);
+    void hideCursor();
+
   private:
+    // visible - ie. is showing
     bool m_visible;
+    // hidden - ie. not minimized
+    bool m_hidden;
     typedef std::vector<nds::Sprite * > SpriteVector;
     SpriteVector m_sprites;
+    nds::Sprite *  m_cursorSprite;
     Document & m_document;
     Controller & m_controller;
     View & m_view;
 
-    int m_timerReset;
-    int m_timer;
     int m_angle;
     Position m_position;
 
     void handlePress(int i);
     void layout();
 
+    void setHidden(bool hidden);
 };
 #endif
