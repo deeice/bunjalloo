@@ -26,9 +26,11 @@ typedef std::basic_string<unicodeint> UnicodeString;
 
 /** Convert a Unicode string to a regular char string, by "escaping" Unicode characters.
  * @param ustr the Unicode string to convert.
+ * @param byteencode encode to UTF8 bytes. If false, then non-ASCII characters
+ *                          are encoded in HTML escape format (%8F, etc)
  * @return the char string with any Unicode characters escaped to hex values.
  */
-std::string unicode2string(const UnicodeString & ustr);
+std::string unicode2string(const UnicodeString & ustr, bool byteencode=false);
 
 /** Convert a char string to a Unicode one.
  * @param str the char string to convert.

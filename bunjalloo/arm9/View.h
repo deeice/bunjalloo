@@ -17,6 +17,7 @@
 #ifndef View_h_seen
 #define View_h_seen
 
+#include <string>
 #include "ViewI.h"
 #include "ButtonListener.h"
 #include "LinkListener.h"
@@ -24,15 +25,17 @@
 class Document;
 class Controller;
 
+class BookmarkToolbar;
+class BrowseToolbar;
 class FormControl;
 class Keyboard;
+class LinkHandler;
 class ScrollPane;
+class SearchEntry;
+class Stylus;
 class TextField;
 class Toolbar;
 class ViewRender;
-class LinkHandler;
-class SearchEntry;
-class Stylus;
 
 /** Handle the displaying of HTML data.*/
 class View : public ViewI, public ButtonListener, public LinkListener
@@ -63,17 +66,30 @@ class View : public ViewI, public ButtonListener, public LinkListener
      */
     virtual void linkClicked(Link * link);
 
+    /** The user wants to enter a URL. Set up URL entering mode.
+     */
     void enterUrl();
+
+    /** User wants to bookmark a URL or show the bookmark page.
+     */
+    void bookmarkUrl();
+
+    /** Add the current page to the bookmarks.
+     */
+    void bookmarkCurrentPage();
 
     /** Save the current page as...  */
     void saveAs();
 
+    /** Exit bookmark mode.. */
+    void endBookmark();
   private:
 
     enum InputState
     {
       BROWSE,
       ENTER_URL,
+      BOOKMARK,
       SAVE_AS
     };
 
@@ -83,6 +99,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     Keyboard * m_keyboard;
     ViewRender * m_renderer;
     TextField * m_addressBar;
+    BrowseToolbar * m_browseToolbar;
+    BookmarkToolbar * m_bookmarkToolbar;
     Toolbar * m_toolbar;
     InputState m_state;
     FormControl * m_form;
@@ -93,6 +111,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     bool m_dirty;
     std::string m_linkHref;
     int m_refreshing;
+    // store the title of the page to bookmark..
+    std::string m_bookmarkTitleUtf8;
 
     void browse();
     void keyboard();
@@ -100,5 +120,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void doEnterUrl();
     void doSaveAs();
 
+    void showBookmarkPage();
+    // extract the page title for bookmark hack
+    void extractTitle();
 };
 #endif

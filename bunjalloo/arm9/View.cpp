@@ -17,20 +17,22 @@
 #include <libgen.h>
 #include "ndspp.h"
 #include "libnds.h"
+#include "BrowseToolbar.h"
+#include "BookmarkToolbar.h"
 #include "Canvas.h"
 #include "Config.h"
 #include "Controller.h"
 #include "Document.h"
 #include "File.h"
 #include "FormControl.h"
+#include "HtmlElement.h"
 #include "Keyboard.h"
 #include "Link.h"
 #include "LinkHandler.h"
-#include "TextField.h"
-#include "Toolbar.h"
 #include "ScrollPane.h"
 #include "SearchEntry.h"
 #include "Stylus.h"
+#include "TextField.h"
 #include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
@@ -41,6 +43,7 @@ const static char * ENTER_URL_TITLE("Enter a web site address:");
 const static char * SAVE_AS_TITLE("Enter a file name:");
 const static char * ENTER_TEXT_TITLE("Enter some text:");
 const static int STEP(1);
+const static char * BOOKMARK_FILE  = "/"DATADIR"/user/bookmarks.html";
 
 View::View(Document & doc, Controller & c):
   m_document(doc),
@@ -49,7 +52,9 @@ View::View(Document & doc, Controller & c):
   m_keyboard(new Keyboard),
   m_renderer(new ViewRender(this)),
   m_addressBar(new TextField(UnicodeString())),
-  m_toolbar(new Toolbar(doc, c, *this)),
+  m_browseToolbar(new BrowseToolbar(doc, c, *this)),
+  m_bookmarkToolbar(new BookmarkToolbar(doc, c, *this)),
+  m_toolbar(m_browseToolbar),
   m_state(BROWSE),
   m_form(0),
   m_linkHandler(new LinkHandler(this)),
@@ -66,7 +71,7 @@ View::View(Document & doc, Controller & c):
   m_keyboard->setTitle(string2unicode(ENTER_TEXT_TITLE));
   m_document.registerView(this);
   keysSetRepeat( 10, 5 );
-  m_toolbar->setVisible();
+  m_toolbar->setVisible(true);
   string searchFile;
   if (m_controller.config().resource(Config::SEARCHFILE_STR,searchFile))
   {
@@ -79,10 +84,31 @@ View::~View()
   delete m_keyboard;
   delete m_renderer;
   delete m_addressBar;
-  delete m_toolbar;
+  delete m_browseToolbar;
+  delete m_bookmarkToolbar;
   delete m_linkHandler;
   delete m_search;
   delete m_stylus;
+}
+
+void View::extractTitle()
+{
+  // use title text..
+  // extract the title from the document
+  // only allow bookmarking of html? no, allow any old crap - firefox does.
+  // so, extract either the title, or the basename (remove cgi stuff?)
+  const HtmlElement * title = m_document.titleNode();
+  if (title)
+  {
+    const UnicodeString & titleText = title->firstChild()->text();
+    m_bookmarkTitleUtf8 = unicode2string(titleText, true);
+  }
+  else
+  {
+    URI tmpUri(m_document.uri());
+    m_bookmarkTitleUtf8 = tmpUri.fileName();
+    m_bookmarkTitleUtf8 = nds::File::base(m_bookmarkTitleUtf8.c_str());
+  }
 }
 
 void View::notify()
@@ -140,6 +166,77 @@ void View::enterUrl()
   m_toolbar->setVisible(false);
   m_state = ENTER_URL;
   m_dirty = true;
+}
+
+void View::endBookmark()
+{
+  m_state = BROWSE;
+  m_document.setHistoryEnabled(false);
+  if (m_linkHref.empty())
+    m_linkHref = m_document.uri();
+  m_document.setHistoryEnabled(true);
+
+  m_toolbar->setVisible(false);
+  m_toolbar = m_browseToolbar;
+  m_toolbar->setVisible(true);
+}
+
+void View::bookmarkUrl()
+{
+  // Add a line to the file DATADIR/userdata/bookmarks.html
+  m_toolbar->setVisible(false);
+  m_toolbar = m_bookmarkToolbar;
+  m_toolbar->setVisible(true);
+  m_state = BOOKMARK;
+  // extract the *current* title
+  extractTitle();
+  showBookmarkPage();
+}
+
+void View::showBookmarkPage()
+{
+  m_document.setHistoryEnabled(false);
+  if (nds::File::exists(BOOKMARK_FILE) == nds::File::F_NONE)
+  {
+    // create it
+    nds::File bookmarks;
+    // doesn't exist, so write out the header...
+    bookmarks.open(BOOKMARK_FILE, "w");
+    if (not bookmarks.is_open()) {
+      // that's unpossible!
+      return;
+    }
+    const static string header("<META HTTP-EQUIV='Content-Type' CONTENT='text/html; charset=UTF-8'><TITLE>Bookmarks</TITLE>\n");
+    bookmarks.write(header.c_str(), header.length());
+  }
+  string bookmarkUrl("file://");
+  bookmarkUrl += BOOKMARK_FILE;
+  m_controller.doUri(bookmarkUrl);
+  m_document.setHistoryEnabled(true);
+}
+
+void View::bookmarkCurrentPage()
+{
+  {
+    nds::File bookmarks;
+    // OK - add to the bm file
+    bookmarks.open(BOOKMARK_FILE, "a");
+    if (bookmarks.is_open())
+    {
+      // write out "<a href=%1>%2</a>" 1=href 2=title
+      string href("<a href='");
+      bookmarks.write(href.c_str(), href.length());
+      const string & uri(m_document.uri());
+      bookmarks.write(uri.c_str(), uri.length());
+      href = "'>";
+      bookmarks.write(href.c_str(), href.length());
+      // output titleText to bookmarks
+      bookmarks.write(m_bookmarkTitleUtf8.c_str(), m_bookmarkTitleUtf8.length());
+      href = "</a><br>\n";
+      bookmarks.write(href.c_str(), href.length());
+    }
+  }
+  showBookmarkPage();
 }
 
 void View::saveAs()
@@ -340,6 +437,16 @@ void View::tick()
     case SAVE_AS:
       keyboard();
       break;
+    case BOOKMARK:
+      // have a page of bookmarks or what?
+      // need to be able to
+      // 1) jump to bookmark
+      // 2) edit bookmark
+      // 3) add current page easily
+      // 4) add any page
+      // for now cheap solution: have an Add button and change the Toolbar state.
+      browse();
+      break;
   }
   m_dirty |= m_keyboard->tick();
   m_toolbar->tick();
@@ -371,6 +478,11 @@ void View::tick()
   // clicked a link:
   if (not m_linkHref.empty()) {
     URI uri(m_document.uri());
+    if (m_state == BOOKMARK)
+    {
+      endBookmark();
+      uri = m_linkHref;
+    }
     string tmp(m_linkHref);
     m_linkHref = "";
     // cout << "Navigated to " << m_linkHref << endl;

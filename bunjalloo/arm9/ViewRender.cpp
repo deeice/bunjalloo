@@ -182,8 +182,6 @@ bool ViewRender::applyFormat(const HtmlElement * element)
   if (not element->text().empty())
   {
     textArea()->appendText(element->text());
-    // and clear the text.
-    element->clearText();
   }
   else if (element->isa(HtmlConstants::SCRIPT_TAG) or element->isa(HtmlConstants::STYLE_TAG))
   {
@@ -356,7 +354,7 @@ void ViewRender::render()
   {
     assert(root->isa(HtmlConstants::HTML_TAG));
     assert(root->hasChildren());
-    doTitle(root->firstChild());
+    doTitle(m_self->m_document.titleNode());
 
     const HtmlElement * body = root->lastChild();
     if (body->hasChildren())
@@ -376,17 +374,15 @@ void ViewRender::render()
   }
 }
 
-void ViewRender::doTitle(const HtmlElement * head)
+void ViewRender::doTitle(const HtmlElement * title)
 {
-  const ElementList titles = head->elementsByTagName(HtmlConstants::TITLE_TAG);
-  if (not titles.empty())
+  if (title)
   {
     m_textArea = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
     m_textArea->setCentred();
     m_textArea->setOutlined();
     m_textArea->setSize(nds::Canvas::instance().width()-7, m_textArea->font().height());
     m_self->m_scrollPane->add(m_textArea);
-    const HtmlElement * title =  titles.front();
     const HtmlElement * titleText = title->firstChild();
     applyFormat(titleText);
     m_textArea = 0;

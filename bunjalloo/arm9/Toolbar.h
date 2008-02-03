@@ -19,6 +19,7 @@
 
 #include <vector>
 #include "Sprite.h"
+#include "ViewI.h"
 
 class Document;
 class Controller;
@@ -35,45 +36,82 @@ class Toolbar: public ViewI
       RIGHT
     };
 
-    Toolbar(Document & doc, Controller & cont, View & view);
-    ~Toolbar();
+    /** Icon positions in the toolbar image. */
+    enum ToolbarIcon
+    {
+      ICON_BACK = 0,
+      ICON_FORWARD,
+      ICON_STOP,
+      ICON_REFRESH,
+
+      ICON_BACK_DISABLE,
+      ICON_FORWARD_DISABLE,
+      ICON_PREFS,
+      ICON_SPINNER,
+
+      ICON_BOOKMARK,
+      ICON_GO_URL,
+      ICON_SEARCH,
+      ICON_SAVE_AS,
+
+      ICON_NOT_CONNECTED,
+      ICON_CONNECTED,
+      ICON_CONNECT_ERROR,
+      ICON_HIDE_LEFT,
+      ICON_ADD_BOOKMARK,
+
+    };
+    static const int TILES_PER_ICON;
+    static const int TOOLBAR_X;
+    static const int TOOLBAR_X_RIGHT;
+    static const int TOOLBAR_X_LEFT;
+    static const int TOOLBAR_SEP;
+
+    Toolbar(Document & doc, Controller & cont, View & view, int entries);
+    virtual ~Toolbar();
 
     bool visible() const;
-    void setVisible(bool visible=true);
+    virtual void setVisible(bool visible);
 
-    void tick();
+    /** Callback for each frame animation. */
+    virtual void tick() = 0;
+    virtual void updateIcons() = 0;
 
     bool touch(int x, int y);
 
-    void updateIcons();
 
     void cyclePosition();
 
-    virtual void notify();
 
     void showCursor(int x, int y, int cursorid);
     void hideCursor();
 
-  private:
-    // visible - ie. is showing
-    bool m_visible;
-    // hidden - ie. not minimized
-    bool m_hidden;
-    typedef std::vector<nds::Sprite * > SpriteVector;
-    SpriteVector m_sprites;
-    nds::Sprite *  m_cursorSprite;
+    //! Implement ViewI
+    virtual void notify();
+
+    Position position() const;
+
+  protected:
     Document & m_document;
     Controller & m_controller;
     View & m_view;
+    typedef std::vector<nds::Sprite * > SpriteVector;
+    SpriteVector m_sprites;
 
-    int m_angle;
+    virtual void handlePress(int i) = 0;
+    virtual void layout();
+
+  private:
+    //VRAM initialisation - done just the once.
+    static bool s_haveInitialised;
+    static void initSpriteData(unsigned short * oamData);
+
+    // visible - ie. is showing
+    bool m_visible;
+    nds::Sprite *  m_cursorSprite;
+
     Position m_position;
 
-    void handlePress(int i);
-    void layout();
 
-    void setHidden(bool hidden);
-    void setHiddenIconExpand();
-    void setHiddenIconContract();
 };
 #endif

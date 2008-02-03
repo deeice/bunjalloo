@@ -22,7 +22,7 @@
 #define sprintf_platform sprintf
 #endif
 
-std::string unicode2string(const UnicodeString & ustr)
+std::string unicode2string(const UnicodeString & ustr, bool byteencode)
 {
   std::string str;
   UnicodeString::const_iterator it(ustr.begin());
@@ -38,10 +38,17 @@ std::string unicode2string(const UnicodeString & ustr)
       char buffer[4];
       for (int i = 0; i < used; ++i)
       {
-        // convert to %hex
-        str += '%';
-        sprintf_platform(buffer, "%02X", encoded[i]);
-        str += buffer;
+        if (byteencode)
+        {
+          str += (char)encoded[i];
+        }
+        else
+        {
+          // convert to %hex
+          str += '%';
+          sprintf_platform(buffer, "%02X", encoded[i]);
+          str += buffer;
+        }
       }
     }
   }

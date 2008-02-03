@@ -33,82 +33,25 @@ using nds::Wifi9;
 
 static const int TOOLBAR_Y(SCREEN_HEIGHT-17);
 static const int TOOLBAR_Y_VERT(5);
-static const int TOOLBAR_X(18);
-static const int TOOLBAR_X_RIGHT(26);
-static const int TOOLBAR_X_LEFT(10);
-static const int TOOLBAR_SEP(20);
+const int Toolbar::TOOLBAR_X(18);
+const int Toolbar::TOOLBAR_X_RIGHT(26);
+const int Toolbar::TOOLBAR_X_LEFT(10);
+const int Toolbar::TOOLBAR_SEP(20);
 static const int TIMER_RESET(120);
 static const int TOOLBAR_SCREEN(0);
 
 // number of VRAM slots used per icon
-static const int TILES_PER_ICON(8);
+const int Toolbar::TILES_PER_ICON(8);
 
-enum ToolbarIcon
+bool Toolbar::s_haveInitialised(false);
+void Toolbar::initSpriteData(unsigned short * oamData)
 {
-  ICON_BACK = 0,
-  ICON_FORWARD,
-  ICON_STOP,
-  ICON_REFRESH,
+  if (s_haveInitialised)
+    return;
 
-  ICON_BACK_DISABLE,
-  ICON_FORWARD_DISABLE,
-  ICON_PREFS,
-  ICON_SPINNER,
-
-  ICON_BOOKMARK,
-  ICON_GO_URL,
-  ICON_SEARCH,
-  ICON_SAVE_AS,
-
-  ICON_NOT_CONNECTED,
-  ICON_CONNECTED,
-  ICON_CONNECT_ERROR,
-  ICON_HIDE_LEFT,
-
-};
-
-enum ToolbarSpriteID
-{
-  SPRITE_HIDE,
-
-  SPRITE_BACK,
-  SPRITE_FORWARD,
-  SPRITE_STOP_REFRESH,
-  SPRITE_BOOKMARK,
-
-  SPRITE_GO_URL,
-  SPRITE_SAVE_AS,
-
-  SPRITE_CONNECT_STATUS,
-
-  SPRITE_SPINNER,
-
-  SPRITE_END_OF_ENTRIES,
-  SPRITE_CURSOR=SPRITE_END_OF_ENTRIES,
-
-};
-
-Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
-  m_visible(false),
-  m_hidden(false),
-  m_document(doc),
-  m_controller(cont),
-  m_view(view),
-  m_angle(0),
-  m_position(BOTTOM)
-{
   nds::Video & main(nds::Video::instance(0));
   main.blend(nds::Video::BLDMOD_OBJECT, 0, nds::Video::BLDMOD_BG3);
   main.setBlendAB(8,8);
-  m_document.registerView(this);
-  for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
-  {
-    // would be 4 tiles per sprite (16x16 = 4*8x8)
-    // but the tile count is for 4bpp tiles, 256 color 8bpp require twice as much vram.
-    nds::Sprite * sprite(new nds::Sprite(TOOLBAR_SCREEN, 16, 16, i*TILES_PER_ICON, 256));
-    m_sprites.push_back(sprite);
-  }
-  layout();
 
   Image image("/"DATADIR"/fonts/toolbar.png", true);
   if (image.isValid())
@@ -116,8 +59,6 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
     const unsigned short * data = image.data();
     if (data)
     {
-      unsigned short * oamData = m_sprites.front()->oamData();
-
       // need to load in 16x16 tile order
       int bytesPerRow = image.width();
       int tiles16x = image.width() / 16;
@@ -161,13 +102,31 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view):
       p.load(image.palette(), image.paletteSize()*2);
     }
   }
-  setHidden(false);
-  updateIcons();
+  s_haveInitialised = true;
+}
+
+Toolbar::Toolbar(Document & doc, Controller & cont, View & view, int entries):
+  m_document(doc),
+  m_controller(cont),
+  m_view(view),
+  m_visible(false),
+  m_position(BOTTOM)
+{
+  m_document.registerView(this);
+  for (int i = 0; i < entries; i++)
+  {
+    // would be 4 tiles per sprite (16x16 = 4*8x8)
+    // but the tile count is for 4bpp tiles, 256 color 8bpp require twice as much vram.
+    nds::Sprite * sprite(new nds::Sprite(TOOLBAR_SCREEN, 16, 16, i*TILES_PER_ICON, 256));
+    m_sprites.push_back(sprite);
+  }
+  initSpriteData(m_sprites.front()->oamData());
+  layout();
 }
 
 void Toolbar::layout()
 {
-  for (int i = 0; i < SPRITE_END_OF_ENTRIES; i++)
+  for (unsigned int i = 0; i < m_sprites.size(); i++)
   {
     int x, y;
     switch (m_position)
@@ -196,8 +155,7 @@ void Toolbar::layout()
     m_sprites[i]->setX(x);
     m_sprites[i]->setY(y);
   }
-  setVisible();
-  setHidden(m_hidden);
+  setVisible(true);
 }
 
 static void deleteSprite(nds::Sprite * s)
@@ -220,19 +178,19 @@ bool Toolbar::visible() const
 {
   return m_visible;
 }
+
 void Toolbar::setVisible(bool visible)
 {
   m_visible = visible;
-  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setEnabled), m_visible));
-  m_sprites[SPRITE_SPINNER]->setEnabled( visible and (m_document.status() != Document::LOADED) );
-  for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
 }
 
 bool Toolbar::touch(int x, int y)
 {
-  nds::Rectangle touchZone = { m_sprites[0]->x(), m_sprites[0]->y(),
-    m_sprites[SPRITE_END_OF_ENTRIES-1]->x() - m_sprites[0]->x() + m_sprites[0]->width(),
-    m_sprites[SPRITE_END_OF_ENTRIES-1]->y() - m_sprites[0]->y() + m_sprites[0]->height()
+  nds::Sprite * first(m_sprites.front());
+  nds::Sprite * last(m_sprites.back());
+  nds::Rectangle touchZone = { first->x(), first->y(),
+    last->x() - first->x() + first->width(),
+    last->y() - first->y() + first->height()
     };
   if (not visible())
   {
@@ -248,15 +206,10 @@ bool Toolbar::touch(int x, int y)
     {
       nds::Sprite * sprite(*it);
       nds::Rectangle rect = { sprite->x(), sprite->y(), sprite->width(), sprite->height() };
-      if (rect.hit(x, y))
+      if (sprite->enabled() and rect.hit(x, y))
       {
         handlePress(index);
         handled = true;
-      }
-      // if hidden, only handle hide/show thing
-      if (m_hidden and index)
-      {
-        break;
       }
     }
     return handled;
@@ -264,99 +217,6 @@ bool Toolbar::touch(int x, int y)
   return false;
 }
 
-void Toolbar::handlePress(int i)
-{
-  switch ((ToolbarSpriteID)i)
-  {
-    case SPRITE_HIDE:
-      setHidden(!m_hidden);
-      break;
-    case SPRITE_BACK:
-      m_controller.previous();
-      break;
-    case SPRITE_FORWARD:
-      m_controller.next();
-      break;
-    case SPRITE_STOP_REFRESH:
-      if (m_document.status() == Document::LOADED)
-      {
-        m_controller.reload();
-      }
-      else
-      {
-        m_controller.stop();
-      }
-      break;
-    case SPRITE_SAVE_AS:
-      m_view.saveAs();
-      break;
-    case SPRITE_GO_URL:
-      m_view.enterUrl();
-      break;
-    default:
-      break;
-  }
-}
-
-void Toolbar::updateIcons()
-{
-  m_sprites[SPRITE_HIDE]->setTile( TILES_PER_ICON * ICON_HIDE_LEFT);
-  m_sprites[SPRITE_BACK]->setTile( TILES_PER_ICON * ( m_document.hasPreviousHistory() ? ICON_BACK: ICON_BACK_DISABLE));
-  m_sprites[SPRITE_FORWARD]->setTile( TILES_PER_ICON * ( m_document.hasNextHistory() ? ICON_FORWARD: ICON_FORWARD_DISABLE));
-  m_sprites[SPRITE_STOP_REFRESH]->setTile( TILES_PER_ICON * ( m_document.status() != Document::LOADED ? ICON_STOP: ICON_REFRESH));
-  m_sprites[SPRITE_BOOKMARK]->setTile( TILES_PER_ICON * ICON_BOOKMARK);
-  m_sprites[SPRITE_GO_URL]->setTile( TILES_PER_ICON * ICON_GO_URL);
-  m_sprites[SPRITE_SAVE_AS]->setTile( TILES_PER_ICON * ICON_SAVE_AS);
-  m_sprites[SPRITE_SPINNER]->setTile( TILES_PER_ICON * ICON_SPINNER);
-  bool wifiInit = m_controller.wifiInitialised();
-  ToolbarIcon wifiIcon(ICON_NOT_CONNECTED);
-  if (wifiInit)
-  {
-    switch ( Wifi9::instance().status() )
-    {
-      case Wifi9::CANNOTCONNECT:
-        wifiIcon = ICON_CONNECT_ERROR;
-        break;
-
-      case Wifi9::SEARCHING:
-      case Wifi9::AUTHENTICATING:
-      case Wifi9::ASSOCIATING:
-      case Wifi9::ACQUIRINGDHCP:
-      case Wifi9::ASSOCIATED:
-        wifiIcon = ICON_CONNECTED;
-        break;
-
-      case Wifi9::DISCONNECTED :
-        wifiIcon = ICON_NOT_CONNECTED;
-        break;
-    }
-  }
-  m_sprites[SPRITE_CONNECT_STATUS]->setTile( TILES_PER_ICON * wifiIcon);
-  m_sprites[SPRITE_SPINNER]->setEnabled( m_document.status() != Document::LOADED );
-
-  m_sprites[SPRITE_HIDE]->setHflip(m_hidden);
-
-}
-
-void Toolbar::tick()
-{
-  if (visible())
-  {
-    if (m_document.status() != Document::LOADED)
-    {
-      m_angle+=32;
-      m_angle &= 0x1ff;
-      nds::Sprite * spinner(m_sprites[SPRITE_SPINNER]);
-      spinner->setDoubleSize(false);
-      spinner->setRotateScale(true);
-      spinner->setRotate(1);
-      u16 cosAng = COS[m_angle] / 16;
-      u16 sinAng = SIN[m_angle] / 16;
-      spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
-    }
-    for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
-  }
-}
 
 void Toolbar::cyclePosition()
 {
@@ -398,55 +258,7 @@ void Toolbar::hideCursor()
   m_cursorSprite->update();
 }
 
-void Toolbar::setHiddenIconContract()
+Toolbar::Position Toolbar::position() const
 {
-  nds::Sprite * hideToggle(m_sprites[SPRITE_HIDE]);
-  switch (m_position)
-  {
-    case LEFT:
-    case RIGHT:
-    case TOP:
-    case BOTTOM:
-      hideToggle->setX(0);
-      break;
-  }
-  hideToggle->setTranslucent(true);
-}
-
-void Toolbar::setHiddenIconExpand()
-{
-  nds::Sprite * hideToggle(m_sprites[SPRITE_HIDE]);
-  switch (m_position)
-  {
-    case LEFT:
-      hideToggle->setX(TOOLBAR_X_LEFT);
-      break;
-    case RIGHT:
-      hideToggle->setX(SCREEN_WIDTH - TOOLBAR_X_RIGHT);
-      break;
-    case TOP:
-    case BOTTOM:
-      hideToggle->setX(TOOLBAR_X);
-      break;
-  }
-  hideToggle->setTranslucent(false);
-}
-
-void Toolbar::setHidden(bool hidden)
-{
-  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setEnabled), !hidden));
-  m_sprites[SPRITE_SPINNER]->setEnabled( m_document.status() != Document::LOADED );
-  for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
-  nds::Sprite * hideToggle(m_sprites[SPRITE_HIDE]);
-  hideToggle->setEnabled();
-  hideToggle->setHflip(hidden);
-  if (hidden)
-  {
-    setHiddenIconContract();
-  }
-  else
-  {
-    setHiddenIconExpand();
-  }
-  m_hidden = hidden;
+  return m_position;
 }

@@ -50,7 +50,7 @@ class ViewRender
     void renderSelect(const HtmlElement * body);
     void doImage(const UnicodeString & unicode,
         const UnicodeString & src);
-    void doTitle(const HtmlElement * head);
+    void doTitle(const HtmlElement * title);
     void renderInput(const HtmlElement * inputElement);
     void renderTextArea(const HtmlElement * inputElement);
     void clearRadioGroups();

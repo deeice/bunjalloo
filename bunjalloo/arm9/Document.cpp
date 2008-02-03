@@ -14,8 +14,10 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <assert.h>
 #include "Document.h"
 #include "HtmlDocument.h"
+#include "HtmlConstants.h"
 #include "HeaderParser.h"
 #include "HtmlElement.h"
 #include "CookieJar.h"
@@ -27,7 +29,8 @@ Document::Document():
   m_amount(0),
   m_cookieJar(new CookieJar),
   m_htmlDocument(new HtmlDocument),
-  m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar))
+  m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar)),
+  m_historyEnabled(true)
 {
   m_history.clear();
   m_historyPosition = m_history.begin();
@@ -44,9 +47,9 @@ Document::~Document()
 void Document::setUri(const std::string & uriString)
 {
   // m_uri = uriString;
-  if (m_history.empty() or uriString != currentHistoryUri())
+  if (m_historyEnabled and (m_history.empty() or uriString != currentHistoryUri()))
   {
-    // refreshing the same page
+    // not refreshing the same page
     HistoryVector::iterator currPosition(m_historyPosition);
     if (hasNextHistory()) {
       ++currPosition;
@@ -65,6 +68,11 @@ void Document::setUri(const std::string & uriString)
     printf("%s\n",it->c_str());
   }
 #endif
+}
+
+void Document::setHistoryEnabled(bool enable)
+{
+  m_historyEnabled = enable;
 }
 
 const std::string & Document::uri() const
@@ -88,6 +96,24 @@ const HtmlElement * Document::rootNode() const
 {
   // m_htmlDocument->dumpDOM();
   return m_htmlDocument->rootNode();
+}
+
+const HtmlElement * Document::titleNode() const
+{
+  const HtmlElement * title(0);
+  if (m_htmlDocument->mimeType() == HtmlDocument::TEXT_HTML)
+  {
+    const HtmlElement * root(rootNode());
+    assert(root->isa(HtmlConstants::HTML_TAG));
+    assert(root->hasChildren());
+    // firstChild is <HEAD> node
+    const ElementList titles = root->firstChild()->elementsByTagName(HtmlConstants::TITLE_TAG);
+    if (not titles.empty())
+    {
+      title = titles.front();
+    }
+  }
+  return title;
 }
 
 void Document::reset()
@@ -197,7 +223,9 @@ std::string Document::gotoPreviousHistory()
 {
   if (hasPreviousHistory())
   {
-    --m_historyPosition;
+    if (m_historyEnabled) {
+      --m_historyPosition;
+    }
     return currentHistoryUri();
   }
   return "";
@@ -207,7 +235,9 @@ std::string Document::gotoNextHistory()
 {
   if (hasNextHistory())
   {
-    ++m_historyPosition;
+    if (m_historyEnabled) {
+      ++m_historyPosition;
+    }
     return currentHistoryUri();
   }
   return "";

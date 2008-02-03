@@ -73,6 +73,11 @@ class Document
      */
     const HtmlElement * rootNode() const;
 
+    /** Get the title node of the document model.
+     * @return The title node, or 0 if not available.
+     */
+    const HtmlElement * titleNode() const;
+
     CookieJar * cookieJar() const;
 
     /** Get the status of the document.
@@ -154,6 +159,8 @@ class Document
      */
     int position() const;
 
+    //! Set whether a URI update changes the history or not
+    void setHistoryEnabled(bool enable);
   private:
     //std::string m_uri;
     Status m_status;
@@ -166,6 +173,7 @@ class Document
     typedef std::pair<std::string, int> HistoryEntry;
     typedef std::vector<HistoryEntry> HistoryVector;
 
+    bool m_historyEnabled;
     HistoryVector m_history;
     HistoryVector::iterator m_historyPosition;
 
