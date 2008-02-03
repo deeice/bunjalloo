@@ -36,6 +36,7 @@ class ParserTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( testNumbers );
   CPPUNIT_TEST( testGzip );
   CPPUNIT_TEST( testNewline );
+  CPPUNIT_TEST( testBogusComment );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -53,6 +54,7 @@ public:
   void testNumbers();
   void testGzip();
   void testNewline();
+  void testBogusComment();
 
   void readFile(const char * fileName);
 private:

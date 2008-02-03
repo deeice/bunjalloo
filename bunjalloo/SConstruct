@@ -57,8 +57,10 @@ def createEnv(buildTarget):
             --rename-section .data=.rodata,readonly,contents ')
   else:
     env = defaultEnv.Copy()
+    #env.Append(CCFLAGS="-fprofile-arcs -ftest-coverage")
     env.Append(OBJCOPY = 'objcopy')
     env.Append(OBJCOPYFLAGS = ' -I binary -O elf32-i386 -B i386 ')
+    #env.Prepend( LIBS=['gcov'])
     env.Prepend( LIBS=['SDL', 'GL'])
     for i in ['CC', 'CXX', 'OBJCOPY']:
       if os.environ.has_key(i) and os.environ[i]:
