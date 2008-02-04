@@ -45,6 +45,7 @@ void BrowseToolbar::tick()
     Sprite * spinner(m_sprites[SPRITE_CONNECT_STATUS]);
     if (m_document.status() != Document::LOADED)
     {
+      spinner->setTile(TILES_PER_ICON * ICON_SPINNER);
       m_angle+=32;
       m_angle &= 0x1ff;
       spinner->setDoubleSize(false);
@@ -60,6 +61,13 @@ void BrowseToolbar::tick()
     }
     for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&Sprite::update));
   }
+}
+
+void BrowseToolbar::setVisible(bool visible)
+{
+  Toolbar::setVisible(visible);
+  if (visible)
+    setHidden(m_hidden);
 }
 
 void BrowseToolbar::handlePress(int i)

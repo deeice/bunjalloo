@@ -381,8 +381,7 @@ void View::browse()
         m_document.setPosition( m_scrollPane->currentPosition());
       }
     }
-    if (m_keyboard->visible())
-      m_toolbar->setVisible(false);
+    m_toolbar->setVisible(!m_keyboard->visible());
   }
   // else --- add drag gestures, etc..
 
