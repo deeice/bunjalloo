@@ -62,6 +62,7 @@ class Toolbar: public ViewI
 
       ICON_COOKIE,
       ICON_ADD_COOKIE,
+      ICON_ADD_SEARCH,
 
     };
     static const int TILES_PER_ICON;
