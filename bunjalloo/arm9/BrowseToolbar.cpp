@@ -20,11 +20,10 @@ enum ToolbarSpriteID
   SPRITE_BOOKMARK,
 
   SPRITE_GO_URL,
+  SPRITE_PREFS,
   SPRITE_SAVE_AS,
 
   SPRITE_CONNECT_STATUS,
-
-  SPRITE_SPINNER,
 
   SPRITE_END_OF_ENTRIES,
 
@@ -43,17 +42,21 @@ void BrowseToolbar::tick()
 {
   if (visible())
   {
+    Sprite * spinner(m_sprites[SPRITE_CONNECT_STATUS]);
     if (m_document.status() != Document::LOADED)
     {
       m_angle+=32;
       m_angle &= 0x1ff;
-      Sprite * spinner(m_sprites[SPRITE_SPINNER]);
       spinner->setDoubleSize(false);
       spinner->setRotateScale(true);
       spinner->setRotate(1);
       u16 cosAng = COS[m_angle] / 16;
       u16 sinAng = SIN[m_angle] / 16;
       spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
+    }
+    else
+    {
+      spinner->setRotateScale(false);
     }
     for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&Sprite::update));
   }
@@ -89,6 +92,11 @@ void BrowseToolbar::handlePress(int i)
       m_view.enterUrl();
       break;
 
+    case SPRITE_PREFS:
+      // Preferences...
+      m_view.preferences();
+      break;
+
     case SPRITE_BOOKMARK:
       m_view.bookmarkUrl();
       break;
@@ -107,7 +115,7 @@ void BrowseToolbar::updateIcons()
   m_sprites[SPRITE_BOOKMARK]->setTile( TILES_PER_ICON * ICON_BOOKMARK);
   m_sprites[SPRITE_GO_URL]->setTile( TILES_PER_ICON * ICON_GO_URL);
   m_sprites[SPRITE_SAVE_AS]->setTile( TILES_PER_ICON * ICON_SAVE_AS);
-  m_sprites[SPRITE_SPINNER]->setTile( TILES_PER_ICON * ICON_SPINNER);
+  m_sprites[SPRITE_PREFS]->setTile( TILES_PER_ICON * ICON_PREFS);
   bool wifiInit = m_controller.wifiInitialised();
   ToolbarIcon wifiIcon(ICON_NOT_CONNECTED);
   if (wifiInit)
@@ -131,8 +139,14 @@ void BrowseToolbar::updateIcons()
         break;
     }
   }
-  m_sprites[SPRITE_CONNECT_STATUS]->setTile( TILES_PER_ICON * wifiIcon);
-  m_sprites[SPRITE_SPINNER]->setEnabled( m_document.status() != Document::LOADED );
+  if (m_document.status() == Document::LOADED)
+  {
+    m_sprites[SPRITE_CONNECT_STATUS]->setTile( TILES_PER_ICON * wifiIcon);
+  }
+  else
+  {
+    m_sprites[SPRITE_CONNECT_STATUS]->setTile( TILES_PER_ICON * ICON_SPINNER);
+  }
   m_sprites[SPRITE_HIDE]->setHflip(m_hidden);
 }
 
@@ -173,7 +187,6 @@ void BrowseToolbar::setHiddenIconExpand()
 void BrowseToolbar::setHidden(bool hidden)
 {
   for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&Sprite::setEnabled), !hidden));
-  m_sprites[SPRITE_SPINNER]->setEnabled( m_document.status() != Document::LOADED );
   for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&Sprite::update));
   Sprite * hideToggle(m_sprites[SPRITE_HIDE]);
   hideToggle->setEnabled();
@@ -187,14 +200,6 @@ void BrowseToolbar::setHidden(bool hidden)
     setHiddenIconExpand();
   }
   m_hidden = hidden;
-}
-
-void BrowseToolbar::setVisible(bool visible)
-{
-  Toolbar::setVisible(visible);
-  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&Sprite::setEnabled), visible));
-  m_sprites[SPRITE_SPINNER]->setEnabled( visible and (m_document.status() != Document::LOADED) );
-  for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&Sprite::update));
 }
 
 void BrowseToolbar::layout()

@@ -28,13 +28,6 @@ void BookmarkToolbar::updateIcons()
 void BookmarkToolbar::tick()
 {}
 
-void BookmarkToolbar::setVisible(bool visible)
-{
-  Toolbar::setVisible(visible);
-  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&Sprite::setEnabled), visible));
-  for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&Sprite::update));
-}
-
 void BookmarkToolbar::handlePress(int i)
 {
   switch ((ToolbarSpriteID)i)

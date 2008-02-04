@@ -168,6 +168,13 @@ void View::enterUrl()
   m_dirty = true;
 }
 
+void View::setToolbar(Toolbar * toolbar)
+{
+  m_toolbar->setVisible(false);
+  m_toolbar = toolbar;
+  m_toolbar->setVisible(true);
+}
+
 void View::endBookmark()
 {
   m_state = BROWSE;
@@ -176,17 +183,13 @@ void View::endBookmark()
     m_linkHref = m_document.uri();
   m_document.setHistoryEnabled(true);
 
-  m_toolbar->setVisible(false);
-  m_toolbar = m_browseToolbar;
-  m_toolbar->setVisible(true);
+  setToolbar(m_browseToolbar);
 }
 
 void View::bookmarkUrl()
 {
   // Add a line to the file DATADIR/userdata/bookmarks.html
-  m_toolbar->setVisible(false);
-  m_toolbar = m_bookmarkToolbar;
-  m_toolbar->setVisible(true);
+  setToolbar(m_bookmarkToolbar);
   m_state = BOOKMARK;
   // extract the *current* title
   extractTitle();
@@ -237,6 +240,10 @@ void View::bookmarkCurrentPage()
     }
   }
   showBookmarkPage();
+}
+
+void View::preferences()
+{
 }
 
 void View::saveAs()

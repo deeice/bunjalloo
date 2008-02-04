@@ -155,7 +155,7 @@ void Toolbar::layout()
     m_sprites[i]->setX(x);
     m_sprites[i]->setY(y);
   }
-  setVisible(true);
+  setVisible(visible());
 }
 
 static void deleteSprite(nds::Sprite * s)
@@ -182,6 +182,8 @@ bool Toolbar::visible() const
 void Toolbar::setVisible(bool visible)
 {
   m_visible = visible;
+  for_each(m_sprites.begin(), m_sprites.end(), std::bind2nd(std::mem_fun(&nds::Sprite::setEnabled), visible));
+  for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
 }
 
 bool Toolbar::touch(int x, int y)

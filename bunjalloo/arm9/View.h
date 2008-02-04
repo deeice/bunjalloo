@@ -83,6 +83,9 @@ class View : public ViewI, public ButtonListener, public LinkListener
 
     /** Exit bookmark mode.. */
     void endBookmark();
+
+    /** Exit bookmark mode.. */
+    void preferences();
   private:
 
     enum InputState
@@ -123,5 +126,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void showBookmarkPage();
     // extract the page title for bookmark hack
     void extractTitle();
+
+    void setToolbar(Toolbar * toolbar);
 };
 #endif

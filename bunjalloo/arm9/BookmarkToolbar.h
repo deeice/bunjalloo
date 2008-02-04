@@ -9,7 +9,6 @@ class BookmarkToolbar: public Toolbar
     BookmarkToolbar(Document & doc, Controller & cont, View & view);
     virtual void updateIcons();
     virtual void tick();
-    virtual void setVisible(bool visible);
 
   protected:
     void handlePress(int i);
