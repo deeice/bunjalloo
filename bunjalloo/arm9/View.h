@@ -25,8 +25,6 @@
 class Document;
 class Controller;
 
-class BookmarkToolbar;
-class BrowseToolbar;
 class FormControl;
 class Keyboard;
 class LinkHandler;
@@ -102,8 +100,9 @@ class View : public ViewI, public ButtonListener, public LinkListener
     Keyboard * m_keyboard;
     ViewRender * m_renderer;
     TextField * m_addressBar;
-    BrowseToolbar * m_browseToolbar;
-    BookmarkToolbar * m_bookmarkToolbar;
+    Toolbar * m_browseToolbar;
+    Toolbar * m_bookmarkToolbar;
+    Toolbar * m_prefsToolbar;
     Toolbar * m_toolbar;
     InputState m_state;
     FormControl * m_form;

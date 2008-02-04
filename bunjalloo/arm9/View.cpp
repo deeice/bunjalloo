@@ -29,6 +29,7 @@
 #include "Keyboard.h"
 #include "Link.h"
 #include "LinkHandler.h"
+#include "PreferencesToolbar.h"
 #include "ScrollPane.h"
 #include "SearchEntry.h"
 #include "Stylus.h"
@@ -54,6 +55,7 @@ View::View(Document & doc, Controller & c):
   m_addressBar(new TextField(UnicodeString())),
   m_browseToolbar(new BrowseToolbar(doc, c, *this)),
   m_bookmarkToolbar(new BookmarkToolbar(doc, c, *this)),
+  m_prefsToolbar( new PreferencesToolbar(doc, c, *this)),
   m_toolbar(m_browseToolbar),
   m_state(BROWSE),
   m_form(0),
@@ -244,6 +246,19 @@ void View::bookmarkCurrentPage()
 
 void View::preferences()
 {
+  // clicked preferences button.
+  // This should allow:
+  // 1) Homepage (?) issues 30, 38
+  // 2) Cookie file edit, issue 36
+  // 3) Add current server to cookie file (+edit?), issue 36
+  // 4) shortcut file edition (Add field?)
+
+  // Solution: new toolbar! PreferencesToolbar.cpp
+  // back
+  // edit cookie file
+  // add cookie + edit
+  // add shortcut + edit
+  setToolbar(m_prefsToolbar);
 }
 
 void View::saveAs()

@@ -60,6 +60,9 @@ class Toolbar: public ViewI
       ICON_HIDE_LEFT,
       ICON_ADD_BOOKMARK,
 
+      ICON_COOKIE,
+      ICON_ADD_COOKIE,
+
     };
     static const int TILES_PER_ICON;
     static const int TOOLBAR_X;
