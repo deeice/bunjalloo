@@ -26,7 +26,7 @@ class FormCheckBox: public CheckBox, public ButtonListener
   public:
     FormCheckBox(HtmlElement * element);
 
-    virtual void pressed(ButtonI * self);
+    virtual void pressed(ButtonI * button);
 
   private:
     HtmlElement * m_element;

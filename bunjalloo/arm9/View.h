@@ -76,13 +76,13 @@ class View : public ViewI, public ButtonListener, public LinkListener
      */
     void bookmarkCurrentPage();
 
-    /** Save the current page as...  */
+    /** Save the current page as something.  */
     void saveAs();
 
-    /** Exit bookmark mode.. */
+    /** Exit bookmark mode. */
     void endBookmark();
 
-    /** Exit bookmark mode.. */
+    /** Exit bookmark mode. */
     void preferences();
   private:
 

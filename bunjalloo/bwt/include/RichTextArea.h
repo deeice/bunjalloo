@@ -34,6 +34,7 @@ class RichTextArea: public TextArea
 
     /** Add a Link to the text.
      * @param href the document address to link to.
+     * @param viewed true if the link has been visited already.
      */
     void addLink(const std::string & href, bool viewed=false);
 

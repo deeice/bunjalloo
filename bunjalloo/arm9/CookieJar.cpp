@@ -42,7 +42,7 @@ CookieJar::~CookieJar()
 }
 
 
-Cookie * CookieJar::hasCookieForDomain(const URI & uri, const string & name) const
+Cookie * CookieJar::hasCookieForDomain(const URI & uri, const std::string & name) const
 {
   vector<Cookie *>::const_iterator it(m_cookies.begin());
   vector<Cookie *>::const_iterator end(m_cookies.end());

@@ -40,6 +40,7 @@ class CookieJar
     ~CookieJar();
 
     /** Add cookies based on the request header.
+     * @param uri The uri of the page that is sending the cookie set request.
      * @param request Set-Cookie request header value.
      */
     void addCookieHeader(const URI & uri, const std::string & request);

@@ -32,7 +32,7 @@ class FormTextArea: public ScrollPane, public TextEntryI, public TextListener
 
     void layoutViewer();
 
-    void editText(TextEntryI *);
+    virtual void editText(TextEntryI * entry);
     HtmlElement * textNode();
 
     /** Implements TextEntryI by proxy to the textArea.  */

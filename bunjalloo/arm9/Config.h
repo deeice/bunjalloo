@@ -38,7 +38,6 @@ class Config
 
     /** Initialise the config class. Set the document parser and the controller.
      * @param doc the document model of the configuration file.
-     * @param controller class that handles the loading, etc, of the config files.
      */
     Config(Document & doc);
 

@@ -38,6 +38,7 @@ class URI
 
     /** Create an URI initialised to the given string.
      * @param uriString the URI location
+     * @param fix if true, this will add the protocol if needed.
      */
     URI(const std::string & uriString, bool fix=true);
 
@@ -83,7 +84,7 @@ class URI
     const std::string method() const;
 
     /** Set the method (GET or POST).
-     * @param the HTTP method.
+     * @param method the HTTP method.
      */
     void setMethod(const std::string & method);
 

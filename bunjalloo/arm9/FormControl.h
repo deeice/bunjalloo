@@ -31,7 +31,8 @@ class FormControl : public Button
     FormControl(const HtmlElement * element, const UnicodeString & text);
 
     /** input a touch value after clicking.
-     * @param str the input touch.
+     * @param controller the controller that will handle updates, new uris
+     * @param uri the uri of the page that the form is on.
      */
     virtual void input(Controller & controller, URI & uri);
 
