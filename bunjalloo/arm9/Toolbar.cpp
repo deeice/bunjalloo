@@ -43,9 +43,10 @@ static const int TOOLBAR_SCREEN(0);
 // number of VRAM slots used per icon
 const int Toolbar::TILES_PER_ICON(8);
 
-bool Toolbar::s_haveInitialised(false);
-void Toolbar::initSpriteData(unsigned short * oamData)
+//VRAM initialisation - done just the once.
+static void initSpriteData(unsigned short * oamData)
 {
+  static bool s_haveInitialised(false);
   if (s_haveInitialised)
     return;
 

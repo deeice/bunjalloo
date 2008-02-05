@@ -132,8 +132,9 @@ void ViewRender::postFormat(const HtmlElement * element)
   else if (element->isa(HtmlConstants::LI_TAG))
   {
     ElementList::const_iterator it(element->children().begin());
+    ElementList::const_iterator end(element->children().end());
     bool hasBlock(false);
-    for (; it != element->children().end(); ++it)
+    for (; it != end; ++it)
     {
       if ( (*it)->isa(HtmlConstants::UL_TAG) or (*it)->isBlock()) {
         hasBlock = true;
@@ -235,6 +236,7 @@ void ViewRender::walkTree(const HtmlElement * element)
   {
     const ElementList & theChildren = element->children();
     ElementList::const_iterator it(theChildren.begin());
+    ElementList::const_iterator end(theChildren.end());
 
     bool hasBlock(false);
     /*
@@ -249,7 +251,7 @@ void ViewRender::walkTree(const HtmlElement * element)
     */
 
     it = theChildren.begin();
-    for (; it != theChildren.end(); ++it)
+    for (; it != end; ++it)
     {
       const HtmlElement * child(*it);
       if (hasBlock) {

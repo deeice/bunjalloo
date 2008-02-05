@@ -106,10 +106,6 @@ class Toolbar: public ViewI
     virtual void layout();
 
   private:
-    //VRAM initialisation - done just the once.
-    static bool s_haveInitialised;
-    static void initSpriteData(unsigned short * oamData);
-
     // visible - ie. is showing
     bool m_visible;
     nds::Sprite *  m_cursorSprite;

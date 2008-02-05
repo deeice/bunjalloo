@@ -70,7 +70,6 @@ class HtmlDocument : public HtmlParser
 
   private:
 
-    static void setNewAttributes(HtmlElement * element, const AttributeVector & attrs);
 
     enum TreeState
     {

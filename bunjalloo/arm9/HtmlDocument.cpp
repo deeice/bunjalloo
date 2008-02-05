@@ -267,6 +267,16 @@ void HtmlDocument::afterHead(const std::string & tag)
   handleEndTag(tag);
 }
 
+static void setNewAttributes(HtmlElement * element, const AttributeVector & attrs)
+{
+  AttributeVector::const_iterator it(attrs.begin());
+  for (; it != attrs.end(); ++it) {
+    Attribute * attr(*it);
+    element->setAttribute(attr->name, attr->value);
+  }
+}
+
+
 void HtmlDocument::inBody(const std::string & tag, const AttributeVector & attrs)
 {
   if (   tag == "base"
@@ -1050,15 +1060,6 @@ const HtmlElement * HtmlDocument::rootNode() const
   return 0;
 }
 
-void HtmlDocument::setNewAttributes(HtmlElement * element, const AttributeVector & attrs)
-{
-  AttributeVector::const_iterator it(attrs.begin());
-  for (; it != attrs.end(); ++it) {
-    Attribute * attr(*it);
-    element->setAttribute(attr->name, attr->value);
-  }
-}
-
 bool HtmlDocument::inScope(const std::string & element, bool inTableScope) const
 {
    ElementVector::const_reverse_iterator it(m_openElements.rbegin());
@@ -1089,7 +1090,8 @@ HtmlElement* HtmlDocument::activeFormatContains(const std::string & tagName)
 {
 
   ElementList::iterator it = m_activeFormatters.begin();
-  for (; it != m_activeFormatters.end(); ++it)
+  ElementList::const_iterator end(m_activeFormatters.end());
+  for (; it != end; ++it)
   {
     if ( (*it)->isa(tagName))
       break;
@@ -1189,15 +1191,16 @@ void HtmlDocument::reconstructActiveFormatters()
   }
 
   ElementList::iterator it(m_activeFormatters.begin());
+  ElementList::const_iterator end(m_activeFormatters.end());
   //3. Let entry be the last (most recently added) element in the list of active formatting elements.
-  for (; it != m_activeFormatters.end(); ++it)
+  for (; it != end; ++it)
   {
     //4. If there are no entries before entry in the list of active formatting elements, then jump to step 8.
     HtmlElement * entry = *it;
     bool lastEntry(false);
     ElementList::iterator currentIt(it);
     ++it;
-    if  ( it != m_activeFormatters.end())
+    if  ( it != end)
     {
       lastEntry = true;
       //5. Let entry be the entry one earlier than entry in the list of active formatting elements.
@@ -1313,8 +1316,9 @@ void HtmlDocument::adoptionAgency(const std::string & tag)
     HtmlElement * furthestBlock(0);
     // save the iterator for later
     ElementVector::iterator commonAncestorIt(openElement);
+    ElementVector::const_iterator end(m_openElements.end());
     ++openElement;
-    for (; openElement != m_openElements.end(); ++openElement)
+    for (; openElement != end; ++openElement)
     {
       HtmlElement * element(*openElement);
       if ( not isFormatting(element) and not isPhrasing(element))
