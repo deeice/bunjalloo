@@ -19,6 +19,7 @@
 #include "ComboBox.h"
 #include "ScrollPane.h"
 #include "ScrollBar.h"
+#include "Stylus.h"
 #include "Button.h"
 #include "WidgetColors.h"
 
@@ -74,11 +75,20 @@ void ComboBox::addItem(const UnicodeString & item)
   scrollPane()->setScrollIncrement(m_bounds.h);
 }
 
-bool ComboBox::touch(int x, int y)
+bool ComboBox::stylusUp(const Stylus * stylus)
 {
-  // if touch is in the button > toggle "menu"
-  // if menu shown and touch is on menu > select item
-  // if touch not on anything, make sure menu is hidden
+  if (m_open and scrollPane()->stylusUp(stylus))
+  {
+    m_dirty = true;
+    return true;
+  }
+  return false;
+}
+
+bool ComboBox::stylusDownFirst(const Stylus * stylus)
+{
+  int x = stylus->startX();
+  int y = stylus->startY();
   if (m_bounds.hit(x, y))
   {
     m_open = not m_open;
@@ -86,17 +96,21 @@ bool ComboBox::touch(int x, int y)
       button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
     else
       button()->setBackgroundColor(WidgetColors::COMBOBOX_SELECTED);
-
     return true;
   }
-  if (m_open and scrollPane()->touch(x, y))
+  if (m_open and scrollPane()->stylusDownFirst(stylus))
   {
+    m_dirty = true;
     return true;
   }
   m_open = false;
   button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
-  return true;
+  m_dirty = true;
+  return false;
 }
+
+bool ComboBox::stylusDownRepeat(const Stylus * stylus) { return false; }
+bool ComboBox::stylusDown(const Stylus * stylus) { return false; }
 
 void ComboBox::setLocation(unsigned int x, unsigned int y)
 {

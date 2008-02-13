@@ -33,12 +33,14 @@ const unsigned short WidgetColors::COMBOBOX_FOREGROUND = FG;
 const unsigned short WidgetColors::COMBOBOX_SELECTED = PRESSED;
 
 const unsigned short WidgetColors::SCROLLBAR_BACKGROUND = SHAD;
+const unsigned short WidgetColors::SCROLLBAR_BACKGROUND_TOUCH = RGB5(5, 5, 28);
 const unsigned short WidgetColors::SCROLLBAR_BORDER = VDARK;
 const unsigned short WidgetColors::SCROLLBAR_ARROW = FG;
 const unsigned short WidgetColors::SCROLLBAR_ARROW_HEAD = VDARK;
 const unsigned short WidgetColors::SCROLLBAR_HANDLE_NOT_HELD = FG;
-const unsigned short WidgetColors::SCROLLBAR_HANDLE_HELD = BRIGHT;
+const unsigned short WidgetColors::SCROLLBAR_HANDLE_HELD = RGB5(25, 25, 31);
 
-const unsigned short WidgetColors::LINK_CLICKED = RGB5(19, 0,22);
+const unsigned short WidgetColors::LINK_VISITED = RGB5(19, 0,22);
+const unsigned short WidgetColors::LINK_CLICKED = RGB5(31, 0, 0);
 const unsigned short WidgetColors::LINK_REGULAR = RGB5( 0, 0,31);
 const unsigned short WidgetColors::LINK_IMAGE   = RGB5( 0,21, 0);

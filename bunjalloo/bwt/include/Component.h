@@ -19,9 +19,26 @@
 
 #include <vector>
 #include "Rectangle.h"
+#include "StylusListener.h"
+
+//! Helper define for calling stylus callbacks on children
+#define FOR_EACH_CHILD(fn) \
+{  \
+  bool hit_(false); \
+  std::vector<Component*>::iterator first(m_children.begin()); \
+  std::vector<Component*>::iterator end(m_children.end()); \
+  for (; first != end; ++first) \
+  { \
+    if ( (*first)->fn(stylus) ) { \
+      hit_ = true; \
+    } \
+  } \
+  if (hit_) return true; \
+}
+
 
 /** The base class for all GUI Widgets.*/
-class Component
+class Component: public StylusListener
 {
   public:
     /** Set up the Component.*/
@@ -86,12 +103,6 @@ class Component
      */
     inline int y() const;
 
-    /** Handle user touch input.
-     * @param x the on screen x position of the touch.
-     * @param y the on screen y position of the touch.
-     */
-    virtual bool touch(int x, int y);
-
     /** Get the current visibility.
      * @return true if visible, false otherwise.
      */
@@ -113,6 +124,8 @@ class Component
      */
     const Component * childAt(unsigned int i) const;
 
+    /** @return true if the Component needs repainting. */
+    virtual bool dirty() const;
   protected:
     /** Holds the position and size. */
     nds::Rectangle m_bounds;
@@ -128,6 +141,8 @@ class Component
 
     /** The child Components. */
     std::vector<Component *> m_children;
+
+    bool m_dirty;
 };
 
 int Component::width() const

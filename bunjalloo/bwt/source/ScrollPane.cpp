@@ -18,7 +18,7 @@
 #include "Palette.h"
 #include "ScrollPane.h"
 #include "ScrollBar.h"
-#include <algorithm>
+#include "Stylus.h"
 
 Component * ScrollPane::s_popup(0);
 // TODO: make configurable.
@@ -37,7 +37,8 @@ ScrollPane::ScrollPane()
   m_canScrollDown(false),
   m_scrollBar(new ScrollBar),
   m_backgroundColour(nds::Color(31,31,31)),
-  m_stretchChildren(false)
+  m_stretchChildren(false),
+  m_touchedMe(false)
 {
   m_scrollBar->setScrollable(this);
   m_preferredWidth = nds::Canvas::instance().width();
@@ -51,6 +52,7 @@ void ScrollPane::setStretchChildren(bool s)
 ScrollPane::~ScrollPane()
 {
   delete m_scrollBar;
+  Stylus::instance()->unregisterListener(this);
 }
 
 void ScrollPane::setLocation(unsigned int x, unsigned int y)
@@ -302,6 +304,8 @@ int ScrollPane::scrollIncrement() const
 void ScrollPane::setTopLevel(bool topLevel)
 {
   m_topLevel = topLevel;
+  if (topLevel)
+    Stylus::instance()->registerListener(this);
 }
 
 bool ScrollPane::topLevel() const
@@ -314,39 +318,80 @@ bool ScrollPane::scrollBarHit(int x, int y)
   return m_scrollBar->bounds().hit(x, y);
 }
 
-bool ScrollPane::touch(int x, int y)
+bool ScrollPane::stylusUp(const Stylus * stylus)
 {
   if (not visible())
     return false;
-  if (m_topLevel and s_popup and s_popup->bounds().hit(x, y))
+  if (m_scrollBar->stylusUp(stylus))
+  {
+    return true;
+  }
+  if (m_topLevel and s_popup and s_popup->stylusUp(stylus))
   {
     // do not process other events if we hit the pop-up menu.
-    s_popup->touch(x, y);
+    m_dirty = true;
+  }
+  else
+  {
+    // call stylusUp on children too
+    FOR_EACH_CHILD(stylusUp);
+  }
+  return false;
+}
+bool ScrollPane::stylusDownFirst(const Stylus * stylus)
+{
+  if (not visible())
+  {
+    return false;
+  }
+
+  if (m_scrollBar->stylusDownFirst(stylus))
+  {
     return true;
   }
 
-  bool handled(false);
-  bool scrollBarHit = false;
-  if (m_scrollBar->touch(x, y))
+  if (m_topLevel and s_popup and s_popup->stylusDownFirst(stylus))
   {
-    handled = true;
-    scrollBarHit = true;
+    return true;
   }
 
-  std::vector<Component*>::iterator it(m_children.begin());
-  for (; it != m_children.end(); ++it)
+  m_touchedMe = m_bounds.hit(stylus->startX(), stylus->startY());
+  if (m_touchedMe)
   {
-    Component * c(*it);
-    Rectangle bounds(c->bounds());
-    if (not scrollBarHit or (scrollBarHit and not bounds.hit(x, y)))
-    {
-      if (c->touch(x, y))
-      {
-        handled = true;
-      }
-    }
+    // call stylusDownFirst on children too
+    FOR_EACH_CHILD(stylusDownFirst);
   }
-  return handled;
+  // No! If this is invisible, unregister children so it doesn't do naughty
+  // stylus stuff on things that are invisible.
+  return false;
+}
+
+bool ScrollPane::stylusDownRepeat(const Stylus * stylus)
+{
+  if (not visible())
+  {
+    return false;
+  }
+  if (m_scrollBar->stylusDownRepeat(stylus))
+  {
+    return true;
+  }
+  FOR_EACH_CHILD(stylusDownRepeat);
+  return false;
+}
+
+bool ScrollPane::stylusDown(const Stylus * stylus)
+{
+  if (not visible())
+  {
+    return false;
+  }
+  if (m_scrollBar->stylusDown(stylus))
+  {
+    return true;
+  }
+  FOR_EACH_CHILD(stylusDown);
+  return false;
 }
 
 void ScrollPane::upBlock()
@@ -472,6 +517,7 @@ void ScrollPane::setPopup(Component * popup)
 {
   s_popup = popup;
 }
+
 void ScrollPane::removePopup(Component * popup)
 {
   if (s_popup == popup)
@@ -479,3 +525,4 @@ void ScrollPane::removePopup(Component * popup)
     s_popup = 0;
   }
 }
+

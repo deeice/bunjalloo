@@ -23,6 +23,7 @@
 #include "LinkListener.h"
 #include "Rectangle.h"
 #include "ScrollPane.h"
+#include "Stylus.h"
 #include "WidgetColors.h"
 
 LinkHandler::LinkHandler(LinkListener * parent):
@@ -32,6 +33,12 @@ LinkHandler::LinkHandler(LinkListener * parent):
   addItem(string2unicode("url"));
   addItem(string2unicode("image "));
   m_preferredHeight = scrollPane()->height();
+  Stylus::instance()->registerListener(this);
+}
+
+LinkHandler::~LinkHandler()
+{
+  Stylus::instance()->unregisterListener(this);
 }
 
 void LinkHandler::setLink(const Link * link)
@@ -59,20 +66,7 @@ void LinkHandler::pressed(ButtonI * button)
   // make sure the selection is reset.
   ((Button*)scrollPane()->childAt(0))->setSelected(false);
   ((Button*)scrollPane()->childAt(1))->setSelected(false);
-}
-
-bool LinkHandler::touch(int x, int y)
-{
-  if (m_visible)
-  {
-    if (scrollPane()->bounds().hit(x, y))
-    {
-      scrollPane()->touch(x, y);
-    }
-    setVisible(false);
-    return true;
-  }
-  return false;
+  setVisible(false);
 }
 
 void LinkHandler::paint(const nds::Rectangle & clip)
@@ -97,3 +91,26 @@ void LinkHandler::paint(const nds::Rectangle & clip)
       scrollPaneClip.y, scrollPaneClip.w, scrollPaneClip.h, scrollPane()->backgroundColor());
   scrollPane()->paint(scrollPane()->bounds());
 }
+
+bool LinkHandler::stylusUp(const Stylus * stylus)
+{
+  if (not visible())
+  {
+    return false;
+  }
+  FOR_EACH_CHILD(stylusUp);
+  return false;
+}
+
+bool LinkHandler::stylusDownFirst(const Stylus * stylus)
+{
+  if (not visible())
+  {
+    return false;
+  }
+  FOR_EACH_CHILD(stylusDownFirst);
+  // nothing hit? hide me then
+  setVisible(false);
+  return false;
+}
+

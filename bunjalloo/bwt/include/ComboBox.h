@@ -52,10 +52,14 @@ class ComboBox: public Component,
     unsigned int items() const;
 
     // implemented from Component.
-    virtual bool touch(int x, int y);
     virtual void paint(const nds::Rectangle & clip);
     virtual void setLocation(unsigned int x, unsigned int y);
     virtual void setSize(unsigned int w, unsigned int h);
+
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
   private:
     int m_items;
     int m_selectedIndex;

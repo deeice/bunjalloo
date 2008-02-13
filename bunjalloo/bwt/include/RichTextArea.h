@@ -34,9 +34,9 @@ class RichTextArea: public TextArea
 
     /** Add a Link to the text.
      * @param href the document address to link to.
-     * @param viewed true if the link has been visited already.
+     * @param visited true if the link has been visited already.
      */
-    void addLink(const std::string & href, bool viewed=false);
+    void addLink(const std::string & href, bool visited=false);
 
     void add(Component * child);
 
@@ -64,9 +64,12 @@ class RichTextArea: public TextArea
     virtual int linesToSkip() const;
 
     virtual void paint(const nds::Rectangle & clip);
-    virtual bool touch(int x, int y);
     virtual void setLocation(unsigned int x, unsigned int y);
 
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
 
   protected:
     /** Overloaded from TextArea. This checks the current char vs the links to
@@ -97,6 +100,8 @@ class RichTextArea: public TextArea
     bool m_centred;
     bool m_outlined;
 
+    Link * m_linkTouched;
+
     /** Delete the links */
     void removeClickables();
     unsigned int documentSize(int endLine=-1, unsigned int * childIndex=0) const;
@@ -107,9 +112,11 @@ class RichTextArea: public TextArea
     void appendText_copyPaste(const UnicodeString & unicodeString);
 
     // get the document line at the clicked y position
+    int lineAt(int y, int & leftover) const;
     int lineAt(int y) const;
 
     bool lineHasComponent(int line) const;
-    bool childTouch(int x, int y);
+    // bool childTouch(Stylus & stylus);
+    Link * linkAt(int index);
 };
 #endif

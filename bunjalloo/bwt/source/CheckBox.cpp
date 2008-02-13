@@ -26,14 +26,12 @@ CheckBox::CheckBox():ToggleButton()
 
 const unsigned char * CheckBox::getGfxData()
 {
+  int offset = 0;
   if (selected())
-  {
-    return (const u8*)&_binary_checkbox_img_bin_start[16*8];
-  }
-  else
-  {
-    return (const u8*)_binary_checkbox_img_bin_start;
-  }
+    offset |= 1;
+  if (touched())
+    offset |= 2;
+  return (const u8*)&_binary_checkbox_img_bin_start[16*8*offset];
 }
 
 const unsigned short * CheckBox::getPaletteData()

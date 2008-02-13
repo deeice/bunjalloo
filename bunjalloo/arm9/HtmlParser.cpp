@@ -26,6 +26,7 @@
 #include "UnicodeString.h"
 #include "UTF8.h"
 #include "File.h"
+#include "Delete.h"
 
 using namespace std;
 
@@ -156,10 +157,6 @@ class HtmlParserImpl
     unsigned int consumeEntity();
     // deal with wonky chunkers
     void setLeftovers();
-    static void deleteAttribute(Attribute * a)
-    {
-      delete a;
-    }
 
     string asUnconsumedCharString(int amount);
     void consume(int amount);
@@ -404,7 +401,7 @@ void HtmlParserImpl::emitTagToken()
       m_self.handleStartEndTag(m_currentTagToken, m_tagAttributes);
       break;
   }
-  for_each( m_tagAttributes.begin(), m_tagAttributes.end(), deleteAttribute);
+  for_each( m_tagAttributes.begin(), m_tagAttributes.end(), delete_ptr());
   m_tagAttributes.clear();
   if (m_attribute) {
     delete m_attribute;

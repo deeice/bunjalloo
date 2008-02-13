@@ -21,6 +21,7 @@
 #include "ComboBox.h"
 class LinkListener;
 class Link;
+class Stylus;
 
 /** Handle Link presses that are images so the user can decide to follow the
  * anchor or view the image.
@@ -34,6 +35,8 @@ class LinkHandler: public ComboBox
      */
     LinkHandler(LinkListener * parent);
 
+    ~LinkHandler();
+
     /** Set the Link to handle. It should be a img/anchor type Link.
      * @param link the Link to deal with.
      */
@@ -41,8 +44,10 @@ class LinkHandler: public ComboBox
 
     // reimplemented from ComboBox
     virtual void pressed(ButtonI * button);
-    virtual bool touch(int x, int y);
     virtual void paint(const nds::Rectangle & clip);
+
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
   private:
     LinkListener * m_parent;
     const Link * m_link;

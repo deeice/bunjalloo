@@ -112,6 +112,11 @@ class TextArea : public Component
     virtual void setSize(unsigned int w, unsigned int h);
     virtual void paint(const nds::Rectangle & clip);
 
+    virtual bool stylusUp(const Stylus * stylus) { return false; }
+    virtual bool stylusDownFirst(const Stylus * stylus) { return false; }
+    virtual bool stylusDownRepeat(const Stylus * stylus) { return false; }
+    virtual bool stylusDown(const Stylus * stylus) { return false; }
+
   protected:
     /** The document model contains one UnicodeString per line of text.*/
     std::vector<UnicodeString> m_document;

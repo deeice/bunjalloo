@@ -14,12 +14,15 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "libnds.h"
 #include "ToggleButton.h"
 #include "ButtonListener.h"
 #include "Canvas.h"
+#include "WidgetColors.h"
+#include "Stylus.h"
 
 ToggleButton::ToggleButton():
-  Component()
+  Component(), m_touched(false)
 {}
 
 void ToggleButton::paint(const nds::Rectangle & clip)
@@ -42,12 +45,16 @@ void ToggleButton::paint(const nds::Rectangle & clip)
       }
     }
   }
+  m_dirty = false;
 }
 
-bool ToggleButton::touch(int x, int y)
+bool ToggleButton::stylusUp(const Stylus * stylus)
 {
-  if (m_bounds.hit(x, y))
+  int x = stylus->lastX();
+  int y = stylus->lastY();
+  if (m_touched and m_bounds.hit(x, y))
   {
+    m_touched = false;
     if (listener())
     {
       listener()->pressed(this);
@@ -61,3 +68,35 @@ bool ToggleButton::touch(int x, int y)
   return false;
 }
 
+bool ToggleButton::stylusDownFirst(const Stylus * stylus)
+{
+  int x = stylus->lastX();
+  int y = stylus->lastY();
+  if (m_bounds.hit(x, y))
+  {
+    m_touched = true;
+    return true;
+  }
+  return false;
+}
+
+bool ToggleButton::stylusDownRepeat(const Stylus * stylus)
+{
+  return false;
+}
+
+bool ToggleButton::stylusDown(const Stylus * stylus)
+{
+  int x = stylus->lastX();
+  int y = stylus->lastY();
+  if (not m_bounds.hit(x, y))
+  {
+    m_touched = false;
+  }
+  return false;
+}
+
+bool ToggleButton::touched() const
+{
+  return m_touched;
+}

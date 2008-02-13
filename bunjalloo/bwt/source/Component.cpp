@@ -16,19 +16,17 @@
 */
 #include <algorithm>
 #include "Component.h"
+#include "Stylus.h"
+#include "Delete.h"
 
 static const int NO_PREFERRED_SIZE(-1);
-
-static void deleteChild(Component * child)
-{
-  delete child;
-}
 
 Component::Component() :
   m_bounds(),
   m_preferredWidth(NO_PREFERRED_SIZE),
   m_preferredHeight(NO_PREFERRED_SIZE),
-  m_visible(true)
+  m_visible(true),
+  m_dirty(true)
 {
   m_bounds.x = 0;
   m_bounds.y = 0;
@@ -43,7 +41,7 @@ Component::~Component()
 
 void Component::removeChildren()
 {
-  for_each(m_children.begin(), m_children.end(), deleteChild);
+  for_each(m_children.begin(), m_children.end(), delete_ptr());
   m_children.clear();
 }
 
@@ -57,20 +55,11 @@ void Component::add(Component * child)
   }
 }
 
-/** Handle a touch event.
- * @param x the x position.
- * @param y the y position.
- * @return true to consume the event. Component touch returns true.
- */
-bool Component::touch(int x, int y)
-{
-  return true;
-}
-
 void Component::setSize(unsigned int w, unsigned int h)
 {
   m_bounds.w = w;
   m_bounds.h = h;
+  m_dirty = true;
 }
 
 nds::Rectangle Component::bounds() const
@@ -96,6 +85,7 @@ void Component::setLocation(unsigned int x, unsigned int y)
 {
   m_bounds.x = x;
   m_bounds.y = y;
+  m_dirty = true;
 }
 
 unsigned int Component::childCount() const
@@ -112,3 +102,7 @@ const Component * Component::childAt(unsigned int i) const
   return 0;
 }
 
+bool Component::dirty() const
+{
+  return m_dirty;
+}

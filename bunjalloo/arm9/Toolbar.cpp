@@ -17,17 +17,19 @@
 #include <algorithm>
 #include <functional>
 #include "libnds.h"
-#include "Controller.h"
 #include "Config.h"
+#include "Controller.h"
 #include "Document.h"
-#include "URI.h"
+#include "Delete.h"
 #include "Image.h"
 #include "Palette.h"
 #include "Rectangle.h"
+#include "Stylus.h"
 #include "Toolbar.h"
+#include "URI.h"
+#include "Video.h"
 #include "View.h"
 #include "Wifi9.h"
-#include "Video.h"
 
 using nds::Wifi9;
 
@@ -39,9 +41,18 @@ const int Toolbar::TOOLBAR_X_LEFT(10);
 const int Toolbar::TOOLBAR_SEP(20);
 static const int TIMER_RESET(120);
 static const int TOOLBAR_SCREEN(0);
+static const int NO_INDEX(-1);
 
 // number of VRAM slots used per icon
 const int Toolbar::TILES_PER_ICON(8);
+
+static void setBlendHelper(int a, int b)
+{
+  nds::Video & main(nds::Video::instance(0));
+  main.blend(nds::Video::BLDMOD_OBJECT, 0, nds::Video::BLDMOD_BG3);
+  main.setBlendAB(a, b);
+
+}
 
 //VRAM initialisation - done just the once.
 static void initSpriteData(unsigned short * oamData)
@@ -50,9 +61,7 @@ static void initSpriteData(unsigned short * oamData)
   if (s_haveInitialised)
     return;
 
-  nds::Video & main(nds::Video::instance(0));
-  main.blend(nds::Video::BLDMOD_OBJECT, 0, nds::Video::BLDMOD_BG3);
-  main.setBlendAB(8,8);
+  setBlendHelper(8, 8);
 
   Image image("/"DATADIR"/fonts/toolbar.png", true);
   if (image.isValid())
@@ -111,6 +120,7 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view, int entries):
   m_controller(cont),
   m_view(view),
   m_visible(false),
+  m_touchedIndex(NO_INDEX),
   m_position(BOTTOM)
 {
   m_document.registerView(this);
@@ -123,6 +133,7 @@ Toolbar::Toolbar(Document & doc, Controller & cont, View & view, int entries):
   }
   initSpriteData(m_sprites.front()->oamData());
   layout();
+  Stylus::instance()->registerListener(this);
 }
 
 void Toolbar::layout()
@@ -159,15 +170,11 @@ void Toolbar::layout()
   setVisible(visible());
 }
 
-static void deleteSprite(nds::Sprite * s)
-{
-  delete s;
-}
-
 Toolbar::~Toolbar()
 {
-  for_each(m_sprites.begin(), m_sprites.end(), deleteSprite);
+  for_each(m_sprites.begin(), m_sprites.end(), delete_ptr());
   m_document.unregisterView(this);
+  Stylus::instance()->unregisterListener(this);
 }
 
 void Toolbar::notify()
@@ -187,39 +194,91 @@ void Toolbar::setVisible(bool visible)
   for_each(m_sprites.begin(), m_sprites.end(), std::mem_fun(&nds::Sprite::update));
 }
 
-bool Toolbar::touch(int x, int y)
+int Toolbar::touchedIndex(int x, int y) const
 {
+  if (not visible())
+  {
+    return NO_INDEX;
+  }
+
   nds::Sprite * first(m_sprites.front());
   nds::Sprite * last(m_sprites.back());
-  nds::Rectangle touchZone = { first->x(), first->y(),
+  nds::Rectangle touchZone = { first->x(), first->y()+SCREEN_HEIGHT,
     last->x() - first->x() + first->width(),
     last->y() - first->y() + first->height()
     };
-  if (not visible())
-  {
-    return false;
-  }
   if (touchZone.hit(x, y))
   {
-    bool handled(false);
     int index = 0;
-    for (SpriteVector::iterator it(m_sprites.begin());
+    for (SpriteVector::const_iterator it(m_sprites.begin());
         it != m_sprites.end();
         ++it, ++index)
     {
       nds::Sprite * sprite(*it);
-      nds::Rectangle rect = { sprite->x(), sprite->y(), sprite->width(), sprite->height() };
+      nds::Rectangle rect = { sprite->x(), sprite->y()+SCREEN_HEIGHT, sprite->width(), sprite->height() };
       if (sprite->enabled() and rect.hit(x, y))
       {
-        handlePress(index);
-        handled = true;
+        return index;
       }
     }
-    return handled;
   }
+  return NO_INDEX;
+}
+
+bool Toolbar::stylusUp(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  // are we touching something...
+  if (m_touchedIndex != NO_INDEX)
+  {
+    int finalIndex = touchedIndex(stylus->lastX(), stylus->lastY());
+    if (finalIndex == m_touchedIndex)
+    {
+      handlePress(m_touchedIndex);
+    }
+    m_sprites[m_touchedIndex]->setTranslucent(false);
+  }
+  setBlendHelper(8, 8);
   return false;
 }
 
+bool Toolbar::stylusDownFirst(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+
+  bool consumed = false;
+  m_touchedIndex = touchedIndex(stylus->startX(), stylus->startY());
+  if (m_touchedIndex != NO_INDEX)
+  {
+    setBlendHelper(15, 12);
+    m_sprites[m_touchedIndex]->setTranslucent(true);
+    consumed = true;
+  }
+  return consumed;
+}
+
+bool Toolbar::stylusDownRepeat(const Stylus * stylus)
+{
+  return false;
+}
+
+bool Toolbar::stylusDown(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  bool consumed = false;
+  int newIndex = touchedIndex(stylus->lastX(), stylus->lastY());
+  if (m_touchedIndex != NO_INDEX and newIndex != m_touchedIndex)
+  {
+    m_sprites[m_touchedIndex]->setTranslucent(false);
+    setBlendHelper(8, 8);
+    m_touchedIndex = NO_INDEX;
+    consumed = true;
+  }
+  return consumed;
+}
 
 void Toolbar::cyclePosition()
 {
@@ -251,6 +310,8 @@ void Toolbar::showCursor(int x, int y, int cursorid)
   y -= 192;
   if (y < 0)
     return;
+  m_cursorSprite->setTile(cursorid * TILES_PER_ICON);
+  m_cursorSprite->setXY(x, y);
   m_cursorSprite->setEnabled();
   m_cursorSprite->update();
 }
@@ -265,3 +326,4 @@ Toolbar::Position Toolbar::position() const
 {
   return m_position;
 }
+

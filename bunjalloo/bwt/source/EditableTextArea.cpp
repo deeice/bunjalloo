@@ -19,6 +19,7 @@
 #include "EditableTextArea.h"
 #include "Palette.h"
 #include "ScrollPane.h"
+#include "Stylus.h"
 #include "TextListener.h"
 #include "UTF8.h"
 #include "WidgetColors.h"
@@ -331,12 +332,16 @@ void EditableTextArea::setText(const UnicodeString & text)
   resizeParent();
 }
 
-bool EditableTextArea::touch(int x, int y)
+bool EditableTextArea::inBounds(int x, int y)
 {
-  // if inside a scrollPane, check relative to the bounds of parent
-  // otherwise check our bounds.
-  if ( (m_scrollPane and m_scrollPane->bounds().hit(x, y) and m_bounds.hit(x, y) )
-      or (not m_scrollPane and m_bounds.hit(x, y)))
+  return ( (m_scrollPane and m_scrollPane->bounds().hit(x, y) and m_bounds.hit(x, y) )
+      or (not m_scrollPane and m_bounds.hit(x, y)));
+}
+
+bool EditableTextArea::stylusUp(const Stylus * stylus)
+{
+  if (inBounds(stylus->startX(), stylus->startY()) and
+      inBounds(stylus->lastX(), stylus->lastY()))
   {
     if (listener())
     {
@@ -344,10 +349,28 @@ bool EditableTextArea::touch(int x, int y)
     }
     else
     {
-      setCaret(x, y);
+      setCaret(stylus->lastX(), stylus->lastY());
     }
-    return true;
   }
+  return false;
+}
+
+bool EditableTextArea::stylusDownFirst(const Stylus * stylus)
+{
+  // if inside a scrollPane, check relative to the bounds of parent
+  // otherwise check our bounds.
+  return false;
+}
+
+bool EditableTextArea::stylusDownRepeat(const Stylus * stylus)
+{
+  // nothing
+  return false;
+}
+
+bool EditableTextArea::stylusDown(const Stylus * stylus)
+{
+  // selections?
   return false;
 }
 

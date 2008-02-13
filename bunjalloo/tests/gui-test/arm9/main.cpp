@@ -16,20 +16,21 @@
 */
 #include "ndspp.h"
 #include "libnds.h"
-#include "TextArea.h"
-#include "Canvas.h"
-#include "Font.h"
-#include "ScrollPane.h"
-#include "TextAreaFactory.h"
-#include "EditableTextArea.h"
-#include "TextField.h"
-#include "RichTextArea.h"
-#include "Button.h"
-#include "ComboBox.h"
-#include "RadioButton.h"
 #include "ButtonGroup.h"
+#include "Button.h"
+#include "Canvas.h"
 #include "CheckBox.h"
+#include "ComboBox.h"
+#include "EditableTextArea.h"
+#include "Font.h"
 #include "Keyboard.h"
+#include "RadioButton.h"
+#include "RichTextArea.h"
+#include "ScrollPane.h"
+#include "Stylus.h"
+#include "TextAreaFactory.h"
+#include "TextArea.h"
+#include "TextField.h"
 #include "vera.h"
 
 extern const char _binary_test_map_bin_start[];
@@ -234,9 +235,11 @@ int main(int argc, char * argv[])
     if (keys & KEY_TOUCH)
     {
       touchPosition tp = touchReadXY();
-      needsPainting = keyBoard->touch(tp.px, tp.py+SCREEN_HEIGHT);
+      Stylus stylus;
+      stylus.update(Stylus::DOWN, true, tp.px, tp.py+SCREEN_HEIGHT);
+      needsPainting = keyBoard->dirty();
       if (not needsPainting)
-        needsPainting = scrollPane.touch(tp.px, tp.py+SCREEN_HEIGHT);
+        needsPainting = scrollPane.dirty();
     }
 
     needsPainting |= keyBoard->tick();

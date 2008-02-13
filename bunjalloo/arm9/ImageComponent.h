@@ -27,6 +27,10 @@ class ImageComponent: public Component
     virtual void paint(const nds::Rectangle & clip);
     virtual ~ImageComponent();
 
+    virtual bool stylusUp(const Stylus * stylus) { return false; }
+    virtual bool stylusDownFirst(const Stylus * stylus) { return false; }
+    virtual bool stylusDownRepeat(const Stylus * stylus) { return false; }
+    virtual bool stylusDown(const Stylus * stylus) { return false; }
   private:
     Image * m_image;
 

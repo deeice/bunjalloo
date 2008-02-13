@@ -143,6 +143,11 @@ int  Keys::down() const
   return (m_held ^ m_heldLast) & m_held;
 }
 
+int  Keys::up() const
+{
+  return (m_held ^ m_heldLast) & (~m_held);
+}
+
 int Keys::held()
 {
   return m_held;
@@ -175,6 +180,10 @@ void scanKeys()
 u32 keysDown()
 {
   return Keys::instance().down();
+}
+u32 keysUp()
+{
+  return Keys::instance().up();
 }
 u32 keysHeld()
 {

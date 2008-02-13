@@ -46,10 +46,44 @@ const static char * ENTER_TEXT_TITLE("Enter some text:");
 const static int STEP(1);
 const static char * BOOKMARK_FILE  = "/"DATADIR"/user/bookmarks.html";
 
+struct KeyState
+{
+  KeyState() { }
+
+  void initialise( u16 repeat, u16 down, u16 held, u16 up)
+  {
+    m_repeat = repeat;
+    m_down = down;
+    m_held = held;
+    m_up = up;
+  }
+
+  inline int isRepeat(int mask) const
+  {
+    return (m_repeat & mask);
+  }
+  inline int isHeld(int mask) const
+  {
+    return m_held & mask;
+  }
+  inline int isDown(int mask) const
+  {
+    return m_down & mask;
+  }
+  inline int isUp(int mask) const
+  {
+    return m_up & mask;
+  }
+  private:
+  u16 m_repeat;
+  u16 m_down;
+  u16 m_held;
+  u16 m_up;
+};
+
 View::View(Document & doc, Controller & c):
   m_document(doc),
   m_controller(c),
-  m_scrollPane(new ScrollPane),
   m_keyboard(new Keyboard),
   m_renderer(new ViewRender(this)),
   m_addressBar(new TextField(UnicodeString())),
@@ -57,11 +91,12 @@ View::View(Document & doc, Controller & c):
   m_bookmarkToolbar(new BookmarkToolbar(doc, c, *this)),
   m_prefsToolbar( new PreferencesToolbar(doc, c, *this)),
   m_toolbar(m_browseToolbar),
+  m_scrollPane(new ScrollPane),
   m_state(BROWSE),
   m_form(0),
   m_linkHandler(new LinkHandler(this)),
   m_search(0),
-  m_stylus(new Stylus),
+  m_keyState(new KeyState),
   m_dirty(true),
   m_refreshing(0)
 {
@@ -72,7 +107,7 @@ View::View(Document & doc, Controller & c):
   m_keyboard->setTopLevel(m_scrollPane);
   m_keyboard->setTitle(string2unicode(ENTER_TEXT_TITLE));
   m_document.registerView(this);
-  keysSetRepeat( 10, 5 );
+  keysSetRepeat( 20, 10 );
   m_toolbar->setVisible(true);
   string searchFile;
   if (m_controller.config().resource(Config::SEARCHFILE_STR,searchFile))
@@ -90,7 +125,7 @@ View::~View()
   delete m_bookmarkToolbar;
   delete m_linkHandler;
   delete m_search;
-  delete m_stylus;
+  Stylus::deleteInstance();
 }
 
 void View::extractTitle()
@@ -278,46 +313,60 @@ void View::saveAs()
   m_dirty = true;
 }
 
+void View::updateInput()
+{
+  m_keyState->initialise(
+      keysDownRepeat(),
+      keysDown(),
+      keysHeld(),
+      keysUp());
+  touchPosition tp = touchReadXY();
+  Stylus::TouchType touchType = Stylus::keysToTouchType( m_keyState->isHeld(KEY_TOUCH), m_keyState->isUp(KEY_TOUCH));
+  Stylus::instance()->update(touchType, m_keyState->isRepeat(KEY_TOUCH),
+      tp.px, tp.py+SCREEN_HEIGHT);
+}
+
 void View::browse()
 {
-  u16 keys = keysDownRepeat();
-  if (keys & KEY_START) {
+  updateInput();
+
+  if (m_keyState->isRepeat(KEY_START)) {
     enterUrl();
   }
   if (not m_keyboard->visible())
   {
-    if (keys & KEY_SELECT) {
+    if (m_keyState->isRepeat(KEY_SELECT)) {
       m_toolbar->cyclePosition();
     }
-    if (keys & KEY_DOWN) {
+    if (m_keyState->isRepeat(KEY_DOWN)) {
       // scroll down ...
       m_scrollPane->down();
       m_dirty = true;
     }
-    if (keys & KEY_UP) {
+    if (m_keyState->isRepeat(KEY_UP)) {
       // scroll up ...
       m_scrollPane->up();
       m_dirty = true;
     }
-    if (keys & KEY_RIGHT) {
+    if (m_keyState->isRepeat(KEY_RIGHT)) {
       // scroll down ...
       m_scrollPane->pageDown();
       m_dirty = true;
     }
-    if (keys & KEY_LEFT) {
+    if (m_keyState->isRepeat(KEY_LEFT)) {
       // scroll up ...
       m_scrollPane->pageUp();
       m_dirty = true;
     }
-    if (keys & KEY_L) {
+    if (m_keyState->isRepeat(KEY_L)) {
       m_controller.previous();
     }
-    if (keys & KEY_R) {
+    if (m_keyState->isRepeat(KEY_R)) {
       m_controller.next();
     }
   }
 
-  if (keys & KEY_A) {
+  if (m_keyState->isRepeat(KEY_A)) {
     // render the node tree
     m_document.dumpDOM();
   }
@@ -326,56 +375,14 @@ void View::browse()
     m_document.setPosition( m_scrollPane->currentPosition());
   }
 
+  // change to keys actually down, not repeating
+  Stylus * stylus(Stylus::instance());
+  if (stylus->touchType() != Stylus::NOTHING)
   {
-    // change to keys actually down, not repeating
-    u16 held = keysHeld();
-    touchPosition tp = touchReadXY();
-    m_stylus->update(held & KEY_TOUCH, tp.px, tp.py+SCREEN_HEIGHT);
-  }
-
-  bool doClickCheck = false;
-  int lastX=-1, lastY=-1;
-  if (m_stylus->clickType() == Stylus::CLICK)
-  {
-    doClickCheck = true;
-    m_stylus->startPoint(lastX, lastY);
-    m_stylus->reset();
-  }
-  else if (m_stylus->clickType() == Stylus::HELD)
-  {
-    // show held menu...
-    bool hasRepeat = (keys & KEY_TOUCH);
-    m_stylus->startPoint(lastX, lastY);
-    // repeat has kicked in
-    doClickCheck = (hasRepeat and
-        (m_keyboard->visible() or m_scrollPane->scrollBarHit(lastX, lastY)));
-    if (doClickCheck and not m_keyboard->visible())
-    {
-      // must be scrollBarHit... allow scraping across the screen
-      int tmpx;
-      m_stylus->endPoint(tmpx, lastY);
-    }
-  }
-
-  if (doClickCheck)
-  {
-    if (not m_keyboard->visible())
-    {
-      if ( m_toolbar->touch(lastX, lastY-SCREEN_HEIGHT) )
-      {
-        return;
-      }
-      if ( m_linkHandler->visible())
-      {
-        m_dirty = m_linkHandler->touch(lastX, lastY);
-        if (m_dirty)
-          return;
-      }
-    }
-
-    m_dirty = m_keyboard->touch(lastX, lastY);
+    m_dirty = true;
+    m_dirty = m_keyboard->dirty();
     if (not m_dirty) {
-      m_dirty = m_scrollPane->touch(lastX, lastY);
+      m_dirty = m_scrollPane->dirty();
       if (m_dirty)
       {
         m_document.setPosition( m_scrollPane->currentPosition());
@@ -426,24 +433,19 @@ void View::linkClicked(Link * link)
   }
   else // isAnchor and isImage
   {
-    int lastX, lastY;
-    m_stylus->startPoint(lastX, lastY);
+    Stylus * stylus(Stylus::instance());
     m_linkHandler->setLink(link);
-    m_linkHandler->setLocation(lastX, lastY);
+    m_linkHandler->setLocation(stylus->lastX(), stylus->lastY());
     m_linkHandler->setVisible();
   }
 }
 
 void View::keyboard()
 {
-  u16 keys = keysDownRepeat();
-  if (keys & KEY_TOUCH)
-  {
-    touchPosition tp = touchReadXY();
-    m_dirty = m_keyboard->touch(tp.px, tp.py+SCREEN_HEIGHT);
-    if (not m_dirty)
-      m_dirty = m_scrollPane->touch(tp.px, tp.py+SCREEN_HEIGHT);
-  }
+  updateInput();
+  m_dirty = m_keyboard->dirty();
+  if (not m_dirty)
+    m_dirty = m_scrollPane->dirty();
 }
 
 void View::tick()

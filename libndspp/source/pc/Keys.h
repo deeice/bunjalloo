@@ -31,6 +31,7 @@ class Keys
     void handleMouseMotion(int x, int y);
     void scan();
     int  down() const;
+    int  up() const;
     int held();
     int repeat();
     void setRepeat(int setDelay, int setRepeat);

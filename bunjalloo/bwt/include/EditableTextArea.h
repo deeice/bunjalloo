@@ -63,10 +63,12 @@ class EditableTextArea: public TextArea, public TextEntryI
     virtual void text(UnicodeString & returnString) const;
     virtual void setText(const UnicodeString & text);
     virtual void paint(const nds::Rectangle & clip);
-    virtual bool touch(int x, int y);
     virtual bool isMultiLine() const;
-    // virtual void setSize(unsigned int w, unsigned int h);
 
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
   protected:
     /** Overloaded from TextArea. If echo is off, shows * instead of text.*/
     virtual void printu(const UnicodeString & unicodeString);
@@ -84,6 +86,7 @@ class EditableTextArea: public TextArea, public TextEntryI
     void recalculateCaret();
     void resizeParent();
 
+    bool inBounds(int x, int y);
 };
 void EditableTextArea::setEchoText(bool echo)
 {

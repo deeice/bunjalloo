@@ -19,6 +19,7 @@
 #include "Canvas.h"
 #include "Palette.h"
 #include "Rectangle.h"
+#include "Stylus.h"
 #include "TextAreaFactory.h"
 #include "TextArea.h"
 #include "TextContainer.h"
@@ -75,26 +76,61 @@ void Button::paint(const nds::Rectangle & clip)
     }
     Canvas::instance().verticalLine(m_bounds.right()-1, m_bounds.top(), m_bounds.h, lowlight);
   }
+  m_dirty = false;
 }
 
-bool Button::touch(int x, int y)
+bool Button::stylusUp(const Stylus * stylus)
 {
-  if (m_bounds.hit(x,y))
+  int x = stylus->lastX();
+  int y = stylus->lastY();
+  m_dirty = false;
+  if (selected() and m_bounds.hit(x,y))
   {
-    setSelected(true);
+    setSelected(false);
+    m_dirty = true;
     if (listener())
     {
       listener()->pressed(this);
     }
-    return true;
   }
-  else if (listener() == 0)
+  return m_dirty;
+}
+
+bool Button::stylusDownFirst(const Stylus * stylus)
+{
+  int x = stylus->startX();
+  int y = stylus->startY();
+  m_dirty = false;
+  if (m_bounds.hit(x,y))
+  {
+    setSelected(true);
+    m_dirty = true;
+  }
+  else
   {
     setSelected(false);
   }
+  return m_dirty;
+}
+
+bool Button::stylusDownRepeat(const Stylus * stylus)
+{
+  // nothing? perhaps add a flag for repeatable on/off
   return false;
 }
 
+bool Button::stylusDown(const Stylus * stylus)
+{
+  // scraping
+  int x = stylus->lastX();
+  int y = stylus->lastY();
+  if (selected() and not m_bounds.hit(x,y))
+  {
+    setSelected(false);
+    m_dirty = true;
+  }
+  return false;
+}
 
 void Button::setDecoration(bool decorate)
 {

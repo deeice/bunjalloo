@@ -26,6 +26,7 @@ class Button;
 class EditableTextArea;
 class RichTextArea;
 class ScrollPane;
+class Stylus;
 /** Show a virtual keyboard. Accepts touch input and keypad input. */
 class Keyboard : public Component, public TextListener, public ButtonListener
 {
@@ -33,6 +34,8 @@ class Keyboard : public Component, public TextListener, public ButtonListener
 
     /** Construct a keyboard.  */
     Keyboard();
+
+    ~Keyboard();
 
     /** Call this each frame to handle keyboard input.*/
     //void handleInput();
@@ -55,7 +58,11 @@ class Keyboard : public Component, public TextListener, public ButtonListener
 
 
     // Interface implementation.
-    virtual bool touch(int x, int y);
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
+
     virtual void paint(const nds::Rectangle & clip);
     virtual void editText(TextEntryI * entry);
     virtual void pressed(ButtonI * button);
@@ -78,7 +85,6 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     bool m_shift;
     bool m_capsLock;
     KeyboardSelection m_selectedStatus;
-    int  m_ticks;
 
     ScrollPane * m_scrollPane;
     EditableTextArea * m_textArea;
@@ -120,7 +126,6 @@ class Keyboard : public Component, public TextListener, public ButtonListener
     void updateRow(const char * newText, int keys, int offset);
     void updateModifierKeys();
     void updateLayout(const char * text, const char * numbers);
-    void updateTicksForUI(ButtonI * button);
     void appendText(const UnicodeString & text);
     void layoutViewer();
     void applyResult();

@@ -14,15 +14,19 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "Canvas.h"
+#include "Delete.h"
 #include "LinkListener.h"
 #include "Palette.h"
-#include "RichTextArea.h"
-#include "UTF8.h"
 #include "Rectangle.h"
-#include "Canvas.h"
+#include "RichTextArea.h"
+#include "Stylus.h"
+#include "UTF8.h"
 #include "WidgetColors.h"
 using namespace std;
 using namespace nds;
+
+static const int NO_INDEX(-1);
 
 RichTextArea::RichTextArea(Font * font) :
   TextArea(font),
@@ -30,7 +34,8 @@ RichTextArea::RichTextArea(Font * font) :
   m_state(Link::STATE_PLAIN),
   m_linkListener(0),
   m_centred(false),
-  m_outlined(false)
+  m_outlined(false),
+  m_linkTouched(0)
 {
 }
 
@@ -39,14 +44,9 @@ RichTextArea::~RichTextArea()
   removeClickables();
 }
 
-static void deleteLink(Link * link)
-{
-  delete link;
-}
-
 void RichTextArea::removeClickables()
 {
-  for_each(m_links.begin(), m_links.end(), deleteLink);
+  for_each(m_links.begin(), m_links.end(), delete_ptr());
   m_links.clear();
   m_state = Link::STATE_PLAIN;
 }
@@ -141,15 +141,15 @@ void RichTextArea::setLocation(unsigned int x, unsigned int y)
   }
 }
 
-void RichTextArea::addLink(const std::string & href, bool viewed)
+void RichTextArea::addLink(const std::string & href, bool visited)
 {
   Link * link = new Link(href);
   link->setTextStart(m_documentSize);
   m_links.push_back(link);
   m_state = Link::STATE_LINK;
-  if (viewed)
+  if (visited)
   {
-    link->setColor(WidgetColors::LINK_CLICKED);
+    link->setColor(WidgetColors::LINK_VISITED);
   }
 }
 
@@ -322,19 +322,19 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
 
 void RichTextArea::handleNextEvent()
 {
+  Link * currentLink(*m_currentLink);
   switch (m_nextEventType)
   {
     case Link::STATE_LINK:
-      if ( (*m_currentLink)->clicked() )
+      if (currentLink->clicked())
       {
         setTextColor(WidgetColors::LINK_CLICKED);
       }
       else
       {
-        setTextColor((*m_currentLink)->color());
+        setTextColor(currentLink->color());
       }
-      m_nextEvent = (*m_currentLink)->textEnd();
-      (*m_currentLink)->setClicked(false);
+      m_nextEvent = currentLink->textEnd();
       m_nextEventType = Link::STATE_PLAIN;
       setUnderline();
       break;
@@ -345,8 +345,9 @@ void RichTextArea::handleNextEvent()
         ++m_currentLink;
       if (m_currentLink != m_links.end())
       {
-        m_nextEvent = (*m_currentLink)->textStart();
-        m_nextEventType = (*m_currentLink)->eventType();
+        currentLink = *m_currentLink;
+        m_nextEvent = currentLink->textStart();
+        m_nextEventType = currentLink->eventType();
         if (m_nextEvent == m_paintPosition)
         {
           handleNextEvent();
@@ -357,9 +358,15 @@ void RichTextArea::handleNextEvent()
       }
       break;
     case Link::STATE_COLOR:
-      setTextColor((*m_currentLink)->color());
-      m_nextEvent = (*m_currentLink)->textEnd();
-      (*m_currentLink)->setClicked(false);
+      if (currentLink->clicked())
+      {
+        setTextColor(WidgetColors::LINK_CLICKED);
+      }
+      else
+      {
+        setTextColor(currentLink->color());
+      }
+      m_nextEvent = currentLink->textEnd();
       m_nextEventType = Link::STATE_PLAIN;
       setUnderline(false);
       break;
@@ -396,13 +403,14 @@ int RichTextArea::linesToSkip() const
 {
   if (m_bounds.y < 0)
   {
-    return lineAt(0) + 1;
+    return lineAt(0);
   }
   return 0;
 }
 
 void RichTextArea::paint(const nds::Rectangle & clip)
 {
+  m_dirty = false;
   // ensure we switch off links
   setTextColor(0);
   setUnderline(false);
@@ -424,23 +432,8 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   m_paintPosition = 0;
   m_lineNumber = 0;
   // work out what happens when we skip lines.
-  // how to factor this ? copied from lineAt()
-  int dy = (- m_bounds.y);
-  int lineNum = 0;
-  for (; dy > font().height();)
-  {
-    LineHeightMap::const_iterator it(m_lineHeight.find(lineNum));
-
-    if (m_lineHeight.end() != it)
-    {
-      dy -= it->second;
-    }
-    else
-    {
-      dy -= font().height();
-    }
-    lineNum++;
-  }
+  int dy;
+  int lineNum = lineAt(0, dy);
   std::vector<UnicodeString>::const_iterator it(m_document.begin());
   int skipLines(lineNum);
   m_currentChildIndex = 0;
@@ -530,11 +523,11 @@ void RichTextArea::checkSkippedLines(int skipLines)
   }
 }
 
-int RichTextArea::lineAt(int y) const
+int RichTextArea::lineAt(int y, int &leftover) const
 {
   int dy = (y - m_bounds.y);
   int lineNum = 0;
-  for (; dy > 0;)
+  for (; dy > font().height();)
   {
     LineHeightMap::const_iterator it(m_lineHeight.find(lineNum));
 
@@ -548,17 +541,25 @@ int RichTextArea::lineAt(int y) const
     }
     lineNum++;
   }
-  lineNum--;
+  leftover = dy;
   return lineNum;
+}
+
+int RichTextArea::lineAt(int y) const
+{
+  int tmp;
+  return lineAt(y, tmp);
 }
 
 int RichTextArea::pointToCharIndex(int x, int y) const
 {
-  int lineNum = lineAt(y);
+  unsigned int lineNum = lineAt(y);
+  if (lineNum >= m_document.size())
+    return NO_INDEX;
   unsigned int currentChildIndex = 0;
   unsigned int charNumber = documentSize(lineNum, &currentChildIndex);
   const UnicodeString & line(m_document[lineNum]);
-  int caretChar = -1;
+  int caretChar = NO_INDEX;
   bool hasComponent(lineHasComponent(lineNum));
   for (int i = 0, size = 0; i < (int)line.length(); ++i, ++charNumber)
   {
@@ -576,7 +577,7 @@ int RichTextArea::pointToCharIndex(int x, int y) const
       if (size > x)
       {
         // gone past x, not here
-        caretChar = -1;
+        caretChar = NO_INDEX;
         goto done;
       }
     }
@@ -595,7 +596,7 @@ int RichTextArea::pointToCharIndex(int x, int y) const
     }
   }
 done:
-  if (caretChar != -1 and lineNum > 0)
+  if (caretChar != NO_INDEX and lineNum > 0)
   {
     int charsToLine = documentSize(lineNum);
     caretChar += charsToLine;
@@ -603,48 +604,98 @@ done:
   return caretChar;
 }
 
-bool RichTextArea::childTouch(int x, int y)
+Link * RichTextArea::linkAt(int index)
 {
-  bool hit(false);
-  for (std::vector<Component*>::iterator it(m_children.begin());
-      it != m_children.end();
-      ++it)
+  if (index != NO_INDEX)
   {
-    Component * child(*it);
-    hit |= child->touch(x, y);
-  }
-  return hit;
-}
-
-bool RichTextArea::touch(int x, int y)
-{
-  if ( m_bounds.hit(x, y))
-  {
-    int charClicked = pointToCharIndex(x, y);
-    if (charClicked == -1) {
-      return childTouch(x, y);
-    }
-
-    // now see if this is in a link
     LinkList::const_iterator linkIt(m_links.begin());
     for (; linkIt != m_links.end(); ++linkIt)
     {
       Link * l(*linkIt);
-      if (    ((unsigned int)charClicked) >= l->textStart()
-          and ((unsigned int)charClicked) <= l->textEnd())
+      if (    ((unsigned int)index) >= l->textStart()
+          and ((unsigned int)index) <= l->textEnd())
       {
-        if (l->eventType() == Link::STATE_LINK)
-        {
-          l->setClicked();
-        }
-        if (m_linkListener)
-        {
-          m_linkListener->linkClicked(l);
-        }
-        break;
+        return l;
       }
     }
-    return true;
+  }
+  return 0;
+}
+
+bool RichTextArea::stylusUp(const Stylus * stylus)
+{
+  bool consumed(false);
+  if (m_linkTouched and m_bounds.hit(stylus->lastX(), stylus->lastY()))
+  {
+    // was it the same link?
+    int charClicked = pointToCharIndex(stylus->startX(), stylus->startY());
+    Link * l(linkAt(charClicked));
+    bool clicked(false);
+    if (l == m_linkTouched)
+    {
+      // same link
+      m_linkListener->linkClicked(l);
+      clicked = true;
+    }
+    m_linkTouched->setClicked(clicked);
+    consumed = true;
+  }
+  m_linkTouched = 0;
+  if (not consumed)
+    FOR_EACH_CHILD(stylusUp);
+  return consumed;
+}
+
+bool RichTextArea::stylusDownFirst(const Stylus * stylus)
+{
+  bool consumed(false);
+  // see if it hit a link
+  if (m_bounds.hit(stylus->startX(), stylus->startY()))
+  {
+    m_linkTouched = 0;
+    int charClicked = pointToCharIndex(stylus->startX(), stylus->startY());
+    if (charClicked != NO_INDEX)
+    {
+      m_linkTouched = linkAt(charClicked);
+      if (m_linkTouched)
+      {
+        m_linkTouched->setClicked();
+        consumed = true;
+      }
+    }
+    else
+    {
+      FOR_EACH_CHILD(stylusDownFirst);
+    }
+  }
+  return consumed;
+}
+
+bool RichTextArea::stylusDownRepeat(const Stylus * stylus)
+{
+  // do nothing to avoid accidental clicks
+  FOR_EACH_CHILD(stylusDownRepeat);
+  return false;
+}
+
+bool RichTextArea::stylusDown(const Stylus * stylus)
+{
+  int x = stylus->lastX();
+  int y = stylus->lastY();
+  if (m_bounds.hit(x, y))
+  {
+    int charClicked = pointToCharIndex(x, y);
+    Link * l(linkAt(charClicked));
+    if (l != m_linkTouched and m_linkTouched)
+    {
+      m_linkTouched->setClicked(false);
+      m_dirty = true;
+      m_linkTouched = 0;
+    }
+    else
+    {
+      FOR_EACH_CHILD(stylusDown);
+    }
   }
   return false;
 }

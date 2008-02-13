@@ -18,6 +18,7 @@
 #include "Palette.h"
 #include "ScrollBar.h"
 #include "ScrollPane.h"
+#include "Stylus.h"
 #include "WidgetColors.h"
 using nds::Canvas;
 
@@ -31,6 +32,8 @@ ScrollBar::ScrollBar():Component(),
   m_handleSize(0),
   m_handlePosition(0),
   m_handleHeld(HANDLE_NOT_HELD),
+  m_hitOnRepeat(false),
+  m_touchedMe(NO_TOUCH),
   m_scrollPane(0)
 {
 }
@@ -60,32 +63,51 @@ void ScrollBar::setScrollable(ScrollPane * scrollPane)
   m_scrollPane = scrollPane;
 }
 
-bool ScrollBar::touch(int x, int y)
+bool ScrollBar::hitTopArrow(int y)
 {
-  if (m_scrollPane and m_bounds.hit(x, y))
-  {
+   return (y < (m_bounds.y + ARROW_HEIGHT));
+}
 
+bool ScrollBar::hitBottomArrow(int y)
+{
+  return (y > (m_bounds.y + m_bounds.h - ARROW_HEIGHT));
+}
+
+bool ScrollBar::hitHandle(int x, int y)
+{
+  // check if clicking on the handle:
+  nds::Rectangle handle = {m_bounds.x, m_handlePosition, m_bounds.w, m_handleSize};
+  if (handle.hit(x, y))
+  {
+    return true;
+  }
+  return false;
+}
+
+void ScrollBar::doScroll(int x, int y)
+{
+  if (m_scrollPane)
+  {
     // Check if clicking in the arrows:
-    if (y < (m_bounds.y + ARROW_HEIGHT))
+    if (hitTopArrow(y))
     {
       m_scrollPane->up();
       m_handleHeld = HANDLE_NOT_HELD;
-      return true;
+      return;
     }
-    if (y > (m_bounds.y + m_bounds.h - ARROW_HEIGHT))
+    if (hitBottomArrow(y))
     {
       m_scrollPane->down();
       m_handleHeld = HANDLE_NOT_HELD;
-      return true;
+      return;
     }
     // check if clicking on the handle:
-    nds::Rectangle handle = {m_bounds.x, m_handlePosition, m_bounds.w, m_handleSize};
     if (m_handleHeld == HANDLE_NOT_HELD)
     {
-      if (handle.hit(x, y))
+      if (hitHandle(x, y))
       {
         m_handleHeld = y;
-        return true;
+        return;
       }
     }
     else if (m_handleHeld != HANDLE_NOT_HELD)
@@ -93,43 +115,121 @@ bool ScrollBar::touch(int x, int y)
       // scroll to y...
       m_scrollPane->scrollToPercent( ((y - ARROW_HEIGHT - m_bounds.top()) * 256 ) / visibleRange());
       m_handleHeld = y;
-      return true;
+      return;
     }
     // check if above or below the bounds
     if (y < m_handlePosition)
     {
       m_scrollPane->upBlock();
       m_handleHeld = HANDLE_NOT_HELD;
-      return true;
+      return;
     }
     if (y > m_handlePosition)
     {
       m_scrollPane->downBlock();
       m_handleHeld = HANDLE_NOT_HELD;
-      return true;
+      return;
     }
-
   }
-  else {
+  else
+  {
+    // ??
     m_handleHeld = HANDLE_NOT_HELD;
   }
+}
+
+bool ScrollBar::stylusUp(const Stylus * stylus)
+{
+  // only pay attention to touches that start on this widget
+  if (not m_bounds.hit(stylus->startX(), stylus->startY()))
+  {
+    return false;
+  }
+
+  if (not m_hitOnRepeat)
+  {
+    // do actual scroll
+    doScroll(stylus->startX(), stylus->startY());
+  }
+  m_touchedMe = NO_TOUCH;
+  m_dirty = true;
+  return true;
+}
+
+bool ScrollBar::stylusDownFirst(const Stylus * stylus)
+{
+  int x = stylus->startX();
+  int y = stylus->startY();
+  if (not m_bounds.hit(x, y))
+  {
+    m_dirty = m_handleHeld != HANDLE_NOT_HELD;
+    m_handleHeld = HANDLE_NOT_HELD;
+    return false;
+  }
+  /*printf("Hit ScrollBar %d %d in %d %d w %d h %d\n",
+      stylus->startX(), stylus->startY(),
+      m_bounds.x, m_bounds.y,
+      m_bounds.w, m_bounds.h);*/
+
+  if (hitHandle(x, y))
+  {
+    m_touchedMe = TOUCH_HANDLE;
+  }
+  else if (hitTopArrow(y))
+  {
+    m_touchedMe = TOUCH_TOP_ARROW;
+  }
+  else if (hitBottomArrow(y))
+  {
+    m_touchedMe = TOUCH_BOT_ARROW;
+  }
+  else
+  {
+    m_touchedMe = TOUCH_SOMETHING;
+  }
+
+  m_hitOnRepeat = false;
+  m_dirty = true;
+  return true;
+}
+
+bool ScrollBar::stylusDownRepeat(const Stylus * stylus)
+{
+  if (not m_bounds.hit(stylus->startX(), stylus->startY()))
+  {
+    return false;
+  }
+  // do actual scrolling
+  doScroll(stylus->startX(), stylus->lastY());
+  m_hitOnRepeat = true;
+  m_dirty = true;
+  return true;
+}
+
+bool ScrollBar::stylusDown(const Stylus * stylus)
+{
+  // do nothing
+  // TODO: after repeat hits once, assume drag mode?
   return false;
 }
 
 void ScrollBar::paint(const nds::Rectangle & clip)
 {
+  m_dirty = false;
   // background
   Canvas::instance().fillRectangle(m_bounds.x+1,
                                         m_bounds.y+1,
                                         m_bounds.w-1,
                                         m_bounds.h-1,
-                                        WidgetColors::SCROLLBAR_BACKGROUND);
+                                        m_touchedMe==TOUCH_SOMETHING?WidgetColors::SCROLLBAR_BACKGROUND_TOUCH
+                                        :WidgetColors::SCROLLBAR_BACKGROUND);
 
   // up arrow
   Canvas::instance().fillRectangle(m_bounds.x,
                                         m_bounds.y,
                                         m_bounds.w,
                                         ARROW_HEIGHT,
+                                        m_touchedMe==TOUCH_TOP_ARROW?WidgetColors::SCROLLBAR_HANDLE_HELD:
                                         WidgetColors::SCROLLBAR_ARROW);
   // head.
   int headX = m_bounds.x + (m_bounds.w/2);
@@ -141,12 +241,14 @@ void ScrollBar::paint(const nds::Rectangle & clip)
                                         m_bounds.bottom()-ARROW_HEIGHT,
                                         m_bounds.w,
                                         ARROW_HEIGHT,
+                                        m_touchedMe==TOUCH_BOT_ARROW?WidgetColors::SCROLLBAR_HANDLE_HELD:
                                         WidgetColors::SCROLLBAR_ARROW);
   headY = m_bounds.bottom() - (ARROW_HEIGHT/2);
   drawDownArrow(headX-1, headY);
 
   calculateHandle();
-  unsigned short c(WidgetColors::SCROLLBAR_HANDLE_NOT_HELD);
+  unsigned short c(m_touchedMe==TOUCH_HANDLE?WidgetColors::SCROLLBAR_HANDLE_HELD:
+      WidgetColors::SCROLLBAR_HANDLE_NOT_HELD);
   if (m_handleHeld != HANDLE_NOT_HELD)
   {
     c = WidgetColors::SCROLLBAR_HANDLE_HELD;

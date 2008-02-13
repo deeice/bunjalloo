@@ -61,4 +61,5 @@ void ImageComponent::paint(const nds::Rectangle & clip)
   {
     Canvas::instance().drawRectangle(0,0,128,128, nds::Color(31,0,0));
   }
+  m_dirty = false;
 }

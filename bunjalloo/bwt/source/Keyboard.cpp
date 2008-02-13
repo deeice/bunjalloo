@@ -22,6 +22,7 @@
 #include "ScrollPane.h"
 #include "Button.h"
 #include "Canvas.h"
+#include "Stylus.h"
 #include "TextEntryI.h"
 
 // TODO: use config for this?
@@ -71,7 +72,6 @@ Keyboard::Keyboard():
   m_shift(false),
   m_capsLock(false),
   m_selectedStatus(OK),
-  m_ticks(0),
   m_scrollPane(new ScrollPane),
   m_textArea((EditableTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_EDIT)),
   m_richTextArea((RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH)),
@@ -87,7 +87,6 @@ Keyboard::Keyboard():
   m_cancel(new Button),
   m_clearKey(new Button)
 {
-  setVisible(false);
   initUI();
   int x = INITIAL_X;
   int y = INITIAL_Y;
@@ -180,6 +179,13 @@ Keyboard::Keyboard():
   // in the destructor.
   add(m_scrollPane);
   add(m_richTextArea);
+  setVisible(false);
+  Stylus::instance()->registerListener(this);
+}
+
+Keyboard::~Keyboard()
+{
+  Stylus::instance()->unregisterListener(this);
 }
 
 void Keyboard::initUI()
@@ -307,16 +313,13 @@ void Keyboard::pressed(ButtonI * button)
       break;
     case SPKY_ENTER:
       appendText(string2unicode("\n"));
-      updateTicksForUI(button);
       break;
     case SPKY_BACKSPACE:
       m_textArea->deleteChar();
       layoutViewer();
-      updateTicksForUI(button);
       break;
     case SPKY_SPACE:
       appendText(((Button*)button)->text());
-      updateTicksForUI(button);
       break;
     case SPKY_EXTRA:
       m_extra = not m_extra;
@@ -326,7 +329,6 @@ void Keyboard::pressed(ButtonI * button)
       m_selectedStatus = CANCEL;
       m_textArea->clearText();
       m_textArea->appendText(m_initialText);
-      m_ticks = 1;
       tick();
       m_topLevel->setVisible();
       this->setVisible(false);
@@ -334,7 +336,6 @@ void Keyboard::pressed(ButtonI * button)
       break;
     case SPKY_OK:
       m_selectedStatus = OK;
-      m_ticks = 1;
       tick();
       m_topLevel->setVisible();
       this->setVisible(false);
@@ -342,12 +343,10 @@ void Keyboard::pressed(ButtonI * button)
       break;
     case SPKY_CLEAR:
       m_textArea->clearText();
-      updateTicksForUI(button);
       layoutViewer();
       break;
     case SPKY_UNKNOWN:
       // anything else
-      updateTicksForUI(button);
       appendText(((Button*)button)->text());
       m_shift = false;
       m_extra = false;
@@ -371,15 +370,6 @@ void Keyboard::layoutViewer()
     m_scrollPane->scrollToPercent(scrollTo);
   }
 }
-
-void Keyboard::updateTicksForUI(ButtonI * button)
-{
-  m_ticks = 1;
-  tick();
-  button->setSelected(true);
-  m_ticks = TICK_COUNT;
-}
-
 
 void Keyboard::updateModifierKeys()
 {
@@ -436,22 +426,34 @@ void Keyboard::updateLayout(const char * text, const char * numbers)
 
 }
 
-bool Keyboard::touch(int x, int y)
+bool Keyboard::stylusUp(const Stylus * stylus)
 {
-  bool repaint(false);
-  if (visible())
-  {
-    std::vector<Component*>::iterator it(m_children.begin());
-    for (; it != m_children.end(); ++it)
-    {
-      Component * c(*it);
-      if ( c->touch(x, y) )
-      {
-        repaint = true;
-      }
-    }
-  }
-  return repaint;
+  if (not visible())
+    return false;
+  FOR_EACH_CHILD(stylusUp);
+  return false;
+}
+
+bool Keyboard::stylusDownFirst(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  FOR_EACH_CHILD(stylusDownFirst);
+  return false;
+}
+bool Keyboard::stylusDownRepeat(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  FOR_EACH_CHILD(stylusDownRepeat);
+  return false;
+}
+bool Keyboard::stylusDown(const Stylus * stylus)
+{
+  if (not visible())
+    return false;
+  FOR_EACH_CHILD(stylusDown);
+  return false;
 }
 
 void Keyboard::setTopLevel(Component * topLevel)
@@ -478,21 +480,6 @@ bool Keyboard::tick()
   if (pressed)
     pressed--;
 #endif
-  if (m_ticks>0)
-  {
-    m_ticks--;
-    if (m_ticks == 0)
-    {
-      std::vector<Component*>::iterator it(m_children.begin());
-      for (; *it != m_capsLockKey; ++it)
-      {
-        Button * c((Button*)*it);
-        c->setSelected(false);
-      }
-      updateModifierKeys();
-      return true;
-    }
-  }
   return false;
 }
 

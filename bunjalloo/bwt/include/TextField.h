@@ -47,7 +47,11 @@ class TextField: public TextContainer, public TextEntryI
 
     // From Component.
     virtual void paint(const nds::Rectangle & clip);
-    virtual bool touch(int x, int y);
-
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
+  private:
+    bool m_touched;
 };
 #endif

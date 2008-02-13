@@ -77,8 +77,11 @@ class ScrollBar: public Component
     void setScrollable(ScrollPane * scrollPane);
 
     // from Component
-    virtual bool touch(int x, int y);
     virtual void paint(const nds::Rectangle & clip);
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
 
   private:
     int m_total;
@@ -86,9 +89,27 @@ class ScrollBar: public Component
     int m_handleSize;
     int m_handlePosition;
     int m_handleHeld;
+    bool m_hitOnRepeat;
+    enum TouchedWhere
+    {
+      NO_TOUCH,
+      TOUCH_TOP_ARROW,
+      TOUCH_HANDLE,
+      TOUCH_BOT_ARROW,
+      TOUCH_SOMETHING
+    };
+    TouchedWhere m_touchedMe;
     ScrollPane * m_scrollPane;
 
     void calculateHandle();
+    /** Do the actual scroll thing.
+     * @param x the x touch position
+     * @param y the y touch position
+     */
+    void doScroll(int x, int y);
 
+    bool hitHandle(int x, int y);
+    bool hitBottomArrow(int y);
+    bool hitTopArrow(int y);
 };
 #endif

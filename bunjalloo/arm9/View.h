@@ -27,6 +27,7 @@ class Controller;
 
 class FormControl;
 class Keyboard;
+class KeyState;
 class LinkHandler;
 class ScrollPane;
 class SearchEntry;
@@ -96,7 +97,6 @@ class View : public ViewI, public ButtonListener, public LinkListener
 
     Document & m_document;
     Controller & m_controller;
-    ScrollPane * m_scrollPane;
     Keyboard * m_keyboard;
     ViewRender * m_renderer;
     TextField * m_addressBar;
@@ -104,11 +104,12 @@ class View : public ViewI, public ButtonListener, public LinkListener
     Toolbar * m_bookmarkToolbar;
     Toolbar * m_prefsToolbar;
     Toolbar * m_toolbar;
+    ScrollPane * m_scrollPane;
     InputState m_state;
     FormControl * m_form;
     LinkHandler * m_linkHandler;
     SearchEntry * m_search;
-    Stylus * m_stylus;
+    KeyState * m_keyState;
     int m_preInputStartLine;
     bool m_dirty;
     std::string m_linkHref;
@@ -116,6 +117,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     // store the title of the page to bookmark..
     std::string m_bookmarkTitleUtf8;
 
+    void updateInput();
     void browse();
     void keyboard();
 

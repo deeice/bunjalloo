@@ -24,72 +24,79 @@ void StylusTest::testClick()
 {
   Stylus stylus;
   // unclick...
-  stylus.update(false, 1, 1);
+  stylus.update(Stylus::NOTHING, false, 1, 1);
 
   // press once
-  stylus.update(true, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::WAFFLE, stylus.clickType());
+  stylus.update(Stylus::DOWN, false, 1, 1);
+  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
+  CPPUNIT_ASSERT(stylus.down());
+  CPPUNIT_ASSERT(not stylus.isRepeat());
 
   // release
-  stylus.update(false, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::CLICK, stylus.clickType());
+  stylus.update(Stylus::UP, false, 1, 1);
+  CPPUNIT_ASSERT_EQUAL(Stylus::UP, stylus.touchType());
+  CPPUNIT_ASSERT(stylus.up());
+  CPPUNIT_ASSERT(not stylus.isRepeat());
 }
 
 void StylusTest::testHold()
 {
   Stylus stylus;
   // unclick...
-  stylus.update(false, 1, 1);
+  stylus.update(Stylus::NOTHING, false, 1, 1);
 
   // press...
-  stylus.update(true, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::WAFFLE, stylus.clickType());
+  stylus.update(Stylus::DOWN, false, 1, 1);
+  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
 
+  stylus.update(Stylus::DOWN, true, 1, 1);
   // hold..
-  for (int i = 0; i < Stylus::HOLD_LIMIT; ++i)
-  {
-    stylus.update(true, 1, 1);
-  }
-  CPPUNIT_ASSERT_EQUAL(Stylus::HELD, stylus.clickType());
+  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
+  CPPUNIT_ASSERT(stylus.down());
+  CPPUNIT_ASSERT(stylus.isRepeat());
 
   // release
-  stylus.update(false, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::CANCEL, stylus.clickType());
+  stylus.update(Stylus::UP, true, 1, 1);
+  CPPUNIT_ASSERT_EQUAL(Stylus::UP, stylus.touchType());
+  CPPUNIT_ASSERT(not stylus.isRepeat());
 }
 
 void StylusTest::testHoldAndMove()
 {
   Stylus stylus;
   // unclick...
-  stylus.update(false, 1, 1);
+  stylus.update(Stylus::NOTHING, false, 1, 1);
 
   // press...
-  stylus.update(true, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::WAFFLE, stylus.clickType());
+  stylus.update(Stylus::DOWN, false, 1, 1);
+  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
   int x, y;
   stylus.startPoint(x, y);
   CPPUNIT_ASSERT_EQUAL(1, x);
   CPPUNIT_ASSERT_EQUAL(1, y);
 
   // hold..
-  for (int i = 0; i < Stylus::HOLD_LIMIT; ++i)
+  for (int i = 0; i < 200; ++i)
   {
-    stylus.update(true, i, i);
+    stylus.update(Stylus::DOWN, i&1, i, i);
   }
-  stylus.update(true, 99, 27);
+  stylus.update(Stylus::DOWN, true, 99, 27);
   stylus.startPoint(x, y);
   CPPUNIT_ASSERT_EQUAL(1, x);
   CPPUNIT_ASSERT_EQUAL(1, y);
 
-  stylus.endPoint(x, y);
+  stylus.lastPoint(x, y);
   CPPUNIT_ASSERT_EQUAL(99, x);
+  CPPUNIT_ASSERT_EQUAL(99, stylus.lastX());
   CPPUNIT_ASSERT_EQUAL(27, y);
-  CPPUNIT_ASSERT_EQUAL(Stylus::HELD, stylus.clickType());
+  CPPUNIT_ASSERT_EQUAL(27, stylus.lastY());
+  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
+  CPPUNIT_ASSERT(stylus.isRepeat());
 
   // release
-  stylus.update(false, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::CANCEL, stylus.clickType());
-  stylus.endPoint(x, y);
+  stylus.update(Stylus::UP, false, 1, 1);
+  CPPUNIT_ASSERT_EQUAL(Stylus::UP, stylus.touchType());
+  stylus.lastPoint(x, y);
   CPPUNIT_ASSERT_EQUAL(99, x);
   CPPUNIT_ASSERT_EQUAL(27, y);
 }

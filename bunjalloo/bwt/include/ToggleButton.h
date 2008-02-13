@@ -29,8 +29,13 @@ class ToggleButton: public Component, public ButtonI
 
     // from Component
     virtual void paint(const nds::Rectangle & clip);
-    virtual bool touch(int x, int y);
 
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
+
+    bool touched() const;
   protected:
     /** Concrete classes that inherit from ToggleButton should return the
      * graphics to display.
@@ -47,5 +52,6 @@ class ToggleButton: public Component, public ButtonI
     virtual const unsigned short *getPaletteData() = 0;
 
   private:
+    bool m_touched;
 };
 #endif

@@ -38,6 +38,8 @@ class WidgetColors
     static const unsigned short COMBOBOX_SELECTED;
     //!ScrollBar background.
     static const unsigned short SCROLLBAR_BACKGROUND;
+    //!ScrollBar background touched.
+    static const unsigned short SCROLLBAR_BACKGROUND_TOUCH;
     //!ScrollBar border.
     static const unsigned short SCROLLBAR_BORDER;
     //!ScrollBar arrow background.
@@ -49,6 +51,8 @@ class WidgetColors
     //!ScrollBar handle when the user has it selected.
     static const unsigned short SCROLLBAR_HANDLE_HELD;
 
+    //!Link text when it has been visited.
+    static const unsigned short LINK_VISITED;
     //!Link text when it has been selected.
     static const unsigned short LINK_CLICKED;
     //!Link text under normal conditions.

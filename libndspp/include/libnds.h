@@ -153,6 +153,7 @@ typedef enum KEYPAD_BITS {
 } KEYPAD_BITS;
 void scanKeys();
 u32 keysDown();
+u32 keysUp();
 u32 keysHeld();
 u32 keysDownRepeat();
 void keysSetRepeat( u8 setDelay, u8 setRepeat );

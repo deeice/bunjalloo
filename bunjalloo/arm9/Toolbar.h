@@ -20,12 +20,13 @@
 #include <vector>
 #include "Sprite.h"
 #include "ViewI.h"
+#include "StylusListener.h"
 
 class Document;
 class Controller;
 class View;
 
-class Toolbar: public ViewI
+class Toolbar: public ViewI, public StylusListener
 {
   public:
     enum Position
@@ -63,8 +64,8 @@ class Toolbar: public ViewI
       ICON_COOKIE,
       ICON_ADD_COOKIE,
       ICON_ADD_SEARCH,
-
     };
+
     static const int TILES_PER_ICON;
     static const int TOOLBAR_X;
     static const int TOOLBAR_X_RIGHT;
@@ -81,11 +82,8 @@ class Toolbar: public ViewI
     virtual void tick() = 0;
     virtual void updateIcons() = 0;
 
-    bool touch(int x, int y);
-
-
+    /** Cycle the TB position top -> right -> bottom -> left -> top. */
     void cyclePosition();
-
 
     void showCursor(int x, int y, int cursorid);
     void hideCursor();
@@ -94,6 +92,11 @@ class Toolbar: public ViewI
     virtual void notify();
 
     Position position() const;
+
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
 
   protected:
     Document & m_document;
@@ -109,9 +112,11 @@ class Toolbar: public ViewI
     // visible - ie. is showing
     bool m_visible;
     nds::Sprite *  m_cursorSprite;
+    int m_touchedIndex;
 
     Position m_position;
 
+    int touchedIndex(int x, int y) const;
 
 };
 #endif

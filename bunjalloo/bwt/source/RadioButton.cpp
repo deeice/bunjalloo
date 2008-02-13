@@ -26,15 +26,12 @@ RadioButton::RadioButton():ToggleButton()
 
 const unsigned char * RadioButton::getGfxData()
 {
+  int offset = 0;
   if (selected())
-  {
-    return (const u8*)&_binary_radiobutton_img_bin_start[16*8];
-  }
-  else
-  {
-    // paint radio_off
-    return (const u8*)_binary_radiobutton_img_bin_start;
-  }
+    offset |= 1;
+  if (touched())
+    offset |= 2;
+  return (const u8*)&_binary_radiobutton_img_bin_start[16*8*offset];
 }
 
 const unsigned short * RadioButton::getPaletteData()

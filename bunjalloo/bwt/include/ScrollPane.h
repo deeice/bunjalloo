@@ -18,6 +18,7 @@
 #define ScrollPane_h_seen
 
 #include "Component.h"
+#include "StylusListener.h"
 
 class ScrollBar;
 
@@ -103,9 +104,13 @@ class ScrollPane: public Component
 
     // From Component
     virtual void paint(const nds::Rectangle & clip);
-    virtual bool touch(int x, int y);
     virtual void setSize(unsigned int w, unsigned int h);
     virtual void setLocation(unsigned int x, unsigned int y);
+
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
 
   private:
     static Component * s_popup;
@@ -116,6 +121,7 @@ class ScrollPane: public Component
     ScrollBar * m_scrollBar;
     unsigned short m_backgroundColour;
     bool m_stretchChildren;
+    bool m_touchedMe;
 
     void layoutChildren();
     void calculateScrollBar();

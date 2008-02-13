@@ -19,6 +19,7 @@
 #include "File.h"
 #include "ParameterSet.h"
 #include "URI.h"
+#include "Delete.h"
 
 using namespace std;
 static const char * PATH_STR("path");
@@ -30,14 +31,9 @@ CookieJar::CookieJar()
 {
 }
 
-inline void deleteCookie(Cookie * c)
-{
-  delete c;
-}
-
 CookieJar::~CookieJar()
 {
-  for_each(m_cookies.begin(), m_cookies.end(), deleteCookie);
+  for_each(m_cookies.begin(), m_cookies.end(), delete_ptr());
   m_cookies.clear();
 }
 
