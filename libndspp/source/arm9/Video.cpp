@@ -121,8 +121,8 @@ void Video::setFade(int level)
 
 void Video::setBlendAB(int A, int B)
 {
-  A &= 0xf;
-  B &= 0xf;
+  A = A>0x1f?0x1f:A<0?0:A;
+  B = B>0x1f?0x1f:B<0?0:B;
   if (m_screen) {
     SUB_BLEND_AB = (A)|((B)<<8);
   }
