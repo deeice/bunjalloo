@@ -107,7 +107,7 @@ View::View(Document & doc, Controller & c):
   m_keyboard->setTopLevel(m_scrollPane);
   m_keyboard->setTitle(string2unicode(ENTER_TEXT_TITLE));
   m_document.registerView(this);
-  keysSetRepeat( 20, 10 );
+  keysSetRepeat( 10, 5 );
   m_toolbar->setVisible(true);
   string searchFile;
   if (m_controller.config().resource(Config::SEARCHFILE_STR,searchFile))
