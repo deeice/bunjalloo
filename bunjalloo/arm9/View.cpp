@@ -370,10 +370,6 @@ void View::browse()
     // render the node tree
     m_document.dumpDOM();
   }
-  if (m_dirty)
-  {
-    m_document.setPosition( m_scrollPane->currentPosition());
-  }
 
   // change to keys actually down, not repeating
   Stylus * stylus(Stylus::instance());
@@ -391,6 +387,10 @@ void View::browse()
     m_toolbar->setVisible(!m_keyboard->visible());
   }
   // else --- add drag gestures, etc..
+  if (m_scrollPane->visible() and m_dirty)
+  {
+    m_document.setPosition( m_scrollPane->currentPosition());
+  }
 
   if (m_refreshing > 0)
   {
