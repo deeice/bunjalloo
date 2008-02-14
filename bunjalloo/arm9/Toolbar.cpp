@@ -252,7 +252,7 @@ bool Toolbar::stylusDownFirst(const Stylus * stylus)
   m_touchedIndex = touchedIndex(stylus->startX(), stylus->startY());
   if (m_touchedIndex != NO_INDEX)
   {
-    setBlendHelper(15, 12);
+    setBlendHelper(31, 5);
     m_sprites[m_touchedIndex]->setTranslucent(true);
     consumed = true;
   }

@@ -49,17 +49,15 @@ void Button::paint(const nds::Rectangle & clip)
   unsigned short hilight(WidgetColors::BUTTON_SHINE);
   unsigned short lowlight(WidgetColors::BUTTON_SHADOW);
 
-  if (m_decoration) {
-    if (selected())
-    {
-      setBackgroundColor(WidgetColors::BUTTON_PRESSED);
-      hilight = WidgetColors::BUTTON_SHADOW;
-      lowlight = WidgetColors::BUTTON_SHINE;
-    }
-    else
-    {
-      setBackgroundColor(WidgetColors::BUTTON_FOREGROUND);
-    }
+  if (selected())
+  {
+    setBackgroundColor(WidgetColors::BUTTON_PRESSED);
+    hilight = WidgetColors::BUTTON_SHADOW;
+    lowlight = WidgetColors::BUTTON_SHINE;
+  }
+  else
+  {
+    setBackgroundColor(WidgetColors::BUTTON_FOREGROUND);
   }
   TextContainer::paint(clip);
 
@@ -84,11 +82,11 @@ bool Button::stylusUp(const Stylus * stylus)
   int x = stylus->lastX();
   int y = stylus->lastY();
   m_dirty = false;
-  if (selected() and m_bounds.hit(x,y))
+  if (selected())
   {
     setSelected(false);
     m_dirty = true;
-    if (listener())
+    if (m_bounds.hit(x,y) and listener())
     {
       listener()->pressed(this);
     }

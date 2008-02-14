@@ -38,7 +38,9 @@ const unsigned short WidgetColors::SCROLLBAR_BORDER = VDARK;
 const unsigned short WidgetColors::SCROLLBAR_ARROW = FG;
 const unsigned short WidgetColors::SCROLLBAR_ARROW_HEAD = VDARK;
 const unsigned short WidgetColors::SCROLLBAR_HANDLE_NOT_HELD = FG;
-const unsigned short WidgetColors::SCROLLBAR_HANDLE_HELD = RGB5(25, 25, 31);
+const unsigned short WidgetColors::SCROLLBAR_HANDLE_HELD = RGB5(28, 28, 11);
+
+const unsigned short WidgetColors::TEXT_FIELD_TOUCH = RGB5(22, 22, 31);
 
 const unsigned short WidgetColors::LINK_VISITED = RGB5(19, 0,22);
 const unsigned short WidgetColors::LINK_CLICKED = RGB5(31, 0, 0);

@@ -51,6 +51,8 @@ class WidgetColors
     //!ScrollBar handle when the user has it selected.
     static const unsigned short SCROLLBAR_HANDLE_HELD;
 
+    static const unsigned short TEXT_FIELD_TOUCH;
+
     //!Link text when it has been visited.
     static const unsigned short LINK_VISITED;
     //!Link text when it has been selected.

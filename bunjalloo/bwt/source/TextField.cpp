@@ -41,9 +41,9 @@ void TextField::paint(const nds::Rectangle & clip)
   nds::Canvas::instance().verticalLine(m_bounds.left(), m_bounds.top(), m_bounds.h,
       m_touched?WidgetColors::SCROLLBAR_BACKGROUND_TOUCH:WidgetColors::BUTTON_SHADOW);
   nds::Canvas::instance().horizontalLine(m_bounds.x, m_bounds.bottom()-1, m_bounds.w,
-      m_touched?WidgetColors::SCROLLBAR_HANDLE_HELD:WidgetColors::BUTTON_FOREGROUND);
+      m_touched?WidgetColors::TEXT_FIELD_TOUCH:WidgetColors::BUTTON_FOREGROUND);
   nds::Canvas::instance().verticalLine(m_bounds.right(), m_bounds.top(), m_bounds.h,
-      m_touched?WidgetColors::SCROLLBAR_HANDLE_HELD:WidgetColors::BUTTON_FOREGROUND);
+      m_touched?WidgetColors::TEXT_FIELD_TOUCH:WidgetColors::BUTTON_FOREGROUND);
   m_dirty = false;
 }
 
