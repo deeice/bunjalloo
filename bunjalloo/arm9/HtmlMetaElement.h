@@ -21,8 +21,10 @@
 class HtmlMetaElement : public HtmlElement
 {
   public:
+
     HtmlMetaElement(const std::string & tagName);
     HtmlElement * clone() const;
+    DEFINE_ACCEPT();
   protected:
     UnicodeString m_httpEquiv;
     UnicodeString m_content;

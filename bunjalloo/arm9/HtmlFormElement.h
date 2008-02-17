@@ -25,6 +25,7 @@ class HtmlFormElement:public HtmlElement
       : HtmlElement(tagName)
     {}
 
+    DEFINE_ACCEPT();
   protected:
     UnicodeString m_action;
     UnicodeString m_method;

@@ -27,6 +27,7 @@ class HtmlOptionElement : public HtmlElement
     virtual void setAttribute(const std::string & name, const UnicodeString & value);
 
     bool selected() const;
+    DEFINE_ACCEPT();
   private:
     bool m_selected;
     UnicodeString m_value;

@@ -31,5 +31,6 @@ class HtmlPreElement: public HtmlElement
 
     virtual void appendText(unsigned int value);
 
+    DEFINE_ACCEPT();
 };
 #endif

@@ -28,6 +28,7 @@ class HtmlBodyElement : public HtmlElement
 
     HtmlElement * clone() const;
     unsigned int bgColor() const;
+    DEFINE_ACCEPT();
   protected:
     UnicodeString m_bgcolor;
     const UnicodeString * attributePtr(const std::string & name) const;

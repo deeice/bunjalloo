@@ -21,10 +21,13 @@
 class HtmlAnchorElement : public HtmlElement
 {
   public:
+
     HtmlAnchorElement(const std::string & tagName)
       : HtmlElement(tagName) {}
 
     HtmlElement * clone() const;
+
+    DEFINE_ACCEPT();
   protected:
     UnicodeString m_href;
     const UnicodeString * attributePtr(const std::string & name) const;

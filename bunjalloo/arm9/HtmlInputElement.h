@@ -43,6 +43,7 @@ class HtmlInputElement:public HtmlElement
     void setChecked(bool checked);
     bool hasAltText() const;
 
+    DEFINE_ACCEPT();
   protected:
     UnicodeString m_type;
     UnicodeString m_value;

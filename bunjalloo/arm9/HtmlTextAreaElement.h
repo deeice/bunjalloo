@@ -30,6 +30,7 @@ class HtmlTextAreaElement:public HtmlElement
     int rows() const;
     int cols() const;
 
+    DEFINE_ACCEPT();
   protected:
     int m_rows;
     int m_cols;

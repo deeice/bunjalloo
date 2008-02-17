@@ -20,11 +20,25 @@
 #include "ElementList.h"
 #include "UnicodeString.h"
 
+class Visitor;
 
-class HtmlElement /* : public Element */
+#define DEFINE_ACCEPT(klass) \
+  void accept(Visitor & visitor);
+
+#define IMPLEMENT_ACCEPT(klass) \
+void klass::accept(Visitor & visitor)\
+{\
+  visitor.begin(*this);\
+  if (visitor.visit(*this)) \
+    visitChildren(visitor);\
+  visitor.end(*this);\
+}
+
+class HtmlElement
 {
 
   public:
+    virtual DEFINE_ACCEPT();
 
     /** Constructor.
      * @param tagName the name of the tag for this element.
@@ -174,6 +188,7 @@ class HtmlElement /* : public Element */
 
     virtual const UnicodeString * attributePtr(const std::string & name) const;
     virtual void copyAttributes(HtmlElement * copyTo) const;
+    void visitChildren(Visitor & visitor);
 };
 
 bool HtmlElement::hasChildren() const

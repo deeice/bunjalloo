@@ -8,6 +8,7 @@ o.append("""
     #build/pc/Entity.o
     #build/pc/HtmlAnchorElement.o
     #build/pc/HtmlBodyElement.o
+    #build/pc/HtmlBlockElement.o
     #build/pc/HtmlConstants.o
     #build/pc/HtmlDocument.o
     #build/pc/HtmlElement.o

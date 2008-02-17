@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "HtmlImageElement.h"
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlImageElement);
 
 const UnicodeString * HtmlImageElement::attributePtr(const std::string & name) const
 {

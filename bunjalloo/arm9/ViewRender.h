@@ -23,15 +23,59 @@ class HtmlElement;
 class FormRadio;
 #include <map>
 #include "UnicodeString.h"
+#include "Visitor.h"
+#include "HtmlElementFwd.h"
 
-class ViewRender
+class ViewRender: public Visitor
 {
   public:
     ViewRender(View * self);
     void render();
 
-    // ElementList selectedRadioButtons() const;
+    // implement the Visitor interface.
+    virtual bool visit(HtmlAnchorElement & element);
+    virtual void begin(HtmlAnchorElement & element);
+    virtual void end(HtmlAnchorElement & element);
 
+    virtual bool visit(HtmlBlockElement & element);
+    virtual void begin(HtmlBlockElement & element);
+    virtual void end(HtmlBlockElement & element);
+
+    virtual bool visit(HtmlBodyElement & element);
+    virtual void begin(HtmlBodyElement & element);
+    virtual void end(HtmlBodyElement & element);
+
+    virtual bool visit(HtmlElement & element);
+    virtual void begin(HtmlElement & element);
+    virtual void end(HtmlElement & element);
+
+    virtual bool visit(HtmlFormElement & element);
+    virtual void begin(HtmlFormElement & element);
+    virtual void end(HtmlFormElement & element);
+
+    virtual bool visit(HtmlImageElement & element);
+    virtual void begin(HtmlImageElement & element);
+    virtual void end(HtmlImageElement & element);
+
+    virtual bool visit(HtmlInputElement & element);
+    virtual void begin(HtmlInputElement & element);
+    virtual void end(HtmlInputElement & element);
+
+    virtual bool visit(HtmlMetaElement & element);
+    virtual void begin(HtmlMetaElement & element);
+    virtual void end(HtmlMetaElement & element);
+
+    virtual bool visit(HtmlOptionElement & element);
+    virtual void begin(HtmlOptionElement & element);
+    virtual void end(HtmlOptionElement & element);
+
+    virtual bool visit(HtmlPreElement & element);
+    virtual void begin(HtmlPreElement & element);
+    virtual void end(HtmlPreElement & element);
+
+    virtual bool visit(HtmlTextAreaElement & element);
+    virtual void begin(HtmlTextAreaElement & element);
+    virtual void end(HtmlTextAreaElement & element);
   private:
     View * m_self;
     // keep track of the last RichTextArea component added to the ScrollPane
@@ -42,10 +86,6 @@ class ViewRender
     FormGroupMap m_radioGroup;
 
     RichTextArea * textArea();
-    void walkTree(const HtmlElement * element);
-    bool applyFormat(const HtmlElement * element);
-    void preFormat(const HtmlElement * element);
-    void postFormat(const HtmlElement * element);
     void setBgColor(const HtmlElement * body);
     void renderSelect(const HtmlElement * body);
     void doImage(const UnicodeString & unicode,

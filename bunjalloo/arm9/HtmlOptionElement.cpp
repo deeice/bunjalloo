@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "HtmlOptionElement.h"
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlOptionElement);
 
 const UnicodeString * HtmlOptionElement::attributePtr(const std::string & name) const
 {

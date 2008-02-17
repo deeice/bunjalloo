@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "HtmlTextAreaElement.h"
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlTextAreaElement);
 
 static const int MINIMUM_ROWS(4);
 static const int MINIMUM_COLS(10);

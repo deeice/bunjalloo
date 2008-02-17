@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "HtmlInputElement.h"
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlInputElement);
 
 const UnicodeString * HtmlInputElement::attributePtr(const std::string & name) const
 {

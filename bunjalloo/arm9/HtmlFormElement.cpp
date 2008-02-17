@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "HtmlFormElement.h"
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlFormElement);
 
 const UnicodeString * HtmlFormElement::attributePtr(const std::string & name) const
 {

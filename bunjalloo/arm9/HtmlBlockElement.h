@@ -16,16 +16,14 @@
 */
 #ifndef HtmlBlockElement_h_seen
 #define HtmlBlockElement_h_seen
+#include "HtmlElement.h"
 
 class HtmlBlockElement: public HtmlElement
 {
 
   public:
-    HtmlBlockElement(const std::string & tagName)
-      : HtmlElement(tagName)
-    {
-      m_block = true;
-    }
+    HtmlBlockElement(const std::string & tagName);
 
+    DEFINE_ACCEPT();
 };
 #endif

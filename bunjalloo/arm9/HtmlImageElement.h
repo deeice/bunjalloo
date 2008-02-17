@@ -29,6 +29,7 @@ class HtmlImageElement : public HtmlElement
     virtual void setAttribute(const std::string & name,
         const UnicodeString & value);
     bool hasAltText() const;
+    DEFINE_ACCEPT();
   protected:
     UnicodeString m_src;
     UnicodeString m_alt;

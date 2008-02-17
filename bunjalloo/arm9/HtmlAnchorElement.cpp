@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "HtmlAnchorElement.h"
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlAnchorElement);
 
 const UnicodeString * HtmlAnchorElement::attributePtr(const std::string & name) const
 {
@@ -43,3 +45,4 @@ HtmlElement * HtmlAnchorElement::clone() const
   copyAttributes(theClone);
   return theClone;
 }
+

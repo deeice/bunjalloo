@@ -16,6 +16,8 @@
 */
 #include "UnicodeString.h"
 #include "HtmlBodyElement.h"
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlBodyElement);
 
 const UnicodeString * HtmlBodyElement::attributePtr(const std::string & name) const
 {

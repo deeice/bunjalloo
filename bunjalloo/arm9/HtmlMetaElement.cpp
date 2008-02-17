@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "HtmlMetaElement.h"
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlMetaElement);
 
 HtmlMetaElement::HtmlMetaElement(const std::string & tagName)
 : HtmlElement(tagName)

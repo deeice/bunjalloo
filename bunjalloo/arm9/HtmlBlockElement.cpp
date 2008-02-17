@@ -14,22 +14,12 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "HtmlPreElement.h"
+#include "HtmlBlockElement.h"
 #include "Visitor.h"
-IMPLEMENT_ACCEPT(HtmlPreElement);
+IMPLEMENT_ACCEPT(HtmlBlockElement);
 
-
-void HtmlPreElement::appendText(unsigned int value)
+HtmlBlockElement::HtmlBlockElement(const std::string & tagName) :
+  HtmlElement(tagName)
 {
-  if (m_children.size())
-  {
-    if (m_children.back()->isa("#TEXT"))
-    {
-      m_children.back()->text() += value;
-      return;
-    }
-  }
-  HtmlElement* textNode = new HtmlElement("#TEXT");
-  textNode->text() = value;
-  append(textNode);
+  m_block = true;
 }

@@ -24,12 +24,19 @@
 #include "FormControl.h"
 #include "FormRadio.h"
 #include "FormTextArea.h"
+#include "HtmlAnchorElement.h"
+#include "HtmlBlockElement.h"
 #include "HtmlBodyElement.h"
 #include "HtmlConstants.h"
 #include "HtmlDocument.h"
 #include "HtmlElement.h"
+#include "HtmlFormElement.h"
 #include "HtmlImageElement.h"
 #include "HtmlInputElement.h"
+#include "HtmlMetaElement.h"
+#include "HtmlOptionElement.h"
+#include "HtmlPreElement.h"
+#include "HtmlTextAreaElement.h"
 #include "InputText.h"
 #include "Image.h"
 #include "ImageComponent.h"
@@ -69,96 +76,6 @@ RichTextArea * ViewRender::textArea()
   return m_textArea;
 }
 
-void ViewRender::preFormat(const HtmlElement * element)
-{
-  // FIXME - BWT changes - this needs rewriting!
-  if (element->isa(HtmlConstants::A_TAG))
-  {
-    URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(element->attribute("href")));
-    bool viewed = m_self->m_controller.cache()->contains(newUri);
-    textArea()->addLink( unicode2string(element->attribute("href")), viewed);
-  }
-  if (element->isa(HtmlConstants::FORM_TAG))
-  {
-    textArea()->insertNewline();
-  }
-  else if (element->isa(HtmlConstants::PRE_TAG))
-  {
-    textArea()->setParseNewline(true);
-  }
-  else if (element->isa(HtmlConstants::UL_TAG) or element->isa(HtmlConstants::OL_TAG))
-  {
-    // FIXME!!
-    /** m_self->m_textArea->increaseIndent(); */
-    if (not element->isBlock() and element->parent()->isa(HtmlConstants::LI_TAG))
-      textArea()->insertNewline();
-  }
-  else if (element->isa(HtmlConstants::LI_TAG)) {
-    const HtmlElement * prev(element->parent()->previousSibling(element));
-    if (prev and prev->isa("#TEXT")) // TODO - remove #TEXT and so forth
-    {
-      textArea()->insertNewline();
-    }
-  }
-
-  if (element->isBlock())
-  {
-    textArea()->insertNewline();
-  }
-}
-
-void ViewRender::postFormat(const HtmlElement * element)
-{
-  if (element->isa(HtmlConstants::PRE_TAG))
-  {
-    textArea()->setParseNewline(false);
-  }
-  else if (element->isa(HtmlConstants::UL_TAG) or element->isa(HtmlConstants::OL_TAG))
-  {
-    // FIXME - BWT changes - this needs rewriting!
-#if 0
-    textArea()->decreaseIndent();
-    // only add an extra \n if the ul is a top level one
-    const HtmlElement * next = element->parent()->nextSibling(element);
-    if ( next
-        and not next->isa(HtmlConstants::LI_TAG)
-        and not element->isBlock() )
-        //and not (element->parent()->isa(HtmlConstants::LI_TAG) or element->parent()->isa(HtmlConstants::UL_TAG) or element->parent()->isa(HtmlConstants::OL_TAG)))
-    {
-      m_self->m_textArea->insertNewline();
-    }
-#endif
-  }
-  else if (element->isa(HtmlConstants::LI_TAG))
-  {
-    ElementList::const_iterator it(element->children().begin());
-    ElementList::const_iterator end(element->children().end());
-    bool hasBlock(false);
-    for (; it != end; ++it)
-    {
-      if ( (*it)->isa(HtmlConstants::UL_TAG) or (*it)->isBlock()) {
-        hasBlock = true;
-        break;
-      }
-    }
-    if (not hasBlock)
-      textArea()->insertNewline();
-  }
-  else if (element->isa(HtmlConstants::P_TAG) or (element->tagName()[0] == 'h' and (element->tagName()[1] >= '1' and element->tagName()[1] <= '6')))
-  {
-    textArea()->insertNewline();
-  }
-  else if (element->isa(HtmlConstants::A_TAG))
-  {
-    textArea()->endLink();
-  }
-
-  if (element->isBlock())
-  {
-    textArea()->insertNewline();
-  }
-}
-
 static UnicodeString extractImageText(const HtmlElement * element, bool hasAltText)
 {
   const UnicodeString & altText = element->attribute("alt");
@@ -176,94 +93,6 @@ static UnicodeString extractImageText(const HtmlElement * element, bool hasAltTe
     return string2unicode(bnamestr);
   }
   return string2unicode("[IMG]");
-}
-
-bool ViewRender::applyFormat(const HtmlElement * element)
-{
-  if (not element->text().empty())
-  {
-    textArea()->appendText(element->text());
-  }
-  else if (element->isa(HtmlConstants::SCRIPT_TAG) or element->isa(HtmlConstants::STYLE_TAG))
-  {
-    return false;
-  }
-  else if (element->isa(HtmlConstants::BR_TAG))
-  {
-    textArea()->insertNewline();
-  }
-  else if (element->isa(HtmlConstants::IMG_TAG))
-  {
-    // hurrah for alt text. some people set it to "", which screws up any
-    // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
-    bool hasAltText = ((HtmlImageElement*)element)->hasAltText();
-    UnicodeString imgText = extractImageText(element, hasAltText);
-    if (not imgText.empty())
-    {
-      doImage(imgText, element->attribute("src"));
-    }
-  }
-  else if (element->isa(HtmlConstants::SELECT_TAG))
-  {
-    renderSelect(element);
-    return false; // do not walk the children
-  }
-  else if (element->isa(HtmlConstants::INPUT_TAG))
-  {
-    renderInput(element);
-    return false;
-  }
-  else if (element->isa(HtmlConstants::TEXTAREA_TAG))
-  {
-    renderTextArea(element);
-    return false;
-  }
-  else if (element->isa(HtmlConstants::TITLE_TAG))
-  {
-    if (element->hasChildren())
-    {
-      applyFormat(element->firstChild());
-    }
-    return false;
-  }
-  return true;
-}
-
-void ViewRender::walkTree(const HtmlElement * element)
-{
-  preFormat(element);
-  if (element->hasChildren())
-  {
-    const ElementList & theChildren = element->children();
-    ElementList::const_iterator it(theChildren.begin());
-    ElementList::const_iterator end(theChildren.end());
-
-    bool hasBlock(false);
-    /*
-    for (; it != theChildren.end(); ++it)
-    {
-      const HtmlElement * child(*it);
-      if (child->isBlock()) {
-        hasBlock = true;
-        break;
-      }
-    }
-    */
-
-    it = theChildren.begin();
-    for (; it != end; ++it)
-    {
-      const HtmlElement * child(*it);
-      if (hasBlock) {
-        ((HtmlElement*)child)->setBlock();
-      }
-      if (applyFormat(child)) {
-        walkTree(child);
-      }
-    }
-  }
-  postFormat(element);
-  m_lastElement = element;
 }
 
 void ViewRender::setBgColor(const HtmlElement * body)
@@ -298,19 +127,6 @@ void ViewRender::clearRadioGroups()
   }
   m_radioGroup.clear();
 }
-
-/*
-ElementList ViewRender::selectedRadioButtons() const
-{
-  ElementList theList;
-  FormGroupMap::const_iterator it(m_radioGroup.begin());
-  for (; it != m_radioGroup.end(); ++it)
-  {
-     theList.push_back(it->second->selectedElement());
-  }
-  return theList;
-}
-*/
 
 void ViewRender::render()
 {
@@ -358,10 +174,10 @@ void ViewRender::render()
     assert(root->hasChildren());
     doTitle(m_self->m_document.titleNode());
 
-    const HtmlElement * body = root->lastChild();
+    HtmlElement * body = (HtmlElement*)root->lastChild();
     if (body->hasChildren())
     {
-      walkTree(body);
+      body->accept(*this);
       useScrollPane = true;
     }
   }
@@ -385,8 +201,8 @@ void ViewRender::doTitle(const HtmlElement * title)
     m_textArea->setOutlined();
     m_textArea->setSize(nds::Canvas::instance().width()-7, m_textArea->font().height());
     m_self->m_scrollPane->add(m_textArea);
-    const HtmlElement * titleText = title->firstChild();
-    applyFormat(titleText);
+    HtmlElement * titleText = title->firstChild();
+    visit(*titleText);
     m_textArea = 0;
   }
 }
@@ -394,10 +210,6 @@ void ViewRender::doTitle(const HtmlElement * title)
 void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
   Select * select = new Select(const_cast<HtmlElement*>(selectElement));
-  /*
-  m_textArea = 0;
-  m_self->m_scrollPane->add(select);
-  */
   textArea()->add(select);
 }
 
@@ -405,7 +217,6 @@ void ViewRender::renderSelect(const HtmlElement * selectElement)
 // FIXME - where should this go?
 static const int MAX_SIZE(SCREEN_WIDTH-7);
 static const int MIN_SIZE(8);
-
 
 void ViewRender::renderInput(const HtmlElement * inputElement)
 {
@@ -512,3 +323,211 @@ void ViewRender::renderTextArea(const HtmlElement * textAreaElement)
   m_self->m_scrollPane->add(text);
 }
 
+// Visitor implementation
+void ViewRender::begin(HtmlAnchorElement & element)
+{
+  URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(element.attribute("href")));
+  bool viewed = m_self->m_controller.cache()->contains(newUri);
+  textArea()->addLink( unicode2string(element.attribute("href")), viewed);
+}
+
+bool ViewRender::visit(HtmlAnchorElement & element)
+{
+  return true;
+}
+void ViewRender::end(HtmlAnchorElement & element)
+{
+  textArea()->endLink();
+}
+
+void ViewRender::begin(HtmlBlockElement & element)
+{
+  if (element.isBlock())
+  {
+    textArea()->insertNewline();
+  }
+}
+bool ViewRender::visit(HtmlBlockElement & element)
+{
+  return true;
+}
+void ViewRender::end(HtmlBlockElement & element)
+{
+  if (element.isBlock())
+  {
+    textArea()->insertNewline();
+  }
+}
+
+void ViewRender::begin(HtmlBodyElement & element)
+{
+}
+bool ViewRender::visit(HtmlBodyElement & element)
+{
+  return true;
+}
+void ViewRender::end(HtmlBodyElement & element)
+{
+}
+
+void ViewRender::begin(HtmlElement & element)
+{
+  if (element.isa(HtmlConstants::UL_TAG) or element.isa(HtmlConstants::OL_TAG))
+  {
+    // FIXME!!
+    /** m_self->m_textArea->increaseIndent(); */
+    if (not element.isBlock() and element.parent()->isa(HtmlConstants::LI_TAG))
+      textArea()->insertNewline();
+  }
+  else if (element.isa(HtmlConstants::LI_TAG)) {
+    const HtmlElement * prev(element.parent()->previousSibling(&element));
+    if (prev and prev->isa("#TEXT")) // TODO - remove #TEXT and so forth
+    {
+      textArea()->insertNewline();
+    }
+  }
+}
+
+bool ViewRender::visit(HtmlElement & element)
+{
+  if (not element.text().empty())
+  {
+    textArea()->appendText(element.text());
+  }
+  else if (element.isa(HtmlConstants::BR_TAG))
+  {
+    textArea()->insertNewline();
+  }
+  else if (element.isa(HtmlConstants::TEXTAREA_TAG))
+  {
+    renderTextArea(&element);
+  }
+  /*else if (element.isa(HtmlConstants::TITLE_TAG))
+  {
+    if (element.hasChildren())
+    {
+      visit(*element.firstChild());
+    }
+  }*/
+  return true;
+}
+void ViewRender::end(HtmlElement & element)
+{
+  if (element.isa(HtmlConstants::LI_TAG))
+  {
+    ElementList::const_iterator it(element.children().begin());
+    ElementList::const_iterator end(element.children().end());
+    bool hasBlock(false);
+    for (; it != end; ++it)
+    {
+      if ( (*it)->isa(HtmlConstants::UL_TAG) or (*it)->isBlock()) {
+        hasBlock = true;
+        break;
+      }
+    }
+    if (not hasBlock)
+      textArea()->insertNewline();
+  }
+  else if (element.isa(HtmlConstants::P_TAG) or (element.tagName()[0] == 'h' and (element.tagName()[1] >= '1' and element.tagName()[1] <= '6')))
+  {
+    textArea()->insertNewline();
+  }
+}
+
+void ViewRender::begin(HtmlFormElement & element)
+{
+  textArea()->insertNewline();
+}
+bool ViewRender::visit(HtmlFormElement & element)
+{
+  return true;
+}
+void ViewRender::end(HtmlFormElement & element)
+{
+}
+
+void ViewRender::begin(HtmlImageElement & element)
+{
+}
+bool ViewRender::visit(HtmlImageElement & element)
+{
+  // hurrah for alt text. some people set it to "", which screws up any
+  // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
+  bool hasAltText = element.hasAltText();
+  UnicodeString imgText = extractImageText(&element, hasAltText);
+  if (not imgText.empty())
+  {
+    doImage(imgText, element.attribute("src"));
+  }
+  return true;
+}
+void ViewRender::end(HtmlImageElement & element)
+{
+}
+
+void ViewRender::begin(HtmlInputElement & element)
+{
+}
+bool ViewRender::visit(HtmlInputElement & element)
+{
+  if (element.isa(HtmlConstants::SELECT_TAG))
+  {
+    renderSelect(&element);
+    return false;
+  }
+  else if (element.isa(HtmlConstants::INPUT_TAG))
+  {
+    renderInput(&element);
+  }
+  return true;
+}
+void ViewRender::end(HtmlInputElement & element)
+{
+}
+
+void ViewRender::begin(HtmlMetaElement & element)
+{
+}
+bool ViewRender::visit(HtmlMetaElement & element)
+{
+  return true;
+}
+void ViewRender::end(HtmlMetaElement & element)
+{
+}
+
+void ViewRender::begin(HtmlOptionElement & element)
+{
+}
+bool ViewRender::visit(HtmlOptionElement & element)
+{
+  return true;
+}
+void ViewRender::end(HtmlOptionElement & element)
+{
+}
+
+void ViewRender::begin(HtmlPreElement & element)
+{
+  textArea()->setParseNewline(true);
+}
+bool ViewRender::visit(HtmlPreElement & element)
+{
+  return true;
+}
+void ViewRender::end(HtmlPreElement & element)
+{
+  textArea()->setParseNewline(false);
+}
+
+void ViewRender::begin(HtmlTextAreaElement & element)
+{
+}
+bool ViewRender::visit(HtmlTextAreaElement & element)
+{
+  renderTextArea(&element);
+  return true;
+}
+void ViewRender::end(HtmlTextAreaElement & element)
+{
+}

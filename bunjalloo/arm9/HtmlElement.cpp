@@ -21,6 +21,9 @@
 
 using namespace std;
 
+#include "Visitor.h"
+IMPLEMENT_ACCEPT(HtmlElement);
+
 const UnicodeString * HtmlElement::attributePtr(const std::string & name) const
 {
   if (name == "id")
@@ -182,3 +185,12 @@ void HtmlElement::clearText() const
 {
   UnicodeString().swap(m_text);
 }
+
+void HtmlElement::visitChildren(Visitor & visitor)
+{
+  for (ElementList::iterator it(m_children.begin()); it != m_children.end(); ++it)
+  {
+    (*it)->accept(visitor);
+  }
+}
+
