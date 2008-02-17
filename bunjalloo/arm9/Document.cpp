@@ -289,6 +289,11 @@ void Document::magicMimeType(const char * data, int length)
       // isJpeg call will catch it...
       m_htmlDocument->parseContentType("image/jpeg");
     }
+    // lame hack to get html type
+    else if (strncmp(data, "<html>", 6) == 0)
+    {
+      m_htmlDocument->parseContentType("text/html");
+    }
   }
 }
 
