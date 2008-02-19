@@ -68,11 +68,14 @@ if test "$tag" = "yes" ; then
 fi
 
 if test "$upload" = "yes" ; then
-  $UPLOAD -s "Source code for $project release $VERSION" -p quirkysoft \
+  authfile=$(grep $(dirname $repo) $HOME/.subversion/auth/svn.simple/* -l)
+  user=$(grep username -2 $authfile | tail -1)
+  pass=$(grep password -2 $authfile | tail -1)
+  $UPLOAD -s "Source code for $project release $VERSION" --project=quirkysoft --user=$user --password=$pass \
      -l Type-Source,Program-Bunjalloo $src.tar.gz \
     || die "Unable to upload $src.tar.gz"
 
-  $UPLOAD -s "$project release $VERSION" -p quirkysoft \
+  $UPLOAD -s "$project release $VERSION" --project=quirkysoft --user=$user --password=$pass \
    -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${zipname} \
     || die "Unable to upload ${zipname}"
 fi
