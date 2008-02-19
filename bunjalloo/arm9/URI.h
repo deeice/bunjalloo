@@ -104,6 +104,11 @@ class URI
      */
     std::string requestHeader() const;
 
+    /** Retrieve the internal link part of the URI, if it exists.
+     * @return the internal link (\#blah) part of the filename
+     */
+    std::string internalLink() const;
+
     /** Compare this URI to the @a other one. URIs are the same if they have
      * the same protocol and address.
      * @param other the other URI to compare.

@@ -268,3 +268,14 @@ void UriTest::testHttps()
   CPPUNIT_ASSERT_EQUAL( URI::HTTPS_PROTOCOL, uri.protocol());
   CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
 }
+
+void UriTest::testInternal()
+{
+  URI uri("http://server/filename.html");
+  string expectedFile = "/filename.html";
+  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  const URI & internal(uri.navigateTo("#section1"));
+  string expectedInternal("section1");
+  CPPUNIT_ASSERT_EQUAL( expectedFile, internal.fileName());
+  CPPUNIT_ASSERT_EQUAL( expectedInternal, internal.internalLink());
+}

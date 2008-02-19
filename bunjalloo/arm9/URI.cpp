@@ -169,38 +169,6 @@ std::string URI::server() const
   return "";
 }
 
-const std::string URI::fileName() const
-{
-  switch(protocol())
-  {
-    case FILE_PROTOCOL:
-    case CONFIG_PROTOCOL:
-      return m_address;
-    case HTTPS_PROTOCOL:
-    case HTTP_PROTOCOL:
-      {
-        // strip off server
-        int firstSlash(m_address.find("/"));
-        if (firstSlash == -1)
-        {
-          return "/";
-        }
-        else
-        {
-          return m_address.substr(firstSlash, m_address.length()-firstSlash);
-        }
-        string serverName(server());
-        if (m_address.length() == serverName.length()) {
-          return "/";
-        }
-        return m_address.substr(serverName.length(), m_address.length());
-      }
-      break;
-    default:
-      return "";
-  }
-}
-
 static void tokenize(const string& str,
                       vector<string>& tokens,
                       const string& delimiters = " ")
@@ -219,6 +187,57 @@ static void tokenize(const string& str,
         // Find next "non-delimiter"
         pos = str.find_first_of(delimiters, lastPos);
     }
+}
+
+static void stripInternal(const std::string & address, std::string &file, std::string & internal)
+{
+  const std::string f(address);
+  // f.split('#')[1]
+  vector<string> elements;
+  tokenize(f, elements, "#");
+  file = elements[0];
+  if (elements.size() > 1)
+  {
+    internal = elements[1];
+  }
+}
+
+const std::string URI::fileName() const
+{
+  string file, internal;
+  switch(protocol())
+  {
+    case FILE_PROTOCOL:
+    case CONFIG_PROTOCOL:
+      {
+        stripInternal(m_address, file, internal);
+        return file;
+      }
+    case HTTPS_PROTOCOL:
+    case HTTP_PROTOCOL:
+      {
+        // strip off server
+        int firstSlash(m_address.find("/"));
+        if (firstSlash == -1)
+        {
+          return "/";
+        }
+        else
+        {
+          stripInternal(m_address.substr(firstSlash, m_address.length()-firstSlash), file, internal);
+          return file;
+        }
+        string serverName(server());
+        if (m_address.length() == serverName.length()) {
+          return "/";
+        }
+        stripInternal(m_address.substr(serverName.length(), m_address.length()), file, internal);
+        return file;
+      }
+      break;
+    default:
+      return "";
+  }
 }
 
 URI URI::navigateTo(const std::string & newFile ) const
@@ -264,6 +283,11 @@ URI URI::navigateTo(const std::string & newFile ) const
     {
       newURI += tmp.m_address.substr(0,firstSlash) + newFile;
     }
+  }
+  else if (newFile[0] == '#')
+  {
+    // internal link, add newFile to the existing address
+    newURI = tmp.m_address + newFile;
   }
   else
   {
@@ -396,6 +420,13 @@ void URI::setRequestHeader(const std::string & headerData)
 std::string URI::requestHeader() const
 {
   return m_requestHeader;
+}
+
+std::string URI::internalLink() const
+{
+  string file, internal;
+  stripInternal(m_address, file, internal);
+  return internal;
 }
 
 unsigned int URI::crc32int() const
