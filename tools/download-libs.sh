@@ -2,7 +2,7 @@
 
 LIBPNG=libpng-1.2.22
 ZLIB=zlib-1.2.3
-GIFLIB=giflib-4.1.4
+GIFLIB=giflib-4.1.6
 JPEGLIB=jpegsrc.v6b
 
 die() {
@@ -19,7 +19,7 @@ if [ ! -e ${ZLIB}.tar.gz ] ; then
   die "Unable to download ${ZLIB}"
 fi
 if [ ! -e ${GIFLIB}.tar.gz ] ; then
-  wget http://downloads.sourceforge.net/libungif/${GIFLIB}.tar.gz  || \
+  wget http://downloads.sourceforge.net/giflib/${GIFLIB}.tar.gz || \
   die "Unable to download ${GIFLIB}"
 fi
 if [ ! -e ${JPEGLIB}.tar.gz ] ; then
@@ -51,7 +51,8 @@ make -C zlib -f Makefile.ds install || die "Problems building zlib"
 make -C libpng -f Makefile.ds install || die "Problems building libpng"
 make -C giflib -f Makefile.ds install || die "Problems building giflib"
 cd jpeglib
-LDFLAGS="-L$DEVKITPRO/libnds/lib -lnds9 -specs=ds_arm9.specs" CC=$DEVKITARM/bin/arm-eabi-gcc ./configure --prefix=$DEVKITPRO/libnds || die "Problems configuring jpeg lib"
+CFLAGS="-Dsprintf=siprintf -Dfprintf=fiprintf -DNO_GETENV -O2 -march=armv5te -mtune=arm946e-s -ffast-math" \
+ LDFLAGS="-L$DEVKITPRO/libnds/lib -lnds9 -specs=ds_arm9.specs" CC=$DEVKITARM/bin/arm-eabi-gcc ./configure --prefix=$DEVKITPRO/libnds || die "Problems configuring jpeg lib"
 make
 make install-lib
 cd -
