@@ -29,6 +29,10 @@ const UnicodeString * HtmlAnchorElement::attributePtr(const std::string & name) 
   {
     return &m_href;
   }
+  if (name == "name")
+  {
+    return &m_name;
+  }
   return 0;
 
 }
@@ -37,6 +41,7 @@ void HtmlAnchorElement::copyAttributes(HtmlElement * copyTo) const
 {
   HtmlElement::copyAttributes(copyTo);
   ((HtmlAnchorElement*)copyTo)->m_href = m_href;
+  ((HtmlAnchorElement*)copyTo)->m_name = m_name;
 }
 
 HtmlElement * HtmlAnchorElement::clone() const
