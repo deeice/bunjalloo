@@ -287,7 +287,15 @@ URI URI::navigateTo(const std::string & newFile ) const
   else if (newFile[0] == '#')
   {
     // internal link, add newFile to the existing address
-    newURI = tmp.m_address + newFile;
+    int lastHash(tmp.m_address.rfind("#"));
+    if (lastHash == -1)
+    {
+      newURI = tmp.m_address + newFile;
+    }
+    else
+    {
+      newURI += tmp.m_address.substr(0,lastHash) + newFile;
+    }
   }
   else
   {

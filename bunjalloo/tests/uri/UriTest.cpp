@@ -278,4 +278,8 @@ void UriTest::testInternal()
   string expectedInternal("section1");
   CPPUNIT_ASSERT_EQUAL( expectedFile, internal.fileName());
   CPPUNIT_ASSERT_EQUAL( expectedInternal, internal.internalLink());
+  const URI & internal2(internal.navigateTo("#section2"));
+  expectedInternal = "section2";
+  CPPUNIT_ASSERT_EQUAL( expectedInternal, internal2.internalLink());
+
 }
