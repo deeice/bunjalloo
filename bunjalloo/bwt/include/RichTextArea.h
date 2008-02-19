@@ -71,6 +71,11 @@ class RichTextArea: public TextArea
     virtual bool stylusDownRepeat(const Stylus * stylus);
     virtual bool stylusDown(const Stylus * stylus);
 
+    /** Given a link index, find where abouts in the text area it is.
+     */
+    int linkPosition(int linkIndex) const;
+    unsigned int charIndexToYPos(unsigned int charIndex) const;
+
   protected:
     /** Overloaded from TextArea. This checks the current char vs the links to
      * see if the current character is a link or not.*/

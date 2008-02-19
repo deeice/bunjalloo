@@ -60,7 +60,7 @@ std::string Link::href() const
 
 Link::EventType Link::eventType() const
 {
-  if (m_anchor.empty())
+  if (m_anchor.empty() and m_color != WidgetColors::LINK_REGULAR)
     return STATE_COLOR;
   return STATE_LINK;
 }

@@ -25,6 +25,7 @@
 #include "Document.h"
 #include "File.h"
 #include "FormControl.h"
+#include "InternalVisitor.h"
 #include "HtmlElement.h"
 #include "Keyboard.h"
 #include "Link.h"
@@ -34,6 +35,7 @@
 #include "SearchEntry.h"
 #include "Stylus.h"
 #include "TextField.h"
+#include "RichTextArea.h"
 #include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
@@ -160,7 +162,28 @@ void View::notify()
         swiWaitForVBlank();
          */
         m_renderer->render();
-        m_scrollPane->scrollToPercent(m_document.position());
+        int pos = m_document.position();
+        if (pos == -1)
+        {
+          // is it relative?
+          URI uri(m_document.uri());
+          const string & internal(uri.internalLink());
+          if (not internal.empty())
+          {
+            // do some stuff with internal links
+            InternalVisitor visitor(internal);
+            HtmlElement * root((HtmlElement*)m_document.rootNode());
+            root->accept(visitor);
+            if (visitor.found())
+            {
+              RichTextArea * text((RichTextArea*)m_scrollPane->childAt(m_scrollPane->childCount()-1));
+              unsigned int linkPos = text->linkPosition(visitor.index()) + 192;
+              pos = (linkPos * 256) / (text->bounds().h);
+            }
+
+          }
+        }
+        m_scrollPane->scrollToPercent(pos);
         m_dirty = true;
         string refresh;
         int refreshTime;

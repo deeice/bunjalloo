@@ -160,12 +160,7 @@ void RichTextArea::endLink()
     m_state = Link::STATE_PLAIN;
     Link & link(*m_links.back());
     link.setTextEnd(m_documentSize);
-    if (link.textEnd() == link.textStart())
-    {
-      m_links.pop_back();
-      delete &link;
-    }
-    else
+    if (link.textEnd() != link.textStart())
     {
       int lastChar = (int) ( currentLine()[currentLine().length()-1] );
       if (isWhitespace(lastChar))
@@ -204,12 +199,6 @@ void RichTextArea::endImage()
     m_state = Link::STATE_PLAIN;
     Link & link(*m_links.back());
     link.setTextEnd(m_documentSize);
-    if (link.textEnd() == link.textStart())
-    {
-    //printf("pop link endCol\n");
-      m_links.pop_back();
-      delete &link;
-    }
   }
   else if (m_state == Link::STATE_LINK)
   {
@@ -323,20 +312,30 @@ void RichTextArea::printu(const UnicodeString & unicodeString)
 void RichTextArea::handleNextEvent()
 {
   Link * currentLink(*m_currentLink);
+
+  if (currentLink->textEnd() == currentLink->textStart())
+  {
+    // skip it
+    m_nextEventType = Link::STATE_PLAIN;
+  }
+
   switch (m_nextEventType)
   {
     case Link::STATE_LINK:
-      if (currentLink->clicked())
+      if (not currentLink->href().empty())
       {
-        setTextColor(WidgetColors::LINK_CLICKED);
-      }
-      else
-      {
-        setTextColor(currentLink->color());
+        if (currentLink->clicked())
+        {
+          setTextColor(WidgetColors::LINK_CLICKED);
+        }
+        else
+        {
+          setTextColor(currentLink->color());
+        }
+        setUnderline();
       }
       m_nextEvent = currentLink->textEnd();
       m_nextEventType = Link::STATE_PLAIN;
-      setUnderline();
       break;
     case Link::STATE_PLAIN:
       setTextColor(0);
@@ -371,6 +370,21 @@ void RichTextArea::handleNextEvent()
       setUnderline(false);
       break;
   }
+}
+
+unsigned int RichTextArea::charIndexToYPos(unsigned int charIndex) const
+{
+  // given a cursor position, find the equivalent line/ypos
+  unsigned int ypos = 0;
+  unsigned int total = 0;
+  int fontHeight = font().height();
+  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  for (; it != m_document.end() and total < charIndex; ++it)
+  {
+    total += it->length();
+    ypos++;
+  }
+  return ypos*fontHeight;
 }
 
 unsigned int RichTextArea::documentSize(int endLine, unsigned int * childIndex) const
@@ -602,6 +616,26 @@ done:
     caretChar += charsToLine;
   }
   return caretChar;
+}
+
+int RichTextArea::linkPosition(int linkIndex) const
+{
+  LinkList::const_iterator it(m_links.begin());
+  int i = 0;
+  while (i != linkIndex)
+  {
+    ++it;
+    ++i;
+    if (it == m_links.end())
+      break;
+  }
+  if (it != m_links.end())
+  {
+    // now know where it starts
+    Link * l(*it);
+    return charIndexToYPos(l->textStart());
+  }
+  return -1;
 }
 
 Link * RichTextArea::linkAt(int index)

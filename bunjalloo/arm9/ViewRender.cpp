@@ -326,9 +326,14 @@ void ViewRender::renderTextArea(const HtmlElement * textAreaElement)
 // Visitor implementation
 void ViewRender::begin(HtmlAnchorElement & element)
 {
-  URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(element.attribute("href")));
-  bool viewed = m_self->m_controller.cache()->contains(newUri);
-  textArea()->addLink( unicode2string(element.attribute("href")), viewed);
+  const UnicodeString & href(element.attribute("href"));
+  bool viewed = false;
+  if (not href.empty())
+  {
+    URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(href));
+    viewed = m_self->m_controller.cache()->contains(newUri);
+  }
+  textArea()->addLink( unicode2string(href), viewed);
 }
 
 bool ViewRender::visit(HtmlAnchorElement & element)
