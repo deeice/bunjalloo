@@ -427,7 +427,8 @@ void ScrollPane::scrollToPercent(int i)
   // 50 is in the middle
   if (m_children.empty())
     return;
-
+  if (i < 0)
+    i = 0;
   int topLimit = m_scrollBar->y();
   int total = m_scrollBar->total() - m_scrollBar->visibleRange();
   int y = 0;

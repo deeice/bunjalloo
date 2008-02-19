@@ -55,7 +55,7 @@ void Document::setUri(const std::string & uriString)
       ++currPosition;
       m_history.erase(currPosition, m_history.end());
     }
-    m_history.push_back(HistoryEntry(uriString,0));
+    m_history.push_back(HistoryEntry(uriString,-1));
     m_historyPosition = m_history.end();
     --m_historyPosition;
   }

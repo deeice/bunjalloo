@@ -612,7 +612,7 @@ void DocumentTest::testHistory()
   root = m_document->rootNode();
   CPPUNIT_ASSERT(root != 0);
   CPPUNIT_ASSERT(root->isa("html"));
-  CPPUNIT_ASSERT_EQUAL(0, m_document->position());
+  CPPUNIT_ASSERT_EQUAL(-1, m_document->position());
 
   string prev = m_document->gotoPreviousHistory();
 
