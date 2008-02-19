@@ -49,7 +49,7 @@ void LinkHandler::setLink(const Link * link)
 void LinkHandler::pressed(ButtonI * button)
 {
   // A button on the scroll bar is pressed. See which it was...
-  if (((Button*)scrollPane()->childAt(0))->selected())
+  if (button == ((Button*)scrollPane()->childAt(0)))
   {
     // goto link
     Link link(m_link->href());
