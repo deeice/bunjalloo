@@ -38,6 +38,9 @@ public:
 private:
   Cache * m_cache;
   Document * m_document;
+  char * m_data;
+  int m_length;
+  void readFile(const char * fileName);
 };
 
 #endif

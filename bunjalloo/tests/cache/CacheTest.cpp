@@ -24,10 +24,31 @@ using namespace std;
 
 CPPUNIT_TEST_SUITE_REGISTRATION( CacheTest );
 
+void CacheTest::readFile(const char * fileName)
+{
+  ifstream testFile;
+  string inputFileName("input/");
+  inputFileName += fileName;
+  testFile.open(inputFileName.c_str(), ios::in);
+  if (testFile.is_open())
+  {
+    testFile.seekg(0, ios::end);
+    m_length = testFile.tellg();
+    m_data = new char[m_length+2];
+    testFile.seekg(0, ios::beg);
+    testFile.read(m_data, m_length);
+    m_data[m_length] = 0;
+    testFile.close();
+  }
+  CPPUNIT_ASSERT(m_data != 0);
+  CPPUNIT_ASSERT(m_length != 0);
+}
+
 void CacheTest::tearDown()
 {
   delete m_cache;
   delete m_document;
+  delete [] m_data;
   nds::File::rmrf("data");
 }
 void CacheTest::setUp()
@@ -62,6 +83,14 @@ void CacheTest::testLoadCheck()
   // now that it is in the cache, contains should be true
   contains = m_cache->contains(next);
   CPPUNIT_ASSERT(contains);
+
+  // magically load the data from a file and then
+  // check that a new load returns "true", loaded from cache
+  readFile("test.txt");
+  m_document->appendData(m_data, m_length);
+  m_document->setStatus(Document::LOADED);
+  result = m_cache->load(next);
+  CPPUNIT_ASSERT(result);
 
   // now navigate to an internal link - should contain this,
   // as it is the same page.
