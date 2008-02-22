@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "File.h"
+#include <errno.h>
+#include <string.h>
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
@@ -217,8 +219,20 @@ int File::mkdir(const char * path, unsigned int mode)
 
 bool File::unlink(const char * path)
 {
-  return ::unlink(toFat(path).c_str()) == 0;
-  //return false;
+  //return ::unlink(toFat(path).c_str()) == 0;
+  int result(0);
+  const char * actualPath = toFat(path).c_str();
+  if (exists(path) == F_DIR)
+    result = ::rmdir(actualPath);
+  else
+    result = ::unlink(actualPath);
+  int err = errno;
+  if (result != 0)
+  {
+    char * errmsg = strerror(err);
+    printf("Error removing %s: %d, %s\n", actualPath, err, errmsg);
+  }
+  return result == 0;
 }
 
 void nds::File::ls(const char * path, std::vector<std::string> & entries)

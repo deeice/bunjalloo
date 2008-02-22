@@ -146,6 +146,7 @@ bool nds::File::rmrf(const char * path)
   for (;;)
   {
     vector<string> contents;
+    contents.clear();
     ls(path, contents);
     if (contents.empty())
     {
@@ -171,6 +172,7 @@ bool nds::File::rmrf(const char * path)
           break;
       }
     }
+    return false;
   }
 }
 
