@@ -6,7 +6,7 @@
 class BookmarkToolbar: public Toolbar
 {
   public:
-    BookmarkToolbar(Document & doc, Controller & cont, View & view);
+    BookmarkToolbar(View & view);
     virtual void updateIcons();
     virtual void tick();
 

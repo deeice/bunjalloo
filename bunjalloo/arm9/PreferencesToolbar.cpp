@@ -17,8 +17,8 @@ enum ToolbarSpriteID
   SPRITE_END_OF_ENTRIES,
 };
 
-PreferencesToolbar::PreferencesToolbar(Document & doc, Controller & cont, View & view) :
-  Toolbar(doc, cont, view, SPRITE_END_OF_ENTRIES)
+PreferencesToolbar::PreferencesToolbar(View & view) :
+  Toolbar(view, SPRITE_END_OF_ENTRIES)
 {
 }
 

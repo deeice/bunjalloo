@@ -22,8 +22,6 @@
 #include "ViewI.h"
 #include "StylusListener.h"
 
-class Document;
-class Controller;
 class View;
 
 class Toolbar: public ViewI, public StylusListener
@@ -72,7 +70,7 @@ class Toolbar: public ViewI, public StylusListener
     static const int TOOLBAR_X_LEFT;
     static const int TOOLBAR_SEP;
 
-    Toolbar(Document & doc, Controller & cont, View & view, int entries);
+    Toolbar(View & view, int entries);
     virtual ~Toolbar();
 
     bool visible() const;
@@ -99,8 +97,6 @@ class Toolbar: public ViewI, public StylusListener
     virtual bool stylusDown(const Stylus * stylus);
 
   protected:
-    Document & m_document;
-    Controller & m_controller;
     View & m_view;
     typedef std::vector<nds::Sprite * > SpriteVector;
     SpriteVector m_sprites;

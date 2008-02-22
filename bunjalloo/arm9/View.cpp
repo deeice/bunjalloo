@@ -89,9 +89,9 @@ View::View(Document & doc, Controller & c):
   m_keyboard(new Keyboard),
   m_renderer(new ViewRender(this)),
   m_addressBar(new TextField(UnicodeString())),
-  m_browseToolbar(new BrowseToolbar(doc, c, *this)),
-  m_bookmarkToolbar(new BookmarkToolbar(doc, c, *this)),
-  m_prefsToolbar( new PreferencesToolbar(doc, c, *this)),
+  m_browseToolbar(new BrowseToolbar(*this)),
+  m_bookmarkToolbar(new BookmarkToolbar(*this)),
+  m_prefsToolbar( new PreferencesToolbar(*this)),
   m_toolbar(m_browseToolbar),
   m_scrollPane(new ScrollPane),
   m_state(BROWSE),
@@ -575,4 +575,3 @@ void View::doSaveAs()
     m_controller.saveAs(fileName.c_str());
   }
 }
-

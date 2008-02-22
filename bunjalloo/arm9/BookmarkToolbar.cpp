@@ -14,8 +14,8 @@ enum ToolbarSpriteID
   SPRITE_END_OF_ENTRIES,
 };
 
-BookmarkToolbar::BookmarkToolbar(Document & doc, Controller & cont, View & view) :
-  Toolbar(doc, cont, view, SPRITE_END_OF_ENTRIES)
+BookmarkToolbar::BookmarkToolbar(View & view) :
+  Toolbar(view, SPRITE_END_OF_ENTRIES)
 {
 }
 

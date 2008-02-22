@@ -115,15 +115,13 @@ static void initSpriteData(unsigned short * oamData)
   s_haveInitialised = true;
 }
 
-Toolbar::Toolbar(Document & doc, Controller & cont, View & view, int entries):
-  m_document(doc),
-  m_controller(cont),
+Toolbar::Toolbar(View & view, int entries):
   m_view(view),
   m_visible(false),
   m_touchedIndex(NO_INDEX),
   m_position(BOTTOM)
 {
-  m_document.registerView(this);
+  m_view.document().registerView(this);
   for (int i = 0; i < entries; i++)
   {
     // would be 4 tiles per sprite (16x16 = 4*8x8)
@@ -173,7 +171,7 @@ void Toolbar::layout()
 Toolbar::~Toolbar()
 {
   for_each(m_sprites.begin(), m_sprites.end(), delete_ptr());
-  m_document.unregisterView(this);
+  m_view.document().unregisterView(this);
   Stylus::instance()->unregisterListener(this);
 }
 

@@ -6,7 +6,7 @@
 class PreferencesToolbar: public Toolbar
 {
   public:
-    PreferencesToolbar(Document & doc, Controller & cont, View & view);
+    PreferencesToolbar(View & view);
     virtual void updateIcons();
     virtual void tick();
 

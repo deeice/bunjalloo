@@ -85,6 +85,16 @@ class View : public ViewI, public ButtonListener, public LinkListener
 
     /** Exit bookmark mode. */
     void preferences();
+
+    /** Get the Controller.
+     * @return a reference to the Controller.
+     */
+    inline Controller & controller() const;
+
+    /** Get the Document.
+     * @return a reference to the Document.
+     */
+    inline Document & document() const;
   private:
 
     enum InputState
@@ -130,4 +140,14 @@ class View : public ViewI, public ButtonListener, public LinkListener
 
     void setToolbar(Toolbar * toolbar);
 };
+
+Controller & View::controller() const
+{
+  return m_controller;
+}
+
+Document & View::document() const
+{
+  return m_document;
+}
 #endif

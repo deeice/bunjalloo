@@ -6,7 +6,7 @@
 class BrowseToolbar: public Toolbar
 {
   public:
-    BrowseToolbar(Document & doc, Controller & cont, View & view);
+    BrowseToolbar(View & view);
     virtual void updateIcons();
     virtual void tick();
     virtual void setVisible(bool visible);
