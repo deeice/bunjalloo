@@ -20,7 +20,6 @@ o.append("""
     #build/pc/HtmlParser.o
     #build/pc/HtmlPreElement.o
     #build/pc/HtmlTextAreaElement.o
-    #build/pc/ParameterSet.o
     #build/pc/SearchEntry.o
     """.split())
 tester = env.Program(testerFile, Flatten([mainObj, o]))

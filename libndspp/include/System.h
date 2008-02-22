@@ -39,6 +39,7 @@ namespace nds
       /** Get the system name. */
       static const char * uname();
 
+      static int language();
   };
 }
 // tolua_end

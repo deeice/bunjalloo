@@ -1,0 +1,3 @@
+Go="¡Vamos!"
+long="el tamaño es largo"
+text="Algo más de texto"

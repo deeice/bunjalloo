@@ -19,11 +19,11 @@
 
 #include <string>
 #include "ParameterSet.h"
+#include "FileParser.h"
 
 class Document;
-class ParameterSet;
 
-class Config
+class Config: public FileParser
 {
   public:
     static const char PROXY_STR[];
@@ -67,13 +67,13 @@ class Config
     static void copyTemplate(const char * src, const char * dst);
 
 
+    void callback(const std::string & first, const std::string & second);
   private:
     Document & m_document;
     KeyValueMap m_resources;
 
     void configPathMember(const std::string & value, std::string & member);
     void handleCookies() const;
-    void parseLine(ParameterSet & set);
 
 };
 

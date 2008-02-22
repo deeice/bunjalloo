@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007,2008 Richard Quirk
+  Copyright (C) 2008 Richard Quirk
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -14,38 +14,19 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <stdlib.h>
-#include "System.h"
-#include "libnds.h"
+#ifndef FileParser_h_seen
+#define FileParser_h_seen
+#include <string>
+class ParameterSet;
 
-void nds::System::checkSleep()
+class FileParser
 {
-  if (keysDown() & KEY_LID)
-  {
-    // remove current interrupts, set the lid open interrupt handler
-#if 0
-    powerOFF(POWER_LCD);
-    swiIntrWait(1, IRQ_VBLANK);
-    // wait for vblank before powering on the LCD
-    while (REG_VCOUNT!=0);
-    while (REG_VCOUNT==0);
-    while (REG_VCOUNT!=0);
-    powerON(POWER_LCD);
+  public:
+    virtual ~FileParser() {}
+    virtual void callback(const std::string & key, const std::string & value) = 0;
+    void parseFile(const char * filename);
+
+  private:
+    void parseLine(const ParameterSet & set);
+};
 #endif
-  }
-}
-
-const char * nds::System::uname()
-{
-  return "SDL";
-}
-
-int nds::System::language()
-{
-  char *l(getenv("NDS_LANG"));
-  if (l)
-  {
-    return strtol(l, 0, 0);
-  }
-  return 0;
-}

@@ -18,7 +18,6 @@ o.append("""
     #build/pc/HtmlOptionElement.o
     #build/pc/HtmlPreElement.o
     #build/pc/HtmlTextAreaElement.o
-    #build/pc/ParameterSet.o
     """.split())
 tester = env.Program(testerFile, Flatten([mainObj, o]))
 out = env.Test('test.passed', tester)

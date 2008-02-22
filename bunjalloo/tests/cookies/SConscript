@@ -5,7 +5,6 @@ files = env['TESTER_SOURCES']
 o = env.Object(files)
 o.append("""
     #build/pc/CookieJar.o
-    #build/pc/ParameterSet.o
     #build/pc/URI.o
     """.split())
 tester = env.Program(testerFile, Flatten([mainObj, o]))

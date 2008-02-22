@@ -1,0 +1,18 @@
+Import('testEnv')
+
+# set up the file names
+fontName = 'vera'
+extensions = ['map', 'pal', 'img']
+files = [ '%s.%s'%(fontName, ext) for ext in extensions]
+
+# convert png to a .h file
+testEnv.Png2h('%s.png'%fontName)
+# create the binary files from the font files (simple copy -> name.bin)
+bins = [ testEnv.Command( f+'.bin', f, [Copy('$TARGET', '$SOURCE')]) for f in files]
+# create objs from .bin files
+objs = Flatten([testEnv.Bin2o(bin) for bin in bins])
+
+# return these objects
+Return('objs')
+
+# vim: set filetype=python :

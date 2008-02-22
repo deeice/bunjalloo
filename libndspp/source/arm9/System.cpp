@@ -16,6 +16,7 @@
 */
 #include "System.h"
 #include <nds.h>
+#include <nds/system.h>
 
 void nds::System::checkSleep()
 {
@@ -35,4 +36,9 @@ void nds::System::checkSleep()
 const char * nds::System::uname()
 {
   return "Nintendo DS";
+}
+
+int nds::System::language()
+{
+  return PersonalData->_user_data.language;
 }

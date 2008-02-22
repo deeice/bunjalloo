@@ -58,10 +58,15 @@ std::string unicode2string(const UnicodeString & ustr, bool byteencode)
 UnicodeString string2unicode(const std::string & str)
 {
   UnicodeString ustr;
-  std::string::const_iterator it(str.begin());
-  for ( ; it != str.end() ; ++it)
+  const char * p = str.c_str();
+  size_t len = str.length();
+  for (int i = 0 ; i < len; )
   {
-    ustr += *it;
+    unsigned int val;
+    unsigned int read = UTF8::decode(p, val);
+    ustr += val;
+    p += read;
+    i += read;
   }
   return ustr;
 }

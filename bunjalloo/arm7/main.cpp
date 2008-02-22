@@ -141,6 +141,7 @@ int main(int argc, char ** argv) {
   // must be the first thing we do...
   Wifi7 wifi;
   irqInit();
+  readUserSettings();
 
   // Start the RTC tracking IRQ
   initClockIRQ();

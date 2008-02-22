@@ -20,3 +20,5 @@ tests/stylus/tester
 tests/cache/tester
 data/bunjalloo/cache
 docs
+tests/lang-test/lang-test
+tests/lang-test/lang-test.nds

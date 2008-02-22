@@ -40,7 +40,6 @@ using namespace std;
 
 void Config::reload()
 {
-  nds::File configFile;
   string cfgFilename;
   cfgFilename += DATADIR;
   cfgFilename += "/";
@@ -60,49 +59,26 @@ void Config::reload()
     nds::File::mkdir(USER_DIR);
   }
 
-  configFile.open(cfgFilename.c_str());
-  vector<string> lines;
-  if (configFile.is_open())
-  {
-    configFile.readlines(lines);
-    configFile.close();
-    for (vector<string>::iterator it(lines.begin());
-        it != lines.end();
-        ++it)
-    {
-      string & line(*it);
-      stripWhitespace(line);
-      if (not line.empty() and line[0] != '#')
-      {
-        ParameterSet set(line);
-        parseLine(set);
-      }
-    }
-  }
+  parseFile(cfgFilename.c_str());
+
 
   handleCookies();
 }
 
-void Config::parseLine(ParameterSet & set)
+void Config::callback(const std::string & first, const std::string & second)
 {
-  const KeyValueMap& keyValueMap(set.keyValueMap());
-  for (KeyValueMap::const_iterator it(keyValueMap.begin());
-      it != keyValueMap.end();
-      ++it)
+  if (first == FONT_STR
+      or first == COOKIE_STR
+      or first == SEARCHFILE_STR
+      or first == CERT_FILE)
   {
-    if (it->first == FONT_STR
-        or it->first == COOKIE_STR
-        or it->first == SEARCHFILE_STR
-        or it->first == CERT_FILE)
-    {
-      string value;
-      configPathMember(it->second, value);
-      m_resources[it->first] = value;
-    }
-    else
-    {
-      m_resources[it->first] = it->second;
-    }
+    string value;
+    configPathMember(second, value);
+    m_resources[first] = value;
+  }
+  else
+  {
+    m_resources[first] = second;
   }
 }
 
