@@ -1,4 +1,6 @@
-# This is the Bunjalloo configuration file.
+# This is an example of the Bunjalloo configuration file
+# If /data/bunjalloo/config.ini doesn't exist at start up
+# then this file is copied there and used.
 
 # Configure the path from /data/bunjalloo to the font base. 
 # Can be absolute or relative, but does not support ".."
@@ -22,10 +24,6 @@ cafile=cert/CAcertSrv.pem
 
 # The maximum number of connections before we consider a connection lost.
 timeout=60
-
-# Time in cycles until toolbar is hidden. 60 cycles = 1 second.
-# 200 is a little over 3 seconds.
-toolbar=200
 
 # Use an on disk cache of files. Speeds up browsing.
 # The cache is stored in /data/bunjalloo/cache in crc32 files.

@@ -47,6 +47,7 @@ const static char * SAVE_AS_TITLE("Enter a file name:");
 const static char * ENTER_TEXT_TITLE("Enter some text:");
 const static int STEP(1);
 const static char * BOOKMARK_FILE  = "/"DATADIR"/user/bookmarks.html";
+const static char * SEARCH_TEMPLATE = "/"DATADIR"/docs/search-example.txt";
 
 struct KeyState
 {
@@ -114,6 +115,11 @@ View::View(Document & doc, Controller & c):
   string searchFile;
   if (m_controller.config().resource(Config::SEARCHFILE_STR,searchFile))
   {
+    if (nds::File::exists(searchFile.c_str()) == nds::File::F_NONE)
+    {
+      // copy the template file there instead
+      Config::copyTemplate(SEARCH_TEMPLATE, searchFile.c_str());
+    }
     m_search = new SearchEntry(searchFile);
   }
 }

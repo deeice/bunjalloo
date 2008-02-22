@@ -21,7 +21,12 @@
 #include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "URI.h"
-const std::string Config::s_configFile("/"DATADIR"/config.ini");
+
+static const char * s_datadir = DATADIR;
+static const char s_configFile[] = "config.ini";
+static const char s_templateName[] = "config-example.txt";
+static const char COOKIE_TEMPLATE[] = "ckallow-example.txt";
+static const char USER_DIR[] = "/"DATADIR"/user";
 
 const char Config::PROXY_STR[] = "proxy";
 const char Config::FONT_STR[] = "font";
@@ -29,7 +34,6 @@ const char Config::COOKIE_STR[] = "cookiefile";
 const char Config::CERT_FILE[] = "cafile";
 const char Config::SEARCHFILE_STR[] = "searchfile";
 const char Config::MAX_CONNECT[] = "timeout";
-const char Config::TOOLBAR_TIME[] = "toolbar";
 const char Config::USECACHE[] = "usecache";
 const char Config::CLEARCACHE[] = "clearcache";
 using namespace std;
@@ -37,11 +41,31 @@ using namespace std;
 void Config::reload()
 {
   nds::File configFile;
-  configFile.open(s_configFile.c_str());
+  string cfgFilename;
+  cfgFilename += DATADIR;
+  cfgFilename += "/";
+  cfgFilename += s_configFile;
+
+  if (nds::File::exists(cfgFilename.c_str()) == nds::File::F_NONE)
+  {
+    // write default config file
+    string cfgTemplate(s_datadir);
+    cfgTemplate += "/docs/";
+    cfgTemplate += s_templateName;
+    copyTemplate(cfgTemplate.c_str(), cfgFilename.c_str());
+  }
+
+  if (nds::File::exists(USER_DIR) == nds::File::F_NONE)
+  {
+    nds::File::mkdir(USER_DIR);
+  }
+
+  configFile.open(cfgFilename.c_str());
+  vector<string> lines;
   if (configFile.is_open())
   {
-    vector<string> lines;
     configFile.readlines(lines);
+    configFile.close();
     for (vector<string>::iterator it(lines.begin());
         it != lines.end();
         ++it)
@@ -54,7 +78,6 @@ void Config::reload()
         parseLine(set);
       }
     }
-    configFile.close();
   }
 
   handleCookies();
@@ -91,6 +114,13 @@ void Config::handleCookies() const
   nds::File cookieList;
   string cookieFile;
   resource(COOKIE_STR, cookieFile);
+  if (nds::File::exists(cookieFile.c_str()) == nds::File::F_NONE)
+  {
+    string cookietemp(DATADIR);
+    cookietemp += "/docs/";
+    cookietemp += COOKIE_TEMPLATE;
+    copyTemplate(cookietemp.c_str(), cookieFile.c_str());
+  }
   cookieList.open(cookieFile.c_str());
   if (cookieList.is_open())
   {
@@ -134,6 +164,35 @@ void Config::configPathMember(const std::string & value, std::string & member)
     // is absolute path.
     member = value;
   }
+}
+
+
+void Config::copyTemplate(const char * src, const char * dst)
+{
+  // copy a template file to the new file, stripping comments off
+  nds::File srcFile;
+  srcFile.open(src, "r");
+  if (srcFile.is_open())
+  {
+    vector<string> lines;
+    srcFile.readlines(lines);
+    srcFile.close();
+
+    nds::File dstFile;
+    dstFile.open(dst, "w");
+    for (vector<string>::iterator it=lines.begin(); it!=lines.end(); ++it)
+    {
+      string & line(*it);
+      stripWhitespace(line);
+      if (not line.empty() and line[0] != '#')
+      {
+        dstFile.write(line.c_str());
+        // Linux users know, Windows users will cry.
+        dstFile.write("\r\n");
+      }
+    }
+  }
+
 }
 
 bool Config::resource(const std::string & name, std::string & value) const

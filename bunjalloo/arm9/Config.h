@@ -32,7 +32,6 @@ class Config
     static const char CERT_FILE[];
     static const char SEARCHFILE_STR[];
     static const char MAX_CONNECT[];
-    static const char TOOLBAR_TIME[];
     static const char USECACHE[];
     static const char CLEARCACHE[];
 
@@ -61,8 +60,14 @@ class Config
      */
     void reload();
 
+    /** Copy a template config file from src to dst, stripping blank lines and comments.
+     * @param src the source file
+     * @param dst the destination file
+     */
+    static void copyTemplate(const char * src, const char * dst);
+
+
   private:
-    static const std::string s_configFile;
     Document & m_document;
     KeyValueMap m_resources;
 

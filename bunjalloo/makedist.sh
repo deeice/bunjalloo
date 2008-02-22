@@ -49,9 +49,11 @@ makedistdir=$(dirname $0)
 cd $makedistdir
 makedistdir=$(pwd)
 revision=$(git-svn find-rev HEAD)
-# don't include my test cache in the distro!
+# don't include my test files in the distro!
 rm -rf data/bunjalloo/cache
-rm -rf data/bunjalloo/user/bookmarks.html
+rm -rf data/bunjalloo/user/*
+rm -f data/bunjalloo/config.ini
+
 scons -Q dist version=$VERSION || die "Failed to build dist"
 zipname=$project-$VERSION.zip
 echo "Created $zipname"
