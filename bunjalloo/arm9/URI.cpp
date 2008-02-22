@@ -274,8 +274,8 @@ URI URI::navigateTo(const std::string & newFile ) const
   if (newFile[0] == '/')
   {
     // ok, so strip off the last part and try again
-    int firstSlash(tmp.m_address.find("/"));
-    if (firstSlash == -1)
+    size_t firstSlash(tmp.m_address.find("/"));
+    if (firstSlash == string::npos)
     {
       newURI += tmp.m_address + newFile;
     }
@@ -287,8 +287,8 @@ URI URI::navigateTo(const std::string & newFile ) const
   else if (newFile[0] == '#')
   {
     // internal link, add newFile to the existing address
-    int lastHash(tmp.m_address.rfind("#"));
-    if (lastHash == -1)
+    size_t lastHash(tmp.m_address.rfind("#"));
+    if (lastHash == string::npos)
     {
       newURI = tmp.m_address + newFile;
     }
@@ -300,8 +300,8 @@ URI URI::navigateTo(const std::string & newFile ) const
   else
   {
     // strip off last part of file and go here.
-    int lastSlash(tmp.m_address.rfind("/"));
-    if (lastSlash == -1)
+    size_t lastSlash(tmp.m_address.rfind("/"));
+    if (lastSlash == string::npos)
     {
       newURI += tmp.m_address + "/" + newFile;
     }

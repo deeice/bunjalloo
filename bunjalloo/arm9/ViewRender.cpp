@@ -331,7 +331,7 @@ void ViewRender::begin(HtmlAnchorElement & element)
   if (not href.empty())
   {
     URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(href));
-    viewed = m_self->m_controller.cache()->contains(newUri);
+    viewed = m_self->m_controller.cache()->contains(newUri, false);
   }
   textArea()->addLink( unicode2string(href), viewed);
 }

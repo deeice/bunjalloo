@@ -36,6 +36,7 @@ class UriTest : public CPPUNIT_NS::TestFixture
     CPPUNIT_TEST( testSpaces );
     CPPUNIT_TEST( testHttps );
     CPPUNIT_TEST( testInternal );
+    CPPUNIT_TEST( testCRC );
     CPPUNIT_TEST_SUITE_END();
 
   public:
@@ -52,6 +53,7 @@ class UriTest : public CPPUNIT_NS::TestFixture
     void testSpaces();
     void testHttps();
     void testInternal();
+    void testCRC();
 
 };
 

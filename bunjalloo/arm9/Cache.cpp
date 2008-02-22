@@ -41,7 +41,8 @@ Cache::Cache(Document & document, bool useCache, bool clearCache)
 
 std::string uri2CacheFile(const URI & uri)
 {
-  std::string crc = uri.crc32();
+  // strip #internal from URI
+  std::string crc = uri.navigateTo(uri.fileName()).crc32();
   std::string cacheFile = Cache::CACHE_DIR;
   // Cache name is 8 letter Hex crc32
   // Headers are stored in cacheFile.hdr
@@ -50,11 +51,21 @@ std::string uri2CacheFile(const URI & uri)
 }
 
 
-bool Cache::contains(const URI & uri) const
+bool Cache::contains(const URI & uri, bool stripInternal) const
 {
   if (m_useCache)
   {
-    CachedMap::const_iterator pos(m_fileIds.find(uri.crc32int()));
+    CachedMap::const_iterator pos;
+    if (stripInternal and not uri.internalLink().empty())
+    {
+      // has an internal link... strip it, since we are interested in 
+      // real page hits
+      pos = m_fileIds.find(uri.navigateTo(uri.fileName()).crc32int());
+    }
+    else
+    {
+      pos = m_fileIds.find(uri.crc32int());
+    }
     return (pos != m_fileIds.end());
   }
   return false;
@@ -74,6 +85,11 @@ void Cache::feed(const std::string & filename)
       m_document.appendData(buffer, read);
     }
   }
+}
+
+void Cache::add(const URI & uri)
+{
+  m_fileIds[uri.crc32int()] = 1;
 }
 
 void Cache::remove(const URI & uri)
@@ -96,6 +112,7 @@ bool Cache::load(const URI & uri)
     std::string cacheFile(uri2CacheFile(uri));
     if (contains(uri) and nds::File::exists(uri2CacheFile(uri).c_str()) == nds::File::F_REG)
     {
+      add(uri);
       m_document.reset();
       feed(cacheFile+".hdr");
       m_document.appendData("\r\n", 2);
@@ -104,7 +121,7 @@ bool Cache::load(const URI & uri)
     }
     else
     {
-      m_fileIds[uri.crc32int()] = 1;
+      add(uri);
       m_document.setCacheFile(cacheFile);
     }
   }

@@ -37,9 +37,10 @@ class Cache
 
     /** Does the given URI live in the cache already?
      * @param uri the uri to check.
+     * @param stripInternal remove any internal link, to check cache hits
      * @return true if the file exists, false otherwise.
      */
-    bool contains(const URI & uri) const;
+    bool contains(const URI & uri, bool stripInternal=true) const;
 
     /** Load a file from the cache. Loads the original headers and the data.
      * @param uri the uri to load.
@@ -63,5 +64,6 @@ class Cache
     CachedMap m_fileIds;
 
     void feed(const std::string & filename);
+    void add(const URI & uri);
 };
 #endif

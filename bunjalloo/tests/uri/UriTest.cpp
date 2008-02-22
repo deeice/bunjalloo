@@ -283,3 +283,11 @@ void UriTest::testInternal()
   CPPUNIT_ASSERT_EQUAL( expectedInternal, internal2.internalLink());
 
 }
+
+void UriTest::testCRC()
+{
+  URI uri("http://server.com/");
+  unsigned int crc = uri.crc32int();
+  unsigned int expected(0x7fec9bc0);
+  CPPUNIT_ASSERT_EQUAL(expected, crc);
+}

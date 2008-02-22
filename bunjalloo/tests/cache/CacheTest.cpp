@@ -92,10 +92,15 @@ void CacheTest::testLoadCheck()
   result = m_cache->load(next);
   CPPUNIT_ASSERT(result);
 
-  // now navigate to an internal link - should contain this,
-  // as it is the same page.
+  // now navigate to an internal link
   next = uri.navigateTo("/index.html#pos1");
+  // keep internal links, cache will not contain as it is a "new" link.
+  contains = m_cache->contains(next, false);
+  CPPUNIT_ASSERT(!contains);
   contains = m_cache->contains(next);
   CPPUNIT_ASSERT(contains);
-}
+  // should load from cache though, as it is the same base page.
+  result = m_cache->load(next);
+  CPPUNIT_ASSERT(result);
 
+}
