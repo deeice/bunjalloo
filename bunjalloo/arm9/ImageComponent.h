@@ -19,11 +19,13 @@
 
 #include "Component.h"
 #include <string>
+namespace nds {
 class Image;
+}
 class ImageComponent: public Component
 {
   public:
-    ImageComponent(Image * image);
+    ImageComponent(nds::Image * image);
     virtual void paint(const nds::Rectangle & clip);
     virtual ~ImageComponent();
 
@@ -32,7 +34,7 @@ class ImageComponent: public Component
     virtual bool stylusDownRepeat(const Stylus * stylus) { return false; }
     virtual bool stylusDown(const Stylus * stylus) { return false; }
   private:
-    Image * m_image;
+    nds::Image * m_image;
 
 };
 #endif

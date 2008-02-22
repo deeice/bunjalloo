@@ -19,7 +19,9 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
+namespace nds {
 class Image;
+}
 class ImageTest : public CPPUNIT_NS::TestFixture
 {
   private:
@@ -42,7 +44,7 @@ class ImageTest : public CPPUNIT_NS::TestFixture
     void testWideGif();
     void testTallGif();
   private:
-    Image * m_image;
+    nds::Image * m_image;
 
 };
 

@@ -22,9 +22,10 @@
 #include "Palette.h"
 
 using nds::Canvas;
+using nds::Image;
 
 
-ImageComponent::ImageComponent(Image * image):m_image(image)
+ImageComponent::ImageComponent(nds::Image * image):m_image(image)
 {
   if (m_image)
   {
@@ -37,7 +38,7 @@ ImageComponent::~ImageComponent()
   delete m_image;
 }
 
-static void drawImage(Canvas & canvas, Image & image, int startx, int starty)
+static void drawImage(Canvas & canvas, nds::Image & image, int startx, int starty)
 {
   const unsigned short * data = image.data();
   for (unsigned int y = 0; y < image.height(); ++y)

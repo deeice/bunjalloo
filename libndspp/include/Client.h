@@ -22,6 +22,7 @@ namespace nds {
   class Client
   {
     public:
+      /** Size of buffers used internally.*/
       static const int BUFFER_SIZE;
 
       /*!@brief Create a TCP client that connects to an IP address and port
@@ -36,6 +37,7 @@ namespace nds {
       /*! @brief Connect to the given IP addres and port.*/
       void connect();
 
+      /** Error values. */
       enum ReadError {
         CONNECTION_CLOSED=0,
         READ_ERROR=-1,

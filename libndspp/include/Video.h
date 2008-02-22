@@ -100,6 +100,9 @@ namespace nds
       //! Make this screen go to the bottom.
       void setToBottom();
 
+      /** Is this screen on top?.
+       * @return true if this is on top, false otherwise.
+       */
       bool onTop() const;
 
 #ifdef TOLUA

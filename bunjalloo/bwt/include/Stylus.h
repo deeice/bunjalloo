@@ -81,6 +81,7 @@ class Stylus
 
     /** Update the stylus state.
      * @param touch is the stylus up, down, or down and repeated.
+     * @param repeat did the touch trigger repeat too
      * @param x the x pos
      * @param y the y pos
      */

@@ -22,6 +22,8 @@ using namespace std;
 // Registers the fixture into the 'registry'
 CPPUNIT_TEST_SUITE_REGISTRATION( ImageTest );
 
+using nds::Image;
+
 void ImageTest::setUp()
 {
   m_image = 0;

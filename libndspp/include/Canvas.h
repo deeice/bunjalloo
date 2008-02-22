@@ -27,17 +27,59 @@ namespace nds   // tolua_export
   class Canvas
   {
     public:
+      /** Get the static Canvas instance.*/
       static Canvas & instance();
+      /** Draw a pixel at a given posiiton.
+       * @param x the x position
+       * @param y the y position. 0 is the tpo of the screen, 383 is the bottom
+       * @param color the 15 bit RGB color.
+       */
       void drawPixel(int x, int y, int color);
+      /** Fill a rectangle at the given position with the given dimensions.
+       * @param x the x position.
+       * @param y the y position. 0 is the tpo of the screen, 383 is the bottom
+       * @param w width in pixels.
+       * @param h height in pixels.
+       * @param color the 15 bit RGB color.
+       */
       void fillRectangle(int x, int y, int w, int h, int color);
+      /** Draw an outline rectangle at the given position with the given dimensions.
+       * @param x the x position.
+       * @param y the y position. 0 is the tpo of the screen, 383 is the bottom
+       * @param w width in pixels.
+       * @param h height in pixels.
+       * @param color the 15 bit RGB color.
+       */
       void drawRectangle(int x, int y, int w, int h, int color);
+      /** Draw a vertical line.
+       * @param x the x position.
+       * @param y the y position. 0 is the tpo of the screen, 383 is the bottom
+       * @param length the number of pixels in the line
+       * @param color the 15 bit RGB color.
+       */
       void verticalLine(int x, int y, int length, int colour);
+      /** Draw a horizontal line.
+       * @param x the x position.
+       * @param y the y position. 0 is the tpo of the screen, 383 is the bottom
+       * @param length the number of pixels in the line
+       * @param color the 15 bit RGB color.
+       */
       void horizontalLine(int x, int y, int length, int colour);
+      /** Width of the canvas. */
       int width() const;
+      /** Height of the canvas. */
       int height() const;
+      /** Tell this Canvas that painting has finished. This will swap buffers
+       * to refresh the display.*/
       void endPaint();
 
+      /** Set the clipped region.
+       * @param clip the area to clip to, anything outside this is not drawn.
+       */
       void setClip(const nds::Rectangle & clip);
+      /** Get the clipped region.
+       * @return the area clipped to.
+       */
       nds::Rectangle clip() const;
 // tolua_end
 

@@ -40,6 +40,7 @@ namespace nds   // tolua_export
        */
       static const char * dirname(const char * path);
 
+      /** Returned from exists call to get the file type.*/
       enum FileType
       {
         F_NONE,//!< non existant
@@ -58,12 +59,25 @@ namespace nds   // tolua_export
        */
       static bool mkdir(const char * path);
 
+      /** Delete a file or directory. 
+       * @param path the file or dir to delete 
+       */
       static bool unlink(const char * path);
+      /** Recursively delete files in a given directory
+       * @param path the file or dir to delete 
+       */
       static bool rmrf(const char * path);
 
+      /** Copy a file from one place to another.
+       * @param src source file name
+       * @param dst the target file name
+       */
       static bool cp(const char * src, const char * dst);
 
-      // entries is a list of basename files in the directory
+      /** Get a list of files in a directory.
+       * @param path the directory to list
+       * @param entries an array of contents.
+       */
       static void ls(const char * path, std::vector<std::string> & entries);
 
 
@@ -95,6 +109,9 @@ namespace nds   // tolua_export
        */
       int write(const char * buffer, int size=-1);
 
+      /** is at the end of file?.
+       * @return true if at the end of the file, false otherwise.
+       */
       bool eof() const;
 
       /** Get the size of the file in bytes.

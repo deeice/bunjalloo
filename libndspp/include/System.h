@@ -36,6 +36,7 @@ namespace nds
        */
       static void checkSleep();
 
+      /** Get the system name. */
       static const char * uname();
 
   };

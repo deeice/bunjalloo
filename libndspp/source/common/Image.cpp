@@ -23,7 +23,7 @@
 extern "C" {
 #include "jpeglib.h"
 };
-
+using nds::Image;
 using std::auto_ptr;
 static const int PNG_BYTES_TO_CHECK = 8;
 static const int JPEG_BYTES_TO_CHECK = 11;

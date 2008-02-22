@@ -63,7 +63,7 @@ static void initSpriteData(unsigned short * oamData)
 
   setBlendHelper(8, 8);
 
-  Image image("/"DATADIR"/fonts/toolbar.png", true);
+  nds::Image image("/"DATADIR"/fonts/toolbar.png", true);
   if (image.isValid())
   {
     const unsigned short * data = image.data();

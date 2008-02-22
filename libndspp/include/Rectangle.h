@@ -22,15 +22,33 @@ namespace nds
 {
   struct Rectangle
   {
-    int x;
-    int y;
-    int w;
-    int h;
+    int x; //!< x position
+    int y; //!< y position
+    int w; //!< width
+    int h; //!< height
+
+    /** Hit test.
+     * @param x x position to check
+     * @param y y position to check
+     * @return true if the given position is in the rectangle.
+     */
     bool hit(int x, int y) const;
+
+    /** @return the right edge. */
     int right() const;
+
+    /** @return the left edge. */
     int left() const;
+
+    /** @return the top edge. */
     int top() const;
+
+    /** @return the bottom edge. */
     int bottom() const;
+
+    /** Get the intersection with another Rectangle.
+     * @param r2 the rectangle to intersect with. 
+     * @return the intersection of this Rectangle with teh otehr one. */
     Rectangle intersect(const Rectangle & r2) const;
   };
 }

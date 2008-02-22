@@ -193,6 +193,9 @@ namespace nds {
         setRotateScale(false);
       }
 
+      /** Get the enabled status based on internal flags.
+       * @return true if enabled.
+       */
       inline bool enabled() const
       {
         if ( doubleSize() and not rotateScale())
@@ -258,11 +261,6 @@ namespace nds {
        * @see setSize,width
        */
       void setHeight(unsigned int h);
-      /*! retrieve the size.
-       * @param w width one of 8,16,32,64
-       * @param h height one of 8,16,32,64
-       * @see setSize,height,width
-       */
       // attr2
       //! returns the tile entry
       unsigned int tile() const;

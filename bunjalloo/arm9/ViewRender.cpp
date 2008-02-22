@@ -152,10 +152,10 @@ void ViewRender::render()
     {
       filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
     }
-    Image * image(0);
+    nds::Image * image(0);
     if (not filename.empty())
     {
-      image = new Image(filename.c_str(), (Image::ImageType)mimeType);
+      image = new nds::Image(filename.c_str(), (nds::Image::ImageType)mimeType);
     }
     ImageComponent * imageComponent = new ImageComponent(image);
     textArea()->add(imageComponent);

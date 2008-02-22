@@ -19,3 +19,4 @@ tests/searcher/tester
 tests/stylus/tester
 tests/cache/tester
 data/bunjalloo/cache
+docs

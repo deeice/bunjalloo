@@ -66,6 +66,9 @@ namespace nds
        */
       void disconnect();
 
+      /** Get the signal strength.
+       * @return the signal strength.
+       */
       int signalStrength() const;
 
 //tolua_end

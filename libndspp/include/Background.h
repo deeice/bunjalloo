@@ -20,10 +20,11 @@
 // tolua_begin
 namespace nds {
 
-  typedef enum {
+  //! Tile flipping.
+  enum MAP_DATA_t {
     TILE_FLIP_HORZ=0x400, //!< Horizontal tile flip
     TILE_FLIP_VERT=0x800  //!< Vertical tile flip
-  } MAP_DATA_t;
+  };
   /*! @brief Background wraps the HW backgrounds.
    *
    *  Up to 4 background layers are available depending on the mode. 
@@ -91,7 +92,7 @@ namespace nds {
 #endif
 // tolua_end
       /*!@brief enable the background layer on the hardware
-       * @param enable true to enable false to disable
+       * @param enabled true to enable false to disable
        */
       void setEnabled(bool enabled=true);
 

@@ -8,6 +8,7 @@
 #include "Sprite.h"
 #include "Palette.h"
 static const int screen = 1;
+using nds::Image;
 
 void initConsole()
 {
