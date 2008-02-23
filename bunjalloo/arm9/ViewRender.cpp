@@ -202,7 +202,10 @@ void ViewRender::doTitle(const HtmlElement * title)
     m_textArea->setSize(nds::Canvas::instance().width()-7, m_textArea->font().height());
     m_self->m_scrollPane->add(m_textArea);
     HtmlElement * titleText = title->firstChild();
-    visit(*titleText);
+    if (titleText)
+    {
+      visit(*titleText);
+    }
     m_textArea = 0;
   }
 }
