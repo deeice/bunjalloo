@@ -52,8 +52,10 @@
 #include "ViewRender.h"
 #include "Controller.h"
 #include "Cache.h"
+#include "Language.h"
 
 using namespace std;
+const static char * NOT_VIEWABLE("not_view");
 
 ViewRender::ViewRender(View * self):
   m_self(self),
@@ -164,8 +166,7 @@ void ViewRender::render()
   }
   else if (mimeType == HtmlParser::OTHER)
   {
-    string notViewable("Content not viewable");
-    textArea()->appendText(string2unicode(notViewable));
+    textArea()->appendText(T(NOT_VIEWABLE));
     useScrollPane = true;
   }
   else

@@ -3,3 +3,4 @@ image=Image
 enter_url="Enter a web site address:"
 save_as="Enter a file name:"
 enter_text="Enter some text:"
+not_view="Content not viewable"
