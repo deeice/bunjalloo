@@ -25,6 +25,7 @@
 #include "Document.h"
 #include "File.h"
 #include "FormControl.h"
+#include "Language.h"
 #include "InternalVisitor.h"
 #include "HtmlElement.h"
 #include "Keyboard.h"
@@ -42,9 +43,9 @@
 #include "WidgetColors.h"
 
 using namespace std;
-const static char * ENTER_URL_TITLE("Enter a web site address:");
-const static char * SAVE_AS_TITLE("Enter a file name:");
-const static char * ENTER_TEXT_TITLE("Enter some text:");
+const static char * ENTER_URL_TITLE("enter_url");
+const static char * SAVE_AS_TITLE("save_as");
+const static char * ENTER_TEXT_TITLE("enter_text");
 const static int STEP(1);
 const static char * BOOKMARK_FILE  = "/"DATADIR"/user/bookmarks.html";
 const static char * SEARCH_TEMPLATE = "/"DATADIR"/docs/search-example.txt";
@@ -108,7 +109,7 @@ View::View(Document & doc, Controller & c):
   m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
   m_scrollPane->setScrollIncrement(20);
   m_keyboard->setTopLevel(m_scrollPane);
-  m_keyboard->setTitle(string2unicode(ENTER_TEXT_TITLE));
+  m_keyboard->setTitle(T(ENTER_TEXT_TITLE));
   m_document.registerView(this);
   keysSetRepeat( 10, 5 );
   m_toolbar->setVisible(true);
@@ -227,7 +228,7 @@ void View::notify()
 void View::enterUrl()
 {
   m_addressBar->setText(string2unicode(m_document.uri()));
-  m_keyboard->setTitle(string2unicode(ENTER_URL_TITLE));
+  m_keyboard->setTitle(T(ENTER_URL_TITLE));
   m_keyboard->editText(m_addressBar);
   m_toolbar->setVisible(false);
   m_state = ENTER_URL;
@@ -335,7 +336,7 @@ void View::saveAs()
     fileName = "index.html";
   }
   m_addressBar->setText(string2unicode(fileName));
-  m_keyboard->setTitle(string2unicode(SAVE_AS_TITLE));
+  m_keyboard->setTitle(T(SAVE_AS_TITLE));
   m_keyboard->editText(m_addressBar);
   m_toolbar->setVisible(false);
   m_state = SAVE_AS;
@@ -515,7 +516,7 @@ void View::tick()
 
   if (m_state != BROWSE and not m_keyboard->visible())
   {
-    m_keyboard->setTitle(string2unicode(ENTER_TEXT_TITLE));
+    m_keyboard->setTitle(T(ENTER_TEXT_TITLE));
   }
   if (m_state == ENTER_URL and not m_keyboard->visible()) {
     m_toolbar->setVisible(true);

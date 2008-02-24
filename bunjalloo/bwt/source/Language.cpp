@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "System.h"
+#include "File.h"
 #include "Language.h"
 
 using namespace std;
@@ -85,6 +86,12 @@ void Language::loadLanguageFile()
   std::string lf(LANGUAGE_DIR);
   lf += m_lang;
   lf += ".txt";
+  if (nds::File::exists(lf.c_str()) == nds::File::F_NONE)
+  {
+    // default to english...
+    lf = LANGUAGE_DIR;
+    lf += "en.txt";
+  }
   parseFile(lf.c_str());
 }
 

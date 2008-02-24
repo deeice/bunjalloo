@@ -19,6 +19,7 @@
 #include "Component.h"
 #include "Link.h"
 #include "Button.h"
+#include "Language.h"
 #include "LinkHandler.h"
 #include "LinkListener.h"
 #include "Rectangle.h"
@@ -30,9 +31,11 @@ LinkHandler::LinkHandler(LinkListener * parent):
   m_parent(parent)
 {
   setVisible(false);
-  addItem(string2unicode("url"));
-  addItem(string2unicode("image "));
+  addItem(T("url"));
+  addItem(T("image"));
   m_preferredHeight = scrollPane()->height();
+  m_preferredWidth = scrollPane()->width();
+  setSize(m_preferredWidth, m_preferredHeight);
   Stylus::instance()->registerListener(this);
 }
 
