@@ -577,7 +577,6 @@ void View::doSaveAs()
   string fileName = unicode2string(m_keyboard->result());
   if (not fileName.empty() and m_keyboard->selected() == Keyboard::OK)
   {
-    // check for search
     m_toolbar->setVisible(true);
     m_controller.saveAs(fileName.c_str());
   }

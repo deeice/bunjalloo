@@ -61,11 +61,11 @@ void Document::setUri(const std::string & uriString)
   }
   m_headerParser->setUri(uriString);
 #if 0
-  printf("%s %d\n", m_historyPosition->c_str(), m_history.size());
-  vector<string>::iterator it(m_history.begin());
+  printf("History: %s %d\n", m_historyPosition->first.c_str(), m_history.size());
+  HistoryVector::iterator it(m_history.begin());
   for (; it != m_history.end(); ++it)
   {
-    printf("%s\n",it->c_str());
+    printf("History: %s\n",it->first.c_str());
   }
 #endif
 }
@@ -139,9 +139,9 @@ void Document::unregisterView(ViewI * view)
 
 unsigned int Document::percentLoaded() const
 {
-    unsigned int dataExpected = m_headerParser->expected();
-    if (dataExpected) {
-      return (m_htmlDocument->dataGot()*100) / dataExpected;
+    unsigned int expected = dataExpected();
+    if (expected) {
+      return (m_htmlDocument->dataGot()*100) / expected;
     }
     return 0;
 }
@@ -162,9 +162,9 @@ void Document::appendData(const char * data, int size)
   m_status = INPROGRESS;
   if (size) {
     m_headerParser->feed(data,size);
-    unsigned int dataExpected(m_headerParser->expected());
+    unsigned int expected(dataExpected());
     unsigned int dataGot(m_htmlDocument->dataGot());
-    if (dataExpected < dataGot)
+    if (expected < dataGot)
     {
       m_htmlDocument->setDataGot(0);
     }
@@ -330,5 +330,10 @@ const int & Document::currentHistoryPosition() const
 bool Document::shouldCache() const
 {
   return m_headerParser->shouldCache();
+}
+
+unsigned int Document::dataExpected() const
+{
+  return m_headerParser->expected();
 }
 

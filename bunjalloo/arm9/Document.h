@@ -161,6 +161,13 @@ class Document
 
     //! Set whether a URI update changes the history or not
     void setHistoryEnabled(bool enable);
+
+    /** Get the amount of data that is expected to be downloaded, based on the
+     * HTTP header or chunk size values. But don't believe its lies.
+     * @return the number of bytes to download.
+     */
+    unsigned int dataExpected() const;
+
   private:
     //std::string m_uri;
     Status m_status;
