@@ -40,9 +40,20 @@ class HttpClient: public nds::Client
     };
 
 
-    HttpClient(const char * ip, int port, const URI & uri);
+    HttpClient();
+    HttpClient(const URI & uri);
     ~HttpClient();
     void setController(Controller * c);
+
+    /** Set the URI to navigate to. This leaves the state as GET_URL.
+     * @param uri the new uri.
+     */
+    void setUri(const URI & uri);
+
+    /** Get the current uri value.
+     * @return the URI of this http request.
+     */
+    const URI & uri() const;
 
     /** Has the connection and web page fetch succeeded.
      * @return true if the attempt at getting the web page was ok, false otherwise.
@@ -66,6 +77,9 @@ class HttpClient: public nds::Client
     void handleRaw(void * bufferIn, int amountRead);
 
     void print(const char * s);
+
+    //! Set the client back to the initial "null" state.
+    void reset();
 
   protected:
     void handle(void * bufferIn, int amountRead);

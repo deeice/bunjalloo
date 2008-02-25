@@ -1052,6 +1052,11 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
   // m_data += ucodeChar;
 }
 
+void HtmlDocument::handleBinaryData(const void * data, unsigned int length)
+{
+  m_dataGot += length;
+}
+
 const HtmlElement * HtmlDocument::rootNode() const
 {
   if (not m_openElements.empty()) {

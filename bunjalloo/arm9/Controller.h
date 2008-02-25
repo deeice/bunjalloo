@@ -46,6 +46,9 @@ class Controller
     /** Save the current page as...  */
     void saveAs(const char * fileName);
 
+    /** Save as was cancelled.*/
+    void cancelSaveAs();
+
     void previous();
     void next();
     void stop();
@@ -66,17 +69,29 @@ class Controller
     View * m_view;
     Config * m_config;
     Cache * m_cache;
+    HttpClient * m_httpClient;
     bool m_wifiInit;
     bool m_stop;
     int m_redirected;
     int m_maxRedirects;
+    enum SaveAs_t
+    {
+      SAVE_NEEDS_DOWNLOADING,
+      SAVE_CURRENT_FILE
+    };
+    SaveAs_t m_saveAs;
 
 
     void localFile(const std::string &);
     void fetchHttp(const URI &);
+    void fetchHttp2(URI & uri);
+    void finishFetchHttp(const URI & uri);
+
     void configureUrl(const std::string & fileName);
     void loadError();
     // helper to avoid code dupe
     void handleUri(const URI & uri);
+    void saveCurrentFileAs(const char * fileName);
+    void downloadAndSaveAs(const char * fileName);
 };
 #endif

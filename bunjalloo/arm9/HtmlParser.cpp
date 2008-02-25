@@ -1356,6 +1356,10 @@ void HtmlParser::feed(const char * data, unsigned int length)
       m_details->fire();
     }
   }
+  else
+  {
+    handleBinaryData(data, length);
+  }
 }
 
 void HtmlParser::setEncoding(HtmlParser::Encoding enc)
@@ -1482,21 +1486,6 @@ void HtmlParser::setToStart()
   m_mimeType = UNINITIALISED;
 }
 
-
-void HtmlParser::handleStartEndTag(const std::string & tag, const AttributeVector & attrs)
-{
-}
-
-void HtmlParser::handleStartTag(const std::string & tag, const AttributeVector & attrs)
-{
-}
-void HtmlParser::handleEndTag(const std::string & tag)
-{
-}
-
-void HtmlParser::handleData(unsigned int ucodeChar)
-{
-}
 
 void HtmlParser::setCacheFile(const std::string & filename)
 {

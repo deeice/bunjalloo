@@ -67,6 +67,7 @@ class HtmlDocument : public HtmlParser
     virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs);
     virtual void handleEndTag(const std::string & tag);
     virtual void handleData(unsigned int ucodeChar);
+    virtual void handleBinaryData(const void * data, unsigned int length);
 
   private:
 

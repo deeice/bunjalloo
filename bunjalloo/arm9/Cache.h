@@ -57,6 +57,11 @@ class Cache
      */
     void clean(const URI & uri);
 
+    /** Get the status of the cache usage.
+     * @return true if we are currently using a cache at all, false otherwise.
+     */
+    inline bool useCache() const;
+
   private:
     Document & m_document;
     bool m_useCache;
@@ -66,4 +71,9 @@ class Cache
     void feed(const std::string & filename);
     void add(const URI & uri);
 };
+
+bool Cache::useCache() const
+{
+  return m_useCache;
+}
 #endif

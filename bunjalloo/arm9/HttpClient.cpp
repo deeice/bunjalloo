@@ -583,8 +583,24 @@ readError:
   return -1;
 }
 
-HttpClient::HttpClient(const char * ip, int port, const URI & uri) :
-  nds::Client(uri.server().c_str(),port), m_total(0), m_finished(false), m_connectAttempts(0),
+
+HttpClient::HttpClient():
+  nds::Client("",0),
+  m_total(0),
+  m_finished(false),
+  m_connectAttempts(0),
+  m_state(WIFI_OFF),
+  m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
+  m_sslClient(new SslClient(*this)),
+  m_log(false)
+{
+}
+
+HttpClient::HttpClient(const URI & uri) :
+  nds::Client(uri.server().c_str(),uri.port()),
+  m_total(0),
+  m_finished(false),
+  m_connectAttempts(0),
   m_uri(uri),
   m_state(WIFI_OFF),
   m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
@@ -661,6 +677,12 @@ void HttpClient::handleRaw(void * bufferIn, int amountRead)
   // printf("%s", buffer);
   m_controller->m_document->appendData(buffer, amountRead);
   m_total += amountRead;
+  // FIXME: cache this?
+  if (m_uri.method() == "HEAD")
+  {
+    if (strstr(buffer, "\r\n\r\n"))
+      m_finished = true;
+  }
   //printf("0x0x End of buffer x0x0", buffer);
 }
 
@@ -746,7 +768,14 @@ void HttpClient::get(const URI & uri)
     }
     s += " HTTP/1.1\r\n";
     s += "Host:" + uri.server()+"\r\n";
-    s += "Connection: close\r\n";
+    if (uri.method() != "HEAD")
+    {
+      // HEAD requests can leave the connection open for reuse, since they know
+      // when the data ends. Everyone else should request that the server
+      // closes the connection, since it is "impossible" to know when a page
+      // ends.
+      s += "Connection: close\r\n";
+    }
     s += "Accept-charset: ISO-8859-1,UTF-8\r\n";
     //If the Accept-Encoding field-value is empty, then only the "identity" encoding is acceptable.
     // -- RFC2616-sec14
@@ -1029,3 +1058,29 @@ bool HttpClient::isSsl() const
 {
   return m_hasSsl and m_uri.protocol() == URI::HTTPS_PROTOCOL;
 }
+
+void HttpClient::setUri(const URI & uri)
+{
+  m_uri = uri;
+  m_state = GET_URL;
+  m_finished = false;
+  setConnection(uri.server().c_str(), uri.port());
+}
+
+const URI & HttpClient::uri() const
+{
+  return m_uri;
+}
+
+void HttpClient::reset()
+{
+  m_total = 0;
+  m_finished = false;
+  m_connectAttempts = 0;
+  m_state = WIFI_OFF;
+  m_maxConnectAttempts = MAX_CONNECT_ATTEMPTS;
+  /*delete m_sslClient;
+  m_sslClient = new SslClient(*this);*/
+  m_log = false;
+}
+
