@@ -77,7 +77,6 @@ class Controller
     enum SaveAs_t
     {
       SAVE_NEEDS_DOWNLOADING,
-      SAVE_NOT_CACHED,
       SAVE_CURRENT_FILE
     };
     SaveAs_t m_saveAs;
