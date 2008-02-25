@@ -224,7 +224,7 @@ void Controller::fetchHttp(const URI & uri)
   bool hasPage = false;
   if (not m_cache->load(uri))
   {
-    HttpClient client(uri.server().c_str(), uri.port(), uri);
+    HttpClient client(uri);
     client.setController(this);
     m_stop = false;
     while (not client.finished())

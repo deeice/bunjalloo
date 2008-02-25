@@ -40,7 +40,7 @@ class HttpClient: public nds::Client
     };
 
 
-    HttpClient(const char * ip, int port, const URI & uri);
+    HttpClient(const URI & uri);
     ~HttpClient();
     void setController(Controller * c);
 

@@ -583,8 +583,11 @@ readError:
   return -1;
 }
 
-HttpClient::HttpClient(const char * ip, int port, const URI & uri) :
-  nds::Client(uri.server().c_str(),port), m_total(0), m_finished(false), m_connectAttempts(0),
+HttpClient::HttpClient(const URI & uri) :
+  nds::Client(uri.server().c_str(),uri.port()),
+  m_total(0),
+  m_finished(false),
+  m_connectAttempts(0),
   m_uri(uri),
   m_state(WIFI_OFF),
   m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
