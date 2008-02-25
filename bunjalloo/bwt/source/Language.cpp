@@ -83,16 +83,19 @@ void Language::callback(const std::string & first, const std::string & second)
 
 void Language::loadLanguageFile()
 {
+  // load english defaults.
   std::string lf(LANGUAGE_DIR);
-  lf += m_lang;
-  lf += ".txt";
-  if (nds::File::exists(lf.c_str()) == nds::File::F_NONE)
+  lf += "en.txt";
+  parseFile(lf.c_str());
+
+  if (nds::File::exists(lf.c_str()) != nds::File::F_NONE)
   {
     // default to english...
     lf = LANGUAGE_DIR;
-    lf += "en.txt";
+    lf += m_lang;
+    lf += ".txt";
+    parseFile(lf.c_str());
   }
-  parseFile(lf.c_str());
 }
 
 

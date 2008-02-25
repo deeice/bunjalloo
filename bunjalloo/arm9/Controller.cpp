@@ -18,6 +18,7 @@
 #include <vector>
 #include "Cache.h"
 #include "Config.h"
+#include "Language.h"
 #include "Controller.h"
 #include "Document.h"
 #include "File.h"
@@ -33,10 +34,11 @@ static const char s_licenceText[] = {
 #include "licence"
 };
 static const char s_errorText[] = {
-#include "error.txt"
+"<html> <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 };
 
 const static char * LICENCE_URL = "file:///licence";
+const static char * UNABLE_TO_LOAD = "cannot_load";
 const static int MAX_REDIRECTS(7);
 
 Controller::Controller()
@@ -167,6 +169,8 @@ void Controller::loadError()
 {
   m_document->reset();
   m_document->appendLocalData(s_errorText, strlen(s_errorText));
+  string errorStr(unicode2string(T(UNABLE_TO_LOAD), true));
+  m_document->appendLocalData(errorStr.c_str(), errorStr.length());
   string href("<a href='");
   href += m_document->uri();
   href += "'>";
