@@ -207,17 +207,9 @@ void View::notify()
       break;
     case Document::INPROGRESS:
       {
-        /** FIXME - broken by BWT.
-        const char * l = "Loading..";
-        m_textArea->setCursor(0, 0);
-        m_textArea->print(l, strlen(l));
-        */
-        /** FIXME - double buffering means this no longer works
+        // add a progress bar or something here...
         unsigned int pc = m_document.percentLoaded();
-        nds::Canvas::instance().fillRectangle(0,40, SCREEN_WIDTH, 20, nds::Color(31,31,31));
-        nds::Canvas::instance().fillRectangle(0,40, pc*SCREEN_WIDTH / 100, 20, nds::Color(30,20,0));
-        swiWaitForVBlank();
-        */
+        printf("In progress.. %d %d\n", m_document.dataExpected(), pc);
       }
       break;
     default:

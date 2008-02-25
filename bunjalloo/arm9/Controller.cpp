@@ -162,6 +162,10 @@ void Controller::downloadAndSaveAs(const char * fileName)
   m_document->setCacheFile(fileName);
   m_httpClient->setUri(tmp);
   fetchHttp2(tmp);
+  if (m_httpClient->hasPage())
+  {
+    finishFetchHttp(tmp);
+  }
 }
 
 void Controller::saveCurrentFileAs(const char * fileName)

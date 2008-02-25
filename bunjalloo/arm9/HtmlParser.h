@@ -105,21 +105,26 @@ class HtmlParser
      * @param tag the tag name (lowercase).
      * @param attrs a vector of attributes for the tag.
      **/
-    virtual void handleStartEndTag(const std::string & tag, const AttributeVector & attrs);
+    virtual void handleStartEndTag(const std::string & tag, const AttributeVector & attrs) = 0;
     /** Called when a start tag is found.
      * @param tag the tag name (lowercase).
      * @param attrs a vector of attributes for the tag.
      **/
-    virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs);
+    virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs) = 0;
     /** Called when an end tag is found.
      * @param tag the tag name (lowercase).
      */
-    virtual void handleEndTag(const std::string & tag);
+    virtual void handleEndTag(const std::string & tag) = 0;
+    /** Called when mime type is binary.
+     * @param data binary data.
+     * @param length size of data in bytes.
+     */
+    virtual void handleBinaryData(const void * data, unsigned int length) = 0;
 
     /** Called for each "glyph" of data between tags.
      * @param ucodeChar unicode character index of the data.
      */
-    virtual void handleData(unsigned int ucodeChar);
+    virtual void handleData(unsigned int ucodeChar) = 0;
 
     void setContentModel(ContentModel newModel);
 
