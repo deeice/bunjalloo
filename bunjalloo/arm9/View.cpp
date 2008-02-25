@@ -208,8 +208,8 @@ void View::notify()
     case Document::INPROGRESS:
       {
         // add a progress bar or something here...
-        unsigned int pc = m_document.percentLoaded();
-        printf("In progress.. %d %d\n", m_document.dataExpected(), pc);
+        //unsigned int pc = m_document.percentLoaded();
+        //printf("In progress.. %d %d\n", m_document.dataExpected(), pc);
       }
       break;
     default:
