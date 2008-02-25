@@ -1,5 +1,6 @@
 url=Enlace
 image=Imagen
+cannot_load="Problemas cargando la página:"
 enter_url="Dirección de la página web:"
 save_as="Guardar el fichero como:"
 enter_text="Añadir texto:"
