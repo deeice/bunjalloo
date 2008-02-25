@@ -129,10 +129,18 @@ void Controller::reload()
   doUri(m_document->uri());
 }
 
+void Controller::cancelSaveAs()
+{
+  if (m_saveAs == SAVE_NEEDS_DOWNLOADING)
+  {
+    // meh.
+    m_document->setStatus(Document::LOADED);
+  }
+}
+
 void Controller::saveAs(const char * fileName)
 {
   // 2 types of "save as" - save the current displayed file, or save a file not yet downloaded.
-  printf("Save as %s\n", fileName);
   switch (m_saveAs)
   {
     case SAVE_CURRENT_FILE:
@@ -149,7 +157,6 @@ void Controller::saveAs(const char * fileName)
 void Controller::downloadAndSaveAs(const char * fileName)
 {
   // ulp
-  printf("Download %s and save it as %s\n", m_document->uri().c_str(), fileName);
   URI tmp(m_document->uri());
   tmp.setMethod("GET");
   m_document->setCacheFile(fileName);
@@ -257,7 +264,6 @@ void Controller::localFile(const std::string & fileName)
 
 void Controller::fetchHttp2(URI & uri)
 {
-  printf("Fetch Http, 2\n");
   m_stop = false;
   while (not m_httpClient->finished())
   {
@@ -270,17 +276,14 @@ void Controller::fetchHttp2(URI & uri)
     if (m_stop)
     {
       loadError();
-    printf("Done! But b0rked\n");
       return;
     }
     swiWaitForVBlank();
   }
-  printf("Done!\n");
 }
 
 void Controller::fetchHttp(const URI & uri)
 {
-  printf("Fetch Http\n");
   /* this works as follows:
    *
    * if not in the cache
@@ -343,7 +346,6 @@ void Controller::fetchHttp(const URI & uri)
           // m_httpClient->disconnect();
           // need to get file name...
           hasPage = false;
-          printf("file not viewable. expecting %d\n", m_document->dataExpected());
           // save as something
           m_saveAs = SAVE_NEEDS_DOWNLOADING;
           m_view->saveAs();

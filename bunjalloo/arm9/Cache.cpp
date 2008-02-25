@@ -98,8 +98,14 @@ void Cache::remove(const URI & uri)
   {
     m_document.setCacheFile("");
     std::string cacheFile(uri2CacheFile(uri));
-    nds::File::rmrf(cacheFile.c_str());
-    nds::File::rmrf((cacheFile+".hdr").c_str());
+    if (nds::File::exists(cacheFile.c_str()) == nds::File::F_REG)
+    {
+      nds::File::unlink(cacheFile.c_str());
+    }
+    if (nds::File::exists(cacheFile.c_str()) == nds::File::F_REG)
+    {
+      nds::File::unlink((cacheFile+".hdr").c_str());
+    }
     m_fileIds.erase(uri.crc32int());
   }
 }

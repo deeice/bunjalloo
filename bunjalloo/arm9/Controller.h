@@ -46,6 +46,9 @@ class Controller
     /** Save the current page as...  */
     void saveAs(const char * fileName);
 
+    /** Save as was cancelled.*/
+    void cancelSaveAs();
+
     void previous();
     void next();
     void stop();

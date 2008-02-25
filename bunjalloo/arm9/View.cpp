@@ -580,4 +580,8 @@ void View::doSaveAs()
     m_toolbar->setVisible(true);
     m_controller.saveAs(fileName.c_str());
   }
+  else
+  {
+    m_controller.cancelSaveAs();
+  }
 }
