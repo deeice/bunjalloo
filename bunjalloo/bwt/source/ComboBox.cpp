@@ -38,6 +38,7 @@ ComboBox::ComboBox():
   scrollPane()->setStretchChildren();
   button()->setDecoration(false);
   button()->setBackgroundColor(WidgetColors::COMBOBOX_FOREGROUND);
+  scrollPane()->setTopLevel(false);
 }
 
 void ComboBox::addItem(const UnicodeString & item)
@@ -58,12 +59,10 @@ void ComboBox::addItem(const UnicodeString & item)
      m_bounds.w = b->preferredSize().w;
   }
   b->setListener(this);
-  b->setSize(m_bounds.w, m_bounds.h);
   b->setDecoration(false);
   b->setBackgroundColor(WidgetColors::COMBOBOX_DROP_DOWN);
   m_items++;
   scrollPane()->add(b);
-  scrollPane()->setTopLevel(false);
   int idealHeight = (m_bounds.h+2)*m_items;
   if (idealHeight > (192/2))
   {

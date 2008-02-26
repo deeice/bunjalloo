@@ -54,6 +54,7 @@ void TextContainer::setText(const UnicodeString & text)
 
 void TextContainer::setSize(unsigned int w, unsigned int h)
 {
+  bool needLayout = ((int)w != m_bounds.w or (int)h != m_bounds.h);
   Component::setSize(w, h);
 
   if ((int)w < (m_preferredWidth+BORDER_WIDTH))
@@ -71,7 +72,10 @@ void TextContainer::setSize(unsigned int w, unsigned int h)
   if (tmpPW > m_preferredWidth)
     m_preferredWidth = tmpPW;
   */
-  layout();
+  if (needLayout)
+  {
+    layout();
+  }
 }
 
 void TextContainer::layout()
