@@ -84,7 +84,6 @@ class Controller
 
     void localFile(const std::string &);
     void fetchHttp(const URI &);
-    void fetchHttp2(URI & uri);
     void finishFetchHttp(const URI & uri);
 
     void configureUrl(const std::string & fileName);

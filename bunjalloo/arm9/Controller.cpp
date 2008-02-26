@@ -134,7 +134,7 @@ void Controller::cancelSaveAs()
   if (m_saveAs == SAVE_NEEDS_DOWNLOADING)
   {
     // meh.
-    m_document->setStatus(Document::LOADED);
+    stop();
   }
 }
 
@@ -156,8 +156,10 @@ void Controller::saveAs(const char * fileName)
 
 void Controller::downloadAndSaveAs(const char * fileName)
 {
-  // ulp
-  URI tmp(m_document->uri());
+  // ulp - redo this
+  printf("downloadAndSaveAs %s\n", fileName);
+
+  /*URI tmp(m_document->uri());
   tmp.setMethod("GET");
   m_document->setCacheFile(fileName);
   m_httpClient->setUri(tmp);
@@ -166,6 +168,7 @@ void Controller::downloadAndSaveAs(const char * fileName)
   {
     finishFetchHttp(tmp);
   }
+  */
 }
 
 void Controller::saveCurrentFileAs(const char * fileName)
@@ -266,26 +269,6 @@ void Controller::localFile(const std::string & fileName)
 
 }
 
-void Controller::fetchHttp2(URI & uri)
-{
-  m_stop = false;
-  while (not m_httpClient->finished())
-  {
-    m_httpClient->handleNextState();
-    if (m_httpClient->state() > HttpClient::WIFI_OFF)
-    {
-      m_wifiInit = true;
-    }
-    m_view->tick();
-    if (m_stop)
-    {
-      loadError();
-      return;
-    }
-    swiWaitForVBlank();
-  }
-}
-
 void Controller::fetchHttp(const URI & uri)
 {
   /* this works as follows:
@@ -312,37 +295,38 @@ void Controller::fetchHttp(const URI & uri)
   {
     // loop one, if get, then head
     // if that is ok, then get again
-    URI tmp(uri);
-    if (uri.method() == "GET")
-    {
-      tmp.setMethod("HEAD");
-      // don't cache the head request, it screws stuff up.
-      m_cache->remove(uri);
-      m_document->setCacheFile("");
-    }
-
-    m_httpClient->setUri(tmp);
+    m_httpClient->setUri(uri);
     m_httpClient->reset();
-    for (;;)
+    m_stop = false;
+    bool firstDownload(true);
+    while (not m_httpClient->finished())
     {
-      fetchHttp2(tmp);
-      if (m_stop)
-        return;
-
-      hasPage = m_httpClient->hasPage();
-      if (m_httpClient->uri().method() == "HEAD")
+      m_httpClient->handleNextState();
+      if (m_httpClient->state() > HttpClient::WIFI_OFF)
       {
-        // what is the mime type of the file?
+        m_wifiInit = true;
+      }
+      m_view->tick();
+      if (m_stop)
+      {
+        loadError();
+        return;
+      }
+      printf("Still downloading\n");
+
+      if (firstDownload)
+      {
         bool download = true;
         switch (m_document->htmlDocument()->mimeType())
         {
-          case HtmlParser::UNINITIALISED:
           case HtmlParser::OTHER:
             break;
 
+          case HtmlParser::UNINITIALISED:
           default:
             // can see it
             download = false;
+            printf("Can see tis\n");
             break;
         }
         if (download)
@@ -353,23 +337,12 @@ void Controller::fetchHttp(const URI & uri)
           // save as something
           m_saveAs = SAVE_NEEDS_DOWNLOADING;
           m_view->saveAs();
-          break;
-        }
-        else
-        {
-          tmp.setMethod("GET");
-          m_document->reset();
-          m_httpClient->setUri(tmp);
-          // load doesn't actually load now, it sets up the caching name and
-          // registers the URL in the cache.
-          m_cache->load(uri);
+          firstDownload = false;
         }
       }
-      else
-      {
-        break;
-      }
+      swiWaitForVBlank();
     }
+    hasPage = m_httpClient->hasPage();
   }
   else
   {
