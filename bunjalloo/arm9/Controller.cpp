@@ -422,3 +422,13 @@ Cache * Controller::cache() const
 {
   return m_cache;
 }
+
+void Controller::setReferer(const URI & referer)
+{
+  m_httpClient->setReferer(referer);
+}
+
+void Controller::clearReferer()
+{
+  m_httpClient->clearReferer();
+}

@@ -81,6 +81,15 @@ class HttpClient: public nds::Client
     //! Set the client back to the initial "null" state.
     void reset();
 
+    /** Set the HTTP Referer URI.
+     * @param referer the referring site.
+     */
+    void setReferer(const URI & referer);
+
+    /** Clear the Referer field.
+     */
+    void clearReferer();
+
   protected:
     void handle(void * bufferIn, int amountRead);
 
@@ -94,6 +103,7 @@ class HttpClient: public nds::Client
     int  m_connectAttempts;
     int  m_reconnects;
     URI m_uri;
+    URI m_referer;
     ConnectionState m_state;
     Controller * m_controller;
     int  m_maxConnectAttempts;

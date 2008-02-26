@@ -40,6 +40,15 @@ class Controller
      */
     void doUri(const URI & uri);
 
+    /** Set the HTTP Referer URI.
+     * @param referer the referring site.
+     */
+    void setReferer(const URI & referer);
+
+    /** Clear the Referer field.
+     */
+    void clearReferer();
+
     /** Refresh the page - reload from http not from cache.  */
     void reload();
 

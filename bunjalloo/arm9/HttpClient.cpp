@@ -776,6 +776,13 @@ void HttpClient::get(const URI & uri)
       // ends.
       s += "Connection: close\r\n";
     }
+    // Only send referrer to the same server.
+    if (not m_referer.server().empty()
+        and m_referer.server() == uri.server())
+    {
+      s += "Referer: "; s += m_referer.asString();
+      s += "\r\n";
+    }
     s += "Accept-charset: ISO-8859-1,UTF-8\r\n";
     //If the Accept-Encoding field-value is empty, then only the "identity" encoding is acceptable.
     // -- RFC2616-sec14
@@ -1084,3 +1091,21 @@ void HttpClient::reset()
   m_log = false;
 }
 
+void HttpClient::setReferer(const URI & referer)
+{
+  if (referer.server().empty())
+  {
+    m_referer = referer;
+  }
+  else
+  {
+    // only send the top level path
+    m_referer = referer.navigateTo("/");
+  }
+}
+
+
+void HttpClient::clearReferer()
+{
+  m_referer = URI("");
+}

@@ -238,6 +238,7 @@ void View::endBookmark()
 {
   m_state = BROWSE;
   m_document.setHistoryEnabled(false);
+  m_controller.clearReferer();
   if (m_linkHref.empty())
     m_linkHref = m_document.uri();
   m_document.setHistoryEnabled(true);
@@ -444,6 +445,7 @@ void View::linkClicked(Link * link)
   bool isAnchor = link->eventType() == Link::STATE_LINK;
   bool isImage  = link->color() == WidgetColors::LINK_IMAGE;
 
+  m_controller.setReferer(m_document.uri());
   if (isAnchor and not isImage)
   {
     m_linkHref = link->href();
@@ -559,6 +561,7 @@ void View::doEnterUrl()
       newAddress = result;
     }
     m_toolbar->setVisible(true);
+    m_controller.clearReferer();
     m_controller.doUri(newAddress);
   }
 }
