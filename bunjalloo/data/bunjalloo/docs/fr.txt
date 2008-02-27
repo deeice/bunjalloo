@@ -1,6 +1,6 @@
 url=Lien
 image=Image
-cannot_load="Le chargement a echoué:"
+cannot_load="Le chargement a échoué:"
 enter_url="Entrez une adresse Web:"
 save_as="Enregistrer sous:"
 enter_text="Entrez du texte:"
