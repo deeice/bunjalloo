@@ -48,6 +48,7 @@ done
 makedistdir=$(dirname $0)
 cd $makedistdir
 makedistdir=$(pwd)
+last=$(git branch -r | grep $project | grep -v tags|tail -1|cut -c3-)
 revision=$(git-svn find-rev HEAD)
 # don't include my test files in the distro!
 rm -rf data/bunjalloo/cache
@@ -63,6 +64,11 @@ git-archive --prefix=$src/ HEAD bunjalloo libndspp | gzip > $src.tar.gz || die "
 mv $src.tar.gz $makedistdir/ || die "Unable to mv $src.tar.gz to $makedistdir"
 cd - > /dev/null
 echo "Created $src.tar.gz"
+
+git log --pretty=format:"  * %s" --no-merges HEAD ^$last \
+                > ChangeLog-$VERSION || die "Unable to create ChangeLog"
+echo "Created ChangeLog-$VERSION"
+
 
 if test "$tag" = "yes" ; then
   tagname=${project}_${VERSION}_r${revision}
