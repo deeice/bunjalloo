@@ -24,6 +24,13 @@ class HtmlElement;
 class CookieJar;
 class URI;
 
+class HeaderListener
+{
+  public:
+    virtual ~HeaderListener() {}
+    virtual void hasHeaders() = 0;
+};
+
 /** Parse the headers and chunks from a HTTP GET request.
  * The payload is then passed on to the HtmlParser.
  */
@@ -79,6 +86,8 @@ class HeaderParser
 
     bool shouldCache() const;
 
+    void setListener(HeaderListener * listener);
+
   private:
     enum HeaderState
     {
@@ -114,6 +123,7 @@ class HeaderParser
 
     HtmlParser* m_htmlParser;
     CookieJar * m_cookieJar;
+    HeaderListener * m_headerListener;
 
     std::string m_cacheFile;
     struct z_stream_s * m_stream;

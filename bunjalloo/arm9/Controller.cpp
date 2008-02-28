@@ -129,42 +129,27 @@ void Controller::reload()
   doUri(m_document->uri());
 }
 
-void Controller::cancelSaveAs()
-{
-  if (m_saveAs == SAVE_NEEDS_DOWNLOADING)
-  {
-    // meh.
-    m_document->setStatus(Document::LOADED);
-  }
-}
-
-void Controller::saveAs(const char * fileName)
+void Controller::saveAs(const char * fileName, SaveAs_t saveType)
 {
   // 2 types of "save as" - save the current displayed file, or save a file not yet downloaded.
+  m_saveAs = saveType;
   switch (m_saveAs)
   {
+    case NO_SAVE:
+      break;
+
     case SAVE_CURRENT_FILE:
       saveCurrentFileAs(fileName);
       break;
 
     default:
-      // download the file...
-      downloadAndSaveAs(fileName);
+      // download the file first!
+      m_saveFileName = fileName;
+      if (m_document->status() == Document::LOADED)
+      {
+        checkSave();
+      }
       break;
-  }
-}
-
-void Controller::downloadAndSaveAs(const char * fileName)
-{
-  // ulp
-  URI tmp(m_document->uri());
-  tmp.setMethod("GET");
-  m_document->setCacheFile(fileName);
-  m_httpClient->setUri(tmp);
-  fetchHttp2(tmp);
-  if (m_httpClient->hasPage())
-  {
-    finishFetchHttp(tmp);
   }
 }
 
@@ -173,8 +158,7 @@ void Controller::saveCurrentFileAs(const char * fileName)
   // save the current document as fileName
   // simply copy from the cache.
   string cachedFile = m_cache->fileName(m_document->uri());
-  if (nds::File::exists(cachedFile.c_str()) == nds::File::F_REG
-      and nds::File::exists(fileName) == nds::File::F_NONE)
+  if (nds::File::exists(cachedFile.c_str()) == nds::File::F_REG)
   {
     /*bool ok = */nds::File::cp(cachedFile.c_str(), fileName);
   }
@@ -266,26 +250,6 @@ void Controller::localFile(const std::string & fileName)
 
 }
 
-void Controller::fetchHttp2(URI & uri)
-{
-  m_stop = false;
-  while (not m_httpClient->finished())
-  {
-    m_httpClient->handleNextState();
-    if (m_httpClient->state() > HttpClient::WIFI_OFF)
-    {
-      m_wifiInit = true;
-    }
-    m_view->tick();
-    if (m_stop)
-    {
-      loadError();
-      return;
-    }
-    swiWaitForVBlank();
-  }
-}
-
 void Controller::fetchHttp(const URI & uri)
 {
   /* this works as follows:
@@ -307,69 +271,30 @@ void Controller::fetchHttp(const URI & uri)
    *
    */
   bool hasPage = false;
-  m_saveAs = m_cache->useCache()?SAVE_CURRENT_FILE:SAVE_NEEDS_DOWNLOADING;
   if (not m_cache->load(uri))
   {
     // loop one, if get, then head
     // if that is ok, then get again
-    URI tmp(uri);
-    if (uri.method() == "GET")
-    {
-      tmp.setMethod("HEAD");
-      // don't cache the head request, it screws stuff up.
-      m_cache->remove(uri);
-      m_document->setCacheFile("");
-    }
-
-    m_httpClient->setUri(tmp);
+    m_httpClient->setUri(uri);
     m_httpClient->reset();
-    for (;;)
+    m_stop = false;
+    m_saveAs = NO_SAVE;
+    while (not m_httpClient->finished())
     {
-      fetchHttp2(tmp);
+      m_httpClient->handleNextState();
+      if (m_httpClient->state() > HttpClient::WIFI_OFF)
+      {
+        m_wifiInit = true;
+      }
+      m_view->tick();
       if (m_stop)
+      {
+        loadError();
         return;
-
-      hasPage = m_httpClient->hasPage();
-      if (m_httpClient->uri().method() == "HEAD")
-      {
-        // what is the mime type of the file?
-        bool download = true;
-        switch (m_document->htmlDocument()->mimeType())
-        {
-          case HtmlParser::UNINITIALISED:
-          case HtmlParser::OTHER:
-            break;
-
-          default:
-            // can see it
-            download = false;
-            break;
-        }
-        if (download)
-        {
-          // m_httpClient->disconnect();
-          // need to get file name...
-          hasPage = false;
-          // save as something
-          m_saveAs = SAVE_NEEDS_DOWNLOADING;
-          m_view->saveAs();
-          break;
-        }
-        else
-        {
-          tmp.setMethod("GET");
-          m_document->reset();
-          m_httpClient->setUri(tmp);
-          // load doesn't actually load now, it sets up the caching name and
-          // registers the URL in the cache.
-          m_cache->load(uri);
-        }
       }
-      else
-      {
-        break;
-      }
+      swiWaitForVBlank();
     }
+    hasPage = m_httpClient->hasPage();
   }
   else
   {
@@ -407,6 +332,16 @@ void Controller::finishFetchHttp(const URI & uri)
     m_redirected = 0;
     m_document->setStatus(Document::LOADED);
   }
+  checkSave();
+}
+
+void Controller::checkSave()
+{
+  if (m_saveAs == SAVE_DOWNLOADING)
+  {
+    saveCurrentFileAs(m_saveFileName.c_str());
+    m_saveAs = NO_SAVE;
+  }
 }
 
 bool Controller::wifiInitialised() const
@@ -417,6 +352,8 @@ bool Controller::wifiInitialised() const
 void Controller::stop()
 {
   m_stop = true;
+  m_saveAs = NO_SAVE;
+  m_saveFileName.clear();
 }
 
 Cache * Controller::cache() const

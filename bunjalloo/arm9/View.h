@@ -103,7 +103,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
       BROWSE,
       ENTER_URL,
       BOOKMARK,
-      SAVE_AS
+      SAVE_CURRENT_FILE,
+      SAVE_DOWNLOADING
     };
 
     Document & m_document;

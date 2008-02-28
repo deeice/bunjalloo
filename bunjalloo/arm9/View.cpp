@@ -23,6 +23,7 @@
 #include "Config.h"
 #include "Controller.h"
 #include "Document.h"
+#include "HtmlDocument.h"
 #include "File.h"
 #include "FormControl.h"
 #include "Language.h"
@@ -235,6 +236,21 @@ void View::notify()
         m_progress->setText(string2unicode(s));
       }
       break;
+    case Document::HAS_HEADERS:
+      {
+        switch (m_document.htmlDocument()->mimeType())
+        {
+          case HtmlParser::OTHER:
+            saveAs();
+            m_state = SAVE_DOWNLOADING;
+            break;
+
+          case HtmlParser::UNINITIALISED:
+          default:
+            // can see it
+            break;
+        }
+      }
     default:
       break;
   }
@@ -355,7 +371,7 @@ void View::saveAs()
   m_keyboard->setTitle(T(SAVE_AS_TITLE));
   m_keyboard->editText(m_addressBar);
   m_toolbar->setVisible(false);
-  m_state = SAVE_AS;
+  m_state = SAVE_CURRENT_FILE;
   m_dirty = true;
 }
 
@@ -504,7 +520,8 @@ void View::tick()
       browse();
       break;
     case ENTER_URL:
-    case SAVE_AS:
+    case SAVE_CURRENT_FILE:
+    case SAVE_DOWNLOADING:
       keyboard();
       break;
     case BOOKMARK:
@@ -546,7 +563,8 @@ void View::tick()
     doEnterUrl();
   }
 
-  if (m_state == SAVE_AS and not m_keyboard->visible()) {
+  if (( m_state == SAVE_CURRENT_FILE or m_state == SAVE_DOWNLOADING )
+    and not m_keyboard->visible()) {
     m_toolbar->setVisible(true);
     doSaveAs();
   }
@@ -597,15 +615,18 @@ void View::doEnterUrl()
 
 void View::doSaveAs()
 {
-  m_state = BROWSE;
   string fileName = unicode2string(m_keyboard->result());
   if (not fileName.empty() and m_keyboard->selected() == Keyboard::OK)
   {
     m_toolbar->setVisible(true);
-    m_controller.saveAs(fileName.c_str());
+    m_controller.saveAs(fileName.c_str(),
+        m_state==SAVE_DOWNLOADING?Controller::SAVE_DOWNLOADING:Controller::SAVE_CURRENT_FILE);
   }
   else
   {
-    m_controller.cancelSaveAs();
+    // this does nothing on already loaded pages.
+    // cancels save on download in progress stuff
+    m_controller.stop();
   }
+  m_state = BROWSE;
 }

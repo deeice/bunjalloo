@@ -25,16 +25,32 @@
 
 using namespace std;
 
+class DocumentHeaderListener: public HeaderListener
+{
+  public:
+    DocumentHeaderListener(Document & doc):
+      m_document(doc) { }
+
+    void hasHeaders()
+    {
+      m_document.setStatus(Document::HAS_HEADERS);
+    }
+  private:
+    Document & m_document;
+};
+
 Document::Document():
   m_amount(0),
   m_cookieJar(new CookieJar),
   m_htmlDocument(new HtmlDocument),
   m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar)),
+  m_headerListener(new DocumentHeaderListener(*this)),
   m_historyEnabled(true)
 {
   m_history.clear();
   m_historyPosition = m_history.begin();
   reset();
+  m_headerParser->setListener(m_headerListener);
 }
 
 Document::~Document()
@@ -42,6 +58,7 @@ Document::~Document()
   delete m_htmlDocument;
   delete m_headerParser;
   delete m_cookieJar;
+  delete m_headerListener;
 }
 
 void Document::setUri(const std::string & uriString)

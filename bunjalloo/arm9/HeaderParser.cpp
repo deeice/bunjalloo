@@ -37,6 +37,7 @@ HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
   m_expected(0),
   m_htmlParser(htmlParser),
   m_cookieJar(cookieJar),
+  m_headerListener(0),
   m_stream(new z_stream_s),
   m_window(new char[WINSIZE])
 {
@@ -44,6 +45,11 @@ HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
 }
 HeaderParser::~HeaderParser()
 { }
+
+void HeaderParser::setListener(HeaderListener * listener)
+{
+  m_headerListener = listener;
+}
 
 void HeaderParser::reset()
 {
@@ -227,6 +233,11 @@ void HeaderParser::beforeField()
 
 void HeaderParser::endingHeaders()
 {
+  if (m_headerListener)
+  {
+    m_headerListener->hasHeaders();
+  }
+
   if (m_chunked) {
     m_state = CHUNK_LINE;
     m_chunkLengthString = "0x";

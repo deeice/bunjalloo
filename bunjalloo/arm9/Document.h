@@ -21,6 +21,7 @@
 #include "ViewI.h"
 
 class HeaderParser;
+class HeaderListener;
 class HtmlDocument;
 class HtmlElement;
 class CookieJar;
@@ -35,7 +36,8 @@ class Document
       NOTHING,   //!< No status set.
       LOADED,    //!< Has fully loaded.
       INPROGRESS, //!< Is in the progress of loading.
-      REDIRECTED //!< Page has been redirected
+      HAS_HEADERS,//!< Has got the HTTP headers
+      REDIRECTED  //!< Page has been redirected
     };
     //! Constructor.
     Document();
@@ -177,6 +179,7 @@ class Document
     CookieJar*    m_cookieJar;
     HtmlDocument* m_htmlDocument;
     HeaderParser* m_headerParser;
+    HeaderListener * m_headerListener;
     //! Store history entry as the url and user defined scroll position.
     typedef std::pair<std::string, int> HistoryEntry;
     typedef std::vector<HistoryEntry> HistoryVector;

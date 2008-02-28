@@ -52,11 +52,14 @@ class Controller
     /** Refresh the page - reload from http not from cache.  */
     void reload();
 
+    enum SaveAs_t
+    {
+      NO_SAVE,
+      SAVE_DOWNLOADING,
+      SAVE_CURRENT_FILE
+    };
     /** Save the current page as...  */
-    void saveAs(const char * fileName);
-
-    /** Save as was cancelled.*/
-    void cancelSaveAs();
+    void saveAs(const char * fileName, SaveAs_t saveType=SAVE_CURRENT_FILE);
 
     void previous();
     void next();
@@ -83,17 +86,12 @@ class Controller
     bool m_stop;
     int m_redirected;
     int m_maxRedirects;
-    enum SaveAs_t
-    {
-      SAVE_NEEDS_DOWNLOADING,
-      SAVE_CURRENT_FILE
-    };
     SaveAs_t m_saveAs;
+    std::string m_saveFileName;
 
 
     void localFile(const std::string &);
     void fetchHttp(const URI &);
-    void fetchHttp2(URI & uri);
     void finishFetchHttp(const URI & uri);
 
     void configureUrl(const std::string & fileName);
@@ -101,6 +99,7 @@ class Controller
     // helper to avoid code dupe
     void handleUri(const URI & uri);
     void saveCurrentFileAs(const char * fileName);
-    void downloadAndSaveAs(const char * fileName);
+    // Check saving when page loads or user tries to save
+    void checkSave();
 };
 #endif
