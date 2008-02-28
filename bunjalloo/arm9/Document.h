@@ -34,7 +34,8 @@ class Document
     enum Status {
       NOTHING,   //!< No status set.
       LOADED,    //!< Has fully loaded.
-      INPROGRESS //!< Is in the progress of loading.
+      INPROGRESS, //!< Is in the progress of loading.
+      REDIRECTED //!< Page has been redirected
     };
     //! Constructor.
     Document();

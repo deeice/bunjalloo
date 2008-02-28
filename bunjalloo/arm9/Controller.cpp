@@ -398,6 +398,7 @@ void Controller::finishFetchHttp(const URI & uri)
     m_redirected++;
     swiWaitForVBlank();
     swiWaitForVBlank();
+    m_document->setStatus(Document::REDIRECTED);
     m_document->reset();
     doUri(uri.navigateTo(m_document->uri()));
   }

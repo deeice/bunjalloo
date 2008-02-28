@@ -32,6 +32,7 @@
 #include "Link.h"
 #include "LinkHandler.h"
 #include "PreferencesToolbar.h"
+#include "ProgressBar.h"
 #include "ScrollPane.h"
 #include "SearchEntry.h"
 #include "Stylus.h"
@@ -95,6 +96,7 @@ View::View(Document & doc, Controller & c):
   m_bookmarkToolbar(new BookmarkToolbar(*this)),
   m_prefsToolbar( new PreferencesToolbar(*this)),
   m_toolbar(m_browseToolbar),
+  m_progress(new ProgressBar(0, 100)),
   m_scrollPane(new ScrollPane),
   m_state(BROWSE),
   m_form(0),
@@ -123,6 +125,9 @@ View::View(Document & doc, Controller & c):
     }
     m_search = new SearchEntry(searchFile);
   }
+  m_progress->setShowString();
+  m_progress->setSize(250, 40);
+  m_progress->setLocation(2, 2);
 }
 
 View::~View()
@@ -162,8 +167,12 @@ void View::notify()
   Document::Status status(m_document.status());
 
   switch (status) {
+    case Document::REDIRECTED:
+        m_filenameForProgress.clear();
+        break;
     case Document::LOADED:
       {
+        m_filenameForProgress.clear();
         /** Broken by BWT.
          m_textArea->setStartLine( (-SCREEN_HEIGHT / m_textArea->font().height()) - 1);
         swiWaitForVBlank();
@@ -208,8 +217,22 @@ void View::notify()
     case Document::INPROGRESS:
       {
         // add a progress bar or something here...
-        //unsigned int pc = m_document.percentLoaded();
-        //printf("In progress.. %d %d\n", m_document.dataExpected(), pc);
+        unsigned int pc = m_document.percentLoaded();
+        m_progress->setValue(pc);
+        if (m_filenameForProgress.empty())
+        {
+          URI u(m_document.uri());
+          m_filenameForProgress = nds::File::base(u.fileName().c_str());
+          if (m_filenameForProgress.empty())
+          {
+            m_filenameForProgress = "index";
+          }
+        }
+        char buffer[10];
+        string s(m_filenameForProgress);
+        sprintf(buffer, " %d%%", pc);
+        s += buffer;
+        m_progress->setText(string2unicode(s));
       }
       break;
     default:
@@ -496,13 +519,19 @@ void View::tick()
       break;
   }
   m_dirty |= m_keyboard->tick();
+  m_dirty |= (m_document.status() == Document::INPROGRESS) and m_progress->dirty();
   m_toolbar->tick();
+
 
   if (m_dirty) {
     const static nds::Rectangle clip = {0, 0, nds::Canvas::instance().width(), nds::Canvas::instance().height()};
     m_scrollPane->paint(clip);
     m_keyboard->paint(clip);
     m_linkHandler->paint(clip);
+    if (m_progress->dirty() and m_document.status() == Document::INPROGRESS)
+    {
+      m_progress->paint(m_progress->bounds());
+    }
     nds::Canvas::instance().endPaint();
     m_dirty = false;
     m_toolbar->updateIcons();

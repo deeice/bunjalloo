@@ -35,6 +35,7 @@ class Stylus;
 class TextField;
 class Toolbar;
 class ViewRender;
+class ProgressBar;
 
 /** Handle the displaying of HTML data.*/
 class View : public ViewI, public ButtonListener, public LinkListener
@@ -114,6 +115,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     Toolbar * m_bookmarkToolbar;
     Toolbar * m_prefsToolbar;
     Toolbar * m_toolbar;
+    ProgressBar * m_progress;
     ScrollPane * m_scrollPane;
     InputState m_state;
     FormControl * m_form;
@@ -126,6 +128,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     int m_refreshing;
     // store the title of the page to bookmark..
     std::string m_bookmarkTitleUtf8;
+    std::string m_filenameForProgress;
 
     void updateInput();
     void browse();

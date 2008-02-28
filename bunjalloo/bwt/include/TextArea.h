@@ -87,6 +87,8 @@ class TextArea : public Component
     /** Return the text colour to the default, initial value. */
     void setDefaultColor();
 
+    unsigned short backgroundColor() const;
+
     /** Get the size of the text in pixels using the current font.
      * @param unicodeString the string to check the size of.
      * @return the size of the string in pixels.

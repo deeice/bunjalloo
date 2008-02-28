@@ -323,6 +323,11 @@ void TextArea::setBackgroundColor(unsigned short color)
   }
 }
 
+unsigned short TextArea::backgroundColor() const
+{
+  return m_bgCol;
+}
+
 void TextArea::setTextColor(unsigned short color)
 {
   m_fgCol = color;
