@@ -48,8 +48,16 @@ class Cache
      */
     bool load(const URI & uri);
 
+    /** Remove a web site address from the cache. This removes the actual file
+     * from the disk too.
+     * @param uri The address to remove.
+     */
     void remove(const URI & uri);
 
+    /** Given a URI, return the name of the file that it is stored in the cache.
+     * @param uri A website address.
+     * @return the cache file name that this website is stored as.
+     */
     std::string fileName(const URI & uri) const;
 
     /** Remove the given uri form the cache.

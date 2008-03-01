@@ -3,6 +3,7 @@
 
 #include "Toolbar.h"
 
+/** The "main" Toolbar with back, forward, stop, reload, etc buttons. */
 class BrowseToolbar: public Toolbar
 {
   public:

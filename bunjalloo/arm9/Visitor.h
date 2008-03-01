@@ -19,6 +19,9 @@
 
 #include "HtmlElementFwd.h"
 
+/** Separate the actions on Html items from their implementations. 
+ * See http://en.wikipedia.org/wiki/Visitor_pattern for more details.
+ */
 class Visitor
 {
   public:

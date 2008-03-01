@@ -22,6 +22,7 @@ class URI
 {
   public:
 
+    /** Types of protocol supported. */
     enum Protocol_t
     {
       UNKNOWN_PROTOCOL,
@@ -31,6 +32,11 @@ class URI
       CONFIG_PROTOCOL
     };
 
+    /** Escape a string for use in URIs, removing spaces and other nasty
+     * things.
+     * @param input The "raw" user string.
+     * @return The "safe" string that can be used as a URI.
+     */
     static UnicodeString escape(const UnicodeString & input);
 
     /** Create an empty URI.*/

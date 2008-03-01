@@ -23,6 +23,7 @@
 
 class Document;
 
+/** Configuration file parser. */
 class Config: public FileParser
 {
   public:
@@ -65,7 +66,6 @@ class Config: public FileParser
      * @param dst the destination file
      */
     static void copyTemplate(const char * src, const char * dst);
-
 
     void callback(const std::string & first, const std::string & second);
   private:

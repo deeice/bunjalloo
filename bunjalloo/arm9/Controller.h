@@ -61,10 +61,18 @@ class Controller
     /** Save the current page as...  */
     void saveAs(const char * fileName, SaveAs_t saveType=SAVE_CURRENT_FILE);
 
+    /** Go to the previous page in the history. */
     void previous();
+
+    /** Go to the next page in the history. */
     void next();
+
+    /** Stop loading the page. */
     void stop();
 
+    /** Get the Config object.
+     * @return a reference to the Config object.
+     */
     const Config & config() const;
 
     /** Show the software licence.*/
@@ -73,8 +81,14 @@ class Controller
     /** Loops forever.*/
     void mainLoop();
 
+    /** Is the wifi initialised?
+     * @return true if wifi has been initialised, or false if it has not.
+     */
     bool wifiInitialised() const;
 
+    /** Get the cache object.
+     * @return the Cache object.
+     */
     Cache * cache() const;
   private:
     Document * m_document;

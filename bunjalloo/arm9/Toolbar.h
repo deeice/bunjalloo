@@ -27,12 +27,13 @@ class View;
 class Toolbar: public ViewI, public StylusListener
 {
   public:
+    /** Position on screen of the Toolbar. */
     enum Position
     {
-      TOP,
-      BOTTOM,
-      LEFT,
-      RIGHT
+      TOP,    //!< Horizontal layout at the top of the screen.
+      BOTTOM, //!< Horizontal layout at the bottom of the screen.
+      LEFT,   //!< Vertical layout on the left hand side of the screen.
+      RIGHT   //!< Vertical layout on the right hand side of the screen.
     };
 
     /** Icon positions in the toolbar image. */
@@ -70,25 +71,52 @@ class Toolbar: public ViewI, public StylusListener
     static const int TOOLBAR_X_LEFT;
     static const int TOOLBAR_SEP;
 
+    /** Create a Toolbar.
+     * @param view The View that will handle user input.
+     * @param entries Number of Sprite entries to be shown.
+     */
     Toolbar(View & view, int entries);
+
+    /** End of Toolbar life. */
     virtual ~Toolbar();
 
+    /** Get the visibility of this Toolbar.
+     * @return true if the Toolbar is visible, false otherwise.
+     */
     bool visible() const;
+
+    /** Set the visibility of this Toolbar.
+     * @param visible The new visibility state.
+     */
     virtual void setVisible(bool visible);
 
     /** Callback for each frame animation. */
     virtual void tick() = 0;
+
+    /** Sub classes should implement this method to update the button sprites
+     * with the right images. */
     virtual void updateIcons() = 0;
 
     /** Cycle the TB position top -> right -> bottom -> left -> top. */
     void cyclePosition();
 
+    /** Show an on-screen cursor.
+     * @param x The cursor x position.
+     * @param y The cursor y position.
+     * @param cursorid The index of the sprite to use for this cursor.
+     */
     void showCursor(int x, int y, int cursorid);
+
+    /** Hide the cursor, making it invisible. */
     void hideCursor();
 
     //! Implement ViewI
     virtual void notify();
 
+    /** Get the on screen Position of the Toolbar.
+     * @return The position of the Toolbar. 
+     * @see Position
+     */
     Position position() const;
 
     virtual bool stylusUp(const Stylus * stylus);
@@ -97,11 +125,18 @@ class Toolbar: public ViewI, public StylusListener
     virtual bool stylusDown(const Stylus * stylus);
 
   protected:
+    /** The View item helps handle user input.  */
     View & m_view;
     typedef std::vector<nds::Sprite * > SpriteVector;
+    //! Vector that holds the hardware sprites shown in this Toolbar.
     SpriteVector m_sprites;
 
+    /** Handle the pressing of button.
+     * @param i The index of the button pressed.
+     */
     virtual void handlePress(int i) = 0;
+
+    /** Do the layout of the buttons. */
     virtual void layout();
 
   private:
