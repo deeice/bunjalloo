@@ -1081,6 +1081,7 @@ const URI & HttpClient::uri() const
 
 void HttpClient::reset()
 {
+  disconnect();
   m_total = 0;
   m_finished = false;
   m_connectAttempts = 0;

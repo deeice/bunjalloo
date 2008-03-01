@@ -295,6 +295,7 @@ void Controller::fetchHttp(const URI & uri)
       swiWaitForVBlank();
     }
     hasPage = m_httpClient->hasPage();
+    m_httpClient->disconnect();
   }
   else
   {
