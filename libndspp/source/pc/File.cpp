@@ -221,16 +221,24 @@ bool File::unlink(const char * path)
 {
   //return ::unlink(toFat(path).c_str()) == 0;
   int result(0);
-  const char * actualPath = toFat(path).c_str();
-  if (exists(path) == F_DIR)
-    result = ::rmdir(actualPath);
-  else
-    result = ::unlink(actualPath);
+  const std::string & actualPath = toFat(path);
+  FileType type = exists(path);
+  switch (type)
+  {
+    case F_DIR:
+      result = ::rmdir(actualPath.c_str());
+      break;
+    case F_REG:
+      result = ::unlink(actualPath.c_str());
+      break;
+    case F_NONE:
+      return true;
+  }
   int err = errno;
   if (result != 0)
   {
     char * errmsg = strerror(err);
-    printf("Error removing %s: %d, %s\n", actualPath, err, errmsg);
+    printf("Error removing %s: %d, %s\n", actualPath.c_str(), err, errmsg);
   }
   return result == 0;
 }

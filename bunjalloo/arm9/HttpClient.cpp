@@ -1087,8 +1087,9 @@ void HttpClient::reset()
   m_state = WIFI_OFF;
   m_maxConnectAttempts = MAX_CONNECT_ATTEMPTS;
   /*delete m_sslClient;
-  m_sslClient = new SslClient(*this);*/
+  m_sslClient = new SslClient(*this);
   m_log = false;
+  */
 }
 
 void HttpClient::setReferer(const URI & referer)
