@@ -1,0 +1,85 @@
+#!/bin/bash
+
+if [ $# -lt 1 ] ; then
+  echo Given a git branch, create a svn branch that is the same name
+  echo and rebase the git branch onto the svn branch.
+  echo If the git branch does not exist, then a new svn branch is created
+  echo and a git local branch created from this.
+  echo
+  echo "Usage $0 <branch>"
+  exit 1
+fi
+
+die() {
+  echo >&2 "$@"
+  exit 1
+}
+# start off on master
+git checkout master || die "Unable to checkout 'master'"
+
+repo=$(git svn info | grep URL: | cut -d: -f2- || die "Not a svn repo")
+if [ $? != 0 ] ; then
+  exit 1
+fi
+echo "Using svn repo: $repo"
+
+create_svn_branch()
+{
+  local branch=$1
+  local revision=$2
+  echo "Create branch '$branch' in subversion..."
+  svn cp -r $revision -m "Create new topic branch '$branch'" $repo ${repo/trunk/branches}/$branch || \
+    die "Could not create new branch in subversion"
+}
+
+update_svn()
+{
+  # rebase a git topic branch on a new subversion branch
+  local branch=$1
+  safe_name=${branch/\//_}
+  # first see if remote exists
+  remote=$(git ls-remote . | cut -f2 | grep remotes/$safe_name)
+  if [ $? == 0 ] ; then
+    die "Remote branch already exits!"
+  fi
+
+  local gitrev=$(git rev-list --boundary $branch...master | grep ^- | cut -c2- | tail -1 || die "Not a branch of trunk?")
+  if [ $? != 0 ] ; then
+    exit 1
+  fi
+  local svnrev=$(git svn find-rev $gitrev || die "Not a svn revision")
+  if [ $? != 0 ] ; then
+    exit 1
+  fi
+  # create a new svn topic branch
+  create_svn_branch $safe_name $svnrev
+  # pull the topic branch into git
+  git svn rebase --all || die "Error rebasing all git-svn branches"
+  # rebase the git topic branch onto the subversion branch
+  git rebase --onto remotes/$safe_name master $branch || die "Error rebasing $branch onto the subversion branch"
+}
+
+new_in_svn()
+{
+  # create a new svn branch, then create a new git branch on top of it
+  local branch=$1
+  local safe_name=${branch/\//_}
+  git checkout master || die "Unable to checkout master"
+  local diffs=$(git svn dcommit -n|grep diff-tree | wc -l)
+  if [ $diffs -gt 0 ] ; then
+    die "Error: Trunk not up to date, commit changes to subversion first."
+  fi
+  create_svn_branch $safe_name HEAD
+  git svn rebase --all || die "Error rebasing all git-svn branches"
+  git checkout -b $branch remotes/$safe_name
+}
+
+branch=$1
+exists=$(git branch | grep $branch || die "Branch '$branch' does not exist - will be created...")
+if [ $? != 0 ] ; then
+  # create a new svn branch
+  new_in_svn $branch
+else
+  update_svn $branch
+fi
+
