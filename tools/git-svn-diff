@@ -1,7 +1,6 @@
 #!/bin/bash
-git-svn dcommit -n | grep diff-tree |\
+git svn dcommit -n | grep diff-tree | awk '{print $1" "$2".."$3}'|\
 while read line
 do
-  git ${line/diff-tree/diff --color} | LESS=-R less
-
-done
+  git ${line/diff-tree/log --color $*} 
+done| LESS=-R less
