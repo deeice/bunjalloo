@@ -34,7 +34,7 @@ class Language: public FileParser
 {
   public:
     /** Name of the directory where language settings are kept.
-     * Settings are kept in <lang>.txt, e.g. en.txt */
+     * Settings are kept in lang.txt, e.g. en.txt */
     const static char LANGUAGE_DIR[];
 
     const static char * BUILTIN_LANGS[6];
