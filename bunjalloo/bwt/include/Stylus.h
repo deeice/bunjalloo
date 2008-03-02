@@ -50,11 +50,17 @@ class Stylus
       return m_repeat;
     }
 
+    /** Was the last event the stylus going down.
+     * @return true if the stylus is down.
+     */
     inline bool down() const
     {
       return touchType() == DOWN;
     }
 
+    /** Was the last event the stylus going up.
+     * @return true if the stylus just got pulled up.
+     */
     inline bool up() const
     {
       return touchType() == UP;
@@ -74,9 +80,24 @@ class Stylus
      */
     void lastPoint(int & x, int & y) const;
 
+    /** The start x position.
+     * @return the x position in pixels.
+     */
     int startX() const;
+
+    /** The start y position of this touch event.
+     * @return the y position in pixels.
+     */
     int startY() const;
+
+    /** The last x position of this touch event.
+     * @return the x position in pixels.
+     */
     int lastX() const;
+
+    /** The last y position of this touch event.
+     * @return the y position in pixels.
+     */
     int lastY() const;
 
     /** Update the stylus state.
@@ -91,17 +112,33 @@ class Stylus
      * @param listener the interested client. 
      */
     void registerListener(StylusListener * listener);
+
     /** Forget that we are notifying this component. 
      * @param listener the client that is no longer interested. 
      */
     void unregisterListener(StylusListener * listener);
 
+    /** Convert the held down and up-or-down-ness of the flags to the
+     * equivalent TouchType value.
+     * @param held if the stylus is being held or not.
+     * @param up if the stylus is up or not.
+     * @return the TouchType value.
+     */
     static TouchType keysToTouchType(bool held, bool up);
 
     /** Global variables, I couldn't think of a better way to do this that
-     * didn't involve passing a stylus pointer to everyone that wanted them */
+     * didn't involve passing a stylus pointer to everyone that wanted them.
+     * @param stylus the global Stylus instance to use.
+     */
     static void registerStylus(Stylus * stylus);
+
+    /** Get the global Stylus instance.
+     * @return the global Stylus instance.
+     */
     static Stylus * instance();
+
+    /** Delete the Stylus instance. @see registerStylus()
+     */
     static void deleteInstance();
 
   private:
