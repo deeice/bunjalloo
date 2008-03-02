@@ -38,7 +38,7 @@ update_svn()
   local branch=$1
   safe_name=${branch/\//_}
   # first see if remote exists
-  remote=$(git ls-remote . | cut -f2 | grep remotes/$safe_name)
+  remote=$(git ls-remote . | cut -f2 | grep "\bremotes/$safe_name\b")
   if [ $? == 0 ] ; then
     die "Remote branch already exits!"
   fi
@@ -75,7 +75,7 @@ new_in_svn()
 }
 
 branch=$1
-exists=$(git branch | grep $branch || die "Branch '$branch' does not exist - will be created...")
+exists=$(git branch | grep "\b$branch$" || die "Branch '$branch' does not exist - will be created...")
 if [ $? != 0 ] ; then
   # create a new svn branch
   new_in_svn $branch
