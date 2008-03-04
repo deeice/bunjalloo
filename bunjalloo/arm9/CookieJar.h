@@ -24,6 +24,8 @@
 class Cookie;
 class URI;
 
+/** A class to hold all the Cookies. @see Cookie.
+ */
 class CookieJar
 {
   public:
@@ -37,6 +39,7 @@ class CookieJar
     /** Create a cookie holder. */
     CookieJar();
 
+    /** End of the jar. */
     ~CookieJar();
 
     /** Add cookies based on the request header.
