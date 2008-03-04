@@ -16,11 +16,6 @@
 */
 #include "UnicodeString.h"
 #include "UTF8.h"
-#ifdef ARM9
-#define sprintf_platform siprintf
-#else
-#define sprintf_platform sprintf
-#endif
 
 std::string unicode2string(const UnicodeString & ustr, bool byteencode)
 {
@@ -60,7 +55,7 @@ UnicodeString string2unicode(const std::string & str)
   UnicodeString ustr;
   const char * p = str.c_str();
   size_t len = str.length();
-  for (int i = 0 ; i < len; )
+  for (size_t i = 0 ; i < len; )
   {
     unsigned int val;
     unsigned int read = UTF8::decode(p, val);

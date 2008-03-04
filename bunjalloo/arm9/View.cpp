@@ -231,7 +231,7 @@ void View::notify()
         }
         char buffer[10];
         string s(m_filenameForProgress);
-        sprintf(buffer, " %d%%", pc);
+        sprintf_platform(buffer, " %d%%", pc);
         s += buffer;
         m_progress->setText(string2unicode(s));
       }

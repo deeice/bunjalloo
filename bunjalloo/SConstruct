@@ -55,11 +55,13 @@ def createEnv(buildTarget):
     env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })],
         OBJCOPYFLAGS = ' -I binary -O elf32-littlearm -B arm \
             --rename-section .data=.rodata,readonly,contents ')
+    env.Append(CPPDEFINES=['sprintf_platform=siprintf'])
   else:
     env = defaultEnv.Copy()
     #env.Append(CCFLAGS="-fprofile-arcs -ftest-coverage")
     env.Append(OBJCOPY = 'objcopy')
     env.Append(OBJCOPYFLAGS = ' -I binary -O elf32-i386 -B i386 ')
+    env.Append(CPPDEFINES=['sprintf_platform=sprintf'])
     #env.Prepend( LIBS=['gcov'])
     env.Prepend( LIBS=['SDL', 'GL'])
     for i in ['CC', 'CXX', 'OBJCOPY']:

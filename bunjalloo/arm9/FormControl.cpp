@@ -55,7 +55,7 @@ static void addBoundary(std::string & processedData, unsigned char boundary[16])
 {
   for (int i = 0; i < 16; ++i) {
     char buffer[3];
-    sprintf(buffer,"%02x",boundary[i]);
+    sprintf_platform(buffer,"%02x",boundary[i]);
     processedData += buffer;
   }
   processedData += "\r\n";
@@ -218,11 +218,7 @@ void FormControl::input(Controller & controller, URI & uri)
   else {
     std::string contentType;
     char buffer[256];
-#ifdef ARM9
-    siprintf(buffer, "%d", processedData.length());
-#else
-    sprintf(buffer, "%d", processedData.length());
-#endif
+    sprintf_platform(buffer, "%d", processedData.length());
     contentType += "Content-Length: ";
     contentType += buffer;
     contentType += "\r\n";

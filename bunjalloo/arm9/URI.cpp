@@ -19,9 +19,6 @@
 #include <algorithm>
 #include <vector>
 #include <functional>
-#ifdef ARM9
-#define sprintf siprintf
-#endif
 
 using namespace std;
 
@@ -387,7 +384,7 @@ UnicodeString URI::escape(const UnicodeString & input)
     unsigned int value = *it;
     if ( isEscapable(value))
     {
-      sprintf(buffer, "%%%02X", value);
+      sprintf_platform(buffer, "%%%02X", value);
       char * src = buffer;
       while (*src != 0) {
         output += *src;
@@ -449,7 +446,7 @@ std::string URI::crc32() const
 {
   uLong crc(crc32int());
   char buffer[32];
-  sprintf(buffer, "%08X", (unsigned int)crc);
+  sprintf_platform(buffer, "%08X", (unsigned int)crc);
   return buffer;
 
 }
