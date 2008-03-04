@@ -89,9 +89,9 @@ class Document
     Status status() const;
 
     /** Set the status.
-     * @param newStatus the new status.
+     * @param status the new status.
      */
-    void setStatus(Status newStatus);
+    void setStatus(Status status);
 
     /** Reset the internal state of the model.
      */

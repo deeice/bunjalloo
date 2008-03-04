@@ -1235,10 +1235,14 @@ void HtmlDocument::reconstructActiveFormatters()
 }
 
 
+/** Marks the positions of formatting elements in the active formatter list.
+ * It has nothing to do with myspace, facebook or any other of your favourite
+ * sites.
+ */
 struct Bookmark
 {
-  const HtmlElement * before;
-  const HtmlElement * after;
+  const HtmlElement * before; //!< Element before this marker.
+  const HtmlElement * after;  //!< Element after this marker.
 };
 
 void HtmlDocument::createBookmark(Bookmark & marker, ElementList::iterator & bookmarkIt) const

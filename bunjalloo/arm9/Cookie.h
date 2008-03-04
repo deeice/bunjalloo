@@ -20,13 +20,23 @@
 #include <string>
 #include "CookieJar.h"
 
+/** Simple implementation of cookies. */
 class Cookie
 {
 
   public:
+    /** Create an empty Cookie.*/
     Cookie()
     {}
 
+    /** Create a Cookie from parameters.
+     * @param name the name of the parameter.
+     * @param value the value to give it.
+     * @param port the server port that set the cookie.
+     * @param domain the domain name
+     * @param path the path that the cookie applies to.
+     * @param secure true if this cookie only applies to secure connections.
+     */
     Cookie(const std::string & name,
            const std::string & value,
            int                 port,
@@ -47,31 +57,50 @@ class Cookie
       }
     }
 
+    /** Check if a domain name matches this Cookie's domain field.
+     * @param domain the domain name to check.
+     * @return true if the domain name given matches for this cookie.
+     */
     bool matchesDomain(const std::string & domain) const
     {
       return (domain == m_domain or CookieJar::topLevel(domain) == m_domain);
     }
 
+    /** Get the name of the Cookie.
+     * @return The name field.
+     */
     const std::string & name() const
     {
       return m_name;
     }
 
+    /** Get the value of the Cookie.
+     * @return the value.
+     */
     const std::string & value() const
     {
       return m_value;
     }
 
+    /** Set the Cookie's value.
+     * @param value the value string.
+     */
     void setValue(const std::string & value)
     {
       m_value = value;
     }
 
+    /** Get the secure status.
+     * @return true if this Cookie only applies to secure connections.
+     */
     bool secure() const
     {
       return m_secure;
     }
 
+    /** Get the path that this Cookie uses.
+     * @return the path field.
+     */
     const std::string & path() const
     {
       return m_path;

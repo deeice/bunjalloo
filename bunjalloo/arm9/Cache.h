@@ -23,6 +23,7 @@
 
 class Document;
 class URI;
+/** Store web pages on disk to save requesting them again. */
 class Cache
 {
   public:

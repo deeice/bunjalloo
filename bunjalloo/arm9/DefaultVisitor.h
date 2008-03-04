@@ -20,6 +20,9 @@
 #include "Visitor.h"
 #include "HtmlElementFwd.h"
 
+/** Do nothing implementation of the Visitor interface.  This class is to make
+ * it easier to create Visitor sub classes.
+ */
 class DefaultVisitor: public Visitor
 {
   public:

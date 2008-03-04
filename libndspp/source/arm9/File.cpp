@@ -196,37 +196,26 @@ void File::close()
   m_details->close();
 }
 
-/*
-bool nds::File::direxists(const char * path)
-{
-  // see if the file exists
-  DIR_ITER * dir = ::diropen(path);
-  bool ex(false);
-  if (dir != 0)
-  {
-    ex = true;
-    ::dirclose(dir);
-  }
-  return ex;
-}
-*/
-
 nds::File::FileType nds::File::exists(const char * path)
 {
+  FatLibrary::instance();
   return existsCommon(path);
 }
 bool nds::File::mkdir(const char * path)
 {
+  FatLibrary::instance();
   return mkdirCommon(path);
 }
 
 int nds::File::mkdir(const char * path, unsigned int mode)
 {
+  FatLibrary::instance();
   return ::mkdir(path, mode);
 }
 
 bool nds::File::unlink(const char * path)
 {
+  FatLibrary::instance();
   return ::unlink(path) == 0;
 }
 
@@ -253,6 +242,7 @@ void nds::File::ls(const char * path, std::vector<std::string> & entries)
 }
 bool nds::File::cp(const char *src, const char *dst)
 {
+  FatLibrary::instance();
   return cpCommon(src, dst);
 }
 
