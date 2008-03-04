@@ -69,7 +69,7 @@ const char * nds::File::dirname(const char * path)
 nds::File::FileType nds::File::existsCommon(const char * path)
 {
   struct stat s;
-  int result = stat(path, &s);
+  int result = ::stat(path, &s);
   if (result == 0)
   {
     if (S_ISREG(s.st_mode))
@@ -82,17 +82,6 @@ nds::File::FileType nds::File::existsCommon(const char * path)
     }
   }
   return F_NONE;
-  /*
-  // see if the file exists
-  int fp = ::open(path, O_RDONLY);
-  bool ex = false;
-  if (fp != -1)
-  {
-    ex = true;
-    ::close(fp);
-  }
-  return ex;
-  */
 }
 
 
