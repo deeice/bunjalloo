@@ -19,6 +19,6 @@ tests/searcher/tester
 tests/stylus/tester
 tests/cache/tester
 data/bunjalloo/cache
-docs
+docs/
 tests/lang-test/lang-test
 tests/lang-test/lang-test.nds
