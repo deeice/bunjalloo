@@ -53,9 +53,9 @@ template <class T> HardwareHandler<T>& HardwareHandler<T>::instance()
 
 template <class T> bool HardwareHandler<T>::compare(const T * x, const T * y)
 {
-  if ( *x < *y )
-    return 1;
-  if ( *x > *y )
-    return -1;
-  return 0;
+  if (!x)
+    return true;
+  if (!y)
+    return false;
+  return ( *x < *y );
 }
