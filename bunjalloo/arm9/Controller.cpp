@@ -217,12 +217,59 @@ void Controller::configureUrl(const std::string & fileName)
   if (position != string::npos)
   {
     string postedUrl = fileName.substr(position+1, fileName.length() - position - 1);
-    //m_config->postConfiguration(postedUrl);
+    m_config->postConfiguration(postedUrl);
   }
   else
   {
-    localFile(fileName);
+    // parse the local file and replace %Key% with Value
+    localConfigFile(fileName);
   }
+}
+
+void Controller::replaceMarkers(std::string & line, const char marker)
+{
+  // find %Foo% and replace it with its localised value, or Foo if none found.
+  size_t pos = line.find(marker);
+  if (pos != string::npos)
+  {
+    // look for the end of it
+    size_t endpos = line.find(marker, pos+1);
+    if (endpos != string::npos)
+    {
+      // subs pos->endpos with the bit in the middle
+      string a = line.substr(0, pos);
+      string middle = line.substr(pos+1, endpos-pos-1);
+      a += unicode2string(T(middle), true).c_str();
+      a += line.substr(endpos+1, line.length()-endpos-1);
+      line = a;
+    }
+  }
+}
+
+void Controller::localConfigFile(const std::string & fileName)
+{
+  nds::File uriFile;
+  uriFile.open(fileName.c_str());
+  // read the lot
+  if (uriFile.is_open())
+  {
+    vector<string> lines;
+    uriFile.readlines(lines);
+    m_document->reset();
+    for (vector<string>::iterator it(lines.begin()); it != lines.end(); ++it)
+    {
+      string & line(*it);
+      replaceMarkers(line);
+      m_document->appendLocalData(line.c_str(), line.length());
+    }
+    m_document->setStatus(Document::LOADED);
+  }
+  else
+  {
+    // could not load file.
+    loadError();
+  }
+
 }
 
 void Controller::localFile(const std::string & fileName)

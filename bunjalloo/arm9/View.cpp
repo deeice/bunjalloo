@@ -317,6 +317,13 @@ void View::showBookmarkPage()
   m_document.setHistoryEnabled(true);
 }
 
+void View::editConfig()
+{
+  // show a config page with values for the configuration :-/
+  URI configFile("config://index.html");
+  m_controller.doUri(configFile);
+}
+
 void View::bookmarkCurrentPage()
 {
   {

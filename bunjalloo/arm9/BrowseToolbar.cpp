@@ -20,7 +20,7 @@ enum ToolbarSpriteID
   SPRITE_BOOKMARK,
 
   SPRITE_GO_URL,
-  //SPRITE_PREFS,
+  SPRITE_PREFS,
   SPRITE_SAVE_AS,
 
   SPRITE_CONNECT_STATUS,
@@ -100,12 +100,11 @@ void BrowseToolbar::handlePress(int i)
       m_view.enterUrl();
       break;
 
-    /*
     case SPRITE_PREFS:
       // Preferences...
       m_view.preferences();
       break;
-    */
+
     case SPRITE_BOOKMARK:
       m_view.bookmarkUrl();
       break;
@@ -124,7 +123,7 @@ void BrowseToolbar::updateIcons()
   m_sprites[SPRITE_BOOKMARK]->setTile( TILES_PER_ICON * ICON_BOOKMARK);
   m_sprites[SPRITE_GO_URL]->setTile( TILES_PER_ICON * ICON_GO_URL);
   m_sprites[SPRITE_SAVE_AS]->setTile( TILES_PER_ICON * ICON_SAVE_AS);
-  //m_sprites[SPRITE_PREFS]->setTile( TILES_PER_ICON * ICON_PREFS);
+  m_sprites[SPRITE_PREFS]->setTile( TILES_PER_ICON * ICON_PREFS);
   bool wifiInit = m_view.controller().wifiInitialised();
   ToolbarIcon wifiIcon(ICON_NOT_CONNECTED);
   if (wifiInit)

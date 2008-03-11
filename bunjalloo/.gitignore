@@ -1,6 +1,6 @@
 .sconsign.dblite
 build
-bunjalloo*
+bunjalloo*.*
 cscope.*
 tags
 tests/cookies/tester

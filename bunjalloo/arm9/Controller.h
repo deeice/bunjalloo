@@ -105,6 +105,7 @@ class Controller
 
 
     void localFile(const std::string &);
+    void localConfigFile(const std::string & fileName);
     void fetchHttp(const URI &);
     void finishFetchHttp(const URI & uri);
 
@@ -115,5 +116,7 @@ class Controller
     void saveCurrentFileAs(const char * fileName);
     // Check saving when page loads or user tries to save
     void checkSave();
+
+    static void replaceMarkers(std::string & line, const char marker='%');
 };
 #endif

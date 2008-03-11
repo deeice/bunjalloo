@@ -204,3 +204,7 @@ bool Config::resource(const std::string & name, int & value) const
   return false;
 }
 
+void Config::postConfiguration(const std::string & postedUrl)
+{
+  printf("Post Config %s\n", postedUrl.c_str());
+}

@@ -68,6 +68,13 @@ class Config: public FileParser
     static void copyTemplate(const char * src, const char * dst);
 
     void callback(const std::string & first, const std::string & second);
+
+    /**
+     * Parse and update the configuration based on user input.
+     * @param postedUrl the url with config data.
+     */
+    void postConfiguration(const std::string & postedUrl);
+
   private:
     Document & m_document;
     KeyValueMap m_resources;

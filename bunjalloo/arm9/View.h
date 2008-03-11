@@ -96,6 +96,10 @@ class View : public ViewI, public ButtonListener, public LinkListener
      * @return a reference to the Document.
      */
     inline Document & document() const;
+
+    /** Edit the configuration.
+     */
+    void editConfig();
   private:
 
     enum InputState

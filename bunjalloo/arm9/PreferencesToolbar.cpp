@@ -14,7 +14,8 @@ enum ToolbarSpriteID
   SPRITE_ADD_COOKIE,
   SPRITE_EDIT_SEARCH,
   SPRITE_ADD_SEARCH,
-  SPRITE_END_OF_ENTRIES,
+  SPRITE_EDIT_CONFIG,
+  SPRITE_END_OF_ENTRIES
 };
 
 PreferencesToolbar::PreferencesToolbar(View & view) :
@@ -29,6 +30,7 @@ void PreferencesToolbar::updateIcons()
   m_sprites[SPRITE_ADD_COOKIE]->setTile( TILES_PER_ICON * ICON_ADD_COOKIE);
   m_sprites[SPRITE_EDIT_SEARCH]->setTile( TILES_PER_ICON * ICON_SEARCH);
   m_sprites[SPRITE_ADD_SEARCH]->setTile( TILES_PER_ICON * ICON_ADD_SEARCH);
+  m_sprites[SPRITE_EDIT_CONFIG]->setTile( TILES_PER_ICON * ICON_PREFS);
 }
 
 void PreferencesToolbar::tick()
@@ -42,6 +44,9 @@ void PreferencesToolbar::handlePress(int i)
       m_view.endBookmark();
       break;
     case (SPRITE_ADD_COOKIE):
+      break;
+    case (SPRITE_EDIT_CONFIG):
+      m_view.editConfig();
       break;
     default:
       break;

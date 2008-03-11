@@ -35,3 +35,6 @@ clearcache=1
 
 # Create a file bunjalloo.log with debugging data
 logger=0
+
+# Language setting. "Builtin" means use the DS setting.
+language=builtin
