@@ -28,8 +28,14 @@ create_svn_branch()
   local branch=$1
   local revision=$2
   echo "Create branch '$branch' in subversion..."
-  svn cp -r $revision -m "Create new topic branch '$branch'" $repo ${repo/trunk/branches}/$branch || \
+  svn cp -r $revision -m "Create new topic branch '$branch'" $repo ${repo/trunk/branches}/topics/$branch || \
     die "Could not create new branch in subversion"
+}
+
+git_svn_fetch()
+{
+  git svn fetch --all || die "Error fetching all git-svn branches"
+  git svn rebase --all || die "Error rebasing all git-svn branches"
 }
 
 update_svn()
@@ -47,6 +53,10 @@ update_svn()
   if [ $? != 0 ] ; then
     exit 1
   fi
+  if [ "x$gitrev" == "x" ] ; then
+    # no revision, i.e. at master tip - use branch name
+    local gitrev=$branch
+  fi
   local svnrev=$(git svn find-rev $gitrev || die "Not a svn revision")
   if [ $? != 0 ] ; then
     exit 1
@@ -54,9 +64,9 @@ update_svn()
   # create a new svn topic branch
   create_svn_branch $safe_name $svnrev
   # pull the topic branch into git
-  git svn rebase --all || die "Error rebasing all git-svn branches"
+  git_svn_fetch
   # rebase the git topic branch onto the subversion branch
-  git rebase --onto remotes/$safe_name master $branch || die "Error rebasing $branch onto the subversion branch"
+  git rebase --onto remotes/topics/$safe_name master $branch || die "Error rebasing $branch onto the subversion branch"
 }
 
 new_in_svn()
@@ -70,8 +80,8 @@ new_in_svn()
     die "Error: Trunk not up to date, commit changes to subversion first."
   fi
   create_svn_branch $safe_name HEAD
-  git svn rebase --all || die "Error rebasing all git-svn branches"
-  git checkout -b $branch remotes/$safe_name
+  git_svn_fetch
+  git checkout -b $branch remotes/topics/$safe_name
 }
 
 branch=$1
