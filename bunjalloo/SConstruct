@@ -20,7 +20,7 @@ executableName = os.path.basename( os.getcwd())
 libndsppDir = '../libndspp'
 
 headers=['#/%s/include'%libndsppDir]
-commonFlags = ' -g -Wall -O0 '
+commonFlags = ' -g -Wall -O2 '
 libraryFiles = {
     'pc': '',
     }
