@@ -51,6 +51,11 @@ UnicodeString Language::translate(const std::string & s)
 void Language::setLanguage(const std::string & l)
 {
   // load the language file
+  m_lang = l;
+  if (l == "builtin")
+  {
+    setBuiltin();
+  }
   loadLanguageFile();
 }
 
@@ -60,15 +65,20 @@ std::string Language::currentLanguage() const
   return m_lang;
 }
 
-Language::Language()
+void Language::setBuiltin()
 {
-  // read user data, load language that applies
   int lang = nds::System::language();
   if (lang > 6 or lang < 0)
   {
     lang = 0;
   }
   m_lang = BUILTIN_LANGS[lang];
+}
+
+Language::Language()
+{
+  // read user data, load language that applies
+  setBuiltin();
   loadLanguageFile();
 }
 

@@ -1,0 +1,12 @@
+url=website
+image=Afbeelding
+cannot_load="kan niet laden"
+enter_url="Typ een website"
+save_as="opslaan als"
+enter_text="typ tekst"
+not_view="Niet laten zien"
+Language=Language
+Spanish=Spanish
+English=English
+Default=Default
+Update=Update

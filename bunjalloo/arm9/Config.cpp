@@ -18,6 +18,7 @@
 #include "CookieJar.h"
 #include "Document.h"
 #include "File.h"
+#include "Language.h"
 #include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "URI.h"
@@ -36,6 +37,7 @@ const char Config::SEARCHFILE_STR[] = "searchfile";
 const char Config::MAX_CONNECT[] = "timeout";
 const char Config::USECACHE[] = "usecache";
 const char Config::CLEARCACHE[] = "clearcache";
+const char LANG_STR[] = "language";
 using namespace std;
 
 void Config::reload()
@@ -75,6 +77,10 @@ void Config::callback(const std::string & first, const std::string & second)
     string value;
     configPathMember(second, value);
     m_resources[first] = value;
+  }
+  else if (first == LANG_STR)
+  {
+    Language::instance().setLanguage(second);
   }
   else
   {
@@ -206,5 +212,12 @@ bool Config::resource(const std::string & name, int & value) const
 
 void Config::postConfiguration(const std::string & postedUrl)
 {
-  printf("Post Config %s\n", postedUrl.c_str());
+  // printf("Post Config %s\n", postedUrl.c_str());
+  // split on "&" and parse parameter pairs
+  ParameterSet set(postedUrl, '&');
+  const KeyValueMap & kv(set.keyValueMap());
+  for (KeyValueMap::const_iterator it(kv.begin()); it != kv.end(); ++it)
+  {
+    callback(it->first, it->second);
+  }
 }

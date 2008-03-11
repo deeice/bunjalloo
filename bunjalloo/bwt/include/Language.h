@@ -68,6 +68,7 @@ class Language: public FileParser
     ~Language();
 
     void loadLanguageFile();
+    void setBuiltin();
 };
 
 #endif
