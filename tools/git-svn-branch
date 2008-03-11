@@ -28,7 +28,7 @@ create_svn_branch()
   local branch=$1
   local revision=$2
   echo "Create branch '$branch' in subversion..."
-  svn cp -r $revision -m "Create new topic branch '$branch'" $repo ${repo/trunk/branches}/$branch || \
+  svn cp -r $revision -m "Create new topic branch '$branch'" $repo ${repo/trunk/branches}/topics/$branch || \
     die "Could not create new branch in subversion"
 }
 
@@ -56,7 +56,7 @@ update_svn()
   # pull the topic branch into git
   git svn rebase --all || die "Error rebasing all git-svn branches"
   # rebase the git topic branch onto the subversion branch
-  git rebase --onto remotes/$safe_name master $branch || die "Error rebasing $branch onto the subversion branch"
+  git rebase --onto remotes/topics/$safe_name master $branch || die "Error rebasing $branch onto the subversion branch"
 }
 
 new_in_svn()
@@ -71,7 +71,7 @@ new_in_svn()
   fi
   create_svn_branch $safe_name HEAD
   git svn rebase --all || die "Error rebasing all git-svn branches"
-  git checkout -b $branch remotes/$safe_name
+  git checkout -b $branch remotes/topics/$safe_name
 }
 
 branch=$1
