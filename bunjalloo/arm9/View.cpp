@@ -276,6 +276,7 @@ void View::setToolbar(Toolbar * toolbar)
 void View::endBookmark()
 {
   m_state = BROWSE;
+  m_document.clearConfigHistory();
   m_document.setHistoryEnabled(false);
   m_controller.clearReferer();
   if (m_linkHref.empty())

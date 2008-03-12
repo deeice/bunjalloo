@@ -354,3 +354,17 @@ unsigned int Document::dataExpected() const
   return m_headerParser->expected();
 }
 
+void Document::clearConfigHistory()
+{
+  int removed(0);
+  for (HistoryVector::iterator it(m_history.begin()); it != m_history.end(); ++it)
+  {
+    HistoryVector::iterator tmp(it);
+    if ( URI(it->first).protocol() == URI::CONFIG_PROTOCOL)
+    {
+      m_history.erase(tmp);
+      --m_historyPosition;
+      --it;
+    }
+  }
+}

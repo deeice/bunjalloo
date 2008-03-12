@@ -633,3 +633,17 @@ void DocumentTest::testBodyEnd()
   CPPUNIT_ASSERT(body != 0);
   CPPUNIT_ASSERT(body->isa("body"));
 }
+
+void DocumentTest::testHistoryWithConfig()
+{
+  m_document->setUri("attrib.html");
+  m_document->setUri("anchor.html");
+  m_document->setUri("config://index.html");
+  m_document->setUri("config://update?language=en");
+  m_document->clearConfigHistory();
+  string result = m_document->uri();
+  string expected = "anchor.html";
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+  CPPUNIT_ASSERT( not m_document->hasNextHistory());
+
+}

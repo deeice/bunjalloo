@@ -5,6 +5,7 @@ enter_url="Gib eine Internetadresse ein:"
 save_as="Gib einen Dateinamen ein:"
 enter_text="Gib Text ein:"
 not_view="Inhalt nicht anzeigbar"
+Config=Configuration
 Language=Language
 Japanese=Japanese
 English=English
