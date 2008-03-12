@@ -429,10 +429,12 @@ void View::browse()
       m_dirty = true;
     }
     if (m_keyState->isRepeat(KEY_L)) {
-      m_controller.previous();
+      if (m_toolbar == m_browseToolbar)
+        m_controller.previous();
     }
     if (m_keyState->isRepeat(KEY_R)) {
-      m_controller.next();
+      if (m_toolbar == m_browseToolbar)
+        m_controller.next();
     }
   }
 

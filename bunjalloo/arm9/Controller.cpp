@@ -219,6 +219,7 @@ void Controller::configureUrl(const std::string & fileName)
   {
     string postedUrl = fileName.substr(position+1, fileName.length() - position - 1);
     m_config->postConfiguration(postedUrl);
+    m_view->endBookmark();
   }
   else
   {
