@@ -16,7 +16,6 @@
 */
 #include "Config.h"
 #include "CookieJar.h"
-#include "Document.h"
 #include "File.h"
 #include "Language.h"
 #include "HtmlConstants.h"
@@ -81,6 +80,7 @@ void Config::callback(const std::string & first, const std::string & second)
   else if (first == LANG_STR)
   {
     Language::instance().setLanguage(second);
+    m_resources[first] = second;
   }
   else
   {
@@ -92,7 +92,6 @@ void Config::handleCookies() const
 {
   // configure the cookie list, read each line in the m_cookieList file and
   // add it as an allowed one to CookieJar
-  CookieJar * cookieJar(m_document.cookieJar());
   nds::File cookieList;
   string cookieFile;
   resource(COOKIE_STR, cookieFile);
@@ -115,15 +114,15 @@ void Config::handleCookies() const
       string & line(*it);
       stripWhitespace(line);
       URI uri(line);
-      cookieJar->setAcceptCookies(uri.server());
+      m_cookieJar.setAcceptCookies(uri.server());
     }
     cookieList.close();
   }
 }
 
 
-Config::Config(Document & doc):
-    m_document(doc)
+Config::Config(CookieJar & cookieJar):
+    m_cookieJar(cookieJar)
 {
   reload();
 }

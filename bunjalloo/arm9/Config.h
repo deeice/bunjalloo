@@ -21,7 +21,7 @@
 #include "ParameterSet.h"
 #include "FileParser.h"
 
-class Document;
+class CookieJar;
 
 /** Configuration file parser. */
 class Config: public FileParser
@@ -39,7 +39,7 @@ class Config: public FileParser
     /** Initialise the config class. Set the document parser and the controller.
      * @param doc the document model of the configuration file.
      */
-    Config(Document & doc);
+    Config(CookieJar & doc);
 
     /** End of life time. */
     ~Config();
@@ -76,7 +76,7 @@ class Config: public FileParser
     void postConfiguration(const std::string & postedUrl);
 
   private:
-    Document & m_document;
+    CookieJar & m_cookieJar;
     KeyValueMap m_resources;
 
     void configPathMember(const std::string & value, std::string & member);
