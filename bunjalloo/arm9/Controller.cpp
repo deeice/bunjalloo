@@ -18,6 +18,7 @@
 #include <vector>
 #include "Cache.h"
 #include "Config.h"
+#include "ConfigParser.h"
 #include "Language.h"
 #include "Controller.h"
 #include "Document.h"
@@ -226,26 +227,6 @@ void Controller::configureUrl(const std::string & fileName)
   }
 }
 
-void Controller::replaceMarkers(std::string & line, const char marker)
-{
-  // find %Foo% and replace it with its localised value, or Foo if none found.
-  size_t pos = line.find(marker);
-  if (pos != string::npos)
-  {
-    // look for the end of it
-    size_t endpos = line.find(marker, pos+1);
-    if (endpos != string::npos)
-    {
-      // subs pos->endpos with the bit in the middle
-      string a = line.substr(0, pos);
-      string middle = line.substr(pos+1, endpos-pos-1);
-      a += unicode2string(T(middle), true).c_str();
-      a += line.substr(endpos+1, line.length()-endpos-1);
-      line = a;
-    }
-  }
-}
-
 void Controller::localConfigFile(const std::string & fileName)
 {
   nds::File uriFile;
@@ -256,10 +237,11 @@ void Controller::localConfigFile(const std::string & fileName)
     vector<string> lines;
     uriFile.readlines(lines);
     m_document->reset();
+    ConfigParser configParser(*m_config);
     for (vector<string>::iterator it(lines.begin()); it != lines.end(); ++it)
     {
       string & line(*it);
-      replaceMarkers(line);
+      configParser.replaceMarkers(line);
       m_document->appendLocalData(line.c_str(), line.length());
     }
     m_document->setStatus(Document::LOADED);

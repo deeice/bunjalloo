@@ -4,14 +4,14 @@
   <form action=config>
     %Language%
     <select name=language>
-      <option value=jp>%Japanese%</option>
-      <option value=en>%English%</option>
-      <option value=fr>%French%</option>
-      <option value=de>%German%</option>
-      <option value=it>%Italian%</option>
-      <option value=es>%Spanish%</option>
-      <option value=nl>%Dutch%</option>
-      <option value=builtin>%Default%</option>
+      <option value=jp %language=jp?selected=1%>%Japanese%</option>
+      <option value=en %language=en?selected=1%>%English%</option>
+      <option value=fr %language=fr?selected=1%>%French%</option>
+      <option value=de %language=de?selected=1%>%German%</option>
+      <option value=it %language=it?selected=1%>%Italian%</option>
+      <option value=es %language=es?selected=1%>%Spanish%</option>
+      <option value=nl %language=nl?selected=1%>%Dutch%</option>
+      <option value=builtin %language=builtin?selected=1%>%Default%</option>
     </select>
     <br>
     <br>

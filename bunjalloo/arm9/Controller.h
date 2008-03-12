@@ -117,6 +117,5 @@ class Controller
     // Check saving when page loads or user tries to save
     void checkSave();
 
-    static void replaceMarkers(std::string & line, const char marker='%');
 };
 #endif
