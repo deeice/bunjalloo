@@ -84,9 +84,10 @@ void stripWhitespace(std::string & modify)
   if (modify.empty())
     return;
   static const std::string delimter(" \r\n	");
-  int firstNonBlank = modify.find_first_not_of(delimter);
-  int lastNonBlank = modify.find_last_not_of(delimter);
-  modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
+  size_t firstNonBlank = modify.find_first_not_of(delimter);
+  size_t lastNonBlank = modify.find_last_not_of(delimter);
+  if (firstNonBlank != std::string::npos and lastNonBlank != std::string::npos)
+    modify = modify.substr(firstNonBlank, (lastNonBlank-firstNonBlank+1));
 }
 
 void stripWhitespace(UnicodeString & modify)
