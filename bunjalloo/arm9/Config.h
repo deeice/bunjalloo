@@ -18,6 +18,7 @@
 #define Config_h_seen
 
 #include <string>
+#include <vector>
 #include "ParameterSet.h"
 #include "FileParser.h"
 
@@ -82,6 +83,8 @@ class Config: public FileParser
     void configPathMember(const std::string & value, std::string & member);
     void handleCookies() const;
 
+    void updateConfig(const std::string & first, const std::string & second,
+        std::vector<std::string> & lines);
 };
 
 #endif

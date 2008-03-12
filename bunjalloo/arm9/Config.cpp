@@ -209,14 +209,55 @@ bool Config::resource(const std::string & name, int & value) const
   return false;
 }
 
+void Config::updateConfig(const std::string & first, const std::string & second,
+    std::vector<std::string> & lines)
+{
+  callback(first, second);
+  for (std::vector<std::string>::iterator it(lines.begin());
+      it != lines.end(); ++it)
+  {
+    string & line(*it);
+    ParameterSet set(line);
+    if (set.hasParameter(first))
+    {
+      bool win(false);
+      if (line[line.length()-1] == '\r')
+      {
+        win = true;
+      }
+      line = first + "=" + second;
+      if (win)
+        line += "\r";
+    }
+  }
+}
+
 void Config::postConfiguration(const std::string & postedUrl)
 {
   // printf("Post Config %s\n", postedUrl.c_str());
   // split on "&" and parse parameter pairs
   ParameterSet set(postedUrl, '&');
   const KeyValueMap & kv(set.keyValueMap());
+  string cfgFilename;
+  cfgFilename += DATADIR;
+  cfgFilename += "/";
+  cfgFilename += s_configFile;
+
+  nds::File file;
+  file.open(cfgFilename.c_str(), "r");
+  vector<string> lines;
+  file.readlines(lines);
+  file.close();
   for (KeyValueMap::const_iterator it(kv.begin()); it != kv.end(); ++it)
   {
-    callback(it->first, it->second);
+    // update the config.ini file, without breaking things
+    updateConfig(it->first, it->second, lines);
+  }
+  file.open(cfgFilename.c_str(), "w");
+  for (std::vector<std::string>::iterator it(lines.begin());
+      it != lines.end(); ++it)
+  {
+    file.write(it->c_str(), it->length());
+    file.write("\n");
   }
 }
