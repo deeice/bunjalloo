@@ -60,7 +60,9 @@ bool Cache::contains(const URI & uri, bool stripInternal) const
     {
       // has an internal link... strip it, since we are interested in 
       // real page hits
-      pos = m_fileIds.find(uri.navigateTo(uri.fileName()).crc32int());
+      const std::string & fn(uri.fileName());
+      const URI & noint = uri.navigateTo(fn);
+      pos = m_fileIds.find(noint.crc32int());
     }
     else
     {
@@ -90,6 +92,8 @@ void Cache::feed(const std::string & filename)
 void Cache::add(const URI & uri)
 {
   m_fileIds[uri.crc32int()] = 1;
+  const URI & noint(uri.navigateTo(uri.fileName()));
+  m_fileIds[noint.crc32int()] = 1;
 }
 
 void Cache::remove(const URI & uri)

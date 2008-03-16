@@ -26,6 +26,7 @@ class CacheTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST_SUITE( CacheTest );
   CPPUNIT_TEST( test0 );
   CPPUNIT_TEST( testLoadCheck );
+  CPPUNIT_TEST( testLocal );
   CPPUNIT_TEST_SUITE_END();
 
 public:
@@ -34,6 +35,7 @@ public:
 
   void test0();
   void testLoadCheck();
+  void testLocal();
 
 private:
   Cache * m_cache;

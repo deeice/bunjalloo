@@ -104,3 +104,15 @@ void CacheTest::testLoadCheck()
   CPPUNIT_ASSERT(result);
 
 }
+
+void CacheTest::testLocal()
+{
+  URI uri("10.0.0.2/~rich/cgi-bin/test.py#hello");
+  bool result = m_cache->load(uri);
+  CPPUNIT_ASSERT(!result);
+  string cachedFile = nds::File::base(m_cache->fileName(uri).c_str());
+  URI uriNoint("10.0.0.2/~rich/cgi-bin/test.py");
+  string expected = uriNoint.crc32();
+  CPPUNIT_ASSERT_EQUAL(expected,  cachedFile);
+
+}
