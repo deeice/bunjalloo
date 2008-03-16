@@ -356,7 +356,6 @@ unsigned int Document::dataExpected() const
 
 void Document::clearConfigHistory()
 {
-  int removed(0);
   for (HistoryVector::iterator it(m_history.begin()); it != m_history.end(); ++it)
   {
     HistoryVector::iterator tmp(it);
