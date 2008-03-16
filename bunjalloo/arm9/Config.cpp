@@ -213,6 +213,7 @@ bool Config::resource(const std::string & name, int & value) const
 void Config::updateConfig(const std::string & first, const std::string & second,
     std::vector<std::string> & lines)
 {
+  bool replaced(false);
   callback(first, second);
   for (std::vector<std::string>::iterator it(lines.begin());
       it != lines.end(); ++it)
@@ -221,6 +222,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
     ParameterSet set(line);
     if (set.hasParameter(first))
     {
+      replaced = true;
       bool win(false);
       if (line[line.length()-1] == '\r')
       {
@@ -229,7 +231,22 @@ void Config::updateConfig(const std::string & first, const std::string & second,
       line = first + "=" + second;
       if (win)
         line += "\r";
+      break;
     }
+  }
+  // append the line if it was not already in the file.
+  if (not replaced)
+  {
+    string line(first);
+    line += "=";
+    line += second;
+    string & firstLine(lines.front());
+    if (firstLine[firstLine.length()-1] == '\r')
+    {
+      line += '\r';
+    }
+    lines.push_back(line);
+
   }
 }
 

@@ -19,6 +19,17 @@ void ConfigParser::parseMiddle(std::string & middle)
   size_t pos = middle.find('?');
   if (pos == string::npos)
   {
+    // check for cfg: value
+    if (middle.find("cfg:")==0)
+    {
+      string resource = middle.substr(4, middle.length()-4);
+      string value;
+      middle.clear();
+      if ( m_config.resource(resource, value) )
+      {
+        middle = value;
+      }
+    }
     return;
   }
   else

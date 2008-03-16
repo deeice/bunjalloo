@@ -26,12 +26,15 @@ class ConfigParseTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST_SUITE( ConfigParseTest );
   CPPUNIT_TEST( test0 );
   CPPUNIT_TEST( test1 );
+  CPPUNIT_TEST( test2 );
+  CPPUNIT_TEST( testCfgParse );
   CPPUNIT_TEST_SUITE_END();
 
   public:
   void test0();
   void test1();
   void test2();
+  void testCfgParse();
   void setUp();
   void tearDown();
 
@@ -106,6 +109,27 @@ void ConfigParseTest::test2()
 
   expected = "";
   line = "%%";
+  m_configParser->replaceMarkers(line);
+  CPPUNIT_ASSERT_EQUAL( expected , line);
+
+}
+
+void ConfigParseTest::testCfgParse()
+{
+  // collect config value
+  string expected("somewhere");
+  string line("%cfg:download%");
+  m_configParser->replaceMarkers(line);
+  CPPUNIT_ASSERT_EQUAL( expected , line);
+
+  // non-config values are empty
+  line = "%cfg:rubbish%";
+  m_configParser->replaceMarkers(line);
+  CPPUNIT_ASSERT( line.empty() );
+
+  // empty config string
+  expected = "";
+  line = "%cfg:%";
   m_configParser->replaceMarkers(line);
   CPPUNIT_ASSERT_EQUAL( expected , line);
 
