@@ -147,6 +147,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void extractTitle();
 
     void setToolbar(Toolbar * toolbar);
+
+    void makeNiceFileName(std::string & fileName);
 };
 
 Controller & View::controller() const

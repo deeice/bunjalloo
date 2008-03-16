@@ -66,6 +66,17 @@ class HtmlParser
      */
     void parseContentType(const std::string & value);
 
+    /** Parse the content-disposition value and act accordingly.
+     * @param value the content-disposition value.
+     */
+    void parseContentDisposition(const std::string & value);
+
+    /** Get the content disposition filename value for this document.
+     * See this page http://www.ietf.org/rfc/rfc2183.txt for details.
+     * @return the Content-Disposition filename.
+     */
+    std::string getContentDisposition() const;
+
     /** Parse the refresh value and act accordingly.
      * Refresh the page and possibly go to a new url.
      * @param value the refresh value.

@@ -366,15 +366,36 @@ void View::preferences()
   setToolbar(m_prefsToolbar);
 }
 
+void View::makeNiceFileName(std::string & fileName)
+{
+  string tmp = m_document.htmlDocument()->getContentDisposition();
+  if (not tmp.empty())
+  {
+    fileName = tmp;
+  }
+  else if (fileName.empty())
+  {
+    fileName = "index.html";
+  }
+  else
+  {
+    // strip off any cgi stuff.
+    size_t pos = fileName.find('?');
+    if (pos != string::npos)
+    {
+      fileName = fileName.substr(0,pos);
+    }
+  }
+}
+
 void View::saveAs()
 {
   // save file as ???
   URI uri(m_document.uri());
+  // FIXME: use Content-Disposition header, if available.
   string fileName(nds::File::base(uri.fileName().c_str()));
-  if (fileName.empty())
-  {
-    fileName = "index.html";
-  }
+  makeNiceFileName(fileName);
+
   m_addressBar->setText(string2unicode(fileName));
   m_keyboard->setTitle(T(SAVE_AS_TITLE));
   m_keyboard->editText(m_addressBar);

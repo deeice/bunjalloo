@@ -107,6 +107,16 @@ class HtmlParserImpl
       m_contentModel = model;
     }
 
+    inline void setContentDisposition(const std::string & disposition)
+    {
+      m_contentDisposition = disposition;
+    }
+
+    const std::string & getContentDisposition() const
+    {
+      return m_contentDisposition;
+    }
+
     void refresh(std::string & refresh, int & time) const;
     void setRefresh(const std::string & refresh, int time);
     void setCacheFile(const std::string & filename);
@@ -135,6 +145,7 @@ class HtmlParserImpl
     string m_doctypeToken;
     //! Sometimes the chunking screws us over.
     string m_leftOvers;
+    string m_contentDisposition;
 
     //! URL for refresh header.
     string m_refresh;
@@ -206,6 +217,7 @@ void HtmlParserImpl::reset()
   m_contentModel = HtmlParser::PCDATA;
   m_encoding = HtmlParser::ISO_ENCODING;
   m_leftOvers.clear();
+  m_contentDisposition.clear();
   m_refresh.clear();
   m_refreshTime = -1;
 }
@@ -1409,6 +1421,22 @@ void HtmlParser::parseContentType(const std::string & value)
   }
 }
 
+void HtmlParser::parseContentDisposition(const std::string & value)
+{
+  ParameterSet paramSet(value);
+  if (paramSet.hasParameter("filename"))
+  {
+    string filename;
+    paramSet.parameter("filename", filename);
+    m_details->setContentDisposition(filename);
+  }
+}
+
+std::string HtmlParser::getContentDisposition() const
+{
+  return m_details->getContentDisposition();
+}
+
 void HtmlParser::setMimeType(ParameterSet & paramSet)
 {
   m_mimeType = OTHER;
@@ -1485,7 +1513,6 @@ void HtmlParser::setToStart()
   m_details->reset();
   m_mimeType = UNINITIALISED;
 }
-
 
 void HtmlParser::setCacheFile(const std::string & filename)
 {

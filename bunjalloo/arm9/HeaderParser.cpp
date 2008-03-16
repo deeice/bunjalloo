@@ -161,6 +161,9 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   else if (field == "refresh") {
     m_htmlParser->parseRefresh(value);
   }
+  else if (field == "content-disposition") {
+    m_htmlParser->parseContentDisposition(value);
+  }
   else if (field == "cache-control")
   {
     if (value.find("no-cache") != string::npos)
