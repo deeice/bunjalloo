@@ -38,3 +38,6 @@ logger=0
 
 # Language setting. "Builtin" means use the DS setting.
 language=builtin
+
+# Default download directory
+download=/

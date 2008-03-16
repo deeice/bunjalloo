@@ -650,6 +650,11 @@ void View::doSaveAs()
   if (not fileName.empty() and m_keyboard->selected() == Keyboard::OK)
   {
     m_toolbar->setVisible(true);
+    // remove any path stuff at the start
+    string path;
+    m_controller.config().resource(Config::DOWNLOAD, path);
+    path += "/";
+    path += nds::File::base(fileName.c_str());
     m_controller.saveAs(fileName.c_str(),
         m_state==SAVE_DOWNLOADING?Controller::SAVE_DOWNLOADING:Controller::SAVE_CURRENT_FILE);
   }

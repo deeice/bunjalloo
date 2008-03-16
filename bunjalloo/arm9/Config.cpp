@@ -36,6 +36,7 @@ const char Config::SEARCHFILE_STR[] = "searchfile";
 const char Config::MAX_CONNECT[] = "timeout";
 const char Config::USECACHE[] = "usecache";
 const char Config::CLEARCACHE[] = "clearcache";
+const char Config::DOWNLOAD[] = "download";
 const char LANG_STR[] = "language";
 using namespace std;
 
