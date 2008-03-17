@@ -20,7 +20,7 @@ executableName = os.path.basename( os.getcwd())
 libndsppDir = '../libndspp'
 
 headers=['#/%s/include'%libndsppDir]
-commonFlags = ' -g -Wall -O2 '
+commonFlags = ' -g -Wall '
 libraryFiles = {
     'pc': '',
     }
@@ -56,12 +56,14 @@ def createEnv(buildTarget):
         OBJCOPYFLAGS = ' -I binary -O elf32-littlearm -B arm \
             --rename-section .data=.rodata,readonly,contents ')
     env.Append(CPPDEFINES=['sprintf_platform=siprintf'])
+    env.Append(CCFLAGS=' -O2 ')
   else:
     env = defaultEnv.Copy()
     #env.Append(CCFLAGS="-fprofile-arcs -ftest-coverage")
     env.Append(OBJCOPY = 'objcopy')
     env.Append(OBJCOPYFLAGS = ' -I binary -O elf32-i386 -B i386 ')
     env.Append(CPPDEFINES=['sprintf_platform=sprintf'])
+    env.Append(CCFLAGS=' -O0 ')
     #env.Prepend( LIBS=['gcov'])
     env.Prepend( LIBS=['SDL', 'GL'])
     for i in ['CC', 'CXX', 'OBJCOPY']:
