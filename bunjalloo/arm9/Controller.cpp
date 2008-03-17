@@ -161,7 +161,16 @@ void Controller::saveCurrentFileAs(const char * fileName)
   string cachedFile = m_cache->fileName(m_document->uri());
   if (nds::File::exists(cachedFile.c_str()) == nds::File::F_REG)
   {
-    /*bool ok = */nds::File::cp(cachedFile.c_str(), fileName);
+    string path;
+    m_config->resource(Config::DOWNLOAD, path);
+    if (nds::File::exists(path.c_str()) == nds::File::F_NONE)
+    {
+      nds::File::mkdir(path.c_str());
+    }
+    path += "/";
+    // remove any path stuff at the start
+    path += nds::File::base(fileName);
+    /*bool ok = */nds::File::cp(cachedFile.c_str(), path.c_str());
   }
 }
 
