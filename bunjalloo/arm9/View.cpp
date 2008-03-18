@@ -105,7 +105,8 @@ View::View(Document & doc, Controller & c):
   m_search(0),
   m_keyState(new KeyState),
   m_dirty(true),
-  m_refreshing(0)
+  m_refreshing(0),
+  m_saveAsEnabled(true)
 {
   m_scrollPane->setTopLevel();
   m_scrollPane->setLocation(0, 0);
@@ -238,6 +239,8 @@ void View::notify()
       break;
     case Document::HAS_HEADERS:
       {
+        if (not m_saveAsEnabled)
+          return;
         switch (m_document.htmlDocument()->mimeType())
         {
           case HtmlParser::OTHER:
@@ -386,6 +389,11 @@ void View::makeNiceFileName(std::string & fileName)
       fileName = fileName.substr(0,pos);
     }
   }
+}
+
+void View::setSaveAsEnabled(bool enabled)
+{
+  m_saveAsEnabled = enabled;
 }
 
 void View::saveAs()

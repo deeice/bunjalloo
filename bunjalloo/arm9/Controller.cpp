@@ -23,6 +23,7 @@
 #include "Controller.h"
 #include "Document.h"
 #include "HtmlDocument.h"
+#include "HtmlElement.h"
 #include "File.h"
 #include "Font.h"
 #include "HttpClient.h"
@@ -227,14 +228,88 @@ void Controller::configureUrl(const std::string & fileName)
   if (position != string::npos)
   {
     string postedUrl = fileName.substr(position+1, fileName.length() - position - 1);
-    m_config->postConfiguration(postedUrl);
-    m_view->endBookmark();
+    string postedAction = nds::File::base(fileName.substr(0, position).c_str());
+    if (postedAction == "config")
+    {
+      m_config->postConfiguration(postedUrl);
+      m_view->endBookmark();
+    }
+    else if (postedAction == "update")
+    {
+      // check for updates!
+      checkUpdates();
+    }
   }
   else
   {
     // parse the local file and replace %Key% with Value
     localConfigFile(fileName);
   }
+}
+
+void Controller::checkUpdates()
+{
+  if (not m_cache->useCache())
+  {
+    return;
+  }
+  string update;
+  m_config->resource(Config::UPDATE, update);
+  m_document->setHistoryEnabled(false);
+  fetchHttp(update);
+  m_document->setHistoryEnabled(true);
+  if (m_document->status() == Document::LOADED
+      and not m_stop
+      and m_document->htmlDocument()->mimeType() == HtmlParser::TEXT_PLAIN)
+  {
+    // loaded. check it is what we expect
+    const HtmlElement * rootNode = m_document->rootNode();
+    if (rootNode->hasChildren())
+    {
+      const HtmlElement * body(rootNode->lastChild());
+      if (body and body->hasChildren())
+      {
+        const HtmlElement * text(body->firstChild());
+        if (text->isa("#TEXT"))
+        {
+          // yipee
+          const string & data = unicode2string(text->text(), true);
+          vector<string> lines;
+          string version, download, size;
+          tokenize(data, lines, "\n");
+          for (vector<string>::const_iterator it(lines.begin()); it != lines.end(); ++it)
+          {
+            ParameterSet set(*it);
+            if (set.hasParameter("version"))
+            {
+              set.parameter("version", version);
+            }
+            if (set.hasParameter("URL"))
+            {
+              set.parameter("URL", download);
+            }
+            if (set.hasParameter("size"))
+            {
+              set.parameter("size", size);
+            }
+          }
+          const URI & downloadUrl(URI(update).navigateTo(download));
+          m_document->setHistoryEnabled(false);
+          m_view->setSaveAsEnabled(false);
+          fetchHttp(downloadUrl);
+          m_view->setSaveAsEnabled(true);
+          // now find out where that was saved...
+          string cachedFile = m_cache->fileName(downloadUrl);
+          if (not m_stop and nds::File::exists(cachedFile.c_str()) == nds::File::F_REG)
+          {
+            printf("Unzip %s\n", cachedFile.c_str());
+          }
+          m_document->setHistoryEnabled(true);
+        }
+      }
+    }
+  }
+  m_view->endBookmark();
 }
 
 void Controller::localConfigFile(const std::string & fileName)

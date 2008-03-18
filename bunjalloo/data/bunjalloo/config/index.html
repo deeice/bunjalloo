@@ -1,7 +1,7 @@
 <html>
   <meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
   <title>%Config%</title>
-  <form action=config>
+  <form action="/config">
     %Language%
     <select name=language>
       <option value=jp %language=jp?selected=1%>%Japanese%</option>
@@ -19,5 +19,12 @@
     <br>
     <br>
     <input type=submit value="%Update%">
+  </form>
+  <p>&nbsp;
+  <p>
+  <form action="/update">
+    %check_update_str%<br>
+    <input type=submit value="%check_update%">
+    %cfg:update%
   </form>
 </html>

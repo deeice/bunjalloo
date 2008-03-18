@@ -18,8 +18,6 @@
 #include "CookieJar.h"
 #include "File.h"
 #include "Language.h"
-#include "HtmlConstants.h"
-#include "HtmlElement.h"
 #include "URI.h"
 
 static const char * s_datadir = DATADIR;
@@ -37,6 +35,7 @@ const char Config::MAX_CONNECT[] = "timeout";
 const char Config::USECACHE[] = "usecache";
 const char Config::CLEARCACHE[] = "clearcache";
 const char Config::DOWNLOAD[] = "download";
+const char Config::UPDATE[] = "update";
 const char LANG_STR[] = "language";
 using namespace std;
 
@@ -47,13 +46,18 @@ void Config::reload()
   cfgFilename += "/";
   cfgFilename += s_configFile;
 
+  string cfgTemplate(s_datadir);
+  cfgTemplate += "/docs/";
+  cfgTemplate += s_templateName;
   if (nds::File::exists(cfgFilename.c_str()) == nds::File::F_NONE)
   {
     // write default config file
-    string cfgTemplate(s_datadir);
-    cfgTemplate += "/docs/";
-    cfgTemplate += s_templateName;
     copyTemplate(cfgTemplate.c_str(), cfgFilename.c_str());
+  }
+  else
+  {
+    // load new values.
+    parseFile(cfgTemplate.c_str());
   }
 
   if (nds::File::exists(USER_DIR) == nds::File::F_NONE)

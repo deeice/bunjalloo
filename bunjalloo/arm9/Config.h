@@ -37,6 +37,7 @@ class Config: public FileParser
     static const char USECACHE[];
     static const char CLEARCACHE[];
     static const char DOWNLOAD[];
+    static const char UPDATE[];
 
     /** Initialise the config class. Set the document parser and the controller.
      * @param doc the document model of the configuration file.

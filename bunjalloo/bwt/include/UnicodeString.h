@@ -17,6 +17,7 @@
 #ifndef UnicodeString_h_seen
 #define UnicodeString_h_seen
 #include <string>
+#include <vector>
 
 /** This typedef is used to represent Unicode strings. Unicode character
  * values are up to 32 bit so an unsigned int is used.
@@ -50,4 +51,7 @@ bool isWhitespace(unsigned int value);
 void stripWhitespace(std::string & modify);
 void stripWhitespace(UnicodeString & modify);
 
+void tokenize(const std::string& str,
+              std::vector<std::string>& tokens,
+              const std::string& delimiters = " ");
 #endif

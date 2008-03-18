@@ -41,3 +41,6 @@ language=builtin
 
 # Default download directory
 download=/
+
+# Place to look for updates
+update=http://10.0.0.2/~rich/version.txt

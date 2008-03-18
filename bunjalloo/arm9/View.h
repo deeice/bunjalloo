@@ -81,6 +81,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     /** Save the current page as something.  */
     void saveAs();
 
+    void setSaveAsEnabled(bool enabled);
+
     /** Exit bookmark mode. */
     void endBookmark();
 
@@ -134,6 +136,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     // store the title of the page to bookmark..
     std::string m_bookmarkTitleUtf8;
     std::string m_filenameForProgress;
+    bool m_saveAsEnabled;
 
     void updateInput();
     void browse();

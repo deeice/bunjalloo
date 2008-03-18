@@ -16,3 +16,5 @@ Spanish=Spanish
 Dutch=Dutch
 Default=Default
 Update=Update
+check_update_str=Check For Updates:
+check_update="Check Now"
