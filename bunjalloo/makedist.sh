@@ -15,12 +15,14 @@ die() {
   exit 1
 }
 
-TEMP=`getopt -o hutv: --long version:,upload,tag,help -- "$@"`
+TEMP=`getopt -o hutv:l: --long version:,last:,upload,tag,help -- "$@"`
     
 if [ $? != 0 ] ; then
   echo "Try '$0 --help' for more information"
   exit 1
 fi  
+
+last=$(git branch -r | grep $project | grep -v tags|tail -1|cut -c3-)
 
 eval set -- "$TEMP"
 
@@ -29,6 +31,7 @@ while true ; do
     -v|--ve|--ver|--vers|--versi|--versio|--version ) VERSION=$2 ; shift 2 ;;
     -u|--up|--upl|--uplo|--uploa|--upload ) upload="yes" ; shift ;;
     -t|--ta|--tag ) tag="yes" ; shift ;;
+    -l|--la|--las|--last ) last=$2 ; shift 2 ;;
     -h|--help )
     echo "Create and optionally upload binary and source distribution files."
     echo ""
@@ -48,7 +51,6 @@ done
 makedistdir=$(dirname $0)
 cd $makedistdir
 makedistdir=$(pwd)
-last=$(git branch -r | grep $project | grep -v tags|tail -1|cut -c3-)
 revision=$(git-svn find-rev HEAD)
 # don't include my test files in the distro!
 rm -rf data/bunjalloo/cache
