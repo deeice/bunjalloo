@@ -4,7 +4,7 @@ libName = 'ndspp'
 #os.path.basename( os.getcwd())
 
 headers=['#/include']
-commonFlags = ' -g -Wall -O2 '
+commonFlags = ' -g -Wall '
 
 defaultEnv = Environment( CCFLAGS=commonFlags, CPPPATH=headers,
     tools=['default', 'color'], toolpath = ['ndspp-scons'])
@@ -16,8 +16,10 @@ def createEnv(buildTarget):
   env = None
   if buildTarget.startswith('arm'):
     env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })] )
+    env.Append(CCFLAGS=' -O2 ')
   else:
     env = defaultEnv.Copy()
+    env.Append(CCFLAGS=' -O0 ')
     for i in ['CC', 'CXX']:
       if os.environ.has_key(i) and os.environ[i]:
         env[i] = os.environ[i]
