@@ -40,7 +40,7 @@ class ZipFile
     /** Fetch the list of files inside the zip file.
      * @param ls the returned list of files is in this vector.
      */
-    void list(std::vector<std::string> ls);
+    void list(std::vector<std::string> & ls);
 
     /** Close the file.
      */

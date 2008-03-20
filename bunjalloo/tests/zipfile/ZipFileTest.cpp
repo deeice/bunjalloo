@@ -55,4 +55,14 @@ void ZipFileTest::test0()
   m_zipfile->open(filename.c_str());
   //CPPUNIT_ASSERT_EQUAL( expected , line);
   CPPUNIT_ASSERT( m_zipfile->is_open());
+  vector<string> files;
+  m_zipfile->list(files);
+  size_t expected(2);
+  CPPUNIT_ASSERT_EQUAL(expected, files.size());
+
+  string expected1("file1.txt");
+  CPPUNIT_ASSERT_EQUAL(expected1, files[0]);
+  string expected2("file2.txt");
+  CPPUNIT_ASSERT_EQUAL(expected2, files[1]);
+
 }
