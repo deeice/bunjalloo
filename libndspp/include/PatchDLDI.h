@@ -23,6 +23,10 @@ namespace nds
        */
       static unsigned short * buffer();
 
+      /** Free the buffer.
+       */
+      static void freeBuffer(unsigned short * buffer);
+
     private:
       class PatchDLDI_Impl;
       PatchDLDI_Impl * m_impl;

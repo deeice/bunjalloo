@@ -53,3 +53,8 @@ unsigned short * nds::PatchDLDI::buffer()
   memset(VRAM_C, 0x00, 128 * 1024);
   return VRAM_C;
 }
+
+void nds::PatchDLDI::freeBuffer(unsigned short * /*buffer*/)
+{
+  VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
+}

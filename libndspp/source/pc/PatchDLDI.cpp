@@ -5,6 +5,8 @@
 
 const unsigned char * nds::PatchDLDI::dldiPatch()
 {
+  static unsigned char * s_data(0);
+  delete[] s_data;
   // Read a file from DLDIPATH/*.dldi
   char * dldiPath = getenv("DLDIPATH");
   if (dldiPath == 0)
@@ -44,6 +46,7 @@ const unsigned char * nds::PatchDLDI::dldiPatch()
     size_t fileSize = ftell(fp);
     fseek(fp, 0, SEEK_SET);
     unsigned char * data = new unsigned char[fileSize];
+    s_data = data;
     /*size_t read = */ fread(data, 1, fileSize, fp);
     return data;
   }
@@ -56,3 +59,7 @@ unsigned short * nds::PatchDLDI::buffer()
   return buffer;
 }
 
+void nds::PatchDLDI::freeBuffer(unsigned short * /*buffer*/)
+{
+  // nothing
+}
