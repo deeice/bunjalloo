@@ -41,6 +41,7 @@ ln -sf jpeg-6b jpeglib
 echo "Checking out more libraries..."
 svn co http://quirkysoft.googlecode.com/svn/external/ otherlibs || die "Unable to checkout from subversion"
 cp otherlibs/zlib/Makefile.ds       zlib/Makefile.ds
+cp otherlibs/zlib/contrib/minizip/Makefile.{ds,linux}  zlib/contrib/minizip/
 cp otherlibs/libpng/Makefile.ds     libpng/Makefile.ds
 cp otherlibs/giflib/Makefile.ds     giflib/Makefile.ds
 cp otherlibs/giflib/config.h        giflib/config.h
@@ -48,6 +49,9 @@ cp otherlibs/giflib/lib/Makefile.ds giflib/lib/Makefile.ds
 
 echo "Building and installing the libraries..."
 make -C zlib -f Makefile.ds install || die "Problems building zlib"
+make -C zlib/contrib/minizip -f Makefile.ds install || die "Problems building unzip lib"
+echo "Also needed for SDL build:"
+echo "sudo make -C zlib/contrib/minizip -f Makefile.linux clean install"
 make -C libpng -f Makefile.ds install || die "Problems building libpng"
 make -C giflib -f Makefile.ds install || die "Problems building giflib"
 cd jpeglib
@@ -65,3 +69,4 @@ echo "  make -C libpng -f Makefile.ds uninstall"
 echo "  make -C giflib -f Makefile.ds uninstall"
 echo "  make -C jpeglib uninstall-lib"
 echo "  make -C otherlibs/matrixssl/src -f Makefile.ds uninstall"
+
