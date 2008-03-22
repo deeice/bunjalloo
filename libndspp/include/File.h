@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 
+struct utimbuf;
 namespace nds   // tolua_export
 {               // tolua_export
   class FileImplementation;
@@ -59,6 +60,7 @@ namespace nds   // tolua_export
        */
       static bool mkdir(const char * path);
 
+      static void utime(const char * path, const utimbuf * buf);
       /** Delete a file or directory. 
        * @param path the file or dir to delete 
        */

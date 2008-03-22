@@ -42,6 +42,9 @@ class ZipFile
      */
     void list(std::vector<std::string> & ls);
 
+    /** Extract the compressed files from the zip file.  */
+    void extract();
+
     /** Close the file.
      */
     void close();

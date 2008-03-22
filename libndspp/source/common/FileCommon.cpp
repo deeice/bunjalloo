@@ -161,7 +161,6 @@ bool nds::File::rmrf(const char * path)
           break;
       }
     }
-    return false;
   }
 }
 

@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <utime.h>
 
 using namespace nds;
 
@@ -273,4 +274,9 @@ bool nds::File::cp(const char *src, const char *dst)
 void * File::file() const
 {
   return m_details->file();
+}
+
+void File::utime(const char * path, const utimbuf * buf)
+{
+  ::utime(path, buf);
 }

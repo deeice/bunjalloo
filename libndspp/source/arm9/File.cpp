@@ -250,3 +250,24 @@ void * File::file() const
 {
   return m_details->file();
 }
+
+
+void File::utime(const char * path, const utimbuf * buf)
+{
+  // Something like this in libfat, if I could be bothered.
+  /*
+  PARTITION * partition = _FAT_partition_getPartitionFromPath (path);
+  if (partition == 0 or partition->readOnly)
+    return;
+  bool fileExists = _FAT_directory_entryFromPath (partition, &dirEntry, path, NULL);
+  if (fileExists and not  _FAT_directory_isDirectory(&dirEntry))
+  {
+    // Set the creation time and date
+    dirEntry.entryData[DIR_ENTRY_cTime_ms] = 0;
+    // _FAT_filetime_get*From_time_t do not really exist.
+    u16_to_u8array (dirEntry.entryData, DIR_ENTRY_cTime, _FAT_filetime_getTimeFrom_time_t( utimbuf->actime ));
+    u16_to_u8array (dirEntry.entryData, DIR_ENTRY_cDate, _FAT_filetime_getDateFrom_time_t( utimbuf->actime ));
+  }
+  */
+}
+

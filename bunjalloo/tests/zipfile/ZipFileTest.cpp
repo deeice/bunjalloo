@@ -14,7 +14,9 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <unistd.h>
 #include <cppunit/extensions/HelperMacros.h>
+#include "File.h"
 #include "ZipFile.h"
 
 using namespace std;
@@ -32,6 +34,8 @@ class ZipFileTest : public CPPUNIT_NS::TestFixture
 
   private:
   ZipFile * m_zipfile;
+  bool m_hasTestDir;
+  void cdTestDir();
 
 
 };
@@ -42,11 +46,38 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ZipFileTest );
 void ZipFileTest::setUp()
 {
   m_zipfile = new ZipFile;
+  m_hasTestDir = false;
 }
-
+void ZipFileTest::cdTestDir()
+{
+  nds::File::mkdir("test");
+  chdir("test");
+  m_hasTestDir = true;
+}
 void ZipFileTest::tearDown()
 {
+  if (m_hasTestDir)
+  {
+    chdir("..");
+    nds::File::rmrf("test");
+  }
   delete m_zipfile;
+}
+
+static std::string readFile(const char * filename)
+{
+  nds::File f;
+  f.open(filename);
+  if (f.is_open())
+  {
+    int size = f.size();
+    char * data = new char[size];
+    f.read(data);
+    string s(data);
+    delete [] data;
+    return s;
+  }
+  return "";
 }
 
 void ZipFileTest::test0()
@@ -65,4 +96,21 @@ void ZipFileTest::test0()
   string expected2("file2.txt");
   CPPUNIT_ASSERT_EQUAL(expected2, files[1]);
 
+  cdTestDir();
+  // now unzip and check the files exists
+  m_zipfile->extract();
+  nds::File::FileType expectedType(nds::File::F_REG);
+  CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("file1.txt"));
+  CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("file2.txt"));
+  expectedType = nds::File::F_NONE;
+  CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("test0.zip"));
+
+  string contents = readFile("file1.txt");
+  string expectedContents("Wed Mar 19 19:54:44 CET 2008\n");
+  CPPUNIT_ASSERT_EQUAL(expectedContents, contents);
+
+  contents = readFile("file2.txt");
+  expectedContents = "Linux rich-laptop 2.6.22-14-generic #1 SMP Tue Feb 12 07:42:25 UTC 2008 i686 GNU/Linux\n";
+  CPPUNIT_ASSERT_EQUAL(expectedContents, contents);
 }
+
