@@ -26,8 +26,9 @@ const unsigned char * nds::PatchDLDI::dldiPatch()
     if (strcmp( ent->d_name, ".") != 0 and strcmp(ent->d_name, "..") != 0 )
     {
       filename = (ent->d_name);
-      size_t pos = filename.rfind(".dldi");
-      if (pos == 4)
+      static const std::string dldiExt(".dldi");
+      size_t pos = filename.rfind(dldiExt);
+      if (pos == (filename.length() - dldiExt.length()))
       {
         // this one
         break;

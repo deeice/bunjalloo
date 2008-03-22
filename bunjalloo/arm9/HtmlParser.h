@@ -96,6 +96,7 @@ class HtmlParser
       IMAGE_JPEG,
       TEXT_HTML,
       TEXT_PLAIN,
+      ZIP,
       UNINITIALISED,
       OTHER
     };

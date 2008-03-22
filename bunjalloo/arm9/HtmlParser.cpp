@@ -1461,6 +1461,10 @@ void HtmlParser::setMimeType(ParameterSet & paramSet)
   {
     m_mimeType = IMAGE_JPEG;
   }
+  else if (paramSet.hasParameter("application/zip"))
+  {
+    m_mimeType = ZIP;
+  }
 }
 
 void HtmlParser::parseRefresh(const std::string & value)

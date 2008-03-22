@@ -17,7 +17,9 @@
 #include <assert.h>
 #include "ndspp.h"
 #include "libnds.h"
+#include "Cache.h"
 #include "Canvas.h"
+#include "Controller.h"
 #include "Document.h"
 #include "File.h"
 #include "FormCheckBox.h"
@@ -37,10 +39,11 @@
 #include "HtmlOptionElement.h"
 #include "HtmlPreElement.h"
 #include "HtmlTextAreaElement.h"
-#include "InputText.h"
-#include "Image.h"
 #include "ImageComponent.h"
+#include "Image.h"
+#include "InputText.h"
 #include "Keyboard.h"
+#include "Language.h"
 #include "PasswordField.h"
 #include "RadioButton.h"
 #include "RichTextArea.h"
@@ -50,9 +53,7 @@
 #include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
-#include "Controller.h"
-#include "Cache.h"
-#include "Language.h"
+#include "ZipViewer.h"
 
 using namespace std;
 const static char * NOT_VIEWABLE("not_view");
@@ -163,6 +164,22 @@ void ViewRender::render()
     textArea()->add(imageComponent);
     useScrollPane = true;
 
+  }
+  else if (mimeType == HtmlParser::ZIP)
+  {
+    URI uri(m_self->m_document.uri());
+    string filename;
+    if (uri.protocol() == URI::FILE_PROTOCOL)
+    {
+      filename = uri.fileName();
+    }
+    else
+    {
+      filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
+    }
+    ZipViewer *zipViewer = new ZipViewer(filename);
+    zipViewer->show(*textArea());
+    useScrollPane = true;
   }
   else if (mimeType == HtmlParser::OTHER)
   {

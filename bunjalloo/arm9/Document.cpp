@@ -306,10 +306,26 @@ void Document::magicMimeType(const char * data, int length)
       // isJpeg call will catch it...
       m_htmlDocument->parseContentType("image/jpeg");
     }
-    // lame hack to get html type
-    else if (strncmp(data, "<html>", 6) == 0)
+    else if (strncmp("PK", data, 2) == 0)
     {
-      m_htmlDocument->parseContentType("text/html");
+      m_htmlDocument->parseContentType("application/zip");
+    }
+    // lame hack to get html type
+    else
+    {
+      string htmlTest(data);
+      transform(htmlTest.begin(), htmlTest.end(), htmlTest.begin(), ::tolower);
+      if (htmlTest.find('<') != string::npos
+          or htmlTest.find("html") != string::npos
+          or htmlTest.find("body") != string::npos
+         )
+      {
+        m_htmlDocument->parseContentType("text/html");
+      }
+      else
+      {
+        m_htmlDocument->parseContentType("application/octet-stream");
+      }
     }
   }
 }
