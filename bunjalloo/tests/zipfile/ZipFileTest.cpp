@@ -25,10 +25,12 @@ class ZipFileTest : public CPPUNIT_NS::TestFixture
 {
   CPPUNIT_TEST_SUITE( ZipFileTest );
   CPPUNIT_TEST( test0 );
+  CPPUNIT_TEST( test1 );
   CPPUNIT_TEST_SUITE_END();
 
   public:
   void test0();
+  void test1();
   void setUp();
   void tearDown();
 
@@ -114,3 +116,17 @@ void ZipFileTest::test0()
   CPPUNIT_ASSERT_EQUAL(expectedContents, contents);
 }
 
+void ZipFileTest::test1()
+{
+  string filename("/data/test0.zip");
+  m_zipfile->open(filename.c_str());
+  //CPPUNIT_ASSERT_EQUAL( expected , line);
+  CPPUNIT_ASSERT( m_zipfile->is_open());
+
+  cdTestDir();
+  // now unzip and check the files exists
+  m_zipfile->extract();
+  nds::File::FileType expectedType(nds::File::F_REG);
+  CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("file1.txt"));
+  CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("file2.txt"));
+}

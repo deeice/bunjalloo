@@ -30,6 +30,8 @@
 #include "TextAreaFactory.h"
 #include "URI.h"
 #include "View.h"
+#include "ZipFile.h"
+#include "PatchDLDI.h"
 
 using namespace std;
 
@@ -303,6 +305,17 @@ void Controller::checkUpdates()
           if (not m_stop and nds::File::exists(cachedFile.c_str()) == nds::File::F_REG)
           {
             printf("Unzip %s\n", cachedFile.c_str());
+            ZipFile zipfile;
+            zipfile.open(cachedFile.c_str());
+            if (zipfile.is_open())
+            {
+              zipfile.extract();
+              nds::PatchDLDI dldi("bunjalloo.nds");
+              if (dldi.patch())
+              {
+                // all done...
+              }
+            }
           }
           m_document->setHistoryEnabled(true);
         }

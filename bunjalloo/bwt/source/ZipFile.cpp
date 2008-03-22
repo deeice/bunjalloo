@@ -245,7 +245,12 @@ class ZipFileImpl
     void open(const char * filename)
     {
       m_filename = filename;
-      m_file = unzOpen(filename);
+      if (nds::File::exists(filename) == nds::File::F_REG and filename[0] == '/')
+      {
+        // try relative if it exists.
+        m_filename = m_filename.substr(1,m_filename.length());
+      }
+      m_file = unzOpen(m_filename.c_str());
     }
 
     bool is_open() const
@@ -290,8 +295,8 @@ class ZipFileImpl
     {
       unz_global_info gi;
       int err = unzGoToFirstFile(m_file);
-      if (err!=UNZ_OK) {
-        printf("error %d with zipfile in unzGetGlobalInfo \n",err);
+      if (err != UNZ_OK) {
+        printf("error %d with zipfile in unzGoToFirstFile \n",err);
         return;
       }
 
