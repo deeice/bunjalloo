@@ -11,6 +11,8 @@ class ZipViewer: public ButtonListener
   public:
     ZipViewer(const std::string & filename);
 
+    void unzip();
+    void unzipAndPatch();
     void show(RichTextArea & textArea);
     virtual void pressed(ButtonI * button);
   private:
