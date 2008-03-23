@@ -61,6 +61,7 @@ const static char * NOT_VIEWABLE("not_view");
 ViewRender::ViewRender(View * self):
   m_self(self),
   m_textArea(0),
+  m_zipViewer(0),
   m_lastElement(0)
 {
 }
@@ -177,8 +178,9 @@ void ViewRender::render()
     {
       filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
     }
-    ZipViewer *zipViewer = new ZipViewer(filename);
-    zipViewer->show(*textArea());
+    delete m_zipViewer;
+    m_zipViewer = new ZipViewer(filename);
+    m_zipViewer->show(*textArea());
     useScrollPane = true;
   }
   else if (mimeType == HtmlParser::OTHER)
