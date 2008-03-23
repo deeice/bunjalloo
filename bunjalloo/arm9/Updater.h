@@ -24,6 +24,7 @@
 class Controller;
 class Document;
 class Button;
+class RichTextArea;
 class View;
 
 class Updater: public ButtonListener
@@ -65,5 +66,7 @@ class Updater: public ButtonListener
     void iniFail();
     void askUpdate();
     void doTitle();
+    void addOk(RichTextArea &);
+    void addCancel(RichTextArea &);
 };
 #endif

@@ -388,3 +388,8 @@ void Document::clearConfigHistory()
     }
   }
 }
+
+const HeaderParser & Document::headerParser() const
+{
+  return *m_headerParser;
+}

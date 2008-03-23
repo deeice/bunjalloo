@@ -152,6 +152,8 @@ class Document
       return m_htmlDocument;
     }
 
+    const HeaderParser & headerParser() const;
+
     /** Set the user defined position of the document.
      * @param position the position of the document
      */

@@ -17,20 +17,21 @@
 #include <string>
 #include <vector>
 #include "Button.h"
-#include "Config.h"
 #include "Cache.h"
+#include "Config.h"
 #include "Controller.h"
 #include "Document.h"
 #include "File.h"
+#include "HeaderParser.h"
 #include "HtmlDocument.h"
 #include "HtmlElement.h"
+#include "Language.h"
 #include "ParameterSet.h"
 #include "RichTextArea.h"
 #include "Updater.h"
 #include "View.h"
-#include "ZipViewer.h"
 #include "ViewRender.h"
-#include "Language.h"
+#include "ZipViewer.h"
 
 using std::string;
 using std::vector;
@@ -137,6 +138,8 @@ void Updater::iniFail()
   doTitle();
   RichTextArea & textArea(*(m_view.renderer()->textArea()));
   textArea.appendText(T("fail_ini"));
+  textArea.insertNewline();
+  addCancel(textArea);
 }
 
 void Updater::doUpdate()
@@ -156,7 +159,9 @@ void Updater::askUpdate()
   RichTextArea & textArea(*(m_view.renderer()->textArea()));
   // now find out where that was saved...
   string cachedFile = m_controller.cache()->fileName(m_downloadUrl);
-  if (not m_controller.stopped() and nds::File::exists(cachedFile.c_str()) == nds::File::F_REG)
+  if (not m_controller.stopped()
+      and nds::File::exists(cachedFile.c_str()) == nds::File::F_REG
+      and m_document.headerParser().httpStatusCode() == 200)
   {
     textArea.appendText(T("update_ask"));
     textArea.insertNewline();
@@ -167,21 +172,33 @@ void Updater::askUpdate()
     textArea.appendText(string2unicode(VERSION));
     textArea.insertNewline();
     textArea.insertNewline();
-    m_ok = new Button(T("ok"));
-    m_cancel = new Button(T("cancel"));
-    m_ok->setListener(this);
-    m_cancel->setListener(this);
-    textArea.add(m_ok);
-    textArea.add(m_cancel);
+    addOk(textArea);
+    addCancel(textArea);
     textArea.insertNewline();
     m_view.resetScroller();
   }
   else
   {
-    textArea.appendText(T("zipfail"));
+    textArea.appendText(T("fail_zip"));
     textArea.appendText(string2unicode(m_newVersion));
+    textArea.insertNewline();
+    addCancel(textArea);
     m_state = ZIP_FAIL;
   }
+}
+
+void Updater::addOk(RichTextArea & textArea)
+{
+  m_ok = new Button(T("ok"));
+  m_ok->setListener(this);
+  textArea.add(m_ok);
+}
+
+void Updater::addCancel(RichTextArea & textArea)
+{
+  m_cancel = new Button(T("cancel"));
+  m_cancel->setListener(this);
+  textArea.add(m_cancel);
 }
 
 void Updater::pressed(ButtonI * button)
