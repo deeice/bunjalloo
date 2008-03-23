@@ -255,7 +255,6 @@ void Controller::checkUpdates()
   Updater * updater = new Updater(*this, *m_document, *m_view);
   m_view->setUpdater(updater);
   updater->init();
-  // m_view->endBookmark();
 }
 
 void Controller::localConfigFile(const std::string & fileName)
@@ -378,7 +377,7 @@ void Controller::finishFetchHttp(const URI & uri)
     m_cache->remove(uri);
   }
   URI docUri(m_document->uri());
-  if (docUri != uri and m_redirected < m_maxRedirects)
+  if (docUri != uri and m_document->historyEnabled() and m_redirected < m_maxRedirects)
   {
     // redirected.
     m_redirected++;

@@ -66,7 +66,8 @@ static bool isEmpty(const UnicodeString & line)
 
 void RichTextArea::appendText(const UnicodeString & unicodeString)
 {
-  if (m_document.size() > 1 and isEmpty(unicodeString) and isEmpty(currentLine()) and isEmpty(m_document[m_document.size()-2]))
+  if (m_document.size() > 1 and isEmpty(unicodeString) and isEmpty(currentLine()) and isEmpty(m_document[m_document.size()-2])
+      and not lineHasComponent(m_document.size()-1))
   {
     // avoid duplicate empty lines
     return;

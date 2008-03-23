@@ -16,6 +16,7 @@
 */
 #include <string>
 #include <vector>
+#include "Button.h"
 #include "Config.h"
 #include "Cache.h"
 #include "Controller.h"
@@ -26,30 +27,57 @@
 #include "ParameterSet.h"
 #include "RichTextArea.h"
 #include "Updater.h"
-#include "URI.h"
 #include "View.h"
 #include "ZipViewer.h"
+#include "ViewRender.h"
 #include "Language.h"
 
 using std::string;
 using std::vector;
 
 Updater::Updater(Controller & c,
-    Document & d, View & view): m_controller(c), m_document(d), m_view(view)
+    Document & d, View & view): m_controller(c), m_document(d), m_view(view), m_state(START)
 {
 }
 
 void Updater::init()
 {
   string update;
+  // set state before calling get uri
+  m_state = GOT_INI;
   m_controller.config().resource(Config::UPDATE, update);
   m_document.setHistoryEnabled(false);
   m_controller.doUri(update);
   m_document.setHistoryEnabled(true);
 }
 
-void Updater::show(RichTextArea & textArea)
+void Updater::show()
 {
+  switch (m_state)
+  {
+    case START:
+      init();
+      break;
+    case GOT_INI:
+      getZip();
+      break;
+    case GOT_ZIP:
+      askUpdate();
+      break;
+    case DO_UPDATE:
+      doUpdate();
+      break;
+    case CANCELLED:
+      m_view.endBookmark();
+      break;
+    default:
+      break;
+  }
+}
+
+void Updater::getZip()
+{
+  m_state = INI_FAIL;
   if (m_document.status() == Document::LOADED
       and not m_controller.stopped()
       and m_document.htmlDocument()->mimeType() == HtmlParser::TEXT_PLAIN)
@@ -67,14 +95,14 @@ void Updater::show(RichTextArea & textArea)
           // yipee
           const string & data = unicode2string(text->text(), true);
           vector<string> lines;
-          string version, download, size;
+          string download, size;
           tokenize(data, lines, "\n");
           for (vector<string>::const_iterator it(lines.begin()); it != lines.end(); ++it)
           {
             ParameterSet set(*it);
             if (set.hasParameter("version"))
             {
-              set.parameter("version", version);
+              set.parameter("version", m_newVersion);
             }
             if (set.hasParameter("URL"))
             {
@@ -85,29 +113,98 @@ void Updater::show(RichTextArea & textArea)
               set.parameter("size", size);
             }
           }
+          m_state = GOT_ZIP;
           string update;
           m_controller.config().resource(Config::UPDATE, update);
-          const URI & downloadUrl(URI(update).navigateTo(download));
+          m_downloadUrl = URI(update).navigateTo(download);
           m_document.setHistoryEnabled(false);
           m_view.setSaveAsEnabled(false);
-          m_controller.doUri(downloadUrl);
+          m_controller.doUri(m_downloadUrl);
           m_view.setSaveAsEnabled(true);
-          // now find out where that was saved...
-          string cachedFile = m_controller.cache()->fileName(downloadUrl);
-          if (not m_controller.stopped() and nds::File::exists(cachedFile.c_str()) == nds::File::F_REG)
-          {
-            ZipViewer viewer(cachedFile);
-            viewer.unzipAndPatch();
-          }
           m_document.setHistoryEnabled(true);
-          textArea.appendText(T("updated"));
-          textArea.appendText(string2unicode(version));
         }
       }
     }
+  }
+  if (m_state == INI_FAIL)
+  {
+    iniFail();
+  }
+}
+
+void Updater::iniFail()
+{
+  doTitle();
+  RichTextArea & textArea(*(m_view.renderer()->textArea()));
+  textArea.appendText(T("fail_ini"));
+}
+
+void Updater::doUpdate()
+{
+  RichTextArea & textArea(*(m_view.renderer()->textArea()));
+  string cachedFile = m_controller.cache()->fileName(m_downloadUrl);
+  ZipViewer viewer(cachedFile);
+  viewer.unzipAndPatch();
+  textArea.appendText(T("done"));
+  m_view.resetScroller();
+}
+
+extern const char * VERSION;
+void Updater::askUpdate()
+{
+  doTitle();
+  RichTextArea & textArea(*(m_view.renderer()->textArea()));
+  // now find out where that was saved...
+  string cachedFile = m_controller.cache()->fileName(m_downloadUrl);
+  if (not m_controller.stopped() and nds::File::exists(cachedFile.c_str()) == nds::File::F_REG)
+  {
+    textArea.appendText(T("update_ask"));
+    textArea.insertNewline();
+    textArea.appendText(T("new_ver"));
+    textArea.appendText(string2unicode(m_newVersion));
+    textArea.insertNewline();
+    textArea.appendText(T("cur_ver"));
+    textArea.appendText(string2unicode(VERSION));
+    textArea.insertNewline();
+    textArea.insertNewline();
+    m_ok = new Button(T("ok"));
+    m_cancel = new Button(T("cancel"));
+    m_ok->setListener(this);
+    m_cancel->setListener(this);
+    textArea.add(m_ok);
+    textArea.add(m_cancel);
+    textArea.insertNewline();
+    m_view.resetScroller();
+  }
+  else
+  {
+    textArea.appendText(T("zipfail"));
+    textArea.appendText(string2unicode(m_newVersion));
+    m_state = ZIP_FAIL;
   }
 }
 
 void Updater::pressed(ButtonI * button)
 {
+  if (m_state == GOT_ZIP)
+  {
+    if (button == (ButtonI*)m_ok)
+    {
+      m_state = DO_UPDATE;
+    }
+    else
+    {
+      m_state = CANCELLED;
+    }
+    show();
+  }
+  else
+  {
+    m_view.endBookmark();
+  }
+}
+
+void Updater::doTitle()
+{
+  m_view.renderer()->doTitle(T("update_title"));
 }

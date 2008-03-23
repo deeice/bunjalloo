@@ -34,6 +34,8 @@ class ViewRender: public Visitor
     ViewRender(View * self);
     void render();
     void setUpdater(Updater * updater);
+    RichTextArea * textArea();
+    void doTitle(const UnicodeString & str);
 
     // implement the Visitor interface.
     virtual bool visit(HtmlAnchorElement & element);
@@ -90,7 +92,6 @@ class ViewRender: public Visitor
     typedef std::map<UnicodeString, FormRadio*> FormGroupMap;
     FormGroupMap m_radioGroup;
 
-    RichTextArea * textArea();
     void setBgColor(const HtmlElement * body);
     void renderSelect(const HtmlElement * body);
     void doImage(const UnicodeString & unicode,

@@ -165,6 +165,8 @@ class Document
     //! Set whether a URI update changes the history or not
     void setHistoryEnabled(bool enable);
 
+    bool historyEnabled() const;
+
     /** Clear config: urls from the history.
      */
     void clearConfigHistory();

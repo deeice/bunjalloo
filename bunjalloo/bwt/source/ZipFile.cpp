@@ -299,13 +299,13 @@ class ZipFileImpl
 
     void extract()
     {
-      unz_global_info gi;
       int err = unzGoToFirstFile(m_file);
       if (err != UNZ_OK) {
         printf("error %d with zipfile in unzGoToFirstFile \n",err);
         return;
       }
 
+      unz_global_info gi;
       err = unzGetGlobalInfo (m_file,&gi);
       if (err!=UNZ_OK) {
         printf("error %d with zipfile in unzGetGlobalInfo \n",err);

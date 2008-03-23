@@ -87,6 +87,11 @@ void Document::setUri(const std::string & uriString)
 #endif
 }
 
+bool Document::historyEnabled() const
+{
+  return m_historyEnabled;
+}
+
 void Document::setHistoryEnabled(bool enable)
 {
   m_historyEnabled = enable;

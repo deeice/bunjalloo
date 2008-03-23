@@ -4,15 +4,10 @@ Import('env')
 # can't glob here as the glob takes place in the build dir.
 target = env['SOURCE_NAME']
 files = env['%s_SOURCE'%target.upper()]
-datedEnv = env.Copy()
-datedEnv.Append(CPPDEFINES=[ ('DATESTRING','\\"%d%02d%02d\\"'%tuple(time.localtime()[0:3]))])
 #objs = [env.Object(filename) for filename in files]
 objs = []
 for filename in files:
-  usingEnv = env
-  if (str(filename) == 'version.c'):
-    usingEnv = datedEnv
-  objs.append(usingEnv.Object(filename))
+  objs.append(env.Object(filename))
 
 
 

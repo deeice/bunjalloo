@@ -17,11 +17,13 @@
 #ifndef Updater_h_seen
 #define Updater_h_seen
 
+#include <string>
 #include "ButtonListener.h"
+#include "URI.h"
 
 class Controller;
 class Document;
-class RichTextArea;
+class Button;
 class View;
 
 class Updater: public ButtonListener
@@ -32,12 +34,36 @@ class Updater: public ButtonListener
 
     virtual void pressed(ButtonI * button);
 
-    void show(RichTextArea & textArea);
+    void show();
 
     bool valid() const;
+
   private:
     Controller & m_controller;
     Document & m_document;
     View & m_view;
+    std::string m_newVersion;
+    Button * m_ok;
+    Button * m_cancel;
+
+    URI m_downloadUrl;
+    enum UpdaterState
+    {
+      START,
+      GOT_INI,
+      GOT_ZIP,
+      DO_UPDATE,
+      INI_FAIL,
+      ZIP_FAIL,
+      CANCELLED,
+      SUCCESS
+    };
+    UpdaterState m_state;
+
+    void getZip();
+    void doUpdate();
+    void iniFail();
+    void askUpdate();
+    void doTitle();
 };
 #endif

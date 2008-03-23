@@ -287,6 +287,7 @@ void View::endBookmark()
   m_document.setHistoryEnabled(true);
 
   setToolbar(m_browseToolbar);
+  m_renderer->setUpdater(0);
 }
 
 void View::bookmarkUrl()
@@ -675,3 +676,15 @@ void View::setUpdater(Updater * updater)
   m_renderer->setUpdater(updater);
 }
 
+void View::resetScroller()
+{
+  m_scrollPane->setLocation(0,0);
+  m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+  m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+  m_scrollPane->scrollToPercent(0);
+}
+
+ViewRender * View::renderer()
+{
+  return m_renderer;
+}

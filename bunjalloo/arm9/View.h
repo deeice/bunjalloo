@@ -105,6 +105,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void editConfig();
 
     void setUpdater(Updater * updater);
+    void resetScroller();
+    ViewRender * renderer();
   private:
 
     enum InputState

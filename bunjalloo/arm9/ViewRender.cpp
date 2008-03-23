@@ -21,6 +21,7 @@
 #include "Canvas.h"
 #include "Controller.h"
 #include "Document.h"
+#include "ElementFactory.h"
 #include "File.h"
 #include "FormCheckBox.h"
 #include "FormControl.h"
@@ -144,57 +145,59 @@ void ViewRender::render()
   const HtmlElement * root = m_self->m_document.rootNode();
   HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
   bool useScrollPane(false);
-  if (mimeType == HtmlDocument::IMAGE_PNG
-      or mimeType == HtmlDocument::IMAGE_GIF
-      or mimeType == HtmlDocument::IMAGE_JPEG)
-  {
-    URI uri(m_self->m_document.uri());
-    string filename;
-    if (uri.protocol() == URI::FILE_PROTOCOL)
-    {
-      filename = uri.fileName();
-    }
-    else
-    {
-      filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
-    }
-    nds::Image * image(0);
-    if (not filename.empty())
-    {
-      image = new nds::Image(filename.c_str(), (nds::Image::ImageType)mimeType);
-    }
-    ImageComponent * imageComponent = new ImageComponent(image);
-    textArea()->add(imageComponent);
-    useScrollPane = true;
 
-  }
-  else if (mimeType == HtmlParser::ZIP)
+  if (m_updater)
   {
-    URI uri(m_self->m_document.uri());
-    string filename;
-    if (uri.protocol() == URI::FILE_PROTOCOL)
-    {
-      filename = uri.fileName();
-    }
-    else
-    {
-      filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
-    }
-    delete m_zipViewer;
-    m_zipViewer = new ZipViewer(filename);
-    m_zipViewer->show(*textArea());
-    useScrollPane = true;
-  }
-  else if (mimeType == HtmlParser::OTHER)
-  {
-    textArea()->appendText(T(NOT_VIEWABLE));
+    m_updater->show();
     useScrollPane = true;
   }
   else
   {
-    if (m_updater)
+    if (mimeType == HtmlDocument::IMAGE_PNG
+        or mimeType == HtmlDocument::IMAGE_GIF
+        or mimeType == HtmlDocument::IMAGE_JPEG)
     {
-      m_updater->show(*textArea());
+      URI uri(m_self->m_document.uri());
+      string filename;
+      if (uri.protocol() == URI::FILE_PROTOCOL)
+      {
+        filename = uri.fileName();
+      }
+      else
+      {
+        filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
+      }
+      nds::Image * image(0);
+      if (not filename.empty())
+      {
+        image = new nds::Image(filename.c_str(), (nds::Image::ImageType)mimeType);
+      }
+      ImageComponent * imageComponent = new ImageComponent(image);
+      textArea()->add(imageComponent);
+      useScrollPane = true;
+
+    }
+    else if (mimeType == HtmlParser::ZIP)
+    {
+      URI uri(m_self->m_document.uri());
+      string filename;
+      if (uri.protocol() == URI::FILE_PROTOCOL)
+      {
+        filename = uri.fileName();
+      }
+      else
+      {
+        filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
+      }
+      delete m_zipViewer;
+      m_zipViewer = new ZipViewer(filename);
+      m_zipViewer->show(*textArea());
+      useScrollPane = true;
+    }
+    else if (mimeType == HtmlParser::OTHER)
+    {
+      textArea()->appendText(T(NOT_VIEWABLE));
+      useScrollPane = true;
     }
     else
     {
@@ -207,17 +210,13 @@ void ViewRender::render()
       {
         body->accept(*this);
       }
+      useScrollPane = true;
     }
-    useScrollPane = true;
   }
 
   if (useScrollPane)
   {
-    ScrollPane & scrollPane(*m_self->m_scrollPane);
-    scrollPane.setLocation(0,0);
-    scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-    scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
-    scrollPane.scrollToPercent(0);
+    m_self->resetScroller();
   }
 }
 
@@ -225,6 +224,16 @@ void ViewRender::setUpdater(Updater * updater)
 {
   delete m_updater;
   m_updater = updater;
+}
+
+void ViewRender::doTitle(const UnicodeString & str)
+{
+  HtmlElement * newElement = ElementFactory::create(HtmlConstants::TITLE_TAG);
+  HtmlElement * text = ElementFactory::create("#TEXT");
+  text->text() = str;
+  newElement->append(text);
+  doTitle(newElement);
+  delete newElement;
 }
 
 void ViewRender::doTitle(const HtmlElement * title)

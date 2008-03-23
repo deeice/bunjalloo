@@ -1,1 +1,1 @@
-const char * VERSION = DATESTRING;
+const char * VERSION = "0.5.5";
