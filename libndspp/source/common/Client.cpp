@@ -33,7 +33,7 @@
 
 using namespace std;
 using namespace nds;
-const int Client::BUFFER_SIZE(1024+512);
+const int Client::BUFFER_SIZE(1024*16);
 
 Client::Client(const char * ip, int port):
   m_ip(0),
@@ -252,6 +252,7 @@ unsigned int Client::write(const void * data, unsigned int length)
   return total;
 }
 
+static char s_buffer[Client::BUFFER_SIZE];
 int Client::read(int max)
 {
   if (max > BUFFER_SIZE)
@@ -289,9 +290,8 @@ int Client::read(int max)
     return RETRY_LATER;
 #endif
   }
-  char buffer[BUFFER_SIZE];
   errno = 0;
-  int amountRead = ::recv(m_tcp_socket, buffer, max, 0 /*MSG_DONTWAIT*/);
+  int amountRead = ::recv(m_tcp_socket, s_buffer, max, 0 /*MSG_DONTWAIT*/);
   tmperr = errno;
   if (amountRead < 0) {
     debug("Error on recv");
@@ -326,7 +326,7 @@ int Client::read(int max)
     }
     return amountRead;
   }
-  handle(buffer, amountRead);
+  handle(s_buffer, amountRead);
 #if DEBUG_WITH_SSTREAM
   stringstream dbg;
   dbg << "Read " << amountRead << " bytes";
