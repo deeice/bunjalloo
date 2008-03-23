@@ -43,4 +43,4 @@ language=builtin
 download=/
 
 # Place to look for updates
-update=http://10.0.0.2/~rich/version.txt
+update=http://quirkysoft.googlecode.com/svn/wiki/BunjallooVersion.wiki
