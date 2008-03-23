@@ -35,6 +35,7 @@ namespace nds   // tolua_export
        * @param color the 15 bit RGB color.
        */
       void drawPixel(int x, int y, int color);
+
       /** Fill a rectangle at the given position with the given dimensions.
        * @param x the x position.
        * @param y the y position. 0 is the tpo of the screen, 383 is the bottom
@@ -100,6 +101,7 @@ namespace nds   // tolua_export
       Canvas(const Canvas &);
       const Canvas operator=(const Canvas &);
       unsigned short * vram(int y);
+      void init();
 
 
   }; //tolua_export

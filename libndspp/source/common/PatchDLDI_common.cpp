@@ -281,6 +281,7 @@ namespace nds
                 int offset = pos - p[DO_driverSize];
                 if (where < offset)
                 {
+                  nds::PatchDLDI::freeBuffer(dst);
                   return false;
                 }
                 fseek(fp, where - offset, SEEK_SET);
@@ -293,15 +294,18 @@ namespace nds
                 fseek(fp, where, SEEK_SET);
                 m_file.write((const char*)dst, r);
                 m_file.close();
+                nds::PatchDLDI::freeBuffer(dst);
                 return true;
               }
               else
               {
+                nds::PatchDLDI::freeBuffer(dst);
                 return false;
               }
             }
           }
           while (r > 0 and pos < 0);
+          nds::PatchDLDI::freeBuffer(dst);
         }
 
         return false;

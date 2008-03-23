@@ -48,13 +48,12 @@ const unsigned char * nds::PatchDLDI::dldiPatch()
 
 unsigned short * nds::PatchDLDI::buffer()
 {
-  VRAM_C_CR = VRAM_ENABLE | VRAM_C_LCD;
+  vramSetBankC(VRAM_C_LCD);
   // Clear VRAM
   memset(VRAM_C, 0x00, 128 * 1024);
   return VRAM_C;
 }
-
 void nds::PatchDLDI::freeBuffer(unsigned short * /*buffer*/)
 {
-  VRAM_C_CR = VRAM_ENABLE | VRAM_C_SUB_BG;
+  vramSetBankC(VRAM_C_SUB_BG);
 }

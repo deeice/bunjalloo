@@ -43,6 +43,11 @@ Canvas::Canvas():
   //m_backSub((unsigned short*)BG_MEM_BUFFER)
   m_backSub((unsigned short*)BG_BMP_RAM(16))
 {
+  init();
+}
+
+void Canvas::init()
+{
   // set up background.
   Video & main(Video::instance());
   Video & sub(Video::instance(1));
@@ -53,15 +58,13 @@ Canvas::Canvas():
 
   // redo the banks - we want enough VRAM for the main and sub screen
   // Can't use hardware double buffering on sub screen, have to fudge it.
+  // Use bank D for the back buffer of the sub screen.
   vramSetMainBanks( VRAM_A_MAIN_BG_0x06000000,
                     VRAM_B_MAIN_BG_0x06020000,
                     VRAM_C_SUB_BG,
                     VRAM_D_MAIN_BG_0x06040000);
-                    //VRAM_D_SUB_SPRITE);
   vramSetBankI(VRAM_I_SUB_SPRITE);
   vramSetBankE(VRAM_E_MAIN_SPRITE);
-  /*vramSetBankF(VRAM_F_MAIN_SPRITE);
-  vramSetBankG(VRAM_G_MAIN_SPRITE);*/
 
   m_bgMain->setEnabled();
   m_bgSub->setEnabled();

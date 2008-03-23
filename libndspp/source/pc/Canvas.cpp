@@ -30,6 +30,11 @@ Canvas::~Canvas(){}
 
 Canvas::Canvas()
 {
+  init();
+}
+
+void Canvas::init()
+{
   Video & main(Video::instance());
   Video & sub(Video::instance(1));
   sub.setMode(5);
