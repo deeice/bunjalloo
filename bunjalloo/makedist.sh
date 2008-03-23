@@ -41,6 +41,7 @@ while true ; do
     echo "-u, --upload             Upload the files too"
     echo "-t, --tag                Create a svn tag for the release"
     echo "-h, --help               This message."
+    echo "-l, --last=LAST          Use LAST as the branch/tag for the last release."
     exit 0
     ;;
     --) shift ;  break ;;
