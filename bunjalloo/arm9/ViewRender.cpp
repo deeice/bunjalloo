@@ -50,6 +50,7 @@
 #include "ScrollPane.h"
 #include "Select.h"
 #include "TextAreaFactory.h"
+#include "Updater.h"
 #include "URI.h"
 #include "View.h"
 #include "ViewRender.h"
@@ -62,6 +63,7 @@ ViewRender::ViewRender(View * self):
   m_self(self),
   m_textArea(0),
   m_zipViewer(0),
+  m_updater(0),
   m_lastElement(0)
 {
 }
@@ -190,16 +192,23 @@ void ViewRender::render()
   }
   else
   {
-    assert(root->isa(HtmlConstants::HTML_TAG));
-    assert(root->hasChildren());
-    doTitle(m_self->m_document.titleNode());
-
-    HtmlElement * body = (HtmlElement*)root->lastChild();
-    if (body->hasChildren())
+    if (m_updater)
     {
-      body->accept(*this);
-      useScrollPane = true;
+      m_updater->show(*textArea());
     }
+    else
+    {
+      assert(root->isa(HtmlConstants::HTML_TAG));
+      assert(root->hasChildren());
+      doTitle(m_self->m_document.titleNode());
+
+      HtmlElement * body = (HtmlElement*)root->lastChild();
+      if (body->hasChildren())
+      {
+        body->accept(*this);
+      }
+    }
+    useScrollPane = true;
   }
 
   if (useScrollPane)
@@ -210,6 +219,12 @@ void ViewRender::render()
     scrollPane.setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
     scrollPane.scrollToPercent(0);
   }
+}
+
+void ViewRender::setUpdater(Updater * updater)
+{
+  delete m_updater;
+  m_updater = updater;
 }
 
 void ViewRender::doTitle(const HtmlElement * title)

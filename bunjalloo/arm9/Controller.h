@@ -70,6 +70,8 @@ class Controller
     /** Stop loading the page. */
     void stop();
 
+    bool stopped() const;
+
     /** Get the Config object.
      * @return a reference to the Config object.
      */

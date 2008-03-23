@@ -21,6 +21,7 @@ class View;
 class RichTextArea;
 class HtmlElement;
 class FormRadio;
+class Updater;
 class ZipViewer;
 #include <map>
 #include "UnicodeString.h"
@@ -32,6 +33,7 @@ class ViewRender: public Visitor
   public:
     ViewRender(View * self);
     void render();
+    void setUpdater(Updater * updater);
 
     // implement the Visitor interface.
     virtual bool visit(HtmlAnchorElement & element);
@@ -82,6 +84,7 @@ class ViewRender: public Visitor
     // keep track of the last RichTextArea component added to the ScrollPane
     RichTextArea * m_textArea;
     ZipViewer * m_zipViewer;
+    Updater * m_updater;
 
     const HtmlElement * m_lastElement;
     typedef std::map<UnicodeString, FormRadio*> FormGroupMap;

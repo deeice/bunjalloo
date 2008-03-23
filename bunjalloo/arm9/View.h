@@ -29,13 +29,14 @@ class FormControl;
 class Keyboard;
 class KeyState;
 class LinkHandler;
+class ProgressBar;
 class ScrollPane;
 class SearchEntry;
 class Stylus;
 class TextField;
 class Toolbar;
+class Updater;
 class ViewRender;
-class ProgressBar;
 
 /** Handle the displaying of HTML data.*/
 class View : public ViewI, public ButtonListener, public LinkListener
@@ -102,6 +103,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     /** Edit the configuration.
      */
     void editConfig();
+
+    void setUpdater(Updater * updater);
   private:
 
     enum InputState

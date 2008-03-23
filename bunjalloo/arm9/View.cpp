@@ -669,3 +669,9 @@ void View::doSaveAs()
   }
   m_state = BROWSE;
 }
+
+void View::setUpdater(Updater * updater)
+{
+  m_renderer->setUpdater(updater);
+}
+

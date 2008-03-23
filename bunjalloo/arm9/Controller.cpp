@@ -22,15 +22,13 @@
 #include "Language.h"
 #include "Controller.h"
 #include "Document.h"
-#include "HtmlDocument.h"
-#include "HtmlElement.h"
 #include "File.h"
 #include "Font.h"
 #include "HttpClient.h"
 #include "TextAreaFactory.h"
+#include "Updater.h"
 #include "URI.h"
 #include "View.h"
-#include "ZipViewer.h"
 
 using namespace std;
 
@@ -254,64 +252,10 @@ void Controller::checkUpdates()
   {
     return;
   }
-  string update;
-  m_config->resource(Config::UPDATE, update);
-  m_document->setHistoryEnabled(false);
-  fetchHttp(update);
-  m_document->setHistoryEnabled(true);
-  if (m_document->status() == Document::LOADED
-      and not m_stop
-      and m_document->htmlDocument()->mimeType() == HtmlParser::TEXT_PLAIN)
-  {
-    // loaded. check it is what we expect
-    const HtmlElement * rootNode = m_document->rootNode();
-    if (rootNode->hasChildren())
-    {
-      const HtmlElement * body(rootNode->lastChild());
-      if (body and body->hasChildren())
-      {
-        const HtmlElement * text(body->firstChild());
-        if (text->isa("#TEXT"))
-        {
-          // yipee
-          const string & data = unicode2string(text->text(), true);
-          vector<string> lines;
-          string version, download, size;
-          tokenize(data, lines, "\n");
-          for (vector<string>::const_iterator it(lines.begin()); it != lines.end(); ++it)
-          {
-            ParameterSet set(*it);
-            if (set.hasParameter("version"))
-            {
-              set.parameter("version", version);
-            }
-            if (set.hasParameter("URL"))
-            {
-              set.parameter("URL", download);
-            }
-            if (set.hasParameter("size"))
-            {
-              set.parameter("size", size);
-            }
-          }
-          const URI & downloadUrl(URI(update).navigateTo(download));
-          m_document->setHistoryEnabled(false);
-          m_view->setSaveAsEnabled(false);
-          fetchHttp(downloadUrl);
-          m_view->setSaveAsEnabled(true);
-          // now find out where that was saved...
-          string cachedFile = m_cache->fileName(downloadUrl);
-          if (not m_stop and nds::File::exists(cachedFile.c_str()) == nds::File::F_REG)
-          {
-            ZipViewer viewer(cachedFile);
-            viewer.unzipAndPatch();
-          }
-          m_document->setHistoryEnabled(true);
-        }
-      }
-    }
-  }
-  m_view->endBookmark();
+  Updater * updater = new Updater(*this, *m_document, *m_view);
+  m_view->setUpdater(updater);
+  updater->init();
+  // m_view->endBookmark();
 }
 
 void Controller::localConfigFile(const std::string & fileName)
@@ -471,6 +415,11 @@ void Controller::stop()
   m_stop = true;
   m_saveAs = NO_SAVE;
   m_saveFileName.clear();
+}
+
+bool Controller::stopped() const
+{
+  return m_stop;
 }
 
 Cache * Controller::cache() const
