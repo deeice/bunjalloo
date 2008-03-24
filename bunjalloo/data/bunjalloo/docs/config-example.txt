@@ -39,6 +39,9 @@ logger=0
 # Language setting. "Builtin" means use the DS setting.
 language=builtin
 
+# Send the full referrer with each request
+fullref=0
+
 # Default download directory
 download=/
 

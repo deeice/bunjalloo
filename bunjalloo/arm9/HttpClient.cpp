@@ -1095,7 +1095,9 @@ void HttpClient::reset()
 
 void HttpClient::setReferer(const URI & referer)
 {
-  if (referer.server().empty())
+  bool fullReferer(false);
+  m_controller->config().resource(Config::FULL_REF, fullReferer);
+  if (referer.server().empty() or fullReferer)
   {
     m_referer = referer;
   }
