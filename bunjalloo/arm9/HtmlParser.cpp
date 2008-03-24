@@ -1445,7 +1445,10 @@ void HtmlParser::setMimeType(ParameterSet & paramSet)
   {
     m_mimeType = TEXT_PLAIN;
   }
-  else if (paramSet.hasParameter("text/html") or paramSet.hasParameter("application/xhtml+xml"))
+  else if (paramSet.hasParameter("text/html")
+      or paramSet.hasParameter("application/xhtml+xml")
+      or paramSet.hasParameter("application/xhtml")
+      )
   {
     m_mimeType = TEXT_HTML;
   }
