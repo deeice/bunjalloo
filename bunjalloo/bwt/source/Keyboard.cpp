@@ -304,11 +304,9 @@ void Keyboard::pressed(ButtonI * button)
   {
     case SPKY_SHIFT:
       m_shift = not m_shift;
-      updateModifierKeys();
       break;
     case SPKY_CAPS:
       m_capsLock = not m_capsLock;
-      updateModifierKeys();
       break;
     case SPKY_ENTER:
       appendText(string2unicode("\n"));
@@ -322,7 +320,6 @@ void Keyboard::pressed(ButtonI * button)
       break;
     case SPKY_EXTRA:
       m_extra = not m_extra;
-      updateModifierKeys();
       break;
     case SPKY_CANCEL:
       m_selectedStatus = CANCEL;
@@ -351,6 +348,7 @@ void Keyboard::pressed(ButtonI * button)
       m_extra = false;
       break;
   }
+  updateModifierKeys();
 }
 
 void Keyboard::appendText(const UnicodeString & text)
