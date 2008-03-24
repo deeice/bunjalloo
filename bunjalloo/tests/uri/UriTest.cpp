@@ -291,3 +291,18 @@ void UriTest::testCRC()
   unsigned int expected(0x7fec9bc0);
   CPPUNIT_ASSERT_EQUAL(expected, crc);
 }
+
+void UriTest::testEscape()
+{
+  string result = unicode2string(URI::escape(string2unicode("/blah&#?=:@")), true);
+  string expected("%2Fblah%26%23%3F%3D%3A%40");
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+  result = unicode2string(URI::unescape(string2unicode("%2Fblah%26%23%3F%3D%3A%40")), true);
+  expected = "/blah&#?=:@";
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+
+  result = unicode2string(URI::unescape(string2unicode("%2Fblah%2%2")), true);
+  expected = "/blah%2%2";
+  CPPUNIT_ASSERT_EQUAL(expected, result);
+
+}

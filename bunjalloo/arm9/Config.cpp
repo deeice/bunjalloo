@@ -218,7 +218,8 @@ void Config::updateConfig(const std::string & first, const std::string & second,
     std::vector<std::string> & lines)
 {
   bool replaced(false);
-  callback(first, second);
+  string valUnescaped(unicode2string(URI::unescape(string2unicode(second)), true));
+  callback(first, valUnescaped);
   for (std::vector<std::string>::iterator it(lines.begin());
       it != lines.end(); ++it)
   {
@@ -232,7 +233,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
       {
         win = true;
       }
-      line = first + "=" + second;
+      line = first + "=" + valUnescaped;
       if (win)
         line += "\r";
       break;
@@ -243,7 +244,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
   {
     string line(first);
     line += "=";
-    line += second;
+    line += valUnescaped;
     string & firstLine(lines.front());
     if (firstLine[firstLine.length()-1] == '\r')
     {

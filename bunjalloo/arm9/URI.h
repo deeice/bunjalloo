@@ -38,6 +38,7 @@ class URI
      * @return The "safe" string that can be used as a URI.
      */
     static UnicodeString escape(const UnicodeString & input);
+    static UnicodeString unescape(const UnicodeString & input);
 
     /** Create an empty URI.*/
     URI();

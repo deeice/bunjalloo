@@ -381,6 +381,51 @@ UnicodeString URI::escape(const UnicodeString & input)
   return output;
 }
 
+UnicodeString URI::unescape(const UnicodeString & input)
+{
+  // convert %XX to char
+  UnicodeString output;
+  UnicodeString::const_iterator it(input.begin());
+  for ( ; it != input.end(); ++it)
+  {
+    unsigned int value = *it;
+    if ( value == '%')
+    {
+      string hex;
+      ++it;
+      if (isxdigit(*it))
+        hex += (char)(*it);
+      else
+      {
+        output += value;
+        --it;
+        continue;
+      }
+      ++it;
+      if (isxdigit(*it))
+        hex += (char)(*it);
+      else
+      {
+        output += value;
+        --it;
+        --it;
+        continue;
+      }
+      int converted = strtol(hex.c_str(), 0, 16);
+      if (converted)
+      {
+        output += converted;
+      }
+    }
+    else
+    {
+      output += value;
+    }
+  }
+  return output;
+
+}
+
 const std::string URI::method() const
 {
   return m_method;
