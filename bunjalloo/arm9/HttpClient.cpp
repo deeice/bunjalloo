@@ -48,6 +48,7 @@
 #include "CookieJar.h"
 #include "Document.h"
 #include "HttpClient.h"
+#include "Language.h"
 #include "URI.h"
 #include "File.h"
 #include "Wifi9.h"
@@ -776,6 +777,9 @@ void HttpClient::get(const URI & uri)
       // ends.
       s += "Connection: close\r\n";
     }
+    s += "Accept-Language: ";
+    s += Language::instance().currentLanguage();
+    s += "\r\n";
     // Only send referrer to the same server.
     if (not m_referer.server().empty()
         and m_referer.server() == uri.server())
