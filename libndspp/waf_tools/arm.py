@@ -16,9 +16,7 @@ def setup_tool(conf, proc):
   arm_eabi='arm-eabi-'
 
   # reset the tools
-  for i in ( ('gcc','CC'), ('g++','CXX'), ('ar','AR'), ('ranlib','RANLIB')):
-    if v[i[1]]:
-      continue
+  for i in ( ('cpp','CPP'), ('gcc','CC'), ('g++','CXX'), ('ar','AR'), ('ranlib','RANLIB')):
     t = conf.find_program(arm_eabi+i[0], path_list=[dka_bin])
     if not t:
       conf.fatal(i[0]+' was not found')
@@ -32,7 +30,8 @@ def setup_tool(conf, proc):
   path = ['%s/libnds/include'%os.environ[DEVKITPRO]]
   #v['CPPPATH'] = path
   v['CPPPATH_ARM%d'%proc] = path
-  v['LINKFLAGS_ARM%d'%proc] = ['-L%s/libnds/lib'%os.environ[DEVKITPRO], '-lnds%d'%proc, '-specs=ds_arm%d.specs'%proc,
+  v['LIBPATH_ARM%d'%proc] = ['%s/libnds/lib'%os.environ[DEVKITPRO]]
+  v['LINKFLAGS_ARM%d'%proc] = ['-lnds%d'%proc, '-specs=ds_arm%d.specs'%proc,
       '-g','-mno-fpu','-Wl,-Map,map%d.map'%proc, '-Wl,-gc-sections']
   v['LIB_ARM%d'%proc] = ['nds%d'%proc]
   v['LINK_CXX'] = v['CXX']

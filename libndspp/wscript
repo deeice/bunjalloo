@@ -19,8 +19,6 @@ def set_options(opt):
 
 def arm_tool_check(conf):
   conf.check_tool('compiler_cxx')
-  # unset CXX
-  conf.env['CXX'] = ''
 
   # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
   # stips off in the check.
@@ -48,14 +46,10 @@ def header_check(conf):
   e.header_code = '#include <stdio.h>'
   e.run()
 
-def lib_check(conf):
-  l = conf.create_library_configurator()
-
 def configure(conf):
   # check native compiler
   arm_tool_check(conf)
   header_check(conf)
-  lib_check(conf)
 
   sdl = Environment.Environment()
   conf.set_env_name('sdl', sdl)
