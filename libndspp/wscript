@@ -27,6 +27,23 @@ def configure(conf):
   conf.check_tool('ndstool', waf_tools)
   conf.check_tool('objcopy', waf_tools)
   conf.check_tool('arm7', waf_tools)
+  # check headers
+  e = conf.create_header_configurator()
+  e.mandatory = 1
+  e.uselib = 'ARM9'
+  for header in ('fat.h', 'png.h', 'zlib.h', 'gif_lib.h', 'matrixSsl.h'):
+    e.name = header
+    e.run()
+  e.name = 'dswifi9.h'
+  e.header_code = '#include <nds/jtypes.h>'
+  e.run()
+
+  e.name = 'jpeglib.h'
+  e.header_code = '#include <stdio.h>'
+  e.run()
+
+  l = conf.create_library_configurator()
+
 
   sdl = Environment.Environment()
   conf.set_env_name('sdl', sdl)
