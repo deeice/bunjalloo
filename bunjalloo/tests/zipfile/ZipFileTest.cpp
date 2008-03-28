@@ -73,8 +73,9 @@ static std::string readFile(const char * filename)
   if (f.is_open())
   {
     int size = f.size();
-    char * data = new char[size];
+    char * data = new char[size+1];
     f.read(data);
+    data[size] = 0;
     string s(data);
     delete [] data;
     return s;
