@@ -5,12 +5,14 @@ import Params, Environment
 import os, os.path
 import sys
 
+Params.g_autoconfig = 1
 top = os.getcwd()
-VERSION="0.1"
+APPNAME=os.path.basename(os.getcwd())
 
 srcdir='.'
 blddir='bld'
-waf_tools="waf_tools"
+libndspp="../libndspp"
+waf_tools=libndspp+"/waf_tools"
 sys.path.append(waf_tools)
 
 def set_options(opt):
@@ -24,6 +26,7 @@ def arm_tool_check(conf):
   # stips off in the check.
   conf.check_tool('arm7', waf_tools)
   conf.check_tool('arm9', waf_tools)
+  conf.check_tool('grit', waf_tools)
   conf.check_tool('ndstool', waf_tools)
   conf.check_tool('objcopy', waf_tools)
 
@@ -34,54 +37,59 @@ def header_check(conf):
   e.nosystem = 1
   e.uselib = 'ARM9'
   e.path = conf.env['CPPPATH_ARM9']
-  for header in ('fat.h', 'png.h', 'zlib.h', 'gif_lib.h', 'matrixSsl.h'):
+  for header in ('zlib.h', 'matrixSsl.h'):
     e.name = header
     e.nosystem = 1
     e.run()
-  e.name = 'dswifi9.h'
-  e.header_code = '#include <nds/jtypes.h>'
-  e.run()
-
-  e.name = 'jpeglib.h'
-  e.header_code = '#include <stdio.h>'
-  e.run()
 
 def configure(conf):
   # check native compiler
   arm_tool_check(conf)
   header_check(conf)
-  conf.env['LIB_INSTALL_DIR'] = top
+  GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q'
+  DATADIR='data/bunjalloo'
+  conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
+  conf.env['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
+  conf.env['GRITFLAGS'] = GRITFLAGS
+  conf.env['LIBPATH'] += [libndspp+'/lib']
+  conf.env['LIB_ARM7'] += ['ndspp-arm7']
+  conf.env['LIB_ARM9'] += ['ndspp-arm9']
 
   sdl = Environment.Environment()
   conf.set_env_name('sdl', sdl)
   sdl.set_variant('sdl')
   conf.setenv('sdl')
   conf.check_tool('compiler_cxx')
+  conf.check_tool('grit', waf_tools)
+  sdl['GRITFLAGS'] = GRITFLAGS
   sdl['ARFLAGS'] += 'c'
-  sdl['LIB_INSTALL_DIR'] = top
+  sdl['LIBPATH'] += [libndspp+'/lib']
+  sdl['CXXDEFINES'] = ['sprintf_platform=sprintf']
+  sdl['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
+  sdl['LIB'] += ['ndspp-pc']
 
 def build(bld):
   # overcome chdir problems for jump-to-error
   if not Params.g_commands['clean']:
     print "waf: Entering directory `%s'"%(top+"/"+blddir)
   # process subfolders from here
-  arm9obj = bld.create_obj('cpp', 'staticlib')
-  arm9obj.inst_dir = 'lib'
-  arm9obj.inst_var = 'LIB_INSTALL_DIR'
-  arm9obj.includes = 'include source/common'
+
+  bld.add_subdirs('bwt')
+  arm9obj = bld.create_obj('cpp', 'program')
+  arm9obj.includes = libndspp+'/include '
   arm7obj = arm9obj.clone('default')
+  arm7obj.includes += ' arm7 '
+  arm9obj.includes += ' arm9 bwt/include bwt/img '
+  arm9obj.uselib_local = 'bwt'
+  arm9obj.find_sources_in_dirs('arm9')
+  arm7obj.find_sources_in_dirs('arm7')
 
   sdl = arm9obj.clone('sdl')
-  arm9obj.includes += ' source/arm9'
-  arm7obj.includes += ' source/arm7'
-  sdl.includes += ' source/pc'
 
-  arm9obj.find_sources_in_dirs('source/arm9 source/common')
-  arm7obj.find_sources_in_dirs('source/arm7')
   arm7obj.uselib = 'ARM7'
   arm9obj.uselib = 'ARM9'
-  arm9obj.target = 'ndspp-arm9'
-  arm7obj.target = 'ndspp-arm7'
-  sdl.target = 'ndspp-pc'
-  sdl.find_sources_in_dirs('source/pc source/common')
+
+  arm9obj.target = APPNAME+'-arm9'
+  arm7obj.target = APPNAME+'-arm7'
+  sdl.target = APPNAME
 

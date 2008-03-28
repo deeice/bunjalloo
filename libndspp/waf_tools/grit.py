@@ -52,7 +52,7 @@ from Object import extension, taskgen
 @taskgen
 @extension('.png')
 def coin_file(self, node):
-  out_source_s = node.change_ext('.s')
+  out_source_s = node.change_ext('.c')
   out_source_h = node.change_ext('.h')
 
 
@@ -75,5 +75,5 @@ def detect(conf):
 
 def setup(bld):
   grit_str = '${GRIT} ${SRC[0].abspath(env)} -o ${SRC[0].bldbase(env)} ${GRITFLAGS} > /dev/null 2>&1 '
-  Action.simple_action('grit', grit_str, color='CYAN', prio=90)
+  Action.simple_action('grit', grit_str, color='CYAN', prio=10)
 
