@@ -9,10 +9,11 @@ imageFiles = ['checkbox.png', 'radiobutton.png']
 
 objs = []
 for img in imageFiles:
-  bin = bwtEnv.Gfx2Bin( img )
-  bwtEnv.Png2h( img )
-  for b in bin:
-    objs.append( bwtEnv.Bin2o(b))
+  c = bwtEnv.Gfx2Bin( img )
+  #bwtEnv.Png2h( img )
+  #for b in bin:
+  #  objs.append( bwtEnv.Bin2o(b))
+  objs.append( c[0] )
 
 Return('objs')
 # vim: set filetype=python :

@@ -82,6 +82,7 @@ def createEnv(buildTarget):
 # @param buildTarget the build target name
 def addProjectDirs(env, buildTarget):
   env.Append( CPPPATH=['#/bwt/include'])
+  env.Append( CPPPATH=['#/build/%s/bwt/data'%buildTarget])
   env.Prepend(LIBPATH=['#/build/%s/bwt/lib/'%buildTarget])
   env.Prepend(LIBS=['bwt'])
   env.Append( CPPDEFINES=[('DATADIR','\\"data/bunjalloo\\"')])
@@ -102,16 +103,16 @@ def addObjCopyImageBuilders(env):
     # add img.bin, pal.bin and map.bin to the output as side effects
     fileName = os.path.basename(str(source[0])).split(os.path.extsep)[0]
     t = []
-    t.append('%s.img.bin'%(fileName))
-    t.append('%s.pal.bin'%(fileName))
+    t.append('%s.c'%(fileName))
+    t.append('%s.h'%(fileName))
     # t.append('%s.map.bin'%(fileName))
     return (t, source)
 
-  env.Append(GRITFLAGS='-pw 16 -gB 8 -m! -ft b -fh! -q')
+  env.Append(GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64')
   # chdir=1 changes to the target dir before executing.
   gritBld = Builder(action='grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS',
       chdir=1,
-      suffix='.bin',
+      suffix='.c',
       src_suffix='.png',
       emitter=img_emitter)
   env.Append( BUILDERS = { 'Gfx2Bin': gritBld } )
@@ -136,7 +137,9 @@ def addObjCopyImageBuilders(env):
 #define %s_h_seen
 #ifdef __cplusplus
 extern "C" {
-#endif"""%(fd, fd))
+#endif\n"""%(fd, fd))
+    fp.write("#define %sTiles _binary_%s_img_bin_start\n"%(fd,fd))
+    fp.write("#define %sPal _binary_%s_pal_bin_start\n"%(fd, fd))
     for i in ('pal', 'img', 'map'):
       fp.write("""
               extern const u16 _binary_%s_%s_bin_end[];
