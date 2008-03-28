@@ -130,3 +130,17 @@ def build(bld):
   sdl.uselib = 'HOST'
   sdl.target = APPNAME
 
+  # generate nds
+  arm9bin = bld.create_obj('objcopy')
+  arm7bin = arm9bin.clone('default')
+  arm7bin.source = arm7obj.target
+  arm9bin.source = arm9obj.target
+  arm7bin.target = arm7obj.target
+  arm9bin.target = arm9obj.target
+
+  nds = bld.create_obj('ndstool')
+  nds.source = (arm7bin.target, arm9bin.target)
+  nds.banner = '%s;;By Richard'%APPNAME
+  nds.icon = 'common/data/icon.bmp'
+  nds.target = APPNAME+'.nds'
+
