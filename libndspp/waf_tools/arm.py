@@ -22,6 +22,7 @@ def setup_tool(conf, proc):
       conf.fatal(i[0]+' was not found')
     v[i[1]] = t
 
+  v['ARFLAGS'] = 'rc'
   v['LINK_CC'] = v['CC']
   v['CCFLAGS_ARM%d'%proc] = (ARCH+' -g -ffast-math').split()
   v['CCFLAGS_ARM%d'%proc].extend({9:' -march=armv5te -mtune=arm946e-s -DARM9',

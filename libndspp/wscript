@@ -56,6 +56,7 @@ def configure(conf):
   sdl.set_variant('sdl')
   conf.setenv('sdl')
   conf.check_tool('compiler_cxx')
+  conf.env['ARFLAGS'] += 'c'
 
 def build(bld):
   # overcome chdir problems for jump-to-error
