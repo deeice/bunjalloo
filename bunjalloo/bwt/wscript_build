@@ -5,14 +5,9 @@ libndspp = '../../libndspp'
 arm9obj = bld.create_obj('cpp', 'staticlib')
 arm9obj.includes = libndspp+'/include '
 arm9obj.includes += ' include img'
-arm9obj.find_sources_in_dirs('source')
+arm9obj.find_sources_in_dirs('source img')
 arm9obj.target = 'bwt'
 
-arm9img = bld.create_obj('cc', 'staticlib')
-arm9img.find_sources_in_dirs('img')
-arm9img.target = 'bwt'
-
 sdl = arm9obj.clone('sdl')
-sdlimg = arm9img.clone('sdl')
 
 arm9obj.uselib = 'ARM9'

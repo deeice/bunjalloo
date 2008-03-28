@@ -49,20 +49,34 @@ def output_for_source(source, env):
 
 from Object import extension, taskgen
 
+def add_include(task):
+  outfile = task.m_outputs[0].abspath(task.env())
+  infile = task.m_inputs[0].abspath(task.env())
+  f = open(outfile, 'w')
+  f.write('#include "%s"\n'%os.path.basename(infile).replace('.c','.h'))
+  i = open(infile)
+  for k in i.readlines():
+    f.write(k)
+  f.close()
+
+
 @taskgen
 @extension('.png')
-def coin_file(self, node):
+def img_file(self, node):
   out_source_s = node.change_ext('.c')
+  out_source_C = node.change_ext('.cpp')
   out_source_h = node.change_ext('.h')
-
 
   tsk = self.create_task('grit')
   tsk.set_inputs(node)
   tsk.set_outputs([out_source_s, out_source_h])
 
-  # the out file is to be processed as a cpp file
-  self.allnodes.append(out_source_s)
+  tsk = self.create_task('c_C')
+  tsk.set_inputs(out_source_s)
+  tsk.set_outputs(out_source_C)
 
+  # the out file is to be processed as a cpp file
+  self.allnodes.append(out_source_C)
 
 def detect(conf):
   dka_bin='%s/bin'%os.environ['DEVKITARM']
@@ -76,4 +90,5 @@ def detect(conf):
 def setup(bld):
   grit_str = '${GRIT} ${SRC[0].abspath(env)} -o ${SRC[0].bldbase(env)} ${GRITFLAGS} > /dev/null 2>&1 '
   Action.simple_action('grit', grit_str, color='CYAN', prio=10)
+  Action.Action('c_C', vars=[], func=add_include , color='CYAN', prio=11)
 

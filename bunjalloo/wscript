@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import Params, Environment
+import Params, Environment, UnitTest
 import os, os.path
 import sys
 
@@ -81,7 +81,7 @@ def configure(conf):
   conf.env['LIB_ARM9'] = ['ndspp-arm9'] + conf.env['LIB_ARM9']
   lib_check_arm9(conf)
   lib_check_arm7(conf)
-  GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q'
+  GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64'
   DATADIR='data/bunjalloo'
   conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
   conf.env['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
@@ -110,7 +110,7 @@ def build(bld):
     print "waf: Entering directory `%s'"%(top+"/"+blddir)
   # process subfolders from here
 
-  bld.add_subdirs('bwt')
+  bld.add_subdirs('bwt tests')
   arm9obj = bld.create_obj('cpp', 'program')
   arm9obj.includes = libndspp+'/include '
   arm7obj = arm9obj.clone('default')
@@ -135,12 +135,17 @@ def build(bld):
   arm7bin = arm9bin.clone('default')
   arm7bin.source = arm7obj.target
   arm9bin.source = arm9obj.target
-  arm7bin.target = arm7obj.target
-  arm9bin.target = arm9obj.target
+  arm7bin.target = arm7obj.target+'.bin'
+  arm9bin.target = arm9obj.target+'.bin'
 
   nds = bld.create_obj('ndstool')
   nds.source = (arm7bin.target, arm9bin.target)
   nds.banner = '%s;;By Richard'%APPNAME
   nds.icon = 'common/data/icon.bmp'
   nds.target = APPNAME+'.nds'
+
+def shutdown():
+  ut = UnitTest.unit_test()
+  ut.run()
+  ut.print_results()
 
