@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-def configure(conf):
-  pass
-
 def build(bld):
-  pass
+  #
+  obj = bld.create_obj('cpp', 'shlib')
+  obj.env = bld.env('sdl')
+  obj.source = '''Main.cpp'''
+  obj.target = '''cppunitmain'''
 
+  # build subdirs
