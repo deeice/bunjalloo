@@ -32,9 +32,12 @@ def setup_tool(conf, proc):
   #v['CPPPATH'] = path
   v['CPPPATH_ARM%d'%proc] = path
   v['LIBPATH_ARM%d'%proc] = ['%s/libnds/lib'%os.environ[DEVKITPRO]]
-  v['LINKFLAGS_ARM%d'%proc] = ['-lnds%d'%proc, '-specs=ds_arm%d.specs'%proc,
+  v['LINKFLAGS_ARM%d'%proc] = ['-specs=ds_arm%d.specs'%proc,
       '-g','-mno-fpu','-Wl,-Map,map%d.map'%proc, '-Wl,-gc-sections']
-  v['LIB_ARM%d'%proc] = ['nds%d'%proc]
+  if proc == 9:
+    v['LIB_ARM%d'%proc] = ['fat', 'nds%d'%proc]
+  else:
+    v['LIB_ARM%d'%proc] = ['nds%d'%proc]
   v['LINK_CXX'] = v['CXX']
   #v['CXXPATH'] = v['CPPPATH']
   v['CPPFLAGS_ARM%d'%proc].extend(v['CCFLAGS_ARM%d'%proc])

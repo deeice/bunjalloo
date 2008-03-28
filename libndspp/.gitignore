@@ -1,5 +1,7 @@
 .sconsign.dblite
 build
+bld
 lib
 ndspp-scons/*.pyc
+waf_tools/*.pyc
 docs

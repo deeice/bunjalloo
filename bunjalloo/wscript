@@ -11,7 +11,7 @@ APPNAME=os.path.basename(os.getcwd())
 
 srcdir='.'
 blddir='bld'
-libndspp="../libndspp"
+libndspp=os.path.abspath("../libndspp")
 waf_tools=libndspp+"/waf_tools"
 sys.path.append(waf_tools)
 
@@ -21,6 +21,7 @@ def set_options(opt):
 
 def arm_tool_check(conf):
   conf.check_tool('compiler_cxx')
+  conf.check_tool('gcc')
 
   # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
   # stips off in the check.
@@ -42,30 +43,65 @@ def header_check(conf):
     e.nosystem = 1
     e.run()
 
+def lib_check_sdl(conf):
+  e = conf.create_library_enumerator()
+  e.nosystem = 0
+  e.mandatory = 1
+  e.uselib = 'HOST'
+  e.path = conf.env['LIBPATH']
+  for l in 'GL SDL png z gif jpeg matrixsslstatic unzip'.split():
+    e.name = l
+    e.run()
+
+def lib_check_arm7(conf):
+  e = conf.create_library_enumerator()
+  e.nosystem = 1
+  e.mandatory = 1
+  e.uselib = 'ARM7'
+  e.path = conf.env['LIBPATH_ARM7']
+  e.name = 'dswifi7'
+  e.run()
+
+def lib_check_arm9(conf):
+  e = conf.create_library_enumerator()
+  e.nosystem = 1
+  e.mandatory = 1
+  e.uselib = 'ARM9'
+  e.path = conf.env['LIBPATH_ARM9']
+  for l in 'dswifi9 fat png z gif jpeg matrixsslstatic unzip'.split():
+    e.name = l
+    e.run()
+
 def configure(conf):
   # check native compiler
   arm_tool_check(conf)
   header_check(conf)
+  conf.env['LIBPATH'] += [libndspp+'/lib']
+  conf.env['LIB_ARM7'] += ['ndspp-arm7']
+  conf.env['LIB_ARM9'] = ['ndspp-arm9'] + conf.env['LIB_ARM9']
+  lib_check_arm9(conf)
+  lib_check_arm7(conf)
   GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q'
   DATADIR='data/bunjalloo'
   conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
   conf.env['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
+  conf.env['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
   conf.env['GRITFLAGS'] = GRITFLAGS
-  conf.env['LIBPATH'] += [libndspp+'/lib']
-  conf.env['LIB_ARM7'] += ['ndspp-arm7']
-  conf.env['LIB_ARM9'] += ['ndspp-arm9']
 
   sdl = Environment.Environment()
   conf.set_env_name('sdl', sdl)
   sdl.set_variant('sdl')
   conf.setenv('sdl')
   conf.check_tool('compiler_cxx')
+  conf.check_tool('gcc')
   conf.check_tool('grit', waf_tools)
+  lib_check_sdl(conf)
   sdl['GRITFLAGS'] = GRITFLAGS
   sdl['ARFLAGS'] += 'c'
   sdl['LIBPATH'] += [libndspp+'/lib']
   sdl['CXXDEFINES'] = ['sprintf_platform=sprintf']
   sdl['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
+  sdl['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
   sdl['LIB'] += ['ndspp-pc']
 
 def build(bld):
@@ -91,5 +127,6 @@ def build(bld):
 
   arm9obj.target = APPNAME+'-arm9'
   arm7obj.target = APPNAME+'-arm7'
+  sdl.uselib = 'HOST'
   sdl.target = APPNAME
 
