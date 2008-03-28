@@ -33,7 +33,7 @@ def setup_tool(conf, proc):
   v['CPPPATH_ARM%d'%proc] = path
   v['LIBPATH_ARM%d'%proc] = ['%s/libnds/lib'%os.environ[DEVKITPRO]]
   v['LINKFLAGS_ARM%d'%proc] = ['-specs=ds_arm%d.specs'%proc,
-      '-g','-mno-fpu','-Wl,-Map,map%d.map'%proc, '-Wl,-gc-sections']
+      '-g','-mno-fpu','-Wl,-Map,map%d.map'%proc, '-Wl,-gc-sections'] + ARCH.split()
   if proc == 9:
     v['LIB_ARM%d'%proc] = ['fat', 'nds%d'%proc]
   else:

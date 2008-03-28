@@ -103,6 +103,9 @@ def configure(conf):
   sdl['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
   sdl['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
   sdl['LIB'] += ['ndspp-pc']
+  # do not add -O2 FFS, it makes debugging impossible
+  sdl['CCFLAGS'] = ['-Wall']
+  sdl['CXXFLAGS'] = ['-Wall']
 
 def build(bld):
   # overcome chdir problems for jump-to-error
