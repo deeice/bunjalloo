@@ -85,6 +85,8 @@ def configure(conf):
   conf.env['LIBPATH'] += [libndspp+'/lib']
   conf.env['LIB_ARM7'] += ['ndspp-arm7']
   conf.env['LIB_ARM9'] = ['ndspp-arm9'] + conf.env['LIB_ARM9']
+  conf.env['OBJCOPYFLAGS'] = """ -I binary -O elf32-littlearm -B arm
+      --rename-section .data=.rodata,readonly,contents """.split()
   lib_check_arm9(conf)
   lib_check_arm7(conf)
   GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64'
@@ -93,6 +95,7 @@ def configure(conf):
   conf.env['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
   conf.env['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
   conf.env['GRITFLAGS'] = GRITFLAGS
+  conf.env['TOP'] = top
 
   sdl = Environment.Environment()
   conf.set_env_name('sdl', sdl)
@@ -106,13 +109,15 @@ def configure(conf):
   sdl['GRITFLAGS'] = GRITFLAGS
   sdl['ARFLAGS'] += 'c'
   sdl['LIBPATH'] += [libndspp+'/lib']
+  sdl['TOP'] = top
   sdl['CXXDEFINES'] = ['sprintf_platform=sprintf']
   sdl['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
   sdl['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
+  sdl['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
   sdl['LIB'] += ['ndspp-pc']
   # do not add -O2 FFS, it makes debugging impossible
-  sdl['CCFLAGS'] = ['-Wall']
-  sdl['CXXFLAGS'] = ['-Wall']
+  sdl['CCFLAGS'] = ['-Wall', '-g']
+  sdl['CXXFLAGS'] = ['-Wall', '-g']
 
 def build(bld):
   # overcome chdir problems for jump-to-error
@@ -159,6 +164,7 @@ def build(bld):
   nds.banner = '%s;;By Richard'%APPNAME
   nds.icon = 'common/data/icon.bmp'
   nds.target = APPNAME+'.nds'
+
 
 def shutdown():
   ut = UnitTest.unit_test()

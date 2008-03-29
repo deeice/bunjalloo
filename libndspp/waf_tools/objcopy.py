@@ -15,6 +15,18 @@ class objcopyobj(Object.task_gen):
       task.set_inputs(node)
       task.set_outputs(node.change_ext('.bin'))
 
+class binobj(Object.task_gen):
+  def __init__(self):
+    Object.task_gen.__init__(self)
+  def apply(self):
+    find_source_lst = self.path.find_source_lst
+    input_nodes = []
+    for filename in self.to_list(self.source):
+      node = find_source_lst(Utils.split_path(filename))
+      task = self.create_task('bin2o', self.env)
+      task.set_inputs(node)
+      task.set_outputs(node.change_ext('.o'))
+
 def detect(conf):
   v = conf.env
   dka_bin='%s/bin'%os.environ['DEVKITARM']
@@ -27,4 +39,8 @@ def detect(conf):
 def setup(bld):
   objcopy_str = '${OBJCOPY} -O binary ${SRC} ${TGT}'
   Action.simple_action('objcopy', objcopy_str, color='BLUE', prio=130)
+  objcopy_str = '${OBJCOPY} ${OBJCOPYFLAGS} ${SRC} ${TGT}'
+  Action.simple_action('bin2o', objcopy_str, color='BLUE', prio=130)
+
+
 
