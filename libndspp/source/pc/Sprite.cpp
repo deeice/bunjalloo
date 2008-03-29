@@ -27,7 +27,7 @@ static SpriteEntry OAM[128];
 static SpriteEntry OAM_SUB[128];
 
 static SpriteEntry s_sprites[2][128];
-static pSpriteRotation s_affine = (pSpriteRotation)(&s_sprites[0]);
+static pSpriteRotation s_affine = (pSpriteRotation)(void*)(&s_sprites[0]);
 bool Sprite::s_used[2][128];
 
 Sprite::Sprite(int screen):

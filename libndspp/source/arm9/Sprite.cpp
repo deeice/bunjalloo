@@ -24,8 +24,8 @@
 using namespace nds;
 
 static SpriteEntry s_sprites[2][128];
-static pSpriteRotation s_affine[2] = { (pSpriteRotation)(&s_sprites[0]),
-  (pSpriteRotation)(&s_sprites[1])
+static pSpriteRotation s_affine[2] = { (pSpriteRotation)(void*)(&s_sprites[0]),
+  (pSpriteRotation)(void*)(&s_sprites[1])
 };
 bool Sprite::s_used[2][128];
 

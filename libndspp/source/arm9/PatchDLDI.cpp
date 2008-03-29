@@ -43,7 +43,7 @@ extern "C"
 
 const unsigned char * nds::PatchDLDI::dldiPatch()
 {
-  return (unsigned char*)(((unsigned int*)(&_io_dldi)) -24);
+  return (unsigned char*)((&_io_dldi) -24);
 }
 
 unsigned short * nds::PatchDLDI::buffer()
