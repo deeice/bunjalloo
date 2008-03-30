@@ -1,0 +1,12 @@
+#!/usr/bin/env python
+# encoding: utf-8
+import os
+
+def build(bld):
+  arm9 = bld.create_obj('cpp', 'program')
+  arm9.find_sources_in_dirs('arm9')
+  arm9.uselib = 'ARM9'
+  arm9.includes = os.path.join(bld.env('default')['TOP'],'bwt/include')
+  arm9.includes += ' '+os.path.normpath(os.path.join(bld.env('default')['TOP'],'../libndspp/include'))
+  arm9.uselib_local = 'bwt'
+
