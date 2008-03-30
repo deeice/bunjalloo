@@ -3,9 +3,9 @@ import optparse
 import Params, Configure,Action, Utils, ccroot, misc
 import Object
 
-class objcopyobj(Object.task_gen):
-  def __init__(self):
-    Object.task_gen.__init__(self)
+class objcopy_taskgen(Object.task_gen):
+  #def __init__(self):
+  #  Object.task_gen.__init__(self)
   def apply(self):
     find_source_lst = self.path.find_source_lst
     input_nodes = []
@@ -15,9 +15,9 @@ class objcopyobj(Object.task_gen):
       task.set_inputs(node)
       task.set_outputs(node.change_ext('.bin'))
 
-class bin2oobj(Object.task_gen):
-  def __init__(self):
-    Object.task_gen.__init__(self)
+class bin2o_taskgen(Object.task_gen):
+  def __init__(self, *k, **kw):
+    Object.task_gen.__init__(self, *k, **kw)
     self.compiled_tasks = []
     self.uselib = ''
     self.uselib_local = ''

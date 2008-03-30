@@ -92,7 +92,7 @@ def configure(conf):
   lib_check_arm7(conf)
   GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64'
   DATADIR='data/bunjalloo'
-  conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
+  conf.env['CXXDEFINES'] = ['sprintf_platform=siprintf']
   conf.env['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
   conf.env['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
   conf.env['CPPPATH_ARM9'].extend([top+'/bwt/include', libndspp+'/include'])
@@ -165,6 +165,10 @@ def build(bld):
 
 def shutdown():
   ut = UnitTest.unit_test()
+  # gah. this doesn't work - changes to *build* directory.
+  # I patched UnitTest to fix it... but this is getting silly.
+  ut.change_to_testfile_dir = 1
+  ut.want_to_see_test_output = 0
   ut.run()
   ut.print_results()
 

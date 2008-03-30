@@ -1,9 +1,9 @@
 import os, os.path
 import Params, Configure,Action, Object, Utils
 
-class ndstoolobj(Object.task_gen):
-  def __init__(self):
-    Object.task_gen.__init__(self)
+class ndstool_taskgen(Object.task_gen):
+  def __init__(self, *k, **kw):
+    Object.task_gen.__init__(self, *k, **kw)
     self.banner = ''
     self.icon = ''
 
