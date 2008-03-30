@@ -11,5 +11,5 @@ def build(bld):
 
   # build subdirs
   #here = os.path.dirname(bld.m_curdirnode.find_source(obj.source).abspath(obj.env))
-  bld.add_subdirs('patch-test')
+  bld.add_subdirs('patch-test gui-test lang-test')
   # [bld.add_subdirs(d) for d in os.listdir(here) if os.path.isdir(os.path.join(here,d))]
