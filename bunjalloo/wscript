@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import Params, Environment, UnitTest
+import Params, Environment, UnitTest, Utils
 import os, os.path
 import sys
 
@@ -42,6 +42,7 @@ def header_check(conf):
     e.name = header
     e.nosystem = 1
     e.run()
+  conf.env['CPPPATH_ARM9'] = Utils.to_list(conf.env['CPPPATH_ARM9'])
 
 def lib_check_sdl(conf):
   e = conf.create_library_enumerator()
@@ -94,6 +95,8 @@ def configure(conf):
   conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
   conf.env['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
   conf.env['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
+  conf.env['CPPPATH_ARM9'].extend([top+'/bwt/include', libndspp+'/include'])
+  conf.env['CPPPATH_ARM7'].extend([libndspp+'/include'])
   conf.env['GRITFLAGS'] = GRITFLAGS
   conf.env['TOP'] = top
 
@@ -127,21 +130,14 @@ def build(bld):
 
   bld.add_subdirs('bwt tests')
   arm9obj = bld.create_obj('cpp', 'program')
-  arm9obj.includes = libndspp+'/include '
   arm7obj = arm9obj.clone('default')
   arm7obj.includes += ' arm7 '
-  arm9obj.includes += ' arm9 bwt/include bwt/img '
+  arm9obj.includes += ' arm9 bwt/img '
   arm9obj.uselib_local = 'bwt'
   arm9obj.find_sources_in_dirs('arm9')
   arm7obj.find_sources_in_dirs('arm7')
 
   sdl = arm9obj.clone('sdl')
-  #bunjalloo_lib = bld.create_obj('cpp', 'shlib')
-  #bunjalloo_lib.env = bld.env('sdl')
-  #bunjalloo_lib.includes = libndspp+'/include '
-  #bunjalloo_lib.includes += ' arm9 bwt/include bwt/img '
-  #bunjalloo_lib.find_sources_in_dirs('arm9')
-  #bunjalloo_lib.target='bunjalloo'
 
   arm7obj.uselib = 'ARM7'
   arm9obj.uselib = 'ARM9'
