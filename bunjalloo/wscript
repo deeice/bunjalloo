@@ -49,13 +49,13 @@ def lib_check_sdl(conf):
   e.nosystem = 0
   e.mandatory = 1
   e.uselib = 'HOST'
-  e.path = conf.env['LIBPATH']
+  e.path = conf.env['LIBPATH_HOST']
   for l in 'GL SDL png z gif jpeg matrixsslstatic unzip'.split():
     e.name = l
     e.run()
 
   e.uselib = 'TEST'
-  e.path = conf.env['LIBPATH']
+  e.path = conf.env['LIBPATH_TEST']
   for l in 'cppunit'.split():
     e.name = l
     e.run()
@@ -111,16 +111,17 @@ def configure(conf):
 
   sdl['GRITFLAGS'] = GRITFLAGS
   sdl['ARFLAGS'] += 'c'
-  sdl['LIBPATH'] += [libndspp+'/lib']
+  sdl['LIBPATH_HOST'] += [libndspp+'/lib']
+  sdl['LIB_HOST'] += ['ndspp-pc']
   sdl['TOP'] = top
   sdl['CXXDEFINES'] = ['sprintf_platform=sprintf']
   sdl['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
   sdl['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
   sdl['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
-  sdl['LIB'] += ['ndspp-pc']
   # do not add -O2 FFS, it makes debugging impossible
   sdl['CCFLAGS'] = ['-Wall', '-g']
   sdl['CXXFLAGS'] = ['-Wall', '-g']
+  sdl['OBJCOPY'] = 'objcopy'
 
 def build(bld):
   # overcome chdir problems for jump-to-error

@@ -1,28 +1,8 @@
 #!/usr/bin/env python
 # encoding: utf-8
-import os
+import sys
+sys.path.append('waf_tools')
+import builder
 
 def build(bld):
-  APPNAME = os.path.basename(bld.m_curdirnode.srcpath(bld.env()))
-  arm9font = bld.create_obj('bin2o')
-  arm9font.source = """
-                      common/fonts/vera.img
-                      common/fonts/vera.map
-                      common/fonts/vera.pal
-                     """
-  arm9font.target = 'vera'
-
-  arm9 = bld.create_obj('cpp', 'program')
-  arm9.find_sources_in_dirs('arm9')
-  arm9.uselib = 'ARM9'
-  arm9.includes += ' .'
-  arm9.uselib_local = 'bwt vera'
-  arm9.target = APPNAME+'-arm9'
-
-  arm9bin = bld.create_obj('objcopy')
-  arm9bin.source = arm9.target
-  arm9bin.target = arm9.target+'.bin'
-
-  nds = bld.create_obj('ndstool')
-  nds.source = arm9bin.target
-  nds.target = APPNAME+'.nds'
+  builder.build(bld)
