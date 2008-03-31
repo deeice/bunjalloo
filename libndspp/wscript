@@ -69,19 +69,21 @@ def build(bld):
   arm9obj.inst_dir = 'lib'
   arm9obj.inst_var = 'LIB_INSTALL_DIR'
   arm9obj.includes = 'include source/common'
-  arm7obj = arm9obj.clone('default')
 
   sdl = arm9obj.clone('sdl')
+  arm7obj = arm9obj.clone('default')
   arm9obj.includes += ' source/arm9'
-  arm7obj.includes += ' source/arm7'
-  sdl.includes += ' source/pc'
 
   arm9obj.find_sources_in_dirs('source/arm9 source/common')
-  arm7obj.find_sources_in_dirs('source/arm7')
-  arm7obj.uselib = 'ARM7'
   arm9obj.uselib = 'ARM9'
   arm9obj.target = 'ndspp-arm9'
+
+  arm7obj.includes += ' source/arm7'
+  arm7obj.find_sources_in_dirs('source/arm7')
+  arm7obj.uselib = 'ARM7'
   arm7obj.target = 'ndspp-arm7'
-  sdl.target = 'ndspp-pc'
+
+  sdl.includes += ' source/pc'
   sdl.find_sources_in_dirs('source/pc source/common')
+  sdl.target = 'ndspp-pc'
 

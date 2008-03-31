@@ -22,11 +22,12 @@ def build(bld, buildlib=True, buildsdl=True):
   if buildlib:
     arm9.uselib_local += ' vera'
 
-  if buildsdl:
-    sdl = arm9.clone('sdl')
   arm9.uselib = 'ARM9'
   arm9.target = APPNAME+'-arm9'
+
   if buildsdl:
+    sdl = arm9.clone('sdl')
+    sdl.uselib = ''
     sdl.target = APPNAME
 
   arm9bin = bld.create_obj('objcopy')

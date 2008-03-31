@@ -130,26 +130,20 @@ def build(bld):
   # process subfolders from here
 
   arm9obj = bld.create_obj('cpp', 'staticlib')
-  arm7obj = bld.create_obj('cpp', 'program')
-  arm7obj.includes += ' arm7 '
   arm9obj.includes += ' arm9 bwt/img '
-  #arm9obj.uselib_local = 'bwt'
   arm9obj.find_sources_in_dirs('arm9', 'arm9/Main.cpp')
-  #arm9obj.source = [s for s in arm9obj.source if os.path.basename(s) != 'Main.cpp']
-  arm7obj.find_sources_in_dirs('arm7')
-
-
-  sdl = arm9obj.clone('sdl')
-
-  arm7obj.uselib = 'ARM7'
   arm9obj.uselib = 'ARM9'
-
   arm9obj.target = APPNAME
 
-
-  arm7obj.target = APPNAME+'-arm7'
+  sdl = arm9obj.clone('sdl')
+  sdl.uselib = ''
   sdl.target = APPNAME
 
+  arm7obj = bld.create_obj('cpp', 'program')
+  arm7obj.includes += ' arm7 '
+  arm7obj.find_sources_in_dirs('arm7')
+  arm7obj.uselib = 'ARM7'
+  arm7obj.target = APPNAME+'-arm7'
 
   arm9p = bld.create_obj('cpp', 'program')
   arm9p.source = 'arm9/Main.cpp'
@@ -164,11 +158,12 @@ def build(bld):
 
   # generate nds
   arm9bin = bld.create_obj('objcopy')
+  arm9bin.source = arm9p.target
+  arm9bin.target = arm9p.target+'.bin'
+
   arm7bin = arm9bin.clone('default')
   arm7bin.source = arm7obj.target
-  arm9bin.source = arm9p.target
   arm7bin.target = arm7obj.target+'.bin'
-  arm9bin.target = arm9p.target+'.bin'
 
   nds = bld.create_obj('ndstool')
   nds.source = (arm7bin.target, arm9bin.target)
