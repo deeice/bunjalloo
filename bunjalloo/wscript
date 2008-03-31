@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-import Params, Environment, UnitTest, Utils
+import Params, Environment, UnitTest, Utils, Runner, Object
 import os, os.path
 import sys
 
@@ -180,13 +180,25 @@ def build(bld):
 
 def shutdown():
   ut = UnitTest.unit_test()
-  # gah. this doesn't work - changes to *build* directory.
+  # Gah. this doesn't work - changes to *build* directory.
   # I patched UnitTest to fix it... but this is getting silly.
   ut.change_to_testfile_dir = 1
   ut.run_if_waf_does = 'build'
   if Params.g_verbose:
     ut.want_to_see_test_output = True
     ut.want_to_see_test_error = True
+  # if running check, then force all unit tests to be run.
+  # otherwise, only run when things change in the build.
+  if not Params.g_commands["check"]:
+    for obj in Object.g_allobjs:
+      if not hasattr(obj,'unit_test'): continue
+      unit_test = getattr(obj,'unit_test')
+      if not unit_test: continue
+      try:
+        if obj.m_type == 'program':
+          obj.unit_test = obj.link_task.m_hasrun == Runner.success
+      except:
+        continue
   ut.run()
   ut.print_results()
 
