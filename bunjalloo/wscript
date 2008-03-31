@@ -107,12 +107,12 @@ def configure(conf):
   conf.check_tool('compiler_cxx')
   conf.check_tool('gcc')
   conf.check_tool('grit', waf_tools)
+  sdl['LIB_HOST'] = ['ndspp-pc']
   lib_check_sdl(conf)
 
   sdl['GRITFLAGS'] = GRITFLAGS
   sdl['ARFLAGS'] += 'c'
   sdl['LIBPATH_HOST'] += [libndspp+'/lib']
-  sdl['LIB_HOST'] += ['ndspp-pc']
   sdl['TOP'] = top
   sdl['CXXDEFINES'] = ['sprintf_platform=sprintf']
   sdl['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
@@ -129,32 +129,46 @@ def build(bld):
     print "waf: Entering directory `%s'"%(top+"/"+blddir)
   # process subfolders from here
 
-  bld.add_subdirs('bwt tests')
-  arm9obj = bld.create_obj('cpp', 'program')
-  arm7obj = arm9obj.clone('default')
+  arm9obj = bld.create_obj('cpp', 'staticlib')
+  arm7obj = bld.create_obj('cpp', 'program')
   arm7obj.includes += ' arm7 '
   arm9obj.includes += ' arm9 bwt/img '
-  arm9obj.uselib_local = 'bwt'
-  arm9obj.find_sources_in_dirs('arm9')
+  #arm9obj.uselib_local = 'bwt'
+  arm9obj.find_sources_in_dirs('arm9', 'arm9/Main.cpp')
+  #arm9obj.source = [s for s in arm9obj.source if os.path.basename(s) != 'Main.cpp']
   arm7obj.find_sources_in_dirs('arm7')
+
 
   sdl = arm9obj.clone('sdl')
 
   arm7obj.uselib = 'ARM7'
   arm9obj.uselib = 'ARM9'
 
-  arm9obj.target = APPNAME+'-arm9'
+  arm9obj.target = APPNAME
+
+
   arm7obj.target = APPNAME+'-arm7'
-  sdl.uselib = 'HOST'
   sdl.target = APPNAME
+
+
+  arm9p = bld.create_obj('cpp', 'program')
+  arm9p.source = 'arm9/Main.cpp'
+  arm9p.uselib_local = APPNAME+' bwt '
+  arm9p.target = APPNAME+'-arm9'
+
+  sdlp = arm9p.clone('sdl')
+  sdlp.source = 'arm9/Main.cpp'
+  sdlp.uselib = 'HOST'
+  sdlp.uselib_local = APPNAME+' bwt '
+  sdlp.target = APPNAME
 
   # generate nds
   arm9bin = bld.create_obj('objcopy')
   arm7bin = arm9bin.clone('default')
   arm7bin.source = arm7obj.target
-  arm9bin.source = arm9obj.target
+  arm9bin.source = arm9p.target
   arm7bin.target = arm7obj.target+'.bin'
-  arm9bin.target = arm9obj.target+'.bin'
+  arm9bin.target = arm9p.target+'.bin'
 
   nds = bld.create_obj('ndstool')
   nds.source = (arm7bin.target, arm9bin.target)
@@ -162,13 +176,17 @@ def build(bld):
   nds.icon = 'common/data/icon.bmp'
   nds.target = APPNAME+'.nds'
 
+  bld.add_subdirs('bwt tests')
 
 def shutdown():
   ut = UnitTest.unit_test()
   # gah. this doesn't work - changes to *build* directory.
   # I patched UnitTest to fix it... but this is getting silly.
   ut.change_to_testfile_dir = 1
-  ut.want_to_see_test_output = 0
+  ut.run_if_waf_does = 'build'
+  if Params.g_verbose:
+    ut.want_to_see_test_output = True
+    ut.want_to_see_test_error = True
   ut.run()
   ut.print_results()
 
