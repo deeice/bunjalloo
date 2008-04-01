@@ -110,10 +110,11 @@ void change_file_date( const char *filename,
 
 #define WRITEBUFFERSIZE (8192)
 static int do_extract_currentfile(
-  unzFile uf,
-  const int* popt_extract_without_path,
-  int* popt_overwrite,
-  const char* password)
+    ExtractListener * listener,
+    unzFile uf,
+    const int* popt_extract_without_path,
+    int* popt_overwrite,
+    const char* password)
 {
   char filename_inzip[256];
   char* filename_withoutpath;
@@ -142,6 +143,7 @@ static int do_extract_currentfile(
   }
 
   p = filename_withoutpath = filename_inzip;
+  if (listener) listener->before(filename_inzip);
   while ((*p) != '\0')
   {
     if (((*p)=='/') || ((*p)=='\\'))
@@ -235,6 +237,7 @@ static int do_extract_currentfile(
       unzCloseCurrentFile(uf); /* don't lose the error */
   }
 
+  if (listener) listener->after(filename_inzip);
   free(buf);
   return err;
 }
@@ -242,6 +245,10 @@ static int do_extract_currentfile(
 class ZipFileImpl
 {
   public:
+    ZipFileImpl(ExtractListener * listener): m_extractListener(listener)
+    {
+    }
+
     void open(const char * filename)
     {
       m_filename = filename;
@@ -317,7 +324,9 @@ class ZipFileImpl
       const char * password = 0;
       for (uLong i = 0; i < gi.number_entry; i++)
       {
-        if (do_extract_currentfile(m_file,&opt_extract_without_path,
+        if (do_extract_currentfile(
+              m_extractListener,
+              m_file,&opt_extract_without_path,
               &opt_overwrite,
               password) != UNZ_OK)
         {
@@ -339,11 +348,12 @@ class ZipFileImpl
   private:
     string m_filename;
     unzFile m_file;
+    ExtractListener * m_extractListener;
 };
 
 
-ZipFile::ZipFile() :
-  m_impl(new ZipFileImpl)
+ZipFile::ZipFile(ExtractListener * listener) :
+  m_impl(new ZipFileImpl(listener))
 {
 }
 ZipFile::~ZipFile()

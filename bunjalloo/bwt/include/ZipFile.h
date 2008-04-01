@@ -21,13 +21,20 @@
 #include <string>
 
 class ZipFileImpl;
+class ExtractListener
+{
+  public:
+    virtual ~ExtractListener() {}
+    virtual void before(const char * filename) = 0;
+    virtual void after(const char * filename) = 0;
+};
 
 class ZipFile
 {
   public:
     /** Create an object for handling zipped files.
      */
-    ZipFile();
+    ZipFile(ExtractListener * listener = 0);
 
     /** Close the zip file on destruction. */
     ~ZipFile();
@@ -50,6 +57,7 @@ class ZipFile
     void close();
 
     bool is_open() const;
+
   private:
     ZipFileImpl * m_impl;
 };
