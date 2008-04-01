@@ -100,6 +100,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
      */
     inline Document & document() const;
 
+    inline ProgressBar & progressBar() const;
+
     /** Edit the configuration.
      */
     void editConfig();
@@ -167,5 +169,10 @@ Controller & View::controller() const
 Document & View::document() const
 {
   return m_document;
+}
+
+ProgressBar & View::progressBar() const
+{
+  return *m_progress;
 }
 #endif

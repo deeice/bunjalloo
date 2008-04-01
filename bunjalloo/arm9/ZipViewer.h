@@ -19,21 +19,34 @@
 
 #include <string>
 #include "ButtonListener.h"
+#include "ZipFile.h"
 
 class RichTextArea;
+class View;
 
-class ZipViewer: public ButtonListener
+class ZipViewer: public ButtonListener, public ExtractListener
 {
   public:
-    ZipViewer(const std::string & filename);
+    ZipViewer(View & view);
+
+    void setFilename(const std::string & filename);
 
     void unzip();
     void unzipAndPatch();
     void show(RichTextArea & textArea);
     virtual void pressed(ButtonI * button);
+
+    virtual void before(const char * name);
+    virtual void after(const char * name);
+
   private:
+    View & m_view;
     std::string m_filename;
+    // no need to delete these - the text area they get added to deals with
+    // memory management.
     ButtonI * m_unzip;
     ButtonI * m_unzipAndPatch;
+    int m_fileCount;
+    int m_index;
 };
 #endif

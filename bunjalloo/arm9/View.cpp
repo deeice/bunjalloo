@@ -174,11 +174,9 @@ void View::notify()
         break;
     case Document::LOADED:
       {
+        // this is to clear the progress's dirty flag.
+        m_progress->paint(m_progress->bounds());
         m_filenameForProgress.clear();
-        /** Broken by BWT.
-         m_textArea->setStartLine( (-SCREEN_HEIGHT / m_textArea->font().height()) - 1);
-        swiWaitForVBlank();
-         */
         m_renderer->render();
         int pos = m_document.position();
         if (pos == -1)
@@ -218,6 +216,8 @@ void View::notify()
       break;
     case Document::INPROGRESS:
       {
+        m_progress->setMax(100);
+        m_progress->setMin(0);
         // add a progress bar or something here...
         unsigned int pc = m_document.percentLoaded();
         m_progress->setValue(pc);
@@ -576,7 +576,7 @@ void View::tick()
       break;
   }
   m_dirty |= m_keyboard->tick();
-  m_dirty |= (m_document.status() == Document::INPROGRESS) and m_progress->dirty();
+  m_dirty |= m_progress->dirty();
   m_toolbar->tick();
 
 
@@ -585,7 +585,7 @@ void View::tick()
     m_scrollPane->paint(clip);
     m_keyboard->paint(clip);
     m_linkHandler->paint(clip);
-    if (m_progress->dirty() and m_document.status() == Document::INPROGRESS)
+    if (m_progress->dirty())
     {
       m_progress->paint(m_progress->bounds());
     }

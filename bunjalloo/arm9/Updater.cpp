@@ -157,7 +157,8 @@ void Updater::doUpdate()
 {
   RichTextArea & textArea(*(m_view.renderer()->textArea()));
   string cachedFile = m_controller.cache()->fileName(m_downloadUrl);
-  ZipViewer viewer(cachedFile);
+  ZipViewer viewer(m_view);
+  viewer.setFilename(cachedFile);
   viewer.unzipAndPatch();
   textArea.appendText(T("done"));
   m_view.resetScroller();

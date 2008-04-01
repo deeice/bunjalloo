@@ -16,30 +16,43 @@
 */
 #include "Button.h"
 #include "Language.h"
-#include "RichTextArea.h"
-#include "ZipFile.h"
-#include "ZipViewer.h"
 #include "PatchDLDI.h"
+#include "ProgressBar.h"
+#include "RichTextArea.h"
+#include "View.h"
+#include "ViewRender.h"
+#include "ZipViewer.h"
 
 using std::vector;
 using std::string;
 
 static const string ndsExt(".nds");
 
-ZipViewer::ZipViewer( const std::string & filename):
-  m_filename(filename),
+ZipViewer::ZipViewer(View & view):
+  m_view(view),
   m_unzip(0),
-  m_unzipAndPatch(0)
+  m_unzipAndPatch(0),
+  m_fileCount(0),
+  m_index(0)
 {
+}
+
+void ZipViewer::setFilename(const std::string & filename)
+{
+  m_filename = filename;
+  m_unzip = 0;
+  m_unzipAndPatch = 0;
+  m_fileCount = 0;
 }
 
 void ZipViewer::show(RichTextArea & textArea)
 {
-  ZipFile file;
+  ZipFile file(this);
   file.open(m_filename.c_str());
 
   vector<string> contents;
   file.list(contents);
+  m_fileCount = contents.size();
   if (not contents.empty())
   {
     // add an "unzip" button!
@@ -65,7 +78,8 @@ void ZipViewer::show(RichTextArea & textArea)
 
 void ZipViewer::unzip()
 {
-  ZipFile file;
+  m_index = 0;
+  ZipFile file(this);
   // unzip the file
   file.open(m_filename.c_str());
   if (file.is_open())
@@ -77,7 +91,7 @@ void ZipViewer::unzip()
 void ZipViewer::unzipAndPatch()
 {
   unzip();
-  ZipFile file;
+  ZipFile file(this);
   file.open(m_filename.c_str());
   if (file.is_open())
   {
@@ -109,3 +123,23 @@ void ZipViewer::pressed(ButtonI * button)
     unzipAndPatch();
   }
 }
+
+void ZipViewer::before(const char * name)
+{
+  ProgressBar & progressBar(m_view.progressBar());
+  progressBar.setMax(m_fileCount);
+  progressBar.setMin(0);
+
+  UnicodeString u(string2unicode(name));
+  progressBar.setText(u);
+  m_view.tick();
+  m_index++;
+}
+
+void ZipViewer::after(const char * name)
+{
+  ProgressBar & progressBar(m_view.progressBar());
+  progressBar.setValue(m_index);
+  m_view.tick();
+}
+
