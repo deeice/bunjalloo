@@ -29,12 +29,14 @@
 #include "ParameterSet.h"
 #include "RichTextArea.h"
 #include "Updater.h"
+#include "Version.h"
 #include "View.h"
 #include "ViewRender.h"
 #include "ZipViewer.h"
 
 using std::string;
 using std::vector;
+extern const char * VERSION;
 
 Updater::Updater(Controller & c,
     Document & d, View & view): m_controller(c), m_document(d), m_view(view), m_state(START)
@@ -114,15 +116,24 @@ void Updater::getZip()
               set.parameter("size", size);
             }
           }
+          Version current(VERSION);
+          Version online(m_newVersion.c_str());
           m_state = GOT_ZIP;
-          string update;
-          m_controller.config().resource(Config::UPDATE, update);
-          m_downloadUrl = URI(update).navigateTo(download);
-          m_document.setHistoryEnabled(false);
-          m_view.setSaveAsEnabled(false);
-          m_controller.doUri(m_downloadUrl);
-          m_view.setSaveAsEnabled(true);
-          m_document.setHistoryEnabled(true);
+          if (online > current)
+          {
+            string update;
+            m_controller.config().resource(Config::UPDATE, update);
+            m_downloadUrl = URI(update).navigateTo(download);
+            m_document.setHistoryEnabled(false);
+            m_view.setSaveAsEnabled(false);
+            m_controller.doUri(m_downloadUrl);
+            m_view.setSaveAsEnabled(true);
+            m_document.setHistoryEnabled(true);
+          }
+          else
+          {
+            alreadyGotLatest();
+          }
         }
       }
     }
@@ -224,4 +235,16 @@ void Updater::pressed(ButtonI * button)
 void Updater::doTitle()
 {
   m_view.renderer()->doTitle(T("update_title"));
+}
+
+void Updater::alreadyGotLatest()
+{
+  doTitle();
+  RichTextArea & textArea(*(m_view.renderer()->textArea()));
+  textArea.appendText(T("alrdy_upd"));
+  textArea.insertNewline();
+  textArea.appendText(string2unicode(m_newVersion));
+  textArea.insertNewline();
+  textArea.insertNewline();
+  addCancel(textArea);
 }

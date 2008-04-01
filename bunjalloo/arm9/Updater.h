@@ -68,5 +68,6 @@ class Updater: public ButtonListener
     void doTitle();
     void addOk(RichTextArea &);
     void addCancel(RichTextArea &);
+    void alreadyGotLatest();
 };
 #endif
