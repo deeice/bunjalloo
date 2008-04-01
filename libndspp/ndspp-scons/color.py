@@ -27,9 +27,10 @@ def generate(env, **kw):
     sourceTxt = ','.join( [ os.path.basename(str(f)) for f in sources] )
     if len(sourceTxt) > 80:
       sourceTxt = sourceTxt[0:75]+'%s...'%black
+    prog = os.path.basename(s.replace('(', ' ').split()[0])
     sourceTxt = sourceTxt.replace(',', '%s,%s'%(black, blue))
-    sys.stdout.write('\t%s%s%s -> %s%s%s...\n'%
-        (blue, sourceTxt, black,
+    sys.stdout.write('%s:\t%s%s%s -> %s%s%s...\n'%
+        (prog,blue, sourceTxt, black,
          green,('%s,%s'%(black, green)).join( [ os.path.basename(str(f)) for f in targets] ), black ))
 
   if not os.environ.has_key('NO_SCONS_COLOR'):

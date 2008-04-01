@@ -109,7 +109,7 @@ def addObjCopyImageBuilders(env):
 
   env.Append(GRITFLAGS='-pw 16 -gB 8 -m! -ft b -fh! -q')
   # chdir=1 changes to the target dir before executing.
-  gritBld = Builder(action='grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS',
+  gritBld = Builder(action='grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS >/dev/null',
       chdir=1,
       suffix='.bin',
       src_suffix='.png',
@@ -156,7 +156,7 @@ extern "C" {
 
   ## Execute unit tests, creating a test.passed cache file.
   # taken from www.scons.org/wiki/UnitTest
-  def build_unit_test(target, source, env):
+  def run_unit_test(target, source, env):
     app = str(source[0].abspath)
     cwd = os.getcwd()
     dirname = os.path.dirname(app)
@@ -169,7 +169,7 @@ extern "C" {
     else:
       return 1
   # Create a builder for tests
-  bld = Builder(action = build_unit_test)
+  bld = Builder(action = run_unit_test)
   env.Append(BUILDERS = {'Test' :  bld})
 
   def build_cscope_file(target, source, env):

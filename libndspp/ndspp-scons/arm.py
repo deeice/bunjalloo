@@ -76,7 +76,7 @@ def addBinBuilder(env):
 
   env.Append(DLDITOOL='dlditool')
   env.Append(DLDIFILE='none.dldi')
-  dldiPatch = Builder( action=[Copy('$TARGET', '$SOURCE'), '-$DLDITOOL $DLDIFILE $TARGET'],
+  dldiPatch = Builder( action=[Copy('$TARGET', '$SOURCE'), '-$DLDITOOL $DLDIFILE $TARGET >/dev/null'],
       suffix='.nds', src_suffix='.nds')
   env.Append( BUILDERS = { 'DldiPatch': dldiPatch } )
 
