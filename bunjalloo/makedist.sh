@@ -8,7 +8,7 @@ tags=$repo/tags
 project=bunjalloo
 upload="no"
 tag="no"
-VERSION="0.5"
+VERSION=$( grep -i version arm9/version.c  | sed 's/.*"\(.*\)".*/\1/g')
 
 die() {
   echo >&2 "$@"
