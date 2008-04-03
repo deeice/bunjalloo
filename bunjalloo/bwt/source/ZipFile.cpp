@@ -76,7 +76,7 @@ static int makedir (const char * newdir)
       *p = 0;
       if ((nds::File::mkdir(buffer) == -1) && (errno == ENOENT))
         {
-          printf("couldn't create directory %s\n",buffer);
+          // printf("couldn't create directory %s\n",buffer);
           free(buffer);
           return 0;
         }
@@ -130,7 +130,7 @@ static int do_extract_currentfile(
 
   if (err!=UNZ_OK)
   {
-    printf("error %d with zipfile in unzGetCurrentFileInfo\n",err);
+    // printf("error %d with zipfile in unzGetCurrentFileInfo\n",err);
     return err;
   }
 
@@ -138,7 +138,7 @@ static int do_extract_currentfile(
   buf = (void*)malloc(size_buf);
   if (buf==NULL)
   {
-    printf("Error allocating memory\n");
+    // printf("Error allocating memory\n");
     return UNZ_INTERNALERROR;
   }
 
@@ -155,7 +155,7 @@ static int do_extract_currentfile(
   {
     if ((*popt_extract_without_path)==0)
     {
-      printf("creating directory: %s\n",filename_inzip);
+      // printf("creating directory: %s\n",filename_inzip);
       nds::File::mkdir(filename_inzip);
     }
   }
@@ -172,7 +172,7 @@ static int do_extract_currentfile(
     err = unzOpenCurrentFilePassword(uf,password);
     if (err!=UNZ_OK)
     {
-      printf("error %d with zipfile in unzOpenCurrentFilePassword\n",err);
+      // printf("error %d with zipfile in unzOpenCurrentFilePassword\n",err);
     }
 
     if ((skip==0) && (err==UNZ_OK))
@@ -192,26 +192,26 @@ static int do_extract_currentfile(
 
       if (fout==NULL)
       {
-        printf("error opening %s\n",write_filename);
+        // printf("error opening %s\n",write_filename);
       }
     }
 
     if (fout!=NULL)
     {
-      printf(" extracting: %s\n",write_filename);
+      // printf(" extracting: %s\n",write_filename);
 
       do
       {
         err = unzReadCurrentFile(uf,buf,size_buf);
         if (err<0)
         {
-          printf("error %d with zipfile in unzReadCurrentFile\n",err);
+          // printf("error %d with zipfile in unzReadCurrentFile\n",err);
           break;
         }
         if (err>0)
           if (fwrite(buf,err,1,fout)!=1)
           {
-            printf("error in writing extracted file\n");
+            // printf("error in writing extracted file\n");
             err=UNZ_ERRNO;
             break;
           }
@@ -230,7 +230,7 @@ static int do_extract_currentfile(
       err = unzCloseCurrentFile (uf);
       if (err!=UNZ_OK)
       {
-        printf("error %d with zipfile in unzCloseCurrentFile\n",err);
+        // printf("error %d with zipfile in unzCloseCurrentFile\n",err);
       }
     }
     else
@@ -269,7 +269,7 @@ class ZipFileImpl
     {
       int err = unzGoToFirstFile(m_file);
       if (err != UNZ_OK) {
-        printf("error %d with zipfile in unzGoToFirstFile \n",err);
+        // printf("error %d with zipfile in unzGoToFirstFile \n",err);
         return;
       }
 
@@ -277,7 +277,7 @@ class ZipFileImpl
       err = unzGetGlobalInfo (m_file,&gi);
       if (err!=UNZ_OK)
       {
-        printf("error %d with zipfile in unzGetGlobalInfo \n",err);
+        // printf("error %d with zipfile in unzGetGlobalInfo \n",err);
         return;
       }
 
@@ -288,7 +288,7 @@ class ZipFileImpl
         err = unzGetCurrentFileInfo(m_file,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
         if (err!=UNZ_OK)
         {
-          printf("error %d with zipfile in unzGetCurrentFileInfo\n",err);
+          // printf("error %d with zipfile in unzGetCurrentFileInfo\n",err);
           break;
         }
         ls.push_back(filename_inzip);
@@ -297,7 +297,7 @@ class ZipFileImpl
           err = unzGoToNextFile(m_file);
           if (err!=UNZ_OK)
           {
-            printf("error %d with zipfile in unzGoToNextFile\n",err);
+            // printf("error %d with zipfile in unzGoToNextFile\n",err);
             break;
           }
         }
@@ -308,14 +308,14 @@ class ZipFileImpl
     {
       int err = unzGoToFirstFile(m_file);
       if (err != UNZ_OK) {
-        printf("error %d with zipfile in unzGoToFirstFile \n",err);
+        // printf("error %d with zipfile in unzGoToFirstFile \n",err);
         return;
       }
 
       unz_global_info gi;
       err = unzGetGlobalInfo (m_file,&gi);
       if (err!=UNZ_OK) {
-        printf("error %d with zipfile in unzGetGlobalInfo \n",err);
+        // printf("error %d with zipfile in unzGetGlobalInfo \n",err);
         return;
       }
 
@@ -338,7 +338,7 @@ class ZipFileImpl
           err = unzGoToNextFile(m_file);
           if (err!=UNZ_OK)
           {
-            printf("error %d with zipfile in unzGoToNextFile\n",err);
+            // printf("error %d with zipfile in unzGoToNextFile\n",err);
             break;
           }
         }
