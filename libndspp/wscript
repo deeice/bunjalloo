@@ -57,7 +57,6 @@ def configure(conf):
   sdl.set_variant('sdl')
   conf.setenv('sdl')
   conf.check_tool('compiler_cxx')
-  sdl['ARFLAGS'] += 'c'
   sdl['LIB_INSTALL_DIR'] = top
 
 def build(bld):

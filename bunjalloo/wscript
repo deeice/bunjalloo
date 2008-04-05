@@ -111,7 +111,6 @@ def configure(conf):
   lib_check_sdl(conf)
 
   sdl['GRITFLAGS'] = GRITFLAGS
-  sdl['ARFLAGS'] += 'c'
   sdl['LIBPATH_HOST'] += [libndspp+'/lib']
   sdl['TOP'] = top
   sdl['CXXDEFINES'] = ['sprintf_platform=sprintf']
