@@ -60,6 +60,10 @@ void PreferencesToolbar::handlePress(int i)
       m_view.endBookmark();
       break;
     case (SPRITE_ADD_COOKIE):
+      m_view.addCookie();
+      break;
+    case (SPRITE_EDIT_COOKIES):
+      m_view.editCookie();
       break;
     case (SPRITE_EDIT_CONFIG):
       m_view.editConfig();

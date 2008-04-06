@@ -353,6 +353,16 @@ void View::bookmarkCurrentPage()
   showBookmarkPage();
 }
 
+void View::addCookie()
+{
+  // add cookie for the current page.
+}
+
+void View::editCookie()
+{
+  // edit the list of cookies
+}
+
 void View::preferences()
 {
   // clicked preferences button.

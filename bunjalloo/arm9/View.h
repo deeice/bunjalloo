@@ -87,6 +87,12 @@ class View : public ViewI, public ButtonListener, public LinkListener
     /** Exit bookmark mode. */
     void endBookmark();
 
+    /** Add cookie for the current site */
+    void addCookie();
+
+    /** Add cookie for the current site */
+    void editCookie();
+
     /** Exit bookmark mode. */
     void preferences();
 
