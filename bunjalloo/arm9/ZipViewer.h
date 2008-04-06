@@ -33,7 +33,7 @@ class ZipViewer: public ButtonListener, public ExtractListener
 
     void unzip();
     void unzipAndPatch();
-    void show(RichTextArea & textArea);
+    void show();
     virtual void pressed(ButtonI * button);
 
     virtual void before(const char * name);

@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Button.h"
+#include "Document.h"
+#include "File.h"
 #include "Language.h"
 #include "PatchDLDI.h"
 #include "ProgressBar.h"
@@ -45,8 +47,10 @@ void ZipViewer::setFilename(const std::string & filename)
   m_fileCount = 0;
 }
 
-void ZipViewer::show(RichTextArea & textArea)
+void ZipViewer::show()
 {
+  m_view.renderer()->doTitle(string2unicode(nds::File::base(m_view.document().uri().c_str())));
+  RichTextArea & textArea(*m_view.renderer()->textArea());
   ZipFile file(this);
   file.open(m_filename.c_str());
 

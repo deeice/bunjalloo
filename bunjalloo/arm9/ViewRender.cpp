@@ -190,7 +190,7 @@ void ViewRender::render()
         filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
       }
       m_zipViewer->setFilename(filename);
-      m_zipViewer->show(*textArea());
+      m_zipViewer->show();
       useScrollPane = true;
     }
     else if (mimeType == HtmlParser::OTHER)
