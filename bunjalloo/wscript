@@ -45,27 +45,25 @@ def header_check(conf):
   conf.env['CPPPATH_ARM9'] = Utils.to_list(conf.env['CPPPATH_ARM9'])
 
 def lib_check_sdl(conf):
-  e = conf.create_library_enumerator()
+  e = conf.create_library_configurator()
   e.nosystem = 0
   e.mandatory = 1
   e.uselib = 'HOST'
-  e.path = conf.env['LIBPATH_HOST']
-  for l in 'GL SDL png z gif jpeg matrixsslstatic unzip'.split():
+  e.path = [libndspp+'/lib']
+  for l in 'ndspp-pc GL SDL png z gif jpeg matrixsslstatic unzip'.split():
     e.name = l
     e.run()
 
   e.uselib = 'TEST'
-  e.path = conf.env['LIBPATH_TEST']
-  for l in 'cppunit'.split():
+  for l in 'dl cppunit'.split():
     e.name = l
     e.run()
 
 def lib_check_arm7(conf):
-  e = conf.create_library_enumerator()
+  e = conf.create_library_configurator()
   e.nosystem = 1
   e.mandatory = 1
   e.uselib = 'ARM7'
-  e.path = conf.env['LIBPATH_ARM7']
   e.name = 'dswifi7'
   e.run()
 
@@ -92,30 +90,33 @@ def configure(conf):
   lib_check_arm7(conf)
   GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64'
   DATADIR='data/bunjalloo'
-  conf.env['CXXDEFINES'] = ['sprintf_platform=siprintf']
-  conf.env['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
-  conf.env['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
+  conf.env['CXXDEFINES'] = ['DATADIR=\\"%s\\"'%DATADIR,
+                            'DATESTRING=\\"%s\\"'%'today']
+
   conf.env['CPPPATH_ARM9'].extend([top+'/bwt/include', libndspp+'/include'])
   conf.env['CPPPATH_ARM7'].extend([libndspp+'/include'])
   conf.env['GRITFLAGS'] = GRITFLAGS
   conf.env['TOP'] = top
 
   sdl = Environment.Environment()
+
   conf.set_env_name('sdl', sdl)
   sdl.set_variant('sdl')
+
+  for f in ('GRITFLAGS', 'TOP', 'CXXDEFINES'):
+    if type(conf.env[f]) == type([]):
+      sdl[f] = [x for x in conf.env[f]]
+    else:
+      sdl[f] = conf.env[f]
+
+  conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
+  sdl['CXXDEFINES'].extend(['sprintf_platform=sprintf'])
   conf.setenv('sdl')
   conf.check_tool('compiler_cxx')
   conf.check_tool('gcc')
   conf.check_tool('grit', waf_tools)
-  sdl['LIB_HOST'] = ['ndspp-pc']
   lib_check_sdl(conf)
 
-  sdl['GRITFLAGS'] = GRITFLAGS
-  sdl['LIBPATH_HOST'] += [libndspp+'/lib']
-  sdl['TOP'] = top
-  sdl['CXXDEFINES'] = ['sprintf_platform=sprintf']
-  sdl['CXXDEFINES'].extend(['DATADIR=\\"%s\\"'%DATADIR])
-  sdl['CXXDEFINES'].extend(['DATESTRING=\\"%s\\"'%'today'])
   sdl['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
   # do not add -O2 FFS, it makes debugging impossible
   sdl['CCFLAGS'] = ['-Wall', '-g']
@@ -182,7 +183,7 @@ def shutdown():
     ut.want_to_see_test_output = True
     ut.want_to_see_test_error = True
   # if running check, then force all unit tests to be run.
-  # otherwise, only run when things change in the build.
+  # otherwise, only run when things changed in the build.
   if not Params.g_commands["check"]:
     for obj in Object.g_allobjs:
       if not hasattr(obj,'unit_test'): continue

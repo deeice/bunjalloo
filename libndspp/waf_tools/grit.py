@@ -85,7 +85,8 @@ def detect(conf):
   if not grit:
     conf.fatal('grit was not found')
   conf.env['GRIT'] = grit
-  conf.env['GRITFLAGS'] = '-pw 16 -gB 8 -m! -ft b -fh! -q'.split()
+  if not conf.env['GRITFLAGS']:
+    conf.env['GRITFLAGS'] = '-pw 16 -gB 8 -m! -ft b -fh! -q'.split()
 
 def setup(bld):
   grit_str = '${GRIT} ${SRC[0].abspath(env)} -o ${SRC[0].bldbase(env)} ${GRITFLAGS} > /dev/null 2>&1 '
