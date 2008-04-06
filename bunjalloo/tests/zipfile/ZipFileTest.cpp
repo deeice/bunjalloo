@@ -26,11 +26,13 @@ class ZipFileTest : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST_SUITE( ZipFileTest );
   CPPUNIT_TEST( test0 );
   CPPUNIT_TEST( test1 );
+  CPPUNIT_TEST( test2 );
   CPPUNIT_TEST_SUITE_END();
 
   public:
   void test0();
   void test1();
+  void test2();
   void setUp();
   void tearDown();
 
@@ -131,3 +133,39 @@ void ZipFileTest::test1()
   CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("file1.txt"));
   CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("file2.txt"));
 }
+
+class TestExtractListener: public ExtractListener
+{
+  public:
+    TestExtractListener(const std::string & onlyExtract):
+      m_onlyExtract(onlyExtract) { }
+    virtual bool extract(const char * name)
+    {
+      return (name == m_onlyExtract);
+    }
+    virtual void before(const char * name) { }
+    virtual void after(const char * name) { }
+  private:
+    std::string m_onlyExtract;
+
+};
+
+
+void ZipFileTest::test2()
+{
+  string filename("/data/test2.zip");
+  TestExtractListener extractListener("output/somefile.txt");
+  m_zipfile->setListener(&extractListener);
+  m_zipfile->open(filename.c_str());
+  //CPPUNIT_ASSERT_EQUAL( expected , line);
+  CPPUNIT_ASSERT( m_zipfile->is_open());
+
+  cdTestDir();
+  // now unzip and check the files exists
+  m_zipfile->extract();
+  nds::File::FileType expectedType(nds::File::F_REG);
+  CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("output/somefile.txt"));
+  expectedType = nds::File::F_NONE;
+  CPPUNIT_ASSERT_EQUAL(expectedType, nds::File::exists("output/anotherfile.txt"));
+}
+

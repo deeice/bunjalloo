@@ -25,6 +25,11 @@ class ExtractListener
 {
   public:
     virtual ~ExtractListener() {}
+    /** Should the file be extracted.
+     * @param filename the name of the file.
+     * @return true if it should, false otherwise.
+     */
+    virtual bool extract(const char * filename) = 0;
     virtual void before(const char * filename) = 0;
     virtual void after(const char * filename) = 0;
 };
@@ -58,6 +63,7 @@ class ZipFile
 
     bool is_open() const;
 
+    void setListener(ExtractListener * listener);
   private:
     ZipFileImpl * m_impl;
 };

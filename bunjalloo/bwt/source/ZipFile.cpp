@@ -144,6 +144,12 @@ static int do_extract_currentfile(
 
   p = filename_withoutpath = filename_inzip;
   if (listener) listener->before(filename_inzip);
+  if (listener and not listener->extract(filename_inzip))
+  {
+    // skip the file
+    listener->after(filename_inzip);
+    return UNZ_OK;
+  }
   while ((*p) != '\0')
   {
     if (((*p)=='/') || ((*p)=='\\'))
@@ -247,6 +253,11 @@ class ZipFileImpl
   public:
     ZipFileImpl(ExtractListener * listener): m_extractListener(listener)
     {
+    }
+
+    void setListener(ExtractListener * listener)
+    {
+      m_extractListener = listener;
     }
 
     void open(const char * filename)
@@ -384,3 +395,7 @@ void ZipFile::extract()
   m_impl->extract();
 }
 
+void ZipFile::setListener(ExtractListener * listener)
+{
+  m_impl->setListener(listener);
+}
