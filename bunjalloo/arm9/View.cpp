@@ -22,6 +22,7 @@
 #include "Canvas.h"
 #include "Config.h"
 #include "Controller.h"
+#include "CookieHandler.h"
 #include "Document.h"
 #include "HtmlDocument.h"
 #include "File.h"
@@ -104,6 +105,7 @@ View::View(Document & doc, Controller & c):
   m_linkHandler(new LinkHandler(this)),
   m_search(0),
   m_keyState(new KeyState),
+  m_cookieHandler(new CookieHandler(this)),
   m_dirty(true),
   m_refreshing(0),
   m_saveAsEnabled(true)
@@ -356,6 +358,13 @@ void View::bookmarkCurrentPage()
 void View::addCookie()
 {
   // add cookie for the current page.
+  URI uri(m_document.uri());
+  if (uri.protocol() == URI::HTTPS_PROTOCOL or
+      uri.protocol() == URI::HTTP_PROTOCOL)
+  {
+    m_renderer->clear();
+    m_cookieHandler->show();
+  }
 }
 
 void View::editCookie()

@@ -23,6 +23,7 @@
 #include "LinkListener.h"
 
 class Document;
+class CookieHandler;
 class Controller;
 
 class FormControl;
@@ -142,6 +143,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     LinkHandler * m_linkHandler;
     SearchEntry * m_search;
     KeyState * m_keyState;
+    CookieHandler * m_cookieHandler;
     int m_preInputStartLine;
     bool m_dirty;
     std::string m_linkHref;

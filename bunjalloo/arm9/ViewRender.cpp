@@ -135,13 +135,17 @@ void ViewRender::clearRadioGroups()
   m_radioGroup.clear();
 }
 
-void ViewRender::render()
+void ViewRender::clear()
 {
   m_self->m_scrollPane->removeChildren();
-
   clearRadioGroups();
-
   m_textArea = 0;
+}
+
+void ViewRender::render()
+{
+  clear();
+
   const HtmlElement * root = m_self->m_document.rootNode();
   HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
   bool useScrollPane(false);

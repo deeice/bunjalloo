@@ -19,7 +19,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <set>
 
 class Cookie;
 class URI;
@@ -92,8 +92,8 @@ class CookieJar
     //! List of cookies.
     std::vector<Cookie *> m_cookies;
 
-    typedef std::map<std::string, bool> AcceptedDomainMap;
-    AcceptedDomainMap m_acceptedDomains;
+    typedef std::set<std::string> AcceptedDomainSet;
+    AcceptedDomainSet m_acceptedDomains;
 
 
 };

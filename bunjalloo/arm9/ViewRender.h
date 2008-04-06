@@ -33,6 +33,7 @@ class ViewRender: public Visitor
   public:
     ViewRender(View * self);
     void render();
+    void clear();
     void setUpdater(Updater * updater);
     RichTextArea * textArea();
     void doTitle(const UnicodeString & str);
