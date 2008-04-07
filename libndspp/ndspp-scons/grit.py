@@ -17,6 +17,7 @@
 """  SCons tool specification for grit """
 
 import os.path
+import color
 from SCons.Builder import Builder
 DEVKITARM = 'DEVKITARM'
 
@@ -27,8 +28,8 @@ def getGrit(env):
   else:
     import os
     if not os.environ.has_key(DEVKITARM):
-      print '''*** Could not find "grit" in the PATH.'''
-      print 'Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM'
+      color.pprint('''*** Could not find "grit" in the PATH.''', color.red)
+      color.pprint('Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM', color.red)
       env.Exit(1)
     else:
       gritInDKA = env.WhereIs('grit', os.path.join(os.environ[DEVKITARM], 'bin'))

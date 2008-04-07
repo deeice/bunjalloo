@@ -19,6 +19,7 @@ from SCons.Builder import Builder
 from SCons.Defaults import Copy
 
 import os, os.path, sys
+import color
 
 DEVKITARM = 'DEVKITARM'
 DEVKITPRO = 'DEVKITPRO'
@@ -46,7 +47,7 @@ def getLibnds():
 
 def devkitArmSet():
   if not os.environ.has_key(DEVKITARM):
-    print 'Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM'
+    color.pprint('Please set DEVKITARM in your environment. export DEVKITARM=<path to>devkitARM', color.red)
     sys.exit(1)
     return 0
   return 1

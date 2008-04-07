@@ -17,8 +17,12 @@
 import os.path, sys
 
 black = '\x1b[0m'
-green = '\x1b[30;32m'
-blue = '\x1b[30;34m'
+green = '\x1b[92m'
+blue = '\x1b[94m'
+red = '\x1b[91m'
+
+def pprint(msg, col):
+  print col + msg + black
 
 def generate(env, **kw):
   """ Generate a coloured output environment """

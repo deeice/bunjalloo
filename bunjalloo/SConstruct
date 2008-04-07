@@ -44,7 +44,9 @@ def dist():
 
 
 def die(msg):
-  print '*** '+msg
+  import color
+  print '*** ',
+  color.pprint(msg, color.red)
   Exit(1)
 
 def configure(target, env):

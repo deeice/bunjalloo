@@ -11,7 +11,9 @@ buildTargets = ['pc', 'arm9', 'arm7']
 # function definitions
 
 def die(msg):
-  print '*** '+msg
+  import color
+  print '*** ',
+  color.pprint(msg, color.red)
   Exit(1)
 
 def configure(target, env):
@@ -25,7 +27,7 @@ def configure(target, env):
     conf.CheckHeader('nds.h') or die('Install libnds'+where)
     where += '/libnds'
     conf.CheckHeader(['nds/jtypes.h', 'dswifi9.h']) or die('Install the dswifi library'+where)
-    conf.CheckHeader('fat.h') or die('Install the FAT library'+where)
+    conf.CheckHeader('fat.h') or die('Install the fat library'+where)
   else:
     where = '-dev for your system'
     conf.CheckHeader('SDL/SDL.h') or die('Install SDL'+where)
