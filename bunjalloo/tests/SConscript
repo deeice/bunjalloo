@@ -21,8 +21,6 @@ for d in dirs:
   files = [os.path.basename(f) for f in glob.glob(os.path.join(d, '*.cpp'))]
   if (len(files)):
     basedir = os.path.basename(d)
-    # set the absolute output name here, since cannot do it from child script
-    testEnv['TESTER'] = 'tester'
     # Set the sources for the unit test - this is so the sources are built in
     # the build directory and not in place.  Can only glob from here, not once
     # we descend into the sub dir.

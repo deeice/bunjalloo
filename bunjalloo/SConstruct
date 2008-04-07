@@ -48,6 +48,8 @@ def die(msg):
   Exit(1)
 
 def configure(target, env):
+  if env.GetOption('clean'):
+    return env
   conf = env.Configure()
   where = ' in $DEVKITPRO'
   if target == 'arm7':
