@@ -35,7 +35,10 @@ def getGrit(env):
       gritInDKA = env.WhereIs('grit', os.path.join(os.environ[DEVKITARM], 'bin'))
       if gritInDKA:
         return gritInDKA
-  return None
+
+  color.pprint('''*** Could not find "grit" in the PATH.''', color.red)
+  print 'Make sure you are using the latest DevkitArm release'
+  env.Exit(1)
 
 def exists(env):
   # perhaps it is in the path already

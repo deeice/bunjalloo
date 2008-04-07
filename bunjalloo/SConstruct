@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
   Copyright (C) 2007,2008 Richard Quirk
 
@@ -31,6 +32,8 @@ defaultEnv = Environment(CCFLAGS=commonFlags, CPPPATH=headers,
     TARFLAGS='-c -z', TARSUFFIX='tar.gz')
 buildTargets = ['pc', 'arm9', 'arm7']
 
+sys.path.append(os.path.join(libndsppDir, 'ndspp-scons'))
+from find import find
 # function definitions
 
 # create the dist files
@@ -184,17 +187,6 @@ extern "C" {
   cscopeBld = Builder(action='-cscope -b -k -q', suffix='.out', src_suffix='.files', emitter=cscope_emitter)
   env.Append(BUILDERS = {'Cscope' :  cscopeBld})
 
-def find(top='.', includes=[], excludes=[]):
-  result = []
-  for (root, dirs, files) in os.walk(top):
-    exclude = [ e for e in excludes if root.find(e) != -1]
-    if not exclude:
-      for child in files:
-        exclude = [ e for e in excludes if child.find(e) != -1]
-        if not exclude and ((not includes) or (includes and os.path.splitext(child)[1] in includes)):
-          result.append( os.path.join(root, child))
-  return result
-
 ## Build everything for a particular target.
 def build(buildTarget):
   """ build a particular build target """
@@ -285,5 +277,3 @@ def build(buildTarget):
 
 cmd = defaultEnv.Command('tags', '%s.nds'%executableName, 'ctags -R --c++-kinds=+p --fields=+iaS --extra=+q . ../libndspp')
 Default(cmd)
-
-# vim: set filetype=python :

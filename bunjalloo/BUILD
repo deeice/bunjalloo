@@ -76,14 +76,27 @@ And maybe some more ^_^, patches to the build instructions are welcome.
 Almost there!
 =============
 
-That's the tough bit out the way, hopefully. Now to compile libndspp:
+That's the tough bit out the way, hopefully. Now to compile libndspp. You can
+either use the configure style:
+
+    cd ../libndspp
+    ./configure
+    make
+    cd -
+
+Or build it directly with the following command:
 
     scons -C ../libndspp
 
 This will create ../libndspp/lib/libndspp-*.a, one for ARM9, one for ARM7
 and one for the pc (SDL).
 
-Finally, compile Bunjalloo itself.
+Finally, compile Bunjalloo itself. Again, either use the configure approach:
+
+    ./configure
+    make
+
+Or compile directly with this command:
 
     scons
 
