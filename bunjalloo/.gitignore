@@ -12,3 +12,5 @@ data/bunjalloo/cache
 docs/
 tests/lang-test/lang-test
 tests/lang-test/lang-test.nds
+.sconf_temp/*
+config.log

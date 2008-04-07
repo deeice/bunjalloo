@@ -44,6 +44,46 @@ def dist():
   defaultEnv['DIST_NAME'] = distfile
   defaultEnv['DIST_SRC_NAME'] = srcfile
 
+
+def die(msg):
+  print '*** '+msg
+  Exit(1)
+
+def configure(target, env):
+  conf = env.Configure()
+  where = ' in $DEVKITPRO'
+  if target == 'arm7':
+    conf.CheckLibWithHeader('nds7', 'nds.h', 'c') or die('Install libnds'+where)
+    where += '/libnds'
+    conf.CheckLibWithHeader('ndspp-%s'%target, 'ndspp.h', 'c++', None, True) \
+            or die('libndspp must be compiled in "../libndspp"')
+
+    conf.CheckLibWithHeader('dswifi7', ['nds/jtypes.h', 'dswifi7.h'], 'c', None, True) or die('Install the dswifi library'+where)
+  elif target == 'arm9':
+    conf.CheckLibWithHeader('nds9', 'nds.h', 'c', None, True) or die('Install libnds'+where)
+    where += '/libnds'
+    conf.CheckLibWithHeader('ndspp-%s'%target, 'ndspp.h', 'c++', None, True) \
+            or die('libndspp must be compiled in "../libndspp"')
+    conf.CheckLibWithHeader('fat', 'fat.h', 'c', None, True) or die('Install the fat library'+where)
+    conf.CheckLibWithHeader('dswifi9', ['nds/jtypes.h', 'dswifi9.h'], 'c', None, True) or die('Install the dswifi library'+where)
+    conf.CheckLibWithHeader('nds9', 'nds.h', 'c', None, True) or die('Install libnds'+where)
+  else:
+    where = '-dev for your system'
+    conf.CheckLibWithHeader('ndspp-%s'%target, 'ndspp.h', 'c++', None, True) \
+            or die('libndspp must be compiled in "../libndspp"')
+    conf.CheckLibWithHeader('SDL', 'SDL/SDL.h', 'c', None, True) or die('Install SDL'+where)
+    conf.CheckLibWithHeader('GL', 'GL/gl.h', 'c', None, True) or die('Install gl'+where)
+    conf.CheckLibWithHeader('cppunit', 'cppunit/CompilerOutputter.h', 'c++', None, False) or die('Install cppunit'+where)
+
+  # common libs
+  if target != 'arm7':
+    for lib,header in ( ('png','png'), ('z','zlib'), ('gif','gif_lib'), ('jpeg','jpeglib'),
+        ('matrixsslstatic','matrixSsl'), ('unzip', 'unzip') ):
+      conf.CheckLibWithHeader(lib, ['stdio.h',header+'.h'], 'c', None, True) \
+              or die('Install '+header+where)
+
+  return conf.Finish()
+
 ## create the environment for the chosen target
 # @param buildTarget the target build (pc, arm9, arm7)
 # @return the environment copied from defaultEnv
@@ -65,14 +105,12 @@ def createEnv(buildTarget):
     env.Append(CPPDEFINES=['sprintf_platform=sprintf'])
     env.Append(CCFLAGS=' -O0 ')
     #env.Prepend( LIBS=['gcov'])
-    env.Prepend( LIBS=['SDL', 'GL'])
     for i in ['CC', 'CXX', 'OBJCOPY']:
       if os.environ.has_key(i) and os.environ[i]:
         env[i] = os.environ[i]
 
   env.Append( LIBPATH=['#/%s/lib'%libndsppDir])
-  env.Prepend( LIBS=['png','z','gif','jpeg','matrixsslstatic','unzip'])
-  env.Prepend( LIBS=['ndspp-%s'%buildTarget])
+  env = configure(buildTarget, env)
   addObjCopyImageBuilders(env)
   env.Alias('dist', env['DIST_NAME'])
   return env

@@ -99,11 +99,6 @@ def generate(env, **kw):
   env['OBJCOPY'] = devkitPrefix+'objcopy'
   # add 9 or 7
   c = armType[ len(armType) - 1 ]
-  if (c == '9'):
-    env.Append(LIBS=['fat'])
-  env.Append(LIBS=['nds%c'%c])
-  env.Append(LIBS=['dswifi%c'%c])
-
   env.Append(LIBPATH=[os.path.sep.join( [getLibnds(), 'lib'] )])
   env.Append(LINKFLAGS=processorLDFlags%c)
   env.Append(LINKFLAGS=thumbFlags)
