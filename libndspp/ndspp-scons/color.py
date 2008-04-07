@@ -21,6 +21,13 @@ green = '\x1b[92m'
 blue = '\x1b[94m'
 red = '\x1b[91m'
 
+def reset_colors():
+  global black, green, blue, red
+  black = ''
+  green = ''
+  blue = ''
+  red = ''
+
 def pprint(msg, col):
   print col + msg + black
 
@@ -39,6 +46,9 @@ def generate(env, **kw):
 
   if not os.environ.has_key('NO_SCONS_COLOR'):
     env.Append(PRINT_CMD_LINE_FUNC=print_cmd_line)
+
+  if not sys.stdout.isatty():
+    reset_colors()
 
 def exists(env):
   return 1
