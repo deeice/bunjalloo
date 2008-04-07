@@ -363,6 +363,7 @@ void View::addCookie()
       uri.protocol() == URI::HTTP_PROTOCOL)
   {
     m_renderer->clear();
+    m_cookieHandler->setMode(CookieHandler::ADD_MODE);
     m_cookieHandler->show();
   }
 }
@@ -370,6 +371,9 @@ void View::addCookie()
 void View::editCookie()
 {
   // edit the list of cookies
+  m_renderer->clear();
+  m_cookieHandler->setMode(CookieHandler::EDIT_MODE);
+  m_cookieHandler->show();
 }
 
 void View::preferences()

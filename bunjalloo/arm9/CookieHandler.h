@@ -27,6 +27,12 @@ class CookieHandler: public ButtonListener
   public:
     CookieHandler(View * view);
 
+    enum Mode_t
+    {
+      ADD_MODE,
+      EDIT_MODE
+    };
+    void setMode(Mode_t mode);
     void show();
 
     virtual void pressed(ButtonI * button);
@@ -37,7 +43,18 @@ class CookieHandler: public ButtonListener
     RadioButton * m_allButton;
     ButtonI * m_ok;
     ButtonI * m_cancel;
+    ButtonI * m_deleteSelected;
+    ButtonI * m_editSelected;
+    Mode_t m_mode;
 
-    void init();
+    void initAdd();
+    void showAdd();
+    void initEdit();
+    void showEdit();
+
+    void acceptAdd();
+    void acceptEdit();
+
+    void removeSelected();
 };
 #endif

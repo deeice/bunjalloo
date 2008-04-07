@@ -30,6 +30,8 @@ class CookieJar
 {
   public:
 
+    typedef std::set<std::string> AcceptedDomainSet;
+
     /** Given a sub domain, find the top level domain.
      * @param sub the sub domain
      * @return the top level domain, or an @a sub if unable to work it out
@@ -88,14 +90,12 @@ class CookieJar
      */
     void setAcceptCookies(const std::string & domain, bool accept=true);
 
+    void acceptedDomains(AcceptedDomainSet & set) const;
   private:
     //! List of cookies.
     std::vector<Cookie *> m_cookies;
 
-    typedef std::set<std::string> AcceptedDomainSet;
     AcceptedDomainSet m_acceptedDomains;
-
-
 };
 
 #endif

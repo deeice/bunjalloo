@@ -18,6 +18,7 @@
 #include "Button.h"
 #include "CookieHandler.h"
 #include "CookieJar.h"
+#include "CheckBox.h"
 #include "Document.h"
 #include "Language.h"
 #include "RadioButton.h"
@@ -31,12 +32,17 @@ CookieHandler::CookieHandler(View * view): m_view(*view),
   m_siteButton(0),
   m_allButton(0),
   m_ok(0),
-  m_cancel(0)
+  m_cancel(0),
+  m_mode(ADD_MODE)
 {
-  init();
 }
 
-void CookieHandler::init()
+void CookieHandler::setMode(Mode_t mode)
+{
+  m_mode = mode;
+}
+
+void CookieHandler::initAdd()
 {
   // only the group button doesn't get eaten by textArea
   delete m_group;
@@ -55,7 +61,20 @@ void CookieHandler::init()
 
 void CookieHandler::show()
 {
-  init();
+  switch (m_mode)
+  {
+    case ADD_MODE:
+      showAdd();
+      break;
+    case EDIT_MODE:
+      showEdit();
+      break;
+  }
+}
+
+void CookieHandler::showAdd()
+{
+  initAdd();
   m_view.renderer()->doTitle(T("add_ck_title"));
   m_siteButton->setSelected();
   URI uri(m_view.document().uri());
@@ -81,22 +100,99 @@ void CookieHandler::show()
   m_view.resetScroller();
 }
 
+void CookieHandler::initEdit()
+{
+  delete m_group;
+  m_group = 0;
+
+  m_ok = new Button(T("ok"));
+  m_deleteSelected = new Button(T("delsel"));
+  m_editSelected = new Button(T("edsel"));
+
+  m_ok->setListener(this);
+  m_deleteSelected->setListener(this);
+}
+
+void CookieHandler::showEdit()
+{
+  // add a delete thingy.
+  /*
+      Edit cookies
+      [] somesite.com
+      [] someother.com
+      [] ...
+      [] ...
+      [Delete Selected][Edit Selected][add row]
+      
+      [OK] [Cancel]
+  */
+  initEdit();
+  m_view.renderer()->doTitle(T("edit_ck_title"));
+  RichTextArea & textArea(*m_view.renderer()->textArea());
+  CookieJar::AcceptedDomainSet domains;
+  m_view.document().cookieJar()->acceptedDomains(domains);
+  for (CookieJar::AcceptedDomainSet::const_iterator it(domains.begin());
+      it != domains.end(); ++it)
+  {
+    CheckBox * check(new CheckBox);
+    textArea.add(check);
+    textArea.appendText(string2unicode(*it));
+    textArea.insertNewline();
+  }
+  textArea.add(static_cast<Button*>(m_deleteSelected));
+  textArea.add(static_cast<Button*>(m_editSelected));
+  textArea.insertNewline();
+  textArea.appendText(string2unicode(" --- "));
+  textArea.insertNewline();
+  textArea.add(static_cast<Button*>(m_ok));
+  m_view.resetScroller();
+}
+
+void CookieHandler::acceptEdit()
+{
+}
+
+void CookieHandler::acceptAdd()
+{
+  URI uri(m_view.document().uri());
+  std::string domain(uri.server());
+  if (m_allButton->selected())
+  {
+    domain = CookieJar::topLevel(domain);
+  }
+  m_view.document().cookieJar()->setAcceptCookies(domain);
+}
+
+void CookieHandler::removeSelected()
+{
+}
+
 void CookieHandler::pressed(ButtonI * button)
 {
   if (button == m_ok)
   {
-    URI uri(m_view.document().uri());
-    std::string domain(uri.server());
-    if (m_allButton->selected())
+    switch (m_mode)
     {
-      domain = CookieJar::topLevel(domain);
+      case ADD_MODE:
+        acceptAdd();
+        break;
+      case EDIT_MODE:
+        acceptEdit();
+        break;
     }
-    m_view.document().cookieJar()->setAcceptCookies(domain);
     m_view.endBookmark();
   }
   else if (button == m_cancel)
   {
     m_view.endBookmark();
+  }
+  else if (button == m_deleteSelected)
+  {
+    removeSelected();
+  }
+  else if (button == m_editSelected)
+  {
+    /* TODO */
   }
 }
 

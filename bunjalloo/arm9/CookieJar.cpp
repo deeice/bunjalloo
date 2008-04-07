@@ -231,3 +231,8 @@ void CookieJar::setAcceptCookies(const std::string & domain, bool accept)
     m_acceptedDomains.insert(domain);
   }
 }
+
+void CookieJar::acceptedDomains(AcceptedDomainSet & set) const
+{
+  set = m_acceptedDomains;
+}
