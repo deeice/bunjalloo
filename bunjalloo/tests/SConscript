@@ -18,18 +18,18 @@ aliases = []
 dirs = [d for d in glob.glob(str(testEnv.Dir('#tests'))+'/*') if os.path.isdir(d)]
 for d in dirs:
   # find source code in the test directory
-  files = [os.path.basename(f) for f in glob.glob('/'.join([d, '*.cpp']))]
+  files = [os.path.basename(f) for f in glob.glob(os.path.join(d, '*.cpp'))]
   if (len(files)):
     basedir = os.path.basename(d)
     # set the absolute output name here, since cannot do it from child script
-    testEnv['TESTER'] = '/'.join([d,'tester'])
+    testEnv['TESTER'] = 'tester'
     # Set the sources for the unit test - this is so the sources are built in
     # the build directory and not in place.  Can only glob from here, not once
     # we descend into the sub dir.
     testEnv['TESTER_SOURCES'] = files
     Export('testEnv')
     # build the tester..
-    test = SConscript( basedir+'/SConscript', duplicate=0)
+    test = SConscript( os.path.join(basedir,'SConscript'), duplicate=0)
     aliases.append(env.Alias('test-%s'%basedir, test))
 
 env.Alias('tests', aliases)

@@ -27,10 +27,8 @@ libraryFiles = {
 
 # create the default environment with coloured output
 defaultEnv = Environment(CCFLAGS=commonFlags, CPPPATH=headers,
-    tools=['default', 'color'], toolpath = ['%s/ndspp-scons'%libndsppDir],
+    tools=['default', 'color', 'grit', 'unit_test'], toolpath = ['%s/ndspp-scons'%libndsppDir],
     TARFLAGS='-c -z', TARSUFFIX='tar.gz')
-devkitArmBin = ( os.path.sep.join( [ os.environ['DEVKITARM'], 'bin'] ) )
-defaultEnv.PrependENVPath('PATH', devkitArmBin)
 buildTargets = ['pc', 'arm9', 'arm7']
 
 # function definitions
@@ -129,31 +127,6 @@ def addProjectDirs(env, buildTarget):
 # @param env the Environment to alter.
 def addObjCopyImageBuilders(env):
 
-  ## Create bin files from png.
-  # This adds an "emitter" that tells the Builder what things are made,
-  # allowing 1 to many rules (png -> map, pal, img)
-  # @param target the target artifacts
-  # @param source the source input
-  # @param env the environment
-  # @return target, source list tuple
-  def img_emitter(target, source, env):
-    # add img.bin, pal.bin and map.bin to the output as side effects
-    fileName = os.path.basename(str(source[0])).split(os.path.extsep)[0]
-    t = []
-    t.append('%s.img.bin'%(fileName))
-    t.append('%s.pal.bin'%(fileName))
-    # t.append('%s.map.bin'%(fileName))
-    return (t, source)
-
-  env.Append(GRITFLAGS='-pw 16 -gB 8 -m! -ft b -fh! -q')
-  # chdir=1 changes to the target dir before executing.
-  gritBld = Builder(action='grit ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS >/dev/null',
-      chdir=1,
-      suffix='.bin',
-      src_suffix='.png',
-      emitter=img_emitter)
-  env.Append( BUILDERS = { 'Gfx2Bin': gritBld } )
-
   # create o file from bin
   # cd to the directory otherwise puts build path in name.
   objBld = Builder(action='cd ${SOURCE.dir} && $OBJCOPY $OBJCOPYFLAGS ${SOURCE.file} ${TARGET.file}',
@@ -191,24 +164,6 @@ extern "C" {
 
   bldHeader = Builder( action = build_h, suffix='.h', src_suffix='.png')
   env.Append(BUILDERS = {'Png2h': bldHeader})
-
-  ## Execute unit tests, creating a test.passed cache file.
-  # taken from www.scons.org/wiki/UnitTest
-  def run_unit_test(target, source, env):
-    app = str(source[0].abspath)
-    cwd = os.getcwd()
-    dirname = os.path.dirname(app)
-    print "scons: Entering directory `%s'"%dirname
-    os.chdir(dirname)
-    result = os.spawnl(os.P_WAIT, app, app)
-    os.chdir(cwd)
-    if result == 0:
-      open(str(target[0]),'w').write("PASSED\n")
-    else:
-      return 1
-  # Create a builder for tests
-  bld = Builder(action = run_unit_test)
-  env.Append(BUILDERS = {'Test' :  bld})
 
   def build_cscope_file(target, source, env):
     try:
@@ -266,7 +221,7 @@ def build(buildTarget):
   objs = []
   libbwt = None
   if buildTarget != 'arm7':
-    libbwt = SConscript('bwt/SConscript', build_dir='/'.join([buildDir, 'bwt']), duplicate=0)
+    libbwt = SConscript('bwt/SConscript', build_dir=os.path.join(buildDir, 'bwt'), duplicate=0)
   objs.append(SConscript('%s/SConscript'%sourceDirectory, build_dir=buildDir, duplicate=0))
 
   # create <builddir>/<target> file
@@ -299,7 +254,7 @@ def build(buildTarget):
   # build the tests
   if (buildTarget == 'pc'):
     # build tests
-    SConscript('tests/SConscript', build_dir='/'.join([buildDir, 'tests']), duplicate=0)
+    SConscript('tests/SConscript', build_dir=os.path.join(buildDir, 'tests'), duplicate=0)
     Default(env.Command('#/%s'%os.path.basename(str(prog[0])), prog, [Copy('$TARGET', '$SOURCE')]))
     Default('tests')
     filetypes = ['.cpp', '.c', '.h', '.inl', '.py']
@@ -309,11 +264,12 @@ def build(buildTarget):
     cs2 = env.Cscope('cscope')
     env.Alias('cscope', [cs1,cs2])
   if (buildTarget != 'arm7'):
-    SConscript('tests/gui-test/SConscript', build_dir='/'.join([buildDir, 'gui-test']), duplicate=0)
-    SConscript('tests/lang-test/SConscript', build_dir='/'.join([buildDir, 'lang-test']), duplicate=0)
-    SConscript('tests/patch-test/SConscript', build_dir='/'.join([buildDir, 'patch-test']), duplicate=0)
-    SConscript('tests/images/SConscript', build_dir='/'.join([buildDir, 'images']), duplicate=0)
-    SConscript('tests/sprite/SConscript', build_dir='/'.join([buildDir, 'sprite']), duplicate=0)
+    opj=os.path.join
+    SConscript('tests/gui-test/SConscript', build_dir=opj(buildDir, 'gui-test'), duplicate=0)
+    SConscript('tests/lang-test/SConscript', build_dir=opj(buildDir, 'lang-test'), duplicate=0)
+    SConscript('tests/patch-test/SConscript', build_dir=opj(buildDir, 'patch-test'), duplicate=0)
+    SConscript('tests/images/SConscript', build_dir=opj(buildDir, 'images'), duplicate=0)
+    SConscript('tests/sprite/SConscript', build_dir=opj(buildDir, 'sprite'), duplicate=0)
     Default('images')
     Default('sprite')
     Default('gui-test')
