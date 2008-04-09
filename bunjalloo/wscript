@@ -12,17 +12,15 @@ APPNAME=os.path.basename(os.getcwd())
 srcdir='.'
 blddir='bld'
 libndspp=os.path.abspath("../libndspp")
-waf_tools=libndspp+"/waf_tools"
+waf_tools=os.path.join(libndspp, "waf_tools")
 sys.path.append(waf_tools)
 
 def set_options(opt):
-  opt.tool_options('g++')
   opt.tool_options('compiler_cxx')
 
 def arm_tool_check(conf):
-  conf.check_tool('compiler_cxx')
-  conf.check_tool('gcc')
-
+  # load the basics for gcc.
+  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags')
   # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
   # stips off in the check.
   conf.check_tool('arm7', waf_tools)
@@ -31,33 +29,34 @@ def arm_tool_check(conf):
   conf.check_tool('ndstool', waf_tools)
   conf.check_tool('objcopy', waf_tools)
 
-def header_check(conf):
-  # check headers
+def arm_header_check(conf):
   e = conf.create_header_configurator()
   e.mandatory = 1
   e.nosystem = 1
   e.uselib = 'ARM9'
-  e.path = conf.env['CPPPATH_ARM9']
   for header in ('zlib.h', 'matrixSsl.h'):
     e.name = header
-    e.nosystem = 1
     e.run()
   conf.env['CPPPATH_ARM9'] = Utils.to_list(conf.env['CPPPATH_ARM9'])
 
 def lib_check_sdl(conf):
+  pkgconfig = conf.create_pkgconfig_configurator()
+  pkgconfig.uselib = 'HOST'
+  for i in 'libpng sdl'.split():
+    pkgconfig.name = i
+    pkgconfig.run()
+
+  pkgconfig.uselib = 'TEST'
+  pkgconfig.name = 'cppunit'
+  pkgconfig.run()
+
   e = conf.create_library_configurator()
-  e.nosystem = 0
   e.mandatory = 1
   e.uselib = 'HOST'
-  e.path = [libndspp+'/lib']
-  for l in 'ndspp-pc GL SDL png z gif jpeg matrixsslstatic unzip'.split():
+  for l in 'ndspp-pc GL z gif jpeg matrixsslstatic unzip'.split():
     e.name = l
     e.run()
 
-  e.uselib = 'TEST'
-  for l in 'dl cppunit'.split():
-    e.name = l
-    e.run()
 
 def lib_check_arm7(conf):
   e = conf.create_library_configurator()
@@ -68,20 +67,19 @@ def lib_check_arm7(conf):
   e.run()
 
 def lib_check_arm9(conf):
-  e = conf.create_library_enumerator()
+  e = conf.create_library_configurator()
   e.nosystem = 1
   e.mandatory = 1
   e.uselib = 'ARM9'
-  e.path = conf.env['LIBPATH_ARM9']
-  for l in 'dswifi9 fat png z gif jpeg matrixsslstatic unzip'.split():
+  for l in 'ndspp-arm9 dswifi9 fat png z gif jpeg matrixsslstatic unzip'.split():
     e.name = l
     e.run()
 
 def configure(conf):
   # check native compiler
   arm_tool_check(conf)
-  header_check(conf)
-  conf.env['LIBPATH'] += [libndspp+'/lib']
+  arm_header_check(conf)
+  conf.env['LIBPATH'] = [libndspp+'/lib']
   conf.env['LIB_ARM7'] += ['ndspp-arm7']
   conf.env['LIB_ARM9'] = ['ndspp-arm9'] + conf.env['LIB_ARM9']
   conf.env['OBJCOPYFLAGS'] = """ -I binary -O elf32-littlearm -B arm
@@ -93,8 +91,9 @@ def configure(conf):
   conf.env['CXXDEFINES'] = ['DATADIR=\\"%s\\"'%DATADIR,
                             'DATESTRING=\\"%s\\"'%'today']
 
-  conf.env['CPPPATH_ARM9'].extend([top+'/bwt/include', libndspp+'/include'])
-  conf.env['CPPPATH_ARM7'].extend([libndspp+'/include'])
+  libndspp_inc = os.path.join(libndspp, 'include')
+  conf.env['CPPPATH_ARM9'].extend([top+'/bwt/include', libndspp_inc])
+  conf.env['CPPPATH_ARM7'].extend([libndspp_inc])
   conf.env['GRITFLAGS'] = GRITFLAGS
   conf.env['TOP'] = top
 
@@ -103,7 +102,7 @@ def configure(conf):
   conf.set_env_name('sdl', sdl)
   sdl.set_variant('sdl')
 
-  for f in ('GRITFLAGS', 'TOP', 'CXXDEFINES'):
+  for f in ('GRITFLAGS', 'TOP', 'CXXDEFINES', 'LIBPATH'):
     if type(conf.env[f]) == type([]):
       sdl[f] = [x for x in conf.env[f]]
     else:
@@ -126,7 +125,7 @@ def configure(conf):
 def build(bld):
   # overcome chdir problems for jump-to-error
   if not Params.g_commands['clean']:
-    print "waf: Entering directory `%s'"%(top+"/"+blddir)
+    print "waf: Entering directory `%s'"%(os.path.join(top, blddir))
   # process subfolders from here
 
   arm9obj = bld.create_obj('cpp', 'staticlib')
