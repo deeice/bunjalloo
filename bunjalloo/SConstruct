@@ -172,21 +172,6 @@ extern "C" {
   bldHeader = Builder( action = build_h, suffix='.h', src_suffix='.png')
   env.Append(BUILDERS = {'Png2h': bldHeader})
 
-  def build_cscope_file(target, source, env):
-    try:
-      f = open(str(target[0]), 'w')
-      [f.write('%s\n'%str(s)) for s in source]
-      return 0
-    except Exception,e:
-      return 1
-  # create cscope.out from all source files.
-  cscopeFileBld = Builder(action=build_cscope_file, suffix='.files')
-  env.Append(BUILDERS = {'CscopeFile' :  cscopeFileBld})
-  def cscope_emitter(target, source, env):
-    return ( ['cscope.out', 'cscope.po.out', 'cscope.in.out'], source)
-  cscopeBld = Builder(action='-cscope -b -k -q', suffix='.out', src_suffix='.files', emitter=cscope_emitter)
-  env.Append(BUILDERS = {'Cscope' :  cscopeBld})
-
 ## Build everything for a particular target.
 def build(buildTarget):
   """ build a particular build target """
@@ -223,10 +208,6 @@ def build(buildTarget):
   # create <builddir>/<target> file
   program = '%s/%s'%(buildDir, executableName)
   prog = env.Program(program, objs)
-  libObjs = [ o for o in Flatten(objs) if (str(o).lower().rfind('main')==-1)]
-  if (libObjs):
-    # library used for unit tests
-    lib = env.Library(program, libObjs)
 
   if (buildTarget != 'pc'):
     env.SideEffect(program+'.map', program)
@@ -253,12 +234,7 @@ def build(buildTarget):
     SConscript('tests/SConscript', build_dir=os.path.join(buildDir, 'tests'), duplicate=0)
     Default(env.Command('#/%s'%os.path.basename(str(prog[0])), prog, [Copy('$TARGET', '$SOURCE')]))
     Default('tests')
-    filetypes = ['.cpp', '.c', '.h', '.inl', '.py']
-    exclude = ['/build/']
-    allFiles = [find('.', filetypes, exclude) , find('../libndspp', filetypes, exclude)]
-    cs1 = env.CscopeFile('cscope', allFiles )
-    cs2 = env.Cscope('cscope')
-    env.Alias('cscope', [cs1,cs2])
+
   if (buildTarget != 'arm7'):
     opj=os.path.join
     SConscript('tests/gui-test/SConscript', build_dir=opj(buildDir, 'gui-test'), duplicate=0)
