@@ -20,7 +20,7 @@ def set_options(opt):
 
 def arm_tool_check(conf):
   # load the basics for gcc.
-  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags')
+  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags find_ar')
   # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
   # stips off in the check.
   conf.check_tool('arm7', waf_tools)
