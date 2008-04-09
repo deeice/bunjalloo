@@ -6,7 +6,6 @@ import os, os.path
 import sys
 
 Params.g_autoconfig = 1
-top = os.getcwd()
 APPNAME=os.path.basename(os.getcwd())
 
 srcdir='.'
@@ -77,6 +76,8 @@ def lib_check_arm9(conf):
 
 def configure(conf):
   # check native compiler
+  top = os.getcwd()
+
   arm_tool_check(conf)
   arm_header_check(conf)
   conf.env['LIBPATH'] = [libndspp+'/lib']
@@ -125,7 +126,7 @@ def configure(conf):
 def build(bld):
   # overcome chdir problems for jump-to-error
   if not Params.g_commands['clean']:
-    print "waf: Entering directory `%s'"%(os.path.join(top, blddir))
+    print "waf: Entering directory `%s'"%(os.path.join(bld.env()['TOP'], blddir))
   # process subfolders from here
 
   arm9obj = bld.create_obj('cpp', 'staticlib')
