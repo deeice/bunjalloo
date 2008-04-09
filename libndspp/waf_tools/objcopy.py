@@ -83,7 +83,7 @@ extern "C" {
 
 def detect(conf):
   v = conf.env
-  dka_bin='%s/bin'%os.environ['DEVKITARM']
+  dka_bin='%s/bin'%Params.g_options.devkitarm
   arm_eabi='arm-eabi-objcopy'
   objcopy = conf.find_program(arm_eabi, path_list=[dka_bin], var='OBJCOPY')
   if not objcopy:

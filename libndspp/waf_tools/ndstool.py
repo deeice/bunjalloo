@@ -29,7 +29,7 @@ class ndstool_taskgen(Object.task_gen):
     task.set_outputs(find_build(self.target))
 
 def detect(conf):
-  dka_bin='%s/bin'%os.environ['DEVKITARM']
+  dka_bin='%s/bin'%Params.g_options.devkitarm
   ndstool='ndstool'
   ndstool = conf.find_program(ndstool, path_list=[dka_bin], var='NDSTOOL')
   if not ndstool:

@@ -79,7 +79,7 @@ def img_file(self, node):
   self.allnodes.append(out_source_C)
 
 def detect(conf):
-  dka_bin='%s/bin'%os.environ['DEVKITARM']
+  dka_bin='%s/bin'%Params.g_options.devkitarm
   grit='grit'
   grit = conf.find_program(grit, path_list=[dka_bin], var='GRIT')
   if not grit:

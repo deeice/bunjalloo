@@ -16,6 +16,7 @@ sys.path.append(waf_tools)
 def set_options(opt):
   opt.tool_options('g++')
   opt.tool_options('compiler_cxx')
+  opt.tool_options('arm', waf_tools)
 
 def arm_tool_check(conf):
   conf.check_tool('compiler_cxx')

@@ -17,6 +17,7 @@ sys.path.append(waf_tools)
 
 def set_options(opt):
   opt.tool_options('compiler_cxx')
+  opt.tool_options('arm', waf_tools)
 
 def arm_tool_check(conf):
   # load the basics for gcc.
@@ -37,7 +38,6 @@ def arm_header_check(conf):
   for header in ('zlib.h', 'matrixSsl.h'):
     e.name = header
     e.run()
-  conf.env['CPPPATH_ARM9'] = Utils.to_list(conf.env['CPPPATH_ARM9'])
 
 def lib_check_sdl(conf):
   pkgconfig = conf.create_pkgconfig_configurator()
@@ -71,7 +71,7 @@ def lib_check_arm9(conf):
   e.nosystem = 1
   e.mandatory = 1
   e.uselib = 'ARM9'
-  for l in 'ndspp-arm9 dswifi9 fat png z gif jpeg matrixsslstatic unzip'.split():
+  for l in 'ndspp-arm9 dswifi9 png z gif jpeg matrixsslstatic unzip'.split():
     e.name = l
     e.run()
 
