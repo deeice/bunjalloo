@@ -115,6 +115,7 @@ def configure(conf):
   conf.check_tool('compiler_cxx')
   conf.check_tool('gcc')
   conf.check_tool('grit', waf_tools)
+  conf.check_tool('unit_test', waf_tools)
   lib_check_sdl(conf)
 
   sdl['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
@@ -174,26 +175,13 @@ def build(bld):
   bld.add_subdirs('bwt tests')
 
 def shutdown():
+  # force running unit tests
   ut = UnitTest.unit_test()
-  # Gah. this doesn't work - changes to *build* directory.
-  # I patched UnitTest to fix it... but this is getting silly.
   ut.change_to_testfile_dir = 1
-  ut.run_if_waf_does = 'build'
+  ut.run_if_waf_does = 'check'
   if Params.g_verbose:
     ut.want_to_see_test_output = True
     ut.want_to_see_test_error = True
-  # if running check, then force all unit tests to be run.
-  # otherwise, only run when things changed in the build.
-  if not Params.g_commands["check"]:
-    for obj in Object.g_allobjs:
-      if not hasattr(obj,'unit_test'): continue
-      unit_test = getattr(obj,'unit_test')
-      if not unit_test: continue
-      try:
-        if obj.m_type == 'program':
-          obj.unit_test = obj.link_task.m_hasrun == Runner.success
-      except:
-        continue
   ut.run()
   ut.print_results()
 

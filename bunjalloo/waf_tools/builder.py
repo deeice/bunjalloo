@@ -48,3 +48,8 @@ def build_test(bld):
   tst.uselib = 'TEST HOST'
   tst.target = 'tester'
 
+  # Cached unit tests.
+  ut = bld.create_obj('unit_test')
+  ut.env = bld.env('sdl').copy()
+  ut.source = tst.target
+
