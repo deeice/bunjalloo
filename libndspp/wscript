@@ -5,7 +5,6 @@ import Params, Environment
 import os, os.path
 import sys
 
-top = os.getcwd()
 VERSION="0.1"
 
 srcdir='.'
@@ -19,7 +18,7 @@ def set_options(opt):
   opt.tool_options('arm', waf_tools)
 
 def arm_tool_check(conf):
-  conf.check_tool('compiler_cxx')
+  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags')
 
   # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
   # stips off in the check.
@@ -27,17 +26,17 @@ def arm_tool_check(conf):
   conf.check_tool('arm9', waf_tools)
   conf.check_tool('ndstool', waf_tools)
   conf.check_tool('objcopy', waf_tools)
+  # pull in ARFLAGS
+  conf.check_tool('g++', funs='find_ar')
 
-def header_check(conf):
+def arm_header_check(conf):
   # check headers
   e = conf.create_header_configurator()
   e.mandatory = 1
   e.nosystem = 1
   e.uselib = 'ARM9'
-  e.path = conf.env['CPPPATH_ARM9']
   for header in ('fat.h', 'png.h', 'zlib.h', 'gif_lib.h', 'matrixSsl.h'):
     e.name = header
-    e.nosystem = 1
     e.run()
   e.name = 'dswifi9.h'
   e.header_code = '#include <nds/jtypes.h>'
@@ -47,10 +46,18 @@ def header_check(conf):
   e.header_code = '#include <stdio.h>'
   e.run()
 
+def sdl_header_check(conf):
+  e = conf.create_header_configurator()
+  e.mandatory = 1
+  e.name = 'SDL/SDL.h'
+  e.run()
+
+
 def configure(conf):
   # check native compiler
   arm_tool_check(conf)
-  header_check(conf)
+  arm_header_check(conf)
+  top = os.getcwd()
   conf.env['LIB_INSTALL_DIR'] = top
 
   sdl = Environment.Environment()
@@ -59,11 +66,12 @@ def configure(conf):
   conf.setenv('sdl')
   conf.check_tool('compiler_cxx')
   sdl['LIB_INSTALL_DIR'] = top
+  sdl_header_check(conf)
 
 def build(bld):
   # overcome chdir problems for jump-to-error
   if not Params.g_commands['clean']:
-    print "waf: Entering directory `%s'"%(top+"/"+blddir)
+    print "waf: Entering directory `%s'"%(os.path.join(bld.env()['LIB_INSTALL_DIR'], blddir))
   # process subfolders from here
   arm9obj = bld.create_obj('cpp', 'staticlib')
   arm9obj.inst_dir = 'lib'

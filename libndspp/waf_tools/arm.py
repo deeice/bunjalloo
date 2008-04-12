@@ -46,7 +46,7 @@ def setup_tool(conf, proc):
   v['LINK_CC'] = v['CC']
   v['LINK_CXX'] = v['CXX']
 
-  v['CCFLAGS_ARM%d'%proc] = (ARCH+' -g -ffast-math').split()
+  v['CCFLAGS_ARM%d'%proc] = (ARCH+' -ffast-math -O2 -Wall').split()
   v['CCFLAGS_ARM%d'%proc].extend({9:' -march=armv5te -mtune=arm946e-s -DARM9',
       7:' -mcpu=arm7tdmi -mtune=arm7tdmi -DARM7 '}[proc].split())
   v['CPPFLAGS_ARM%d'%proc] = ' -g -fno-rtti -fno-exceptions '.split()
