@@ -13,10 +13,16 @@ blddir='bld'
 libndspp=os.path.abspath("../libndspp")
 waf_tools=os.path.join(libndspp, "waf_tools")
 sys.path.append(waf_tools)
+# local waf_tools
+sys.path.append('waf_tools')
+from builder import check_target
 
 def set_options(opt):
   opt.tool_options('compiler_cxx')
   opt.tool_options('arm', waf_tools)
+  opt.add_option('--delete-scons', action='store_true',
+          help='Delete the leftovers from SCons builds.',
+          default=False, dest='delete_scons')
 
 def arm_tool_check(conf):
   # load the basics for gcc.
@@ -156,6 +162,7 @@ def build(bld):
   sdlp.uselib = 'HOST'
   sdlp.uselib_local = APPNAME+' bwt '
   sdlp.target = APPNAME
+  check_target(sdlp)
 
   # generate nds
   arm9bin = bld.create_obj('objcopy')
@@ -171,6 +178,7 @@ def build(bld):
   nds.banner = '%s;;By Richard'%APPNAME
   nds.icon = 'common/data/icon.bmp'
   nds.target = APPNAME+'.nds'
+  check_target(nds)
 
   bld.add_subdirs('bwt tests')
 

@@ -29,6 +29,7 @@ def build(bld, buildlib=True, buildsdl=True):
     sdl = arm9.clone('sdl')
     sdl.uselib = ''
     sdl.target = APPNAME
+    check_target(sdl)
 
   arm9bin = bld.create_obj('objcopy')
   arm9bin.source = arm9.target
@@ -37,16 +38,27 @@ def build(bld, buildlib=True, buildsdl=True):
   nds = bld.create_obj('ndstool')
   nds.source = arm9bin.target
   nds.target = APPNAME+'.nds'
+  check_target(nds)
+
+def check_target(obj):
+  import Params, Utils
+  if Params.g_options.delete_scons:
+    for target in Utils.to_list(obj.target):
+      t = os.path.join(obj.path.abspath(), target)
+      if os.path.exists(t):
+        Params.pprint('YELLOW', 'Deleting %s/%s'%(obj.path.srcpath(obj.env), target))
+        os.unlink(t)
 
 def build_test(bld):
   tst = bld.create_obj('cpp', 'program')
   tst.env = bld.env('sdl').copy()
+  tst.target = 'tester'
+  check_target(tst)
   tst.find_sources_in_dirs('.')
   tst.unit_test = 1
   tst.includes += ' .'
   tst.uselib_local = 'bwt cppunitmain'
   tst.uselib = 'TEST HOST'
-  tst.target = 'tester'
 
   # Cached unit tests.
   ut = bld.create_obj('unit_test')
