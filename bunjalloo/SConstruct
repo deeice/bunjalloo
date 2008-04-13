@@ -97,13 +97,13 @@ def createEnv(buildTarget):
   dist()
   env = None
   if buildTarget.startswith('arm'):
-    env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })],
+    env = defaultEnv.Clone( tools = [ ('arm', { 'type':buildTarget })],
         OBJCOPYFLAGS = ' -I binary -O elf32-littlearm -B arm \
             --rename-section .data=.rodata,readonly,contents ')
     env.Append(CPPDEFINES=['sprintf_platform=siprintf'])
     env.Append(CCFLAGS=' -O2 ')
   else:
-    env = defaultEnv.Copy()
+    env = defaultEnv.Clone()
     #env.Append(CCFLAGS="-fprofile-arcs -ftest-coverage")
     env.Append(OBJCOPY = 'objcopy')
     env.Append(OBJCOPYFLAGS = ' -I binary -O elf32-i386 -B i386 ')

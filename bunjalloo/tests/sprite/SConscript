@@ -2,7 +2,7 @@ Import ('env')
 import os.path
 
 # copy the env since we change it by adding the font path
-testEnv = env.Copy()
+testEnv = env.Clone()
 
 # get the build target (pc, arm9, arm7) and the source dir (arm9 or 7)
 buildTarget =  testEnv['PLATFORM_NAME']

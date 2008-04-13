@@ -1,5 +1,5 @@
 Import ('testEnv mainObj')
-env = testEnv.Copy()
+env = testEnv.Clone()
 files = env['TESTER_SOURCES']
 o = env.Object(files)
 o.append("""

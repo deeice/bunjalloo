@@ -4,7 +4,7 @@ Import('env')
 # Build the bwt library.
 
 # New Environment from parent.
-bwtEnv = env.Copy()
+bwtEnv = env.Clone()
 
 # make sure we search for headers in img dir
 bwtEnv.Append(CPPPATH='../data')

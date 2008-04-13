@@ -1,6 +1,6 @@
 import glob, os.path
 Import('env')
-testEnv = env.Copy()
+testEnv = env.Clone()
 
 # unit tests need cppunit and dl
 testEnv.Append(LIBS=['cppunit','dl'])
