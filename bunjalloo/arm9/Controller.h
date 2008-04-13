@@ -92,6 +92,10 @@ class Controller
      * @return the Cache object.
      */
     Cache * cache() const;
+
+    /** Save the list of accepted domains to file.  */
+    void saveCookieSettings();
+
   private:
     Document * m_document;
     View * m_view;

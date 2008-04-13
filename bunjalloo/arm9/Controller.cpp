@@ -19,6 +19,7 @@
 #include "Cache.h"
 #include "Config.h"
 #include "ConfigParser.h"
+#include "CookieJar.h"
 #include "Language.h"
 #include "Controller.h"
 #include "Document.h"
@@ -434,4 +435,25 @@ void Controller::setReferer(const URI & referer)
 void Controller::clearReferer()
 {
   m_httpClient->clearReferer();
+}
+
+void Controller::saveCookieSettings()
+{
+  std::string cookieFile;
+  if ( m_config->resource(Config::COOKIE_STR, cookieFile) and not cookieFile.empty())
+  {
+    nds::File allowed;
+    allowed.open(cookieFile.c_str(), "w");
+    if (allowed.is_open())
+    {
+      CookieJar::AcceptedDomainSet domains;
+      m_document->cookieJar()->acceptedDomains(domains);
+      for (CookieJar::AcceptedDomainSet::const_iterator it(domains.begin());
+          it != domains.end(); ++it)
+      {
+        allowed.write(it->c_str());
+        allowed.write("\n");
+      }
+    }
+  }
 }

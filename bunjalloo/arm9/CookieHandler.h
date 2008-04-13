@@ -36,6 +36,11 @@ class CookieHandler: public ButtonListener
     void setMode(Mode_t mode);
     void show();
 
+    /** Tick a frame. 
+     * @return true if needs a redraw.
+     */
+    bool tick();
+
     virtual void pressed(ButtonI * button);
   private:
     View & m_view;
@@ -48,6 +53,7 @@ class CookieHandler: public ButtonListener
     ButtonI * m_editSelected;
     std::vector<CheckBox*> m_checkboxes;
     Mode_t m_mode;
+    bool m_redrawEdit;
 
     void initAdd();
     void showAdd();

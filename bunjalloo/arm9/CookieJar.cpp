@@ -224,6 +224,7 @@ void CookieJar::setAcceptCookies(const std::string & domain, bool accept)
   {
     // no longer accept them
     m_acceptedDomains.erase(domain);
+    // TODO: remove the actual cookie vals too?
   }
 
   if (accept)

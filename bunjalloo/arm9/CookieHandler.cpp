@@ -16,9 +16,10 @@
 */
 #include "ButtonGroup.h"
 #include "Button.h"
+#include "CheckBox.h"
+#include "Controller.h"
 #include "CookieHandler.h"
 #include "CookieJar.h"
-#include "CheckBox.h"
 #include "Document.h"
 #include "Language.h"
 #include "RadioButton.h"
@@ -33,7 +34,8 @@ CookieHandler::CookieHandler(View * view): m_view(*view),
   m_allButton(0),
   m_ok(0),
   m_cancel(0),
-  m_mode(ADD_MODE)
+  m_mode(ADD_MODE),
+  m_redrawEdit(false)
 {
 }
 
@@ -152,6 +154,8 @@ void CookieHandler::showEdit()
 
 void CookieHandler::acceptEdit()
 {
+  // save to the cookie file
+  m_view.controller().saveCookieSettings();
 }
 
 void CookieHandler::acceptAdd()
@@ -163,6 +167,7 @@ void CookieHandler::acceptAdd()
     domain = CookieJar::topLevel(domain);
   }
   m_view.document().cookieJar()->setAcceptCookies(domain);
+  m_view.controller().saveCookieSettings();
 }
 
 void CookieHandler::removeSelected()
@@ -177,10 +182,13 @@ void CookieHandler::removeSelected()
     if (m_checkboxes[index]->selected())
     {
       const std::string & selected(*it);
-      printf("remove %s\n", selected.c_str());
       m_view.document().cookieJar()->setAcceptCookies(selected, false);
     }
   }
+  // callback mechanism - updating textArea can cause crashes as it looks after
+  // all the button references.
+  // View calls our tick() again, in the main tick() loop
+  m_redrawEdit = true;
 }
 
 void CookieHandler::pressed(ButtonI * button)
@@ -210,5 +218,17 @@ void CookieHandler::pressed(ButtonI * button)
   {
     /* TODO */
   }
+}
+
+bool CookieHandler::tick()
+{
+  bool redraw(false);
+  if (m_redrawEdit)
+  {
+    m_view.renderer()->clear();
+    showEdit();
+    m_redrawEdit = false;
+  }
+  return redraw;
 }
 

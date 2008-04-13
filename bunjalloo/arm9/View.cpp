@@ -599,6 +599,7 @@ void View::tick()
       break;
   }
   m_dirty |= m_keyboard->tick();
+  m_dirty |= m_cookieHandler->tick();
   m_dirty |= m_progress->dirty();
   m_toolbar->tick();
 
