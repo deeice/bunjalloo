@@ -20,6 +20,7 @@
 #include "ButtonListener.h"
 class ButtonGroup;
 class RadioButton;
+class CheckBox;
 class Button;
 class View;
 class CookieHandler: public ButtonListener
@@ -45,6 +46,7 @@ class CookieHandler: public ButtonListener
     ButtonI * m_cancel;
     ButtonI * m_deleteSelected;
     ButtonI * m_editSelected;
+    std::vector<CheckBox*> m_checkboxes;
     Mode_t m_mode;
 
     void initAdd();

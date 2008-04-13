@@ -105,6 +105,7 @@ void CookieHandler::initEdit()
   delete m_group;
   m_group = 0;
 
+  m_checkboxes.clear();
   m_ok = new Button(T("ok"));
   m_deleteSelected = new Button(T("delsel"));
   m_editSelected = new Button(T("edsel"));
@@ -122,7 +123,7 @@ void CookieHandler::showEdit()
       [] someother.com
       [] ...
       [] ...
-      [Delete Selected][Edit Selected][add row]
+      [Delete Selected][Edit Selected]
       
       [OK] [Cancel]
   */
@@ -135,6 +136,7 @@ void CookieHandler::showEdit()
       it != domains.end(); ++it)
   {
     CheckBox * check(new CheckBox);
+    m_checkboxes.push_back(check);
     textArea.add(check);
     textArea.appendText(string2unicode(*it));
     textArea.insertNewline();
@@ -165,6 +167,20 @@ void CookieHandler::acceptAdd()
 
 void CookieHandler::removeSelected()
 {
+  // remove from CookieJar, then on accept save-to-file
+  CookieJar::AcceptedDomainSet domains;
+  m_view.document().cookieJar()->acceptedDomains(domains);
+  int index(0);
+  for (CookieJar::AcceptedDomainSet::const_iterator it(domains.begin());
+      it!=domains.end(); ++it, ++index)
+  {
+    if (m_checkboxes[index]->selected())
+    {
+      const std::string & selected(*it);
+      printf("remove %s\n", selected.c_str());
+      m_view.document().cookieJar()->setAcceptCookies(selected, false);
+    }
+  }
 }
 
 void CookieHandler::pressed(ButtonI * button)
