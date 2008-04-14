@@ -739,11 +739,11 @@ bool RichTextArea::stylusDown(const Stylus * stylus)
       {
         // show a menu!
         m_downCount = 0;
+        m_linkTouched->setClicked(false);
         if (m_linkListener)
         {
           m_linkListener->linkPopup(m_linkTouched);
         }
-        m_linkTouched->setClicked(false);
         m_linkTouched = 0;
         m_dirty = true;
       }
