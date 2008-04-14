@@ -15,9 +15,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <vector>
+#include "ElementFactory.h"
+#include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
-#include "ElementFactory.h"
 
 using namespace std;
 
@@ -83,7 +84,7 @@ void HtmlElement::appendText(unsigned int value)
 {
   if (m_children.size())
   {
-    if (m_children.back()->isa("#TEXT"))
+    if (m_children.back()->isa(HtmlConstants::TEXT))
     {
       UnicodeString & text(m_children.back()->m_text);
       if (not ::isblank(value) or (::isblank(value) and not ::isblank(text[text.length()-1])))
@@ -96,7 +97,7 @@ void HtmlElement::appendText(unsigned int value)
   // ignore spaces at the start.
   if (isWhitespace(value) or ::isblank(value))
     return;
-  HtmlElement* textNode = new HtmlElement("#TEXT");
+  HtmlElement* textNode = new HtmlElement(HtmlConstants::TEXT);
   textNode->m_text = value;
   append(textNode);
 }

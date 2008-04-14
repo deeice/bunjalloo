@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "HtmlConstants.h"
 #include "HtmlPreElement.h"
 #include "Visitor.h"
 IMPLEMENT_ACCEPT(HtmlPreElement);
@@ -23,13 +24,13 @@ void HtmlPreElement::appendText(unsigned int value)
 {
   if (m_children.size())
   {
-    if (m_children.back()->isa("#TEXT"))
+    if (m_children.back()->isa(HtmlConstants::TEXT))
     {
       m_children.back()->text() += value;
       return;
     }
   }
-  HtmlElement* textNode = new HtmlElement("#TEXT");
+  HtmlElement* textNode = new HtmlElement(HtmlConstants::TEXT);
   textNode->text() = value;
   append(textNode);
 }

@@ -23,6 +23,7 @@
 #include "Document.h"
 #include "File.h"
 #include "HeaderParser.h"
+#include "HtmlConstants.h"
 #include "HtmlDocument.h"
 #include "HtmlElement.h"
 #include "Language.h"
@@ -93,7 +94,7 @@ void Updater::getZip()
       if (body and body->hasChildren())
       {
         const HtmlElement * text(body->firstChild());
-        if (text->isa("#TEXT"))
+        if (text->isa(HtmlConstants::TEXT))
         {
           // yipee
           const string & data = unicode2string(text->text(), true);

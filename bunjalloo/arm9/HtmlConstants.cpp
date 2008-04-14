@@ -43,5 +43,6 @@ const char HtmlConstants::SELECT_TAG[] = "select";
 const char HtmlConstants::STYLE_TAG[] = "style";
 const char HtmlConstants::TABLE_TAG[] = "table";
 const char HtmlConstants::TEXTAREA_TAG[] = "textarea";
+const char HtmlConstants::TEXT[] = "#TEXT";
 const char HtmlConstants::TITLE_TAG[] = "title";
 const char HtmlConstants::UL_TAG[] = "ul";

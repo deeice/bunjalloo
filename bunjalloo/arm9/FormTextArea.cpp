@@ -18,6 +18,7 @@
 #include "EditableTextArea.h"
 #include "ElementFactory.h"
 #include "FormTextArea.h"
+#include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "HtmlTextAreaElement.h"
 #include "TextAreaFactory.h"
@@ -81,13 +82,13 @@ void FormTextArea::setText(const UnicodeString & text)
 HtmlElement * FormTextArea::textNode()
 {
   // see if the child nodes have textnodes
-  if (m_element->hasChildren() and m_element->firstChild()->isa("#TEXT"))
+  if (m_element->hasChildren() and m_element->firstChild()->isa(HtmlConstants::TEXT))
   {
     return m_element->firstChild();
   }
   else
   {
-    m_element->append( ElementFactory::create("#TEXT"));
+    m_element->append( ElementFactory::create(HtmlConstants::TEXT));
     return m_element->firstChild();
   }
 }

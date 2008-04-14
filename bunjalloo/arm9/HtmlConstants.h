@@ -46,6 +46,7 @@ class HtmlConstants
     const static char SELECT_TAG[];
     const static char STYLE_TAG[];
     const static char TABLE_TAG[];
+    const static char TEXT[];
     const static char TEXTAREA_TAG[];
     const static char TITLE_TAG[];
     const static char UL_TAG[];

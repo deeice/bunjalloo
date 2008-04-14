@@ -232,7 +232,7 @@ void ViewRender::setUpdater(Updater * updater)
 void ViewRender::doTitle(const UnicodeString & str)
 {
   HtmlElement * newElement = ElementFactory::create(HtmlConstants::TITLE_TAG);
-  HtmlElement * text = ElementFactory::create("#TEXT");
+  HtmlElement * text = ElementFactory::create(HtmlConstants::TEXT);
   text->text() = str;
   newElement->append(text);
   doTitle(newElement);
@@ -436,7 +436,7 @@ void ViewRender::begin(HtmlElement & element)
   }
   else if (element.isa(HtmlConstants::LI_TAG)) {
     const HtmlElement * prev(element.parent()->previousSibling(&element));
-    if (prev and prev->isa("#TEXT")) // TODO - remove #TEXT and so forth
+    if (prev and prev->isa(HtmlConstants::TEXT)) // TODO - remove #TEXT and so forth
     {
       textArea()->insertNewline();
     }

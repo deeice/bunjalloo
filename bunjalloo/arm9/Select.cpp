@@ -31,7 +31,7 @@ Select::Select(HtmlElement * select):m_element(select)
     {
       if ( (*it)->isa(HtmlConstants::OPTION_TAG) ) {
         const HtmlOptionElement * option((HtmlOptionElement*)*it);
-        if (option->hasChildren() and option->firstChild()->isa("#TEXT"))
+        if (option->hasChildren() and option->firstChild()->isa(HtmlConstants::TEXT))
         {
           this->addItem(option->firstChild()->text());
           if (option->selected())
