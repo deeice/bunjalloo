@@ -68,6 +68,11 @@ class View : public ViewI, public ButtonListener, public LinkListener
      */
     virtual void linkClicked(Link * link);
 
+    /** Implement the LinkListener interface.
+     * @param link the link that has been clicked.
+     */
+    virtual void linkPopup(Link * link);
+
     /** The user wants to enter a URL. Set up URL entering mode.
      */
     void enterUrl();

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007,2008 Richard Quirk
+  Copyright (C) 2008 Richard Quirk
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -14,25 +14,23 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#ifndef LinkListener_h_seen
-#define LinkListener_h_seen
+#include "HrefFinder.h"
+#include "HtmlAnchorElement.h"
 
-class Link;
-/** Classes that want to register interest in link clicking should inherit from this interface. */
-class LinkListener
+HrefFinder::HrefFinder(const std::string & href)
+  : m_element(0)
 {
-  public:
-    virtual ~LinkListener() {}
+  m_href = string2unicode(href);
+}
 
-    /** Called when a Link is clicked somehwere.
-     * @param link the link that has been clicked.
-     */
-    virtual void linkClicked(Link * link) = 0;
-
-    /** Called when a Link is hovered over for some seconds.
-     * @param link the link that has been hovered over.
-     */
-    virtual void linkPopup(Link * link) = 0;
-
-};
-#endif
+bool HrefFinder::visit(HtmlAnchorElement & element)
+{
+  if (not m_element)
+  {
+    if (element.attribute("href") == m_href)
+    {
+      m_element = &element;
+    }
+  }
+  return true;
+}

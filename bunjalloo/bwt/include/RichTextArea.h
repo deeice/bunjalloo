@@ -106,6 +106,7 @@ class RichTextArea: public TextArea
     bool m_outlined;
 
     Link * m_linkTouched;
+    int m_downCount;
 
     /** Delete the links */
     void removeClickables();

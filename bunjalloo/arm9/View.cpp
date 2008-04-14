@@ -27,12 +27,14 @@
 #include "HtmlDocument.h"
 #include "File.h"
 #include "FormControl.h"
+#include "HrefFinder.h"
 #include "Language.h"
 #include "InternalVisitor.h"
 #include "HtmlElement.h"
 #include "Keyboard.h"
 #include "Link.h"
 #include "LinkHandler.h"
+#include "NodeDumper.h"
 #include "PreferencesToolbar.h"
 #include "ProgressBar.h"
 #include "ScrollPane.h"
@@ -565,6 +567,34 @@ void View::linkClicked(Link * link)
     m_linkHandler->setVisible();
   }
 }
+
+void View::linkPopup(Link * link)
+{
+  // if bookmark page, delete bookmark?
+  URI uri(m_document.uri());
+  if (m_state == BOOKMARK)
+  {
+    // delete the link from the bookmark... ulp
+    HrefFinder visitor(link->href());
+    HtmlElement * root((HtmlElement*)m_document.rootNode());
+    root->accept(visitor);
+    if (visitor.found())
+    {
+      // some how remove this from the bookmark file.
+      // This is *insane*.
+      HtmlElement * el(visitor.element());
+      HtmlElement * p(el->parent());
+      p->remove(el);
+      // now dump the Bookmark file to disk
+      {
+        NodeDumper dumper(BOOKMARK_FILE);
+        root->accept(dumper);
+      }
+      bookmarkUrl();
+    }
+  }
+}
+
 
 void View::keyboard()
 {

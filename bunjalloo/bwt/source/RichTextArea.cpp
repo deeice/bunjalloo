@@ -27,6 +27,7 @@ using namespace std;
 using namespace nds;
 
 static const int NO_INDEX(-1);
+static const int POPUP_MENU_COUNT(20);
 
 RichTextArea::RichTextArea(Font * font) :
   TextArea(font),
@@ -35,7 +36,8 @@ RichTextArea::RichTextArea(Font * font) :
   m_linkListener(0),
   m_centred(false),
   m_outlined(false),
-  m_linkTouched(0)
+  m_linkTouched(0),
+  m_downCount(0)
 {
 }
 
@@ -660,6 +662,7 @@ Link * RichTextArea::linkAt(int index)
 bool RichTextArea::stylusUp(const Stylus * stylus)
 {
   bool consumed(false);
+  m_downCount = 0;
   if (m_linkTouched and m_bounds.hit(stylus->lastX(), stylus->lastY()))
   {
     // was it the same link?
@@ -687,6 +690,7 @@ bool RichTextArea::stylusDownFirst(const Stylus * stylus)
   // see if it hit a link
   if (m_bounds.hit(stylus->startX(), stylus->startY()))
   {
+    m_downCount = 0;
     m_linkTouched = 0;
     int charClicked = pointToCharIndex(stylus->startX(), stylus->startY());
     if (charClicked != NO_INDEX)
@@ -726,9 +730,27 @@ bool RichTextArea::stylusDown(const Stylus * stylus)
       m_linkTouched->setClicked(false);
       m_dirty = true;
       m_linkTouched = 0;
+      m_downCount = 0;
+    }
+    else if (l and l == m_linkTouched)
+    {
+      m_downCount++;
+      if (m_downCount == POPUP_MENU_COUNT)
+      {
+        // show a menu!
+        m_downCount = 0;
+        if (m_linkListener)
+        {
+          m_linkListener->linkPopup(m_linkTouched);
+        }
+        m_linkTouched->setClicked(false);
+        m_linkTouched = 0;
+        m_dirty = true;
+      }
     }
     else
     {
+      m_downCount = 0;
       FOR_EACH_CHILD(stylusDown);
     }
   }

@@ -41,6 +41,7 @@ class Patcher: public LinkListener
 {
   public:
     virtual void linkClicked(Link * link);
+    virtual void linkPopup(Link * link) {}
 };
 
 
