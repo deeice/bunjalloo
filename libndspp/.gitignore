@@ -1,7 +1,0 @@
-.sconsign.dblite
-build
-lib
-ndspp-scons/*.pyc
-docs
-.sconf_temp/*
-config.log
