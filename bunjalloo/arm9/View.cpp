@@ -52,7 +52,6 @@ const static char * ENTER_URL_TITLE("enter_url");
 const static char * SAVE_AS_TITLE("save_as");
 const static char * ENTER_TEXT_TITLE("enter_text");
 const static int STEP(1);
-const static char * BOOKMARK_FILE  = "/"DATADIR"/user/bookmarks.html";
 const static char * SEARCH_TEMPLATE = "/"DATADIR"/docs/search-example.txt";
 
 struct KeyState
@@ -307,12 +306,12 @@ void View::bookmarkUrl()
 void View::showBookmarkPage()
 {
   m_document.setHistoryEnabled(false);
-  if (nds::File::exists(BOOKMARK_FILE) == nds::File::F_NONE)
+  if (nds::File::exists(Config::BOOKMARK_FILE) == nds::File::F_NONE)
   {
     // create it
     nds::File bookmarks;
     // doesn't exist, so write out the header...
-    bookmarks.open(BOOKMARK_FILE, "w");
+    bookmarks.open(Config::BOOKMARK_FILE, "w");
     if (not bookmarks.is_open()) {
       // that's unpossible!
       return;
@@ -321,7 +320,7 @@ void View::showBookmarkPage()
     bookmarks.write(header.c_str(), header.length());
   }
   string bookmarkUrl("file://");
-  bookmarkUrl += BOOKMARK_FILE;
+  bookmarkUrl += Config::BOOKMARK_FILE;
   m_controller.doUri(bookmarkUrl);
   m_document.setHistoryEnabled(true);
 }
@@ -338,7 +337,7 @@ void View::bookmarkCurrentPage()
   {
     nds::File bookmarks;
     // OK - add to the bm file
-    bookmarks.open(BOOKMARK_FILE, "a");
+    bookmarks.open(Config::BOOKMARK_FILE, "a");
     if (bookmarks.is_open())
     {
       // write out "<a href=%1>%2</a>" 1=href 2=title

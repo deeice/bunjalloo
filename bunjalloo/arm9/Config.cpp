@@ -37,6 +37,7 @@ const char Config::CLEARCACHE[] = "clearcache";
 const char Config::DOWNLOAD[] = "download";
 const char Config::UPDATE[] = "update";
 const char Config::FULL_REF[] = "fullref";
+const char Config::BOOKMARK_FILE[] = "/"DATADIR"/user/bookmarks.html";
 const char LANG_STR[] = "language";
 using namespace std;
 

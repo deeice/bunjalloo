@@ -39,6 +39,7 @@ class Config: public FileParser
     static const char DOWNLOAD[];
     static const char UPDATE[];
     static const char FULL_REF[];
+    static const char BOOKMARK_FILE[];
 
     /** Initialise the config class. Set the document parser and the controller.
      * @param doc the document model of the configuration file.
