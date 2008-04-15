@@ -548,7 +548,6 @@ void DocumentTest::testAttribs()
 
 void DocumentTest::testUnicode2String()
 {
-  
   UnicodeString uc;
   uc += 0xa9;
   string c = unicode2string(uc);
@@ -645,5 +644,31 @@ void DocumentTest::testHistoryWithConfig()
   string expected = "anchor.html";
   CPPUNIT_ASSERT_EQUAL(expected, result);
   CPPUNIT_ASSERT( not m_document->hasNextHistory());
+
+}
+
+void DocumentTest::testTokenize()
+{
+  string str("ABCD:EFGH");
+  UnicodeString uc = string2unicode(str);
+  vector<string> strTokens;
+  vector<UnicodeString> uniTokens;
+  tokenize(str, strTokens, string(":"));
+  {
+    string expected("ABCD");
+    CPPUNIT_ASSERT_EQUAL(expected, strTokens[0]);
+    expected = "EFGH";
+    CPPUNIT_ASSERT_EQUAL(expected, strTokens[1]);
+  }
+
+  unsigned short v[] = { ':', 0};
+  tokenize(uc, uniTokens, UnicodeString(v));
+
+  {
+    UnicodeString expected(string2unicode("ABCD"));
+    CPPUNIT_ASSERT(expected == uniTokens[0]);
+    expected = string2unicode("EFGH");
+    CPPUNIT_ASSERT(expected == uniTokens[1]);
+  }
 
 }

@@ -100,7 +100,7 @@ void Updater::getZip()
           const string & data = unicode2string(text->text(), true);
           vector<string> lines;
           string download, size;
-          tokenize(data, lines, "\n");
+          tokenize(data, lines, string("\n"));
           for (vector<string>::const_iterator it(lines.begin()); it != lines.end(); ++it)
           {
             ParameterSet set(*it);

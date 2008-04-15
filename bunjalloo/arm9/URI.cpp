@@ -171,7 +171,7 @@ static void stripInternal(const std::string & address, std::string &file, std::s
   const std::string f(address);
   // f.split('#')[1]
   vector<string> elements;
-  tokenize(f, elements, "#");
+  tokenize(f, elements, string("#"));
   file = elements[0];
   if (elements.size() > 1)
   {
@@ -292,7 +292,7 @@ URI URI::navigateTo(const std::string & newFile ) const
   // if contains dots -> strip them out
   vector<string> pathElements;
   vector<string> newPath;
-  tokenize(newURI, pathElements, "/");
+  tokenize(newURI, pathElements, string("/"));
 
   vector<string>::const_iterator it(pathElements.begin());
   for (; it != pathElements.end();++it)

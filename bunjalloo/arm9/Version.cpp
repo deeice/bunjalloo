@@ -13,7 +13,7 @@ Version::Version(const char * version):
   using std::vector;
   string v(version);
   vector<string> tokens;
-  tokenize(v, tokens, ".");
+  tokenize(v, tokens, string("."));
   if (tokens.size() > 0)
   {
     m_major = strtol(tokens[0].c_str(), 0, 10);
