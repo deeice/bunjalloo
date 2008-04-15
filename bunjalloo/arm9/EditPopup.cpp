@@ -43,6 +43,7 @@ void EditPopup::deleteCallback(void* self)
 
 void EditPopup::editCallback(void* self)
 {
+  ((EditPopup*)self)->editElement();
 }
 
 void EditPopup::delElement()
@@ -58,4 +59,36 @@ void EditPopup::delElement()
     root->accept(dumper);
   }
   m_parent->bookmarkUrl();
+}
+
+void EditPopup::editElement()
+{
+  // edit the element name...
+  m_parent->editBookmark();
+}
+
+UnicodeString EditPopup::details() const
+{
+  UnicodeString val(m_element->attribute("href"));
+  val += '\n';
+  val += m_element->firstChild()->text();
+  return val;
+}
+
+void EditPopup::postEdit(const UnicodeString & val)
+{
+  using std::vector;
+  using std::string;
+  vector<string> tokens;
+  tokenize(unicode2string(val, true), tokens, "\n");
+  m_element->setAttribute("href", string2unicode(tokens[0]));
+  UnicodeString & t(m_element->firstChild()->text());
+  t = string2unicode(tokens[1]);
+  for (size_t i = 2; i < tokens.size(); ++i)
+  {
+    t += string2unicode(tokens[i]);
+  }
+  NodeDumper dumper(Config::BOOKMARK_FILE);
+  HtmlElement * root((HtmlElement*)m_parent->document().rootNode());
+  root->accept(dumper);
 }

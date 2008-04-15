@@ -78,6 +78,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
      */
     void enterUrl();
 
+    void editBookmark();
+
     /** User wants to bookmark a URL or show the bookmark page.
      */
     void bookmarkUrl();
@@ -128,6 +130,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     {
       BROWSE,
       ENTER_URL,
+      EDIT_BOOKMARK,
       BOOKMARK,
       SAVE_CURRENT_FILE,
       SAVE_DOWNLOADING
@@ -165,6 +168,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void keyboard();
 
     void doEnterUrl();
+    void doEditBookmark();
     void doSaveAs();
 
     void showBookmarkPage();

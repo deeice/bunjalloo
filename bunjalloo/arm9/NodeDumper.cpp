@@ -104,8 +104,8 @@ void NodeDumper::begin(HtmlElement & element)
     if (not element.isa(HtmlConstants::TEXT) and m_lastElement != element.tagName())
     {
       writeTag(element.tagName(), OPEN);
-      m_lastElement = element.tagName();
     }
+    m_lastElement = element.tagName();
   }
 }
 

@@ -25,6 +25,8 @@ class EditPopup: public PopupMenu
   public:
     EditPopup(View * parent);
     void setElement(HtmlElement * el);
+    UnicodeString details() const;
+    void postEdit(const UnicodeString & val);
 
   private:
     View * m_parent;
@@ -32,5 +34,6 @@ class EditPopup: public PopupMenu
     static void editCallback(void* self);
     static void deleteCallback(void* self);
     void delElement();
+    void editElement();
 };
 #endif

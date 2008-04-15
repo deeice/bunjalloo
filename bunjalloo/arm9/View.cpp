@@ -49,6 +49,7 @@
 
 using namespace std;
 const static char * ENTER_URL_TITLE("enter_url");
+const static char * EDIT_BOOKMARK_TITLE("edit_bm");
 const static char * SAVE_AS_TITLE("save_as");
 const static char * ENTER_TEXT_TITLE("enter_text");
 const static int STEP(1);
@@ -270,6 +271,16 @@ void View::enterUrl()
   m_keyboard->editText(m_addressBar);
   m_toolbar->setVisible(false);
   m_state = ENTER_URL;
+  m_dirty = true;
+}
+
+void View::editBookmark()
+{
+  m_addressBar->setText(m_editPopup->details());
+  m_keyboard->setTitle(T(EDIT_BOOKMARK_TITLE));
+  m_keyboard->editText(m_addressBar);
+  m_toolbar->setVisible(false);
+  m_state = EDIT_BOOKMARK;
   m_dirty = true;
 }
 
@@ -590,7 +601,6 @@ void View::linkPopup(Link * link)
   }
 }
 
-
 void View::keyboard()
 {
   updateInput();
@@ -608,6 +618,7 @@ void View::tick()
       browse();
       break;
     case ENTER_URL:
+    case EDIT_BOOKMARK:
     case SAVE_CURRENT_FILE:
     case SAVE_DOWNLOADING:
       keyboard();
@@ -651,6 +662,11 @@ void View::tick()
   if (m_state == ENTER_URL and not m_keyboard->visible()) {
     m_toolbar->setVisible(true);
     doEnterUrl();
+  }
+
+  if (m_state == EDIT_BOOKMARK and not m_keyboard->visible()) {
+    m_toolbar->setVisible(true);
+    doEditBookmark();
   }
 
   if (( m_state == SAVE_CURRENT_FILE or m_state == SAVE_DOWNLOADING )
@@ -701,6 +717,16 @@ void View::doEnterUrl()
     m_controller.clearReferer();
     m_controller.doUri(newAddress);
   }
+}
+
+void View::doEditBookmark()
+{
+  const UnicodeString & value = m_keyboard->result();
+  if (not value.empty() and m_keyboard->selected() == Keyboard::OK)
+  {
+    m_editPopup->postEdit(value);
+  }
+  bookmarkUrl();
 }
 
 void View::doSaveAs()
