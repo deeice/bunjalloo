@@ -166,6 +166,10 @@ void View::extractTitle()
     URI tmpUri(m_document.uri());
     m_bookmarkTitleUtf8 = tmpUri.fileName();
     m_bookmarkTitleUtf8 = nds::File::base(m_bookmarkTitleUtf8.c_str());
+    if (m_bookmarkTitleUtf8.empty())
+    {
+      m_bookmarkTitleUtf8 = tmpUri.asString();
+    }
   }
 }
 
