@@ -50,7 +50,7 @@ while true ; do
 done
 
 makedistdir=$(dirname $0)
-cd $makedistdir
+pushd $makedistdir > /dev/null
 makedistdir=$(pwd)
 revision=$(git-svn find-rev HEAD)
 # don't include my test files in the distro!
@@ -62,16 +62,17 @@ scons -Q dist version=$VERSION || die "Failed to build dist"
 zipname=$project-$VERSION.zip
 echo "Created $zipname"
 src=$project-src-$VERSION
-cd ..
+pushd .. >/dev/null
 git-archive --prefix=$src/ HEAD bunjalloo libndspp | gzip > $src.tar.gz || die "Unable to create $src.tar.gz"
 mv $src.tar.gz $makedistdir/ || die "Unable to mv $src.tar.gz to $makedistdir"
-cd - > /dev/null
 echo "Created $src.tar.gz"
 
-git log --pretty=format:"  * %s" --no-merges HEAD ^$last \
-                > ChangeLog-$VERSION || die "Unable to create ChangeLog"
+git log --pretty=format:"  * %s" --no-merges HEAD ^$last -- bunjalloo libndspp \
+                > $makedistdir/ShortLog-$VERSION || die "Unable to create ChangeLog"
+git log --no-merges HEAD ^$last -- bunjalloo libndspp \
+                > $makedistdir/ChangeLog-$VERSION || die "Unable to create ChangeLog"
 echo "Created ChangeLog-$VERSION"
-
+popd > /dev/null
 
 if test "$tag" = "yes" ; then
   tagname=${project}_${VERSION}_r${revision}
@@ -90,4 +91,3 @@ if test "$upload" = "yes" ; then
    -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${zipname} \
     || die "Unable to upload ${zipname}"
 fi
-
