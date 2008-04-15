@@ -92,7 +92,7 @@ bool NodeDumper::visit(HtmlElement & element)
 {
   if (m_file.is_open() and element.isa(HtmlConstants::TEXT))
   {
-    m_file.write(unicode2string(element.text(), false).c_str());
+    m_file.write(unicode2string(element.text(), true).c_str());
   }
   return true;
 }

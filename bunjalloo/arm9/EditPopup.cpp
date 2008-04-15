@@ -79,14 +79,15 @@ void EditPopup::postEdit(const UnicodeString & val)
 {
   using std::vector;
   using std::string;
-  vector<string> tokens;
-  tokenize(unicode2string(val, true), tokens, "\n");
-  m_element->setAttribute("href", string2unicode(tokens[0]));
+  vector<UnicodeString> tokens;
+  unicodeint newline[] = { '\n', 0};
+  tokenize(val, tokens, UnicodeString(newline));
+  m_element->setAttribute("href", tokens[0]);
   UnicodeString & t(m_element->firstChild()->text());
-  t = string2unicode(tokens[1]);
+  t = tokens[1];
   for (size_t i = 2; i < tokens.size(); ++i)
   {
-    t += string2unicode(tokens[i]);
+    t += tokens[i];
   }
   NodeDumper dumper(Config::BOOKMARK_FILE);
   HtmlElement * root((HtmlElement*)m_parent->document().rootNode());
