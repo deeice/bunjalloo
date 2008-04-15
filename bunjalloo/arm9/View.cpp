@@ -24,6 +24,7 @@
 #include "Controller.h"
 #include "CookieHandler.h"
 #include "Document.h"
+#include "EditPopup.h"
 #include "HtmlDocument.h"
 #include "File.h"
 #include "FormControl.h"
@@ -34,7 +35,6 @@
 #include "Keyboard.h"
 #include "Link.h"
 #include "LinkHandler.h"
-#include "NodeDumper.h"
 #include "PreferencesToolbar.h"
 #include "ProgressBar.h"
 #include "ScrollPane.h"
@@ -104,6 +104,7 @@ View::View(Document & doc, Controller & c):
   m_state(BROWSE),
   m_form(0),
   m_linkHandler(new LinkHandler(this)),
+  m_editPopup(new EditPopup(this)),
   m_search(0),
   m_keyState(new KeyState),
   m_cookieHandler(new CookieHandler(this)),
@@ -574,14 +575,20 @@ void View::linkPopup(Link * link)
   if (m_state == BOOKMARK)
   {
     // delete the link from the bookmark... ulp
+
     HrefFinder visitor(link->href());
     HtmlElement * root((HtmlElement*)m_document.rootNode());
     root->accept(visitor);
     if (visitor.found())
     {
+      HtmlElement * el(visitor.element());
+      Stylus * stylus(Stylus::instance());
+      m_editPopup->setElement(el);
+      m_editPopup->setLocation(stylus->lastX(), stylus->lastY());
+      m_editPopup->setVisible();
+#if 0
       // some how remove this from the bookmark file.
       // This is *insane*.
-      HtmlElement * el(visitor.element());
       HtmlElement * p(el->parent());
       p->remove(el);
       // now dump the Bookmark file to disk
@@ -590,6 +597,7 @@ void View::linkPopup(Link * link)
         root->accept(dumper);
       }
       bookmarkUrl();
+#endif
     }
   }
 }
@@ -638,6 +646,7 @@ void View::tick()
     m_scrollPane->paint(clip);
     m_keyboard->paint(clip);
     m_linkHandler->paint(clip);
+    m_editPopup->paint(clip);
     if (m_progress->dirty())
     {
       m_progress->paint(m_progress->bounds());

@@ -30,6 +30,7 @@ class FormControl;
 class Keyboard;
 class KeyState;
 class LinkHandler;
+class EditPopup;
 class ProgressBar;
 class ScrollPane;
 class SearchEntry;
@@ -146,6 +147,7 @@ class View : public ViewI, public ButtonListener, public LinkListener
     InputState m_state;
     FormControl * m_form;
     LinkHandler * m_linkHandler;
+    EditPopup * m_editPopup;
     SearchEntry * m_search;
     KeyState * m_keyState;
     CookieHandler * m_cookieHandler;
