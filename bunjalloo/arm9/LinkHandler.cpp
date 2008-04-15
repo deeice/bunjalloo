@@ -14,34 +14,19 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "Canvas.h"
-#include "ComboBox.h"
-#include "Component.h"
 #include "Link.h"
-#include "Button.h"
 #include "Language.h"
 #include "LinkHandler.h"
 #include "LinkListener.h"
-#include "Rectangle.h"
-#include "ScrollPane.h"
-#include "Stylus.h"
 #include "WidgetColors.h"
 
 LinkHandler::LinkHandler(LinkListener * parent):
   m_parent(parent)
 {
   setVisible(false);
-  addItem(T("url"));
-  addItem(T("image"));
-  m_preferredHeight = scrollPane()->height();
-  m_preferredWidth = scrollPane()->width();
-  setSize(m_preferredWidth, m_preferredHeight);
-  Stylus::instance()->registerListener(this);
-}
-
-LinkHandler::~LinkHandler()
-{
-  Stylus::instance()->unregisterListener(this);
+  addMenuItem(T("url"), urlCallback, this);
+  addMenuItem(T("image"), imageCallback, this);
+  updateLayout();
 }
 
 void LinkHandler::setLink(const Link * link)
@@ -49,71 +34,28 @@ void LinkHandler::setLink(const Link * link)
   m_link = link;
 }
 
-void LinkHandler::pressed(ButtonI * button)
+void LinkHandler::urlCallback(void * self)
 {
-  // A button on the scroll bar is pressed. See which it was...
-  if (button == ((Button*)scrollPane()->childAt(0)))
-  {
-    // goto link
-    Link link(m_link->href());
-    m_parent->linkClicked(&link);
-  }
-  else
-  {
-    // goto src
-    Link link(Link::STATE_COLOR);
-    link.setColor(WidgetColors::LINK_IMAGE);
-    link.setSrc(m_link->src());
-    m_parent->linkClicked(&link);
-  }
-  // make sure the selection is reset.
-  ((Button*)scrollPane()->childAt(0))->setSelected(false);
-  ((Button*)scrollPane()->childAt(1))->setSelected(false);
-  setVisible(false);
+  ((LinkHandler*)self)->url();
 }
 
-void LinkHandler::paint(const nds::Rectangle & clip)
+void LinkHandler::imageCallback(void * self)
 {
-  if ( not m_visible)
-  {
-    return;
-  }
-  scrollPane()->setLocation(m_bounds.x, m_bounds.top());
-  if (scrollPane()->bounds().bottom() > nds::Canvas::instance().height())
-  {
-    scrollPane()->setLocation(m_bounds.x, m_bounds.top() - scrollPane()->height());
-  }
-
-  if (scrollPane()->bounds().right() > nds::Canvas::instance().width())
-  {
-    scrollPane()->setLocation(m_bounds.x - scrollPane()->width(), scrollPane()->bounds().top());
-  }
-
-  nds::Rectangle scrollPaneClip(scrollPane()->bounds());
-  nds::Canvas::instance().fillRectangle(scrollPaneClip.x,
-      scrollPaneClip.y, scrollPaneClip.w, scrollPaneClip.h, scrollPane()->backgroundColor());
-  scrollPane()->paint(scrollPane()->bounds());
+  ((LinkHandler*)self)->image();
 }
 
-bool LinkHandler::stylusUp(const Stylus * stylus)
+void LinkHandler::url()
 {
-  if (not visible())
-  {
-    return false;
-  }
-  FOR_EACH_CHILD(stylusUp);
-  return false;
+  // goto link
+  Link link(m_link->href());
+  m_parent->linkClicked(&link);
 }
 
-bool LinkHandler::stylusDownFirst(const Stylus * stylus)
+void LinkHandler::image()
 {
-  if (not visible())
-  {
-    return false;
-  }
-  FOR_EACH_CHILD(stylusDownFirst);
-  // nothing hit? hide me then
-  setVisible(false);
-  return false;
+  // goto src
+  Link link(Link::STATE_COLOR);
+  link.setColor(WidgetColors::LINK_IMAGE);
+  link.setSrc(m_link->src());
+  m_parent->linkClicked(&link);
 }
-

@@ -17,22 +17,20 @@
 #ifndef EditPopup_h_seen
 #define EditPopup_h_seen
 
-#include "ComboBox.h"
+#include "PopupMenu.h"
 class HtmlElement;
 class View;
-class EditPopup: public ComboBox
+class EditPopup: public PopupMenu
 {
   public:
     EditPopup(View * parent);
-    ~EditPopup();
     void setElement(HtmlElement * el);
 
-    void pressed(ButtonI * button);
-    void paint(const nds::Rectangle & clip);
-    bool stylusUp(const Stylus * stylus);
-    bool stylusDownFirst(const Stylus * stylus);
   private:
     View * m_parent;
     HtmlElement * m_element;
+    static void editCallback(void* self);
+    static void deleteCallback(void* self);
+    void delElement();
 };
 #endif

@@ -586,18 +586,6 @@ void View::linkPopup(Link * link)
       m_editPopup->setElement(el);
       m_editPopup->setLocation(stylus->lastX(), stylus->lastY());
       m_editPopup->setVisible();
-#if 0
-      // some how remove this from the bookmark file.
-      // This is *insane*.
-      HtmlElement * p(el->parent());
-      p->remove(el);
-      // now dump the Bookmark file to disk
-      {
-        NodeDumper dumper(BOOKMARK_FILE);
-        root->accept(dumper);
-      }
-      bookmarkUrl();
-#endif
     }
   }
 }

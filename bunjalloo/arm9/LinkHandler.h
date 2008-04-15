@@ -17,16 +17,14 @@
 #ifndef LinkHandler_h_seen
 #define LinkHandler_h_seen
 
-#include "ButtonListener.h"
-#include "ComboBox.h"
+#include "PopupMenu.h"
 class LinkListener;
 class Link;
-class Stylus;
 
 /** Handle Link presses that are images so the user can decide to follow the
  * anchor or view the image.
  */
-class LinkHandler: public ComboBox
+class LinkHandler: public PopupMenu
 {
 
   public:
@@ -35,21 +33,18 @@ class LinkHandler: public ComboBox
      */
     LinkHandler(LinkListener * parent);
 
-    ~LinkHandler();
-
     /** Set the Link to handle. It should be a img/anchor type Link.
      * @param link the Link to deal with.
      */
     void setLink(const Link * link);
 
-    // reimplemented from ComboBox
-    virtual void pressed(ButtonI * button);
-    virtual void paint(const nds::Rectangle & clip);
-
-    virtual bool stylusUp(const Stylus * stylus);
-    virtual bool stylusDownFirst(const Stylus * stylus);
   private:
     LinkListener * m_parent;
     const Link * m_link;
+
+    static void urlCallback(void * self);
+    static void imageCallback(void * self);
+    void url();
+    void image();
 };
 #endif
