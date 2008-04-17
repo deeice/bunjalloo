@@ -46,10 +46,10 @@ def createEnv(buildTarget):
   global defaultEnv
   env = None
   if buildTarget.startswith('arm'):
-    env = defaultEnv.Copy( tools = [ ('arm', { 'type':buildTarget })] )
+    env = defaultEnv.Clone( tools = [ ('arm', { 'type':buildTarget })] )
     env.Append(CCFLAGS=' -O2 ')
   else:
-    env = defaultEnv.Copy()
+    env = defaultEnv.Clone()
     env.Append(CCFLAGS=' -O0 ')
     for i in ['CC', 'CXX']:
       if os.environ.has_key(i) and os.environ[i]:
