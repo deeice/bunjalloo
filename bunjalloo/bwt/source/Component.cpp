@@ -106,3 +106,10 @@ bool Component::dirty() const
 {
   return m_dirty;
 }
+
+void Component::setVisible(bool visible)
+{
+  if (visible != m_visible)
+    m_dirty = true;
+  m_visible = visible;
+}

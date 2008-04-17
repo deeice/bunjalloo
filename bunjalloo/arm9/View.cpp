@@ -185,6 +185,7 @@ void View::notify()
       {
         // this is to clear the progress's dirty flag.
         m_progress->paint(m_progress->bounds());
+        m_progress->setVisible(false);
         m_filenameForProgress.clear();
         m_renderer->render();
         int pos = m_document.position();
@@ -244,6 +245,7 @@ void View::notify()
         sprintf_platform(buffer, " %d%%", pc);
         s += buffer;
         m_progress->setText(string2unicode(s));
+        m_progress->setVisible();
       }
       break;
     case Document::HAS_HEADERS:

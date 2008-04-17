@@ -92,6 +92,7 @@ void ZipViewer::unzip()
   ProgressBar & progressBar(m_view.progressBar());
   progressBar.setMax(m_fileCount);
   progressBar.setMin(0);
+  progressBar.setVisible();
   m_index = 0;
   progressBar.setValue(m_index);
   ZipFile file(this);
@@ -137,6 +138,9 @@ void ZipViewer::pressed(ButtonI * button)
   {
     unzipAndPatch();
   }
+  ProgressBar & progressBar(m_view.progressBar());
+  progressBar.setVisible(false);
+  m_view.tick();
 }
 
 void ZipViewer::before(const char * name)

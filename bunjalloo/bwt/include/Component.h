@@ -111,7 +111,7 @@ class Component: public StylusListener
     /** Set the visibility.
      * @param visible true if this Component is visible.
      */
-    inline void setVisible(bool visible=true);
+    void setVisible(bool visible=true);
 
     /** Get the number of children that this Component has.
      * @return the number of child components
@@ -166,10 +166,6 @@ int Component::y() const
 bool Component::visible() const
 {
   return m_visible;
-}
-void Component::setVisible(bool visible)
-{
-  m_visible = visible;
 }
 
 #endif

@@ -74,6 +74,9 @@ unsigned int ProgressBar::max() const
 
 void ProgressBar::paint(const nds::Rectangle & clip)
 {
+  m_dirty = false;
+  if (not visible())
+    return;
   // fill the bg rectangle in the text container to the desired colour
   nds::Canvas::instance().setClip(clip);
   // fill to %
@@ -92,6 +95,5 @@ void ProgressBar::paint(const nds::Rectangle & clip)
     nds::Canvas::instance().fillRectangle(progress.x, progress.y,
         progress.w, progress.h, textArea()->backgroundColor());
   }
-  m_dirty = false;
 }
 
