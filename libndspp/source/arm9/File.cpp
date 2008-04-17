@@ -91,8 +91,10 @@ void FileImplementation::open(const char * name, const char * mode)
 
 FileImplementation::~FileImplementation()
 {
-  if (m_stream)
+  if (m_stream) {
+    fflush(m_stream);
     fclose(m_stream);
+  }
 }
 
 int FileImplementation::read(char * buffer, int amount)
@@ -144,6 +146,7 @@ bool FileImplementation::is_open() const
 void FileImplementation::close()
 {
   fseek(m_stream, 0, SEEK_SET);
+  fflush(m_stream);
   fclose(m_stream);
   m_stream = 0;
 }
