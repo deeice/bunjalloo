@@ -39,9 +39,10 @@ from find import find
 # create the dist files
 def dist():
   project = 'bunjalloo'
-  version = ARGUMENTS.get('version','0.5.2')
+  version = ARGUMENTS.get('version','')
   distfile = '%s-%s.zip'%(project, version)
   srcfile = '%s-src-%s'%(project, version)
+  defaultEnv['VERSION'] = version
   defaultEnv['DIST_NAME'] = distfile
   defaultEnv['DIST_SRC_NAME'] = srcfile
 
@@ -220,7 +221,8 @@ def build(buildTarget):
     env['ICON'] = 'common/data/icon.bmp'
     env['BANNER'] = '%s;Web Browser;By Richard Quirk'%executableName
     env['DLDIFILE'] = '%s/data/ez5s.dldi'%(os.environ['HOME'])
-    nds = env.NdsTool(executableName, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
+    version = env['VERSION'].replace('.','')
+    nds = env.NdsTool(executableName+version, [ '#build/arm7/%s.arm'%executableName, '%s.arm'%program ])
     Default(nds)
     env.Zip(env['DIST_NAME'], nds)
     env.Zip(env['DIST_NAME'], '#/data')
