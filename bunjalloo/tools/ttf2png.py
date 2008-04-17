@@ -226,9 +226,6 @@ if __name__ == '__main__':
     # If no range given, export basic ASCII, extended ASCII and Euro symbol
     f.addRange('0x1f,0x7f')
     f.addRange('0xa0,0x100')
+    f.addRange('0x2013,0x2020')
     f.addRange('0x20AC,0x20AD')
-    f.addRange('8211,8212')
-    f.addRange('8216,8218')
-    f.addRange('8220,8221')
-    f.addRange('8226,8226')
   f.save()

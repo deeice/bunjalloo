@@ -24,6 +24,7 @@
 #include "HtmlParser.h"
 #include "ParameterSet.h"
 #include "UnicodeString.h"
+#include "ISO_8859_1.h"
 #include "UTF8.h"
 #include "File.h"
 #include "Delete.h"
@@ -204,7 +205,7 @@ void HtmlParserImpl::next()
     unsigned int read = UTF8::decode(m_position, m_value);
     m_position += read;
   } else {
-    m_value = (*m_position)&0xff;
+    m_value = ISO_8859_1::decode((*m_position)&0xff);
     m_position++;
   }
 }
@@ -770,7 +771,17 @@ unsigned int HtmlParserImpl::consumeEntity()
       }
     }
     if (entity.length() > minLength)
-      return ::strtol(entity.c_str(), 0, 0);
+    {
+      // make sure we catch silly pages that use &#151; and the like
+      // instead of &mdash; 
+      long value = ::strtol(entity.c_str(), 0, 0);
+      if (m_encoding == HtmlParser::ISO_ENCODING)
+      {
+        value = ISO_8859_1::decode(value);
+      }
+      return value;
+      //return ::strtol(entity.c_str(), 0, 0);
+    }
     else {
       // unconsume.
       m_position = start;
@@ -813,8 +824,6 @@ unsigned int HtmlParserImpl::consumeEntity()
         if (match >= 0) {
           // exact match
           found = s_entity[match].value;
-          next(); // consume ;
-          break;
         }
         if (match == -2) {
           // partial match found. keep going.

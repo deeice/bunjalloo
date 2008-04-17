@@ -87,7 +87,7 @@ void HtmlElement::appendText(unsigned int value)
     if (m_children.back()->isa(HtmlConstants::TEXT))
     {
       UnicodeString & text(m_children.back()->m_text);
-      if (not ::isblank(value) or (::isblank(value) and not ::isblank(text[text.length()-1])))
+      if (not isWhitespace(value) or (isWhitespace(value) and not isWhitespace(text[text.length()-1])))
       {
         m_children.back()->m_text += value;
       }
@@ -95,7 +95,7 @@ void HtmlElement::appendText(unsigned int value)
     }
   }
   // ignore spaces at the start.
-  if (isWhitespace(value) or ::isblank(value))
+  if (isWhitespace(value))
     return;
   HtmlElement* textNode = new HtmlElement(HtmlConstants::TEXT);
   textNode->m_text = value;

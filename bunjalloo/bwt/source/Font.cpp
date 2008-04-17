@@ -18,6 +18,7 @@
 #include "Palette.h"
 #include "File.h"
 #include "UTF8.h"
+#include "ISO_8859_1.h"
 using namespace std;
 using namespace nds;
 
@@ -206,7 +207,7 @@ void Font::textSize(const char * text, int amount, int & width, int & height, co
     if (utf8) {
       read = UTF8::decode(text, value);
     } else {
-      value = (int)(text[0]&0xff);
+      value = ISO_8859_1::decode(text[0]&0xff);
     }
     if (value == UTF8::MALFORMED) {
       value = '?';

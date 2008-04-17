@@ -1,12 +1,18 @@
 #!/bin/bash
 
-if [[ $# -lt 2 ]] ; then
-  echo Usage $0 ttf size
+if [[ $# -lt 1 ]] ; then
+  echo Usage $0 ttf [size]
   exit 1
 fi
 inFile=$1
-size=$2
-shift 2;
+# 11 is the default size
+size=11
+if [[ $# -gt 1 ]] ; then
+  size=$2
+  shift ;
+fi
+shift ;
+
 fontName=$(basename $inFile)
 python ttf2png.py $inFile $size $* \
 && convert $fontName.png -colors 16 $fontName.bmp && grit $fontName.bmp -ft b -fh\! -gb -gB 4 -gT FFFFFF
