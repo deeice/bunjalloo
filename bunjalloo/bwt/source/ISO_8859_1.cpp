@@ -45,7 +45,6 @@ unsigned short ISO_8859_1::decode(unsigned short value)
   else if (value >= 0x7F  and value <= 0x9F)
   {
     // windows 1252 code pages
-    printf("In %d out %d\n", value, s_1252[value-0x7f]);
     return s_1252[value-0x7f];
   }
   else
