@@ -180,6 +180,7 @@ class BitmapFont:
     self._subfont = SubFont(fileName, size)
     self._draw = None
     self._image = None
+    self._size = size
 
   ## Save the bitmap image to a file. The filename is basename+.png.
   # Also saves the subfont details.
@@ -189,14 +190,13 @@ class BitmapFont:
     self._draw.setfont(self._subfont.ttf())
     position = 0
     for i in self._subfont.glyphRanges():
-      self._draw.text((position, 0), unichr(i), fill='black')
       w, h = self._subfont.ttf().getsize(unichr(i))
+      if unichr(i) == '_' and self._size < 16:
+        # this shows nothing for size < 16
+        self._draw.line( (position, h-2, position+w, h-2), fill='black', width=1)
+      else:
+        self._draw.text((position, 0), unichr(i), fill='black')
       w = align(w, SubFont.MINIMAL_ALIGN)
-      try:
-        #print unichr(i) +' '+ str(position) +' ' +str(w)
-        pass
-      except UnicodeEncodeError,ex:
-        pass
       position += w
     self._image.save(self._subfont.basename()+'.png','PNG')
 
