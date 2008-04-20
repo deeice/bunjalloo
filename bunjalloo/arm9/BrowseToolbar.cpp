@@ -125,6 +125,10 @@ void BrowseToolbar::handlePress(int i)
       m_view.bookmarkUrl();
       break;
 
+    case SPRITE_CONNECT_STATUS:
+      Wifi9::instance().disconnect();
+      break;
+
     default:
       break;
   }

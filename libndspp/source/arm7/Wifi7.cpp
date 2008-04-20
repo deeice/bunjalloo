@@ -36,21 +36,13 @@ static void arm7_synctoarm9() { // send fifo message
 // interrupt handler to allow incoming notifications from arm9
 static void arm7_fifo() { // check incoming fifo messages
   u32 msg = REG_IPC_FIFO_RX;
-  if(msg==0x87654321) 
+  if(msg==0x87654321)
     Wifi_Sync();
-  else if (msg == 0xDEADFEED)
-  {
-    // shut down the power to the wifi signal
-    Wifi_Deinit();
-    irqDisable(IRQ_WIFI);
-    irqDisable(IRQ_FIFO_NOT_EMPTY);
-    REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR; 
-  }
 }
 
 Wifi7::Wifi7():m_enabled(false)
 {
-  REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR; 
+  REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_SEND_CLEAR;
 }
 
 void Wifi7::mainLoop()
@@ -63,7 +55,7 @@ void Wifi7::mainLoop()
   }
 }
 
-void Wifi7::initialise() 
+void Wifi7::initialise()
 {
   // set up wifi interrupt
   irqSet(IRQ_WIFI, Wifi_Interrupt);
@@ -83,7 +75,7 @@ void Wifi7::initialise()
     // wait for arm9 Wifi_Init return value
     wait_for_fifo();
 
-    fifo_temp=REG_IPC_FIFO_RX; 
+    fifo_temp=REG_IPC_FIFO_RX;
     // give arm9's Wifi_Init value to arm 7 Wifi_Init
     Wifi_Init(fifo_temp);
 
@@ -92,7 +84,7 @@ void Wifi7::initialise()
     REG_IPC_FIFO_CR = IPC_FIFO_ENABLE | IPC_FIFO_RECV_IRQ;
 
     // allow wifi lib to notify arm9
-    Wifi_SetSyncHandler(arm7_synctoarm9); 
+    Wifi_SetSyncHandler(arm7_synctoarm9);
     // arm7 wifi init complete
     m_enabled = true;
   }
