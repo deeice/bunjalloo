@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <vector>
+#include <algorithm>
 #include "ElementFactory.h"
 #include "HtmlConstants.h"
 #include "HtmlElement.h"
