@@ -126,13 +126,14 @@ const HtmlElement * Document::titleNode() const
   if (m_htmlDocument->mimeType() == HtmlDocument::TEXT_HTML)
   {
     const HtmlElement * root(rootNode());
-    assert(root->isa(HtmlConstants::HTML_TAG));
-    assert(root->hasChildren());
-    // firstChild is <HEAD> node
-    const ElementList titles = root->firstChild()->elementsByTagName(HtmlConstants::TITLE_TAG);
-    if (not titles.empty())
+    if (root->isa(HtmlConstants::HTML_TAG) and root->hasChildren())
     {
-      title = titles.front();
+      // firstChild is <HEAD> node
+      const ElementList titles = root->firstChild()->elementsByTagName(HtmlConstants::TITLE_TAG);
+      if (not titles.empty())
+      {
+        title = titles.front();
+      }
     }
   }
   return title;

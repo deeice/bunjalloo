@@ -204,8 +204,10 @@ void ViewRender::render()
     }
     else
     {
-      assert(root->isa(HtmlConstants::HTML_TAG));
-      assert(root->hasChildren());
+      if (not root->isa(HtmlConstants::HTML_TAG))
+        return;
+      if (not root->hasChildren())
+        return;
       doTitle(m_self->m_document.titleNode());
 
       HtmlElement * body = (HtmlElement*)root->lastChild();
