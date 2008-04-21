@@ -1,3 +1,4 @@
+#include <cstdlib>
 #include <string>
 #include <vector>
 #include "Version.h"
