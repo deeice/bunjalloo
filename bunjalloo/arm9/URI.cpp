@@ -86,7 +86,7 @@ void URI::setUri(const std::string & uriString)
   }
   if (sep != string::npos) {
     m_protocol = tmpUri.substr(0,sep);
-    transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), tolower);
+    transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), ::tolower);
     m_address = tmpUri.substr(sep+3, tmpUri.length());
   }
 }

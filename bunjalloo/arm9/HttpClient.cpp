@@ -41,6 +41,7 @@
 */
 #include <string>
 #include <algorithm>
+#include <cstring>
 #include "libnds.h"
 #include "System.h"
 #include "Config.h"

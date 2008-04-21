@@ -31,6 +31,7 @@
     GNU General Public License for more details.
 
 */
+#include <cstring>
 #include "libnds.h"
 #include "PatchDLDI.h"
 #include "File.h"

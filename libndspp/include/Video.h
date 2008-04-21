@@ -16,7 +16,7 @@
 */
 #ifndef Video_h_seen
 #define Video_h_seen
-
+#include <stdint.h>
 // tolua_begin
 namespace nds
 {
@@ -151,7 +151,7 @@ namespace nds
       int objectMapDimensions() const;
     private:
       //! the background register to use
-      volatile unsigned long & m_DISPCNT;
+      volatile uint32_t & m_DISPCNT;
       //! The screen used.
       int m_screen;
 

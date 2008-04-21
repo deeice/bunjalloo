@@ -15,6 +15,8 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <assert.h>
+#include <cstdlib>
+#include <cstring>
 #include "CookieJar.h"
 #include "File.h"
 #include "HeaderParser.h"

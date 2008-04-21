@@ -16,6 +16,7 @@
 */
 #include "File.h"
 #include <string>
+#include <cstring>
 #include <fat.h>
 #include <unistd.h>
 #include <stdio.h>
