@@ -338,6 +338,7 @@ void Image::readPng(const char * filename)
    png_bytep rowBuffer = (png_bytep)malloc(sizeof(png_bytep) * info_ptr->rowbytes);
    for (int pass = 0; pass < number_passes; pass++)
    {
+     m_currentLine = 0;
      for (unsigned int line = 0; line < m_realHeight; line++)
      {
        png_read_row(png_ptr, rowBuffer, png_bytep_NULL);
