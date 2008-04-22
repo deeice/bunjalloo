@@ -47,7 +47,7 @@ void ImageTest::testTall()
 {
   m_image = new Image("inputs/tall.jpg");
   CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 192*2;
+  int expected = 382;
   int result = m_image->height();
   CPPUNIT_ASSERT_EQUAL(expected, result);
 }
@@ -65,7 +65,7 @@ void ImageTest::testTallPng()
 {
   m_image = new Image("inputs/tall.png");
   CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 192*2;
+  int expected = 382;
   int result = m_image->height();
   CPPUNIT_ASSERT_EQUAL(expected, result);
 }
@@ -83,7 +83,7 @@ void ImageTest::testTallGif()
 {
   m_image = new Image("inputs/tall.gif");
   CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 192*2;
+  int expected = 382;
   int result = m_image->height();
   CPPUNIT_ASSERT_EQUAL(expected, result);
 }

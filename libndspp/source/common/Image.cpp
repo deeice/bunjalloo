@@ -143,6 +143,7 @@ Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_currentLine(0),
   m_paletteSize(0),
   m_channels(3),
   m_data(0),
@@ -166,6 +167,7 @@ Image::Image(const char * filename, bool keepPalette):
   m_keepPalette(keepPalette),
   m_width(0),
   m_height(0),
+  m_currentLine(0),
   m_paletteSize(0),
   m_channels(3),
   m_data(0),
@@ -346,6 +348,7 @@ void Image::readPng(const char * filename)
        renderLine((const unsigned char*)rowBuffer, line);
      }
    }
+   m_height = m_currentLine;
    free(rowBuffer);
 
    /* clean up after the read, and free any memory allocated - REQUIRED */
@@ -502,6 +505,7 @@ void Image::readGif(const char * filename)
               renderLine(rowBuffer, i);
             }
           }
+          m_height = m_currentLine;
         }
         break;
       case EXTENSION_RECORD_TYPE:
@@ -677,6 +681,7 @@ void Image::readJpeg(const char * filename)
     m_bpp = inputStream->bytes_per_pixel();
     renderLine((const unsigned char*)scanline, line);
   }
+  m_height = m_currentLine;
 
   m_valid = true;
 }
