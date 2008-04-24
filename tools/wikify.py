@@ -4,7 +4,7 @@
 # Based on large portions of JeremyRuston's TiddlyWiki JS Wikifier
 # Changed to GoogleCode wiki syntax, python by Michael Crawford <mike@dataunity.com>
 # Fixed space errors, allow # in wikiwords and remove external 
-# links by Richard # Quirk <richard.quirk at gmail.com>
+# links by Richard Quirk <richard.quirk at gmail.com>
 """ Convert wikitext to HTML """
 
 # Jeremy's license:
