@@ -15,15 +15,17 @@ class objcopy_taskgen(Object.task_gen):
       task.set_inputs(node)
       task.set_outputs(node.change_ext('.bin'))
 
-class bin2o_taskgen(Object.task_gen):
+class bin2o_taskgen(ccroot.ccroot_abstract):
   def __init__(self, *k, **kw):
+    self.m_type = 'staticlib'
     Object.task_gen.__init__(self, *k, **kw)
     self.compiled_tasks = []
     self.uselib = ''
     self.uselib_local = ''
-    self.m_type = 'staticlib'
+    self.features.append('cstaticlib')
 
   def apply(self):
+    self.name = self.target+'_'+self.env.variant()
     find_source_lst = self.path.find_source_lst
     input_nodes = []
     for filename in self.to_list(self.source):
@@ -96,6 +98,3 @@ def setup(bld):
   objcopy_str = 'cd ${SRC[0].bld_dir(env)} && ${OBJCOPY} ${OBJCOPYFLAGS} ${SRC[0].m_name} ${TGT[0].m_name}'
   Action.simple_action('bin2o', objcopy_str, color='BLUE', prio=80)
   Action.Action('name2h', vars=[], func=build_h, prio=81)
-
-
-

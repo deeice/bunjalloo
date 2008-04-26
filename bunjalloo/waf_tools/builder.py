@@ -18,16 +18,17 @@ def build(bld, buildlib=True, buildsdl=True):
   arm9 = bld.create_obj('cpp', 'program')
   arm9.find_sources_in_dirs('arm9')
   arm9.includes += ' .'
-  arm9.uselib_local = 'bwt'
+  libs = 'bwt'
   if buildlib:
-    arm9.uselib_local += ' vera'
+    libs += ' vera'
+  arm9.uselib_local = libs.split()
 
   arm9.uselib = 'ARM9'
   arm9.target = APPNAME+'-arm9'
 
   if buildsdl:
     sdl = arm9.clone('sdl')
-    sdl.uselib = ''
+    sdl.uselib = 'HOST'
     sdl.target = APPNAME
     check_target(sdl)
 
@@ -57,7 +58,7 @@ def build_test(bld):
   tst.find_sources_in_dirs('.')
   tst.unit_test = 1
   tst.includes += ' .'
-  tst.uselib_local = 'bwt cppunitmain'
+  tst.uselib_local = 'bunjalloo bwt cppunitmain'
   tst.uselib = 'TEST HOST'
 
   # Cached unit tests.
