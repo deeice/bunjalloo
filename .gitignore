@@ -1,6 +1,6 @@
 *~
-bunjalloo/bld
-bunjalloo/build
+bld
+build
 bunjalloo/bunjalloo
 bunjalloo/ChangeLog*
 bunjalloo/data/bunjalloo/cache
@@ -15,7 +15,6 @@ bunjalloo/data/bunjalloo/user/ckallow.lst
 bunjalloo/data/bunjalloo/user/search.cfg
 bunjalloo/docs
 bunjalloo/issues.csv
-bunjalloo/.sconf_temp
 bunjalloo/tests/images/images
 bunjalloo/tests/lang-test/lang-test
 bunjalloo/tests/patch-test/patch-test*
@@ -28,12 +27,12 @@ ChaosDS/common/snd/sounds.h
 ChaosDS/tools/padprog
 config.log
 cscope.*
-libndspp/bld
 libndspp/docs
-libndspp/.sconf_temp
+.lock-wscript
 *.nds
 *.[oa]
 *.pyc
+.sconf_temp
 .sconsign.*
 *.swp
 tags
