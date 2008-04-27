@@ -8,6 +8,7 @@ tags=$repo/tags
 project=bunjalloo
 upload="no"
 tag="no"
+WAF_SCRIPT=$(which waf)
 VERSION=$( grep -i version arm9/version.c  | sed 's/.*"\(.*\)".*/\1/g')
 
 die() {
@@ -58,12 +59,20 @@ rm -rf data/bunjalloo/cache
 rm -rf data/bunjalloo/user/*
 rm -f data/bunjalloo/config.ini
 
-scons -Q dist version=$VERSION || die "Failed to build dist"
+#scons -Q dist version=$VERSION || die "Failed to build dist"
 zipname=$project-$VERSION.zip
 echo "Created $zipname"
 src=$project-src-$VERSION
 pushd .. >/dev/null
-git-archive --prefix=$src/ HEAD bunjalloo libndspp | gzip > $src.tar.gz || die "Unable to create $src.tar.gz"
+git-archive --prefix=$src/ HEAD bunjalloo libndspp > $src.tar || die "Unable to create $src.tar.gz"
+echo mkdir $src -p
+mkdir $src -p
+tar xf $src.tar
+cp -v $WAF_SCRIPT $src/bunjalloo/
+cp -v $WAF_SCRIPT $src/libndspp/
+rm $src.tar
+tar czf $src.tar.gz $src
+rm -rf $src
 mv $src.tar.gz $makedistdir/ || die "Unable to mv $src.tar.gz to $makedistdir"
 echo "Created $src.tar.gz"
 
