@@ -1,0 +1,196 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+import Params, Environment, UnitTest, Utils, Runner, Object
+import os, os.path
+import sys
+
+Params.g_autoconfig = 1
+APPNAME=os.path.basename(os.getcwd())
+
+srcdir='.'
+blddir='bld'
+libndspp=os.path.abspath("../libndspp")
+libndspp_inc = os.path.join(libndspp, 'include')
+waf_tools=os.path.join(libndspp, "waf_tools")
+sys.path.append(waf_tools)
+# local waf_tools
+sys.path.append('waf_tools')
+from builder import check_target
+
+def set_options(opt):
+  opt.tool_options('compiler_cxx')
+  opt.tool_options('arm', waf_tools)
+  opt.add_option('--delete-scons', action='store_true',
+          help='Delete the leftovers from SCons builds.',
+          default=False, dest='delete_scons')
+
+def arm_tool_check(conf):
+  # load the basics for gcc.
+  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags find_ar')
+  # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
+  # stips off in the check.
+  conf.check_tool('arm7', waf_tools)
+  conf.check_tool('arm9', waf_tools)
+  conf.check_tool('grit', waf_tools)
+  conf.check_tool('ndstool', waf_tools)
+  conf.check_tool('objcopy', waf_tools)
+
+def arm_header_check(conf):
+  e = conf.create_header_configurator()
+  e.mandatory = 1
+  e.nosystem = 1
+  e.uselib = 'ARM9'
+  for header in ('zlib.h', 'matrixSsl.h'):
+    e.name = header
+    e.run()
+
+def lib_check_sdl(conf):
+  pkgconfig = conf.create_pkgconfig_configurator()
+  pkgconfig.uselib = 'HOST'
+  for i in 'libpng sdl'.split():
+    pkgconfig.name = i
+    pkgconfig.run()
+
+  pkgconfig.uselib = 'TEST'
+  pkgconfig.name = 'cppunit'
+  pkgconfig.run()
+
+  e = conf.create_library_configurator()
+  e.mandatory = 1
+  e.uselib = 'HOST'
+  for l in 'ndspp-pc GL z gif jpeg matrixsslstatic unzip'.split():
+    e.name = l
+    e.run()
+
+
+def lib_check_arm7(conf):
+  e = conf.create_library_configurator()
+  e.nosystem = 1
+  e.mandatory = 1
+  e.uselib = 'ARM7'
+  e.name = 'dswifi7'
+  e.run()
+
+def lib_check_arm9(conf):
+  e = conf.create_library_configurator()
+  e.nosystem = 1
+  e.mandatory = 1
+  e.uselib = 'ARM9'
+  for l in 'ndspp-arm9 dswifi9 png z gif jpeg matrixsslstatic unzip'.split():
+    e.name = l
+    e.run()
+
+def configure(conf):
+  # check native compiler
+  top = os.getcwd()
+
+  arm_tool_check(conf)
+  arm_header_check(conf)
+  conf.env['LIBPATH'] = [libndspp+'/lib']
+  conf.env['LIB_ARM7'] += ['ndspp-arm7']
+  conf.env['LIB_ARM9'] = ['ndspp-arm9'] + conf.env['LIB_ARM9']
+  conf.env['OBJCOPYFLAGS'] = """ -I binary -O elf32-littlearm -B arm
+      --rename-section .data=.rodata,readonly,contents """.split()
+  lib_check_arm9(conf)
+  lib_check_arm7(conf)
+  GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64'
+  DATADIR='data/bunjalloo'
+  conf.env['CXXDEFINES'] = ['DATADIR=\\"%s\\"'%DATADIR,
+                            'DATESTRING=\\"%s\\"'%'today']
+
+  conf.env['CPPPATH_ARM9'].extend([top+'/bwt/include', libndspp_inc])
+  conf.env['CPPPATH_ARM7'].extend([libndspp_inc])
+  conf.env['GRITFLAGS'] = GRITFLAGS
+  conf.env['TOP'] = top
+
+  sdl = Environment.Environment()
+
+  conf.set_env_name('sdl', sdl)
+  sdl.set_variant('sdl')
+
+  for f in ('GRITFLAGS', 'TOP', 'CXXDEFINES', 'LIBPATH'):
+    if type(conf.env[f]) == type([]):
+      sdl[f] = [x for x in conf.env[f]]
+    else:
+      sdl[f] = conf.env[f]
+
+  conf.env['CXXDEFINES'].extend(['sprintf_platform=siprintf'])
+  sdl['CXXDEFINES'].extend(['sprintf_platform=sprintf'])
+  conf.setenv('sdl')
+  conf.check_tool('compiler_cxx')
+  conf.check_tool('gcc')
+  conf.check_tool('grit', waf_tools)
+  conf.check_tool('unit_test', waf_tools)
+  lib_check_sdl(conf)
+  sdl['CPPPATH_HOST'].extend([top+'/bwt/include', libndspp_inc, top+'/arm9'])
+
+  sdl['OBJCOPYFLAGS'] = ' -I binary -O elf32-i386 -B i386 '.split()
+  # do not add -O2 FFS, it makes debugging impossible
+  sdl['CCFLAGS'] = ['-Wall', '-g']
+  sdl['CXXFLAGS'] = ['-Wall', '-g']
+  sdl['OBJCOPY'] = 'objcopy'
+
+def build(bld):
+  # overcome chdir problems for jump-to-error
+  if not Params.g_commands['clean']:
+    print "waf: Entering directory `%s'"%(os.path.join(bld.env()['TOP'], blddir))
+  # process subfolders from here
+
+  arm9obj = bld.create_obj('cpp', 'staticlib')
+  arm9obj.includes += ' arm9 bwt/img '
+  arm9obj.find_sources_in_dirs('arm9', ['Main.cpp'])
+  arm9obj.uselib = 'ARM9'
+  arm9obj.target = APPNAME
+
+  sdl = arm9obj.clone('sdl')
+  sdl.uselib = 'HOST'
+  sdl.target = APPNAME
+
+  arm7obj = bld.create_obj('cpp', 'program')
+  arm7obj.includes += ' arm7 '
+  arm7obj.find_sources_in_dirs('arm7')
+  arm7obj.uselib = 'ARM7'
+  arm7obj.target = APPNAME+'-arm7'
+
+  arm9p = bld.create_obj('cpp', 'program')
+  arm9p.source = 'arm9/Main.cpp'
+  arm9p.uselib_local = APPNAME+' bwt '
+  arm9p.target = APPNAME+'-arm9'
+
+  sdlp = arm9p.clone('sdl')
+  sdlp.source = 'arm9/Main.cpp'
+  sdlp.uselib = 'HOST'
+  sdlp.uselib_local = APPNAME+' bwt '
+  sdlp.target = APPNAME
+  check_target(sdlp)
+
+  # generate nds
+  arm9bin = bld.create_obj('objcopy')
+  arm9bin.source = arm9p.target
+  arm9bin.target = arm9p.target+'.bin'
+
+  arm7bin = arm9bin.clone('default')
+  arm7bin.source = arm7obj.target
+  arm7bin.target = arm7obj.target+'.bin'
+
+  nds = bld.create_obj('ndstool')
+  nds.source = (arm7bin.target, arm9bin.target)
+  nds.banner = '%s;;By Richard'%APPNAME
+  nds.icon = 'common/data/icon.bmp'
+  nds.target = APPNAME+'.nds'
+  check_target(nds)
+
+  bld.add_subdirs('bwt tests')
+
+def shutdown():
+  # force running unit tests
+  ut = UnitTest.unit_test()
+  ut.change_to_testfile_dir = 1
+  ut.run_if_waf_does = 'check'
+  if Params.g_verbose:
+    ut.want_to_see_test_output = True
+    ut.want_to_see_test_error = True
+  ut.run()
+  ut.print_results()
+

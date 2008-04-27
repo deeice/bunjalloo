@@ -64,14 +64,15 @@ def generate(env, **kw):
       # add img.bin, pal.bin and map.bin to the output as side effects
       fileName = os.path.basename(str(source[0])).split(os.path.extsep)[0]
       t = []
-      t.append('%s.img.bin'%(fileName))
-      t.append('%s.pal.bin'%(fileName))
-      # t.append('%s.map.bin'%(fileName))
+      t.append('%s.c'%(fileName))
+      t.append('%s.h'%(fileName))
       return (t, source)
+
+    env.Append(GRITFLAGS='-pw 16 -gB 8 -m! -ftc -fh -q -pe64')
     # chdir=1 changes to the target dir before executing.
     gritBld = Builder(action='$GRIT ${SOURCE.abspath} -o ${SOURCE.file} $GRITFLAGS >/dev/null',
         chdir=1,
-        suffix='.bin',
+        suffix='.c',
         src_suffix='.png',
         emitter=img_emitter)
     env.Append( BUILDERS = { 'Gfx2Bin': gritBld } )

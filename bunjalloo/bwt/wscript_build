@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+libndspp = '../../libndspp'
+arm9obj = bld.create_obj('cpp', 'staticlib')
+arm9obj.includes = libndspp+'/include '
+arm9obj.includes += ' include img'
+arm9obj.find_sources_in_dirs('source img')
+arm9obj.target = 'bwt'
+
+sdl = arm9obj.clone('sdl')
+
+arm9obj.uselib = 'ARM9'

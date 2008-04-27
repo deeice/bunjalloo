@@ -126,6 +126,7 @@ def createEnv(buildTarget):
 # @param buildTarget the build target name
 def addProjectDirs(env, buildTarget):
   env.Append( CPPPATH=['#/bwt/include'])
+  env.Append( CPPPATH=['#/build/%s/bwt/data'%buildTarget])
   env.Prepend(LIBPATH=['#/build/%s/bwt/lib/'%buildTarget])
   env.Prepend(LIBS=['bwt'])
   env.Append( CPPDEFINES=[('DATADIR','\\"data/bunjalloo\\"')])
@@ -155,7 +156,9 @@ def addObjCopyImageBuilders(env):
 #define %s_h_seen
 #ifdef __cplusplus
 extern "C" {
-#endif"""%(fd, fd))
+#endif\n"""%(fd, fd))
+    fp.write("#define %sTiles _binary_%s_img_bin_start\n"%(fd,fd))
+    fp.write("#define %sPal _binary_%s_pal_bin_start\n"%(fd, fd))
     for i in ('pal', 'img', 'map'):
       fp.write("""
               extern const u16 _binary_%s_%s_bin_end[];

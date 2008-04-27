@@ -1,0 +1,97 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+import Params, Environment
+import os, os.path
+import sys
+
+VERSION="0.1"
+
+srcdir='.'
+blddir='bld'
+waf_tools="waf_tools"
+sys.path.append(waf_tools)
+
+def set_options(opt):
+  opt.tool_options('g++')
+  opt.tool_options('compiler_cxx')
+  opt.tool_options('arm', waf_tools)
+
+def arm_tool_check(conf):
+  conf.check_tool('g++', funs='cxx_load_tools gxx_common_flags')
+
+  # cannot check compiler_cc for devkitArm as it needs LINKFLAGS, which waf
+  # stips off in the check.
+  conf.check_tool('arm7', waf_tools)
+  conf.check_tool('arm9', waf_tools)
+  conf.check_tool('ndstool', waf_tools)
+  conf.check_tool('objcopy', waf_tools)
+  # pull in ARFLAGS
+  conf.check_tool('g++', funs='find_ar')
+
+def arm_header_check(conf):
+  # check headers
+  e = conf.create_header_configurator()
+  e.mandatory = 1
+  e.nosystem = 1
+  e.uselib = 'ARM9'
+  for header in ('fat.h', 'png.h', 'zlib.h', 'gif_lib.h', 'matrixSsl.h'):
+    e.name = header
+    e.run()
+  e.name = 'dswifi9.h'
+  e.header_code = '#include <nds/jtypes.h>'
+  e.run()
+
+  e.name = 'jpeglib.h'
+  e.header_code = '#include <stdio.h>'
+  e.run()
+
+def sdl_header_check(conf):
+  e = conf.create_header_configurator()
+  e.mandatory = 1
+  e.name = 'SDL/SDL.h'
+  e.run()
+
+
+def configure(conf):
+  # check native compiler
+  arm_tool_check(conf)
+  arm_header_check(conf)
+  top = os.getcwd()
+  conf.env['LIB_INSTALL_DIR'] = top
+
+  sdl = Environment.Environment()
+  conf.set_env_name('sdl', sdl)
+  sdl.set_variant('sdl')
+  conf.setenv('sdl')
+  conf.check_tool('compiler_cxx')
+  sdl['LIB_INSTALL_DIR'] = top
+  sdl_header_check(conf)
+
+def build(bld):
+  # overcome chdir problems for jump-to-error
+  if not Params.g_commands['clean']:
+    print "waf: Entering directory `%s'"%(os.path.join(bld.env()['LIB_INSTALL_DIR'], blddir))
+  # process subfolders from here
+  arm9obj = bld.create_obj('cpp', 'staticlib')
+  arm9obj.inst_dir = 'lib'
+  arm9obj.inst_var = 'LIB_INSTALL_DIR'
+  arm9obj.includes = 'include source/common'
+
+  sdl = arm9obj.clone('sdl')
+  arm7obj = arm9obj.clone('default')
+  arm9obj.includes += ' source/arm9'
+
+  arm9obj.find_sources_in_dirs('source/arm9 source/common')
+  arm9obj.uselib = 'ARM9'
+  arm9obj.target = 'ndspp-arm9'
+
+  arm7obj.includes += ' source/arm7'
+  arm7obj.find_sources_in_dirs('source/arm7')
+  arm7obj.uselib = 'ARM7'
+  arm7obj.target = 'ndspp-arm7'
+
+  sdl.includes += ' source/pc'
+  sdl.find_sources_in_dirs('source/pc source/common')
+  sdl.target = 'ndspp-pc'
+

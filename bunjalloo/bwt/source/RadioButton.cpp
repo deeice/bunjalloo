@@ -31,12 +31,12 @@ const unsigned char * RadioButton::getGfxData()
     offset |= 1;
   if (touched())
     offset |= 2;
-  return (const u8*)&_binary_radiobutton_img_bin_start[16*8*offset];
+  return (const u8*)&radiobuttonTiles[16*8*offset];
 }
 
 const unsigned short * RadioButton::getPaletteData()
 {
-  return _binary_radiobutton_pal_bin_start;
+  return radiobuttonPal;
 }
 
 
