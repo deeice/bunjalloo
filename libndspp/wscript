@@ -70,6 +70,7 @@ def configure(conf):
 
 def build(bld):
   # overcome chdir problems for jump-to-error
+  Params.g_options.jobs = 2
   if not Params.g_commands['clean']:
     print "waf: Entering directory `%s'"%(os.path.join(bld.env()['LIB_INSTALL_DIR'], blddir))
   # process subfolders from here
