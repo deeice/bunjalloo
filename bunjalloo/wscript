@@ -27,6 +27,9 @@ def set_options(opt):
   opt.add_option('--install-to', action='store',
           help='Set the install directory.',
           default='bunjalloo-dist', dest='install_to')
+  opt.add_option('--with-dldi', action='store',
+          help='Set the DLDI patch to use.',
+          default='', dest='with_dldi')
 
 def arm_tool_check(conf):
   # load the basics for gcc.
@@ -37,6 +40,7 @@ def arm_tool_check(conf):
   conf.check_tool('arm9', waf_tools)
   conf.check_tool('grit', waf_tools)
   conf.check_tool('ndstool', waf_tools)
+  conf.check_tool('dlditool', waf_tools)
   conf.check_tool('objcopy', waf_tools)
 
 def arm_header_check(conf):
@@ -106,6 +110,8 @@ def configure(conf):
   conf.env['CPPPATH_ARM7'].extend([libndspp_inc])
   conf.env['GRITFLAGS'] = GRITFLAGS
   conf.env['TOP'] = top
+  if Params.g_options.with_dldi:
+    conf.env['DLDIFLAGS'] = Params.g_options.with_dldi
 
   sdl = Environment.Environment()
 
@@ -189,6 +195,11 @@ def build(bld):
   nds.icon = 'common/data/icon.bmp'
   nds.target = APPNAME+'.nds'
   check_target(nds)
+
+  if bld.env()['DLDIFLAGS']:
+    patched = bld.create_obj('dlditool')
+    patched.source = nds.target
+    patched.target = APPNAME+'-patched.nds'
 
   bld.add_subdirs('bwt tests')
 
