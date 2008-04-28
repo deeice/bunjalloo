@@ -16,7 +16,7 @@ die() {
   exit 1
 }
 
-TEMP=`getopt -o hutv:l: --long version:,last:,upload,tag,help -- "$@"`
+TEMP=$(getopt -o hutv:l: --long version:,last:,upload,tag,help -- "$@")
     
 if [ $? != 0 ] ; then
   echo "Try '$0 --help' for more information"
@@ -54,33 +54,37 @@ makedistdir=$(dirname $0)
 pushd $makedistdir > /dev/null
 makedistdir=$(pwd)
 revision=$(git-svn find-rev HEAD)
-# don't include my test files in the distro!
-rm -rf data/bunjalloo/cache
-rm -rf data/bunjalloo/user/*
-rm -f data/bunjalloo/config.ini
 
-#scons -Q dist version=$VERSION || die "Failed to build dist"
-zipname=$project-$VERSION.zip
+# Create the zip file
+distdir=$project-$VERSION
+zipname=$distdir.zip
+waf --install-to=$distdir install > /dev/null || die "Error in build"
+pushd $distdir > /dev/null || die "Unable to cd to $distdir"
+zip -r ../$zipname * > /dev/null || die "Unable to create $zipname"
+popd > /dev/null
+rm -rf $distdir
 echo "Created $zipname"
+
+# Create the tar.gz source code file
 src=$project-src-$VERSION
+src_tarname=$src.tar
+src_tgzname=$src.tar.gz
 pushd .. >/dev/null
-git-archive --prefix=$src/ HEAD bunjalloo libndspp > $src.tar || die "Unable to create $src.tar.gz"
-echo mkdir $src -p
+git-archive --prefix=$src/ HEAD bunjalloo libndspp > $src_tarname || die "Unable to create $src_tarname"
 mkdir $src -p
-tar xf $src.tar
-cp -v $WAF_SCRIPT $src/bunjalloo/
-cp -v $WAF_SCRIPT $src/libndspp/
-rm $src.tar
-tar czf $src.tar.gz $src
-rm -rf $src
-mv $src.tar.gz $makedistdir/ || die "Unable to mv $src.tar.gz to $makedistdir"
-echo "Created $src.tar.gz"
+tar xf $src_tarname && rm $src_tarname
+for i in $src/* ; do
+  cp $WAF_SCRIPT $i
+done
+tar czf $src_tgzname $src && rm -rf $src
+mv $src_tgzname $makedistdir/ || die "Unable to mv $src_tgzname to $makedistdir"
+echo "Created $src_tgzname"
 
 git log --pretty=format:"  * %s" --no-merges HEAD ^$last -- bunjalloo libndspp \
                 > $makedistdir/ShortLog-$VERSION || die "Unable to create ChangeLog"
 git log --no-merges HEAD ^$last -- bunjalloo libndspp \
                 > $makedistdir/ChangeLog-$VERSION || die "Unable to create ChangeLog"
-echo "Created ChangeLog-$VERSION"
+echo "Created ChangeLog-$VERSION and ShortLog-$VERSION"
 popd > /dev/null
 
 if test "$tag" = "yes" ; then
@@ -93,8 +97,8 @@ if test "$upload" = "yes" ; then
   user=$(grep username -2 $authfile | tail -1)
   pass=$(grep password -2 $authfile | tail -1)
   $UPLOAD -s "Source code for $project release $VERSION" --project=quirkysoft --user=$user --password=$pass \
-     -l Type-Source,Program-Bunjalloo $src.tar.gz \
-    || die "Unable to upload $src.tar.gz"
+     -l Type-Source,Program-Bunjalloo $src_tgzname \
+    || die "Unable to upload $src_tgzname"
 
   $UPLOAD -s "$project release $VERSION" --project=quirkysoft --user=$user --password=$pass \
    -l Type-Archive,Program-Bunjalloo,OpSys-NDS ${zipname} \
