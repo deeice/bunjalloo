@@ -50,7 +50,6 @@ The following tools are needed:
 
     sudo apt-get install patch
     sudo apt-get install subversion
-    sudo apt-get install scons
 
 To build the dependencies for the DS version. Assuming you are in the "bunjalloo" directory now:
 
@@ -77,53 +76,45 @@ Almost there!
 =============
 
 That's the tough bit out the way, hopefully. Now to compile libndspp. You can
-either use the configure style:
+use the usual configure style build:
 
     cd ../libndspp
     ./configure
-    make
+    make install
     cd -
 
-Or build it directly with the following command:
+Or if you are familiar wit the waf build system, the equivalent commands are
+valid.  This will install the libraries in ../libndspp/lib/libndspp-*.a, one
+for ARM9, one for ARM7 and one for the pc (SDL).
 
-    scons -C ../libndspp
-
-This will create ../libndspp/lib/libndspp-*.a, one for ARM9, one for ARM7
-and one for the pc (SDL).
-
-Finally, compile Bunjalloo itself. Again, either use the configure approach:
+Finally, compile Bunjalloo itself. Again, either use waf directly or the
+standard configure approach:
 
     ./configure
     make
 
-Or compile directly with this command:
+If this works, you should now have bunjalloo.nds and bunjalloo executable in
+the build directory. First see if the Linux version works:
 
-    scons
-
-If this works, you should now have bunjalloo.nds and bunjalloo in the
-current directory. First see if the Linux version works:
-
-    ./bunjalloo
+    ./build/sdl/bunjalloo
 
 If that worked, try out the DS build...
 
 Installing
 ==========
 
-This is easiest way to test the NDS version is to create a distribution zip and
-install it on your media card. In these steps /media/<disk> is the mount point
-of your media card:
+There build system has a flag '--install-to' that makes the installation of the
+required files onto your DLDI supported device easy. In these steps
+/media/$disk is the mount point of your media card, you will have to replace it
+with the real location:
 
-    ./makedist.sh
-    cp bunjalloo-*.zip /media/<disk>/
-    cd /media/disk
-    unzip bunjalloo-*.zip
-    dlditool /path/to/your.dldi bunjalloo.nds
+    ./waf --install-to=/media/$disk install
+    dlditool /path/to/your.dldi /media/$disk/bunjalloo.nds
 
 Once you have done that, and assuming you don't alter things in the data
 directory, future builds can be updated by simply running:
 
-    cp bunjalloo-patched.nds to /media/<disk>/bunjalloo.nds
+    cp -v bunjalloo-patched.nds /media/$disk/bunjalloo.nds
 
 See this page too for more details.
 http://code.google.com/p/quirkysoft/wiki/Compiling
