@@ -3,6 +3,7 @@
 
 libndspp = '../../libndspp'
 arm9obj = bld.create_obj('cpp', 'staticlib')
+arm9obj.inst_var = 0
 arm9obj.includes = libndspp+'/include '
 arm9obj.includes += ' include img'
 arm9obj.find_sources_in_dirs('source img')

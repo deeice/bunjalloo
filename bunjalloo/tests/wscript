@@ -6,6 +6,7 @@ import Constants
 def build(bld):
   #
   obj = bld.create_obj('cpp', 'staticlib')
+  obj.inst_var = 0
   obj.env = bld.env('sdl').copy()
   obj.source = '''Main.cpp'''
   obj.target = '''cppunitmain'''

@@ -24,6 +24,9 @@ def set_options(opt):
   opt.add_option('--delete-scons', action='store_true',
           help='Delete the leftovers from SCons builds.',
           default=False, dest='delete_scons')
+  opt.add_option('--install-to', action='store',
+          help='Set the install directory.',
+          default='bunjalloo-dist', dest='install_to')
 
 def arm_tool_check(conf):
   # load the basics for gcc.
@@ -139,6 +142,7 @@ def build(bld):
   # process subfolders from here
 
   arm9obj = bld.create_obj('cpp', 'staticlib')
+  arm9obj.inst_var = 0
   arm9obj.includes += ' arm9 bwt/img '
   arm9obj.find_sources_in_dirs('arm9', ['Main.cpp'])
   arm9obj.uselib = 'ARM9'
@@ -149,12 +153,14 @@ def build(bld):
   sdl.target = APPNAME
 
   arm7obj = bld.create_obj('cpp', 'program')
+  arm7obj.inst_var = 0
   arm7obj.includes += ' arm7 '
   arm7obj.find_sources_in_dirs('arm7')
   arm7obj.uselib = 'ARM7'
   arm7obj.target = APPNAME+'-arm7'
 
   arm9p = bld.create_obj('cpp', 'program')
+  arm9p.inst_var = 0
   arm9p.source = 'arm9/Main.cpp'
   arm9p.uselib_local = APPNAME+' bwt '
   arm9p.target = APPNAME+'-arm9'
@@ -168,10 +174,12 @@ def build(bld):
 
   # generate nds
   arm9bin = bld.create_obj('objcopy')
+  arm9bin.inst_var = 0
   arm9bin.source = arm9p.target
   arm9bin.target = arm9p.target+'.bin'
 
   arm7bin = arm9bin.clone('default')
+  arm7bin.inst_var = 0
   arm7bin.source = arm7obj.target
   arm7bin.target = arm7obj.target+'.bin'
 
@@ -183,6 +191,11 @@ def build(bld):
   check_target(nds)
 
   bld.add_subdirs('bwt tests')
+
+  if Params.g_options.install_to:
+    bld.env()['BUNJALLOO_PREFIX'] = Params.g_options.install_to
+    install_files('BUNJALLOO_PREFIX', '', nds.target)
+    [install_files('BUNJALLOO_PREFIX', 'data/bunjalloo/%s'%d, 'data/bunjalloo/%s/*'%d) for d in ('config', 'docs', 'fonts')]
 
 def shutdown():
   # force running unit tests

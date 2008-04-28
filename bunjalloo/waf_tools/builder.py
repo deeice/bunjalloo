@@ -12,10 +12,12 @@ def build(bld, buildlib=True, buildsdl=True):
                         common/fonts/vera.pal
                        """
     arm9font.target = 'vera'
+    arm9font.inst_var = 0
     if buildsdl:
       sdlfont = arm9font.clone('sdl')
 
   arm9 = bld.create_obj('cpp', 'program')
+  arm9.inst_var = 0
   arm9.find_sources_in_dirs('arm9')
   arm9.includes += ' .'
   libs = 'bwt'
@@ -33,6 +35,7 @@ def build(bld, buildlib=True, buildsdl=True):
     check_target(sdl)
 
   arm9bin = bld.create_obj('objcopy')
+  arm9bin.inst_var = 0
   arm9bin.source = arm9.target
   arm9bin.target = arm9.target+'.bin'
 
@@ -52,6 +55,7 @@ def check_target(obj):
 
 def build_test(bld):
   tst = bld.create_obj('cpp', 'program')
+  tst.inst_var = 0
   tst.env = bld.env('sdl').copy()
   tst.target = 'tester'
   check_target(tst)
