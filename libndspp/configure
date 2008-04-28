@@ -124,7 +124,6 @@ clean:
 
 distclean:
 	@$WAF distclean
-	@-rm -rf _build_
 	@-rm -f Makefile
 
 check:
