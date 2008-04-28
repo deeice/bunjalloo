@@ -9,7 +9,7 @@ Params.g_autoconfig = 1
 APPNAME=os.path.basename(os.getcwd())
 
 srcdir='.'
-blddir='bld'
+blddir='build'
 libndspp=os.path.abspath("../libndspp")
 libndspp_inc = os.path.join(libndspp, 'include')
 waf_tools=os.path.join(libndspp, "waf_tools")

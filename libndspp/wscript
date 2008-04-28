@@ -8,7 +8,7 @@ import sys
 VERSION="0.1"
 
 srcdir='.'
-blddir='bld'
+blddir='build'
 waf_tools="waf_tools"
 sys.path.append(waf_tools)
 
