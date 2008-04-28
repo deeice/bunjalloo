@@ -114,7 +114,7 @@ with the real location:
 Once you have done that, and assuming you don't alter things in the data
 directory, future builds can be updated by simply running:
 
-    cp -v bunjalloo-patched.nds /media/$disk/bunjalloo.nds
+    cp -v build/default/bunjalloo-patched.nds /media/$disk/bunjalloo.nds
 
 See this page too for more details.
 http://code.google.com/p/quirkysoft/wiki/Compiling
