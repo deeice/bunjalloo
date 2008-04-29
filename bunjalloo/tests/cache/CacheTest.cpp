@@ -53,6 +53,7 @@ void CacheTest::tearDown()
 }
 void CacheTest::setUp()
 {
+  m_data = 0;
   m_document = new Document;
   m_cache = new Cache(*m_document, true, true);
 }

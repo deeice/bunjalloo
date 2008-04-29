@@ -62,7 +62,8 @@ const char * nds::File::dirname(const char * path)
     return ".";
   }
   else {
-    return str.substr(0, pos).c_str();
+    str = str.substr(0, pos);
+    return str.c_str();
   }
 }
 

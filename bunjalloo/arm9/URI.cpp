@@ -213,10 +213,10 @@ const std::string URI::fileName() const
       }
       break;
     default:
-      return "";
+      return file;
   }
   // sigh.
-  return "";
+  return file;
 }
 
 URI URI::navigateTo(const std::string & newFile ) const

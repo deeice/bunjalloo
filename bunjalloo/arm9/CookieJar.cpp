@@ -81,7 +81,7 @@ void CookieJar::addCookieHeader(const URI & uri, const std::string & request)
   else
   {
     // sort out basename
-    if (path[path.length()-1] != '/')
+    if (path.length() and path[path.length()-1] != '/')
     {
       path = nds::File::dirname(path.c_str());
     }
