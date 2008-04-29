@@ -66,6 +66,8 @@ def configure(conf):
   conf.setenv('sdl')
   conf.check_tool('compiler_cxx')
   sdl['LIB_INSTALL_DIR'] = top
+  sdl['CCFLAGS'] = ['-Wall', '-g']
+  sdl['CXXFLAGS'] = ['-Wall', '-g']
   sdl_header_check(conf)
 
 def build(bld):
