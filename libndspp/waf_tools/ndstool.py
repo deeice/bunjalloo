@@ -1,5 +1,8 @@
-import os, os.path
-import Params, Configure,Action, Object, Utils
+"""
+Waf tool for generating a .nds file from 1 or 2 arm cores, optionally using a
+banner.
+"""
+import Params, Action, Object
 
 class ndstool_taskgen(Object.task_gen):
   def __init__(self, *k, **kw):
@@ -11,8 +14,7 @@ class ndstool_taskgen(Object.task_gen):
     find_build = self.path.find_build
     input_nodes = []
     for filename in self.to_list(self.source):
-      node = self.path.find_build(filename)
-      outnode = node
+      node = find_build(filename)
       input_nodes.append(node)
     taskname = 'ndstool_9'
     if len(input_nodes) > 1:
@@ -29,8 +31,8 @@ class ndstool_taskgen(Object.task_gen):
     task.set_outputs(find_build(self.target))
 
 def detect(conf):
-  dka_bin='%s/bin'%Params.g_options.devkitarm
-  ndstool='ndstool'
+  dka_bin = '%s/bin' % (Params.g_options.devkitarm)
+  ndstool = 'ndstool'
   ndstool = conf.find_program(ndstool, path_list=[dka_bin], var='NDSTOOL')
   if not ndstool:
     conf.fatal('ndstool was not found')

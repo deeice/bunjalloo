@@ -1,11 +1,9 @@
-import os, sys
-import optparse
-import Params, Configure,Action, Utils, ccroot, misc
+""" Use objcopy to generate a library from binary input files. """
+import os
+import Params, Action, Utils, ccroot, misc
 import Object
 
 class objcopy_taskgen(Object.task_gen):
-  #def __init__(self):
-  #  Object.task_gen.__init__(self)
   def apply(self):
     find_source_lst = self.path.find_source_lst
     input_nodes = []
@@ -18,6 +16,8 @@ class objcopy_taskgen(Object.task_gen):
 class bin2o_taskgen(ccroot.ccroot_abstract):
   def __init__(self, *k, **kw):
     self.m_type = 'staticlib'
+    self.name = ''
+    self.link_task = None
     Object.task_gen.__init__(self, *k, **kw)
     self.compiled_tasks = []
     self.uselib = ''
@@ -58,24 +58,24 @@ class bin2o_taskgen(ccroot.ccroot_abstract):
       headertask.set_outputs(self.path.find_build(self.target+'.h'))
 
 def build_h(task):
-  # build h file from input file namesa
+  """ build h file from input file names """
   env = task.env()
   filename = task.m_outputs[0].abspath(env)
-  fp  = open(filename, 'w')
+  hfile  = open(filename, 'w')
   target = os.path.basename(filename).replace('.', '_')
-  fp.write("""#ifndef %s_seen
+  hfile.write("""#ifndef %s_seen
 #define %s_seen
 #ifdef __cplusplus
 extern "C" {
 #endif\n"""%(target, target))
   for i in task.m_inputs:
-    fd = os.path.basename(i.srcpath(env)).replace('.', '_')
-    fp.write("""
+    symbol = os.path.basename(i.srcpath(env)).replace('.', '_')
+    hfile.write("""
             extern const u16 _binary_%s_bin_end[];
             extern const u16 _binary_%s_bin_start[];
             extern const u32 _binary_%s_bin_size[];
-            """%(fd, fd, fd))
-  fp.write("""
+            """%(symbol, symbol, symbol))
+  hfile.write("""
 #ifdef __cplusplus
 };
 #endif
@@ -84,13 +84,13 @@ extern "C" {
   return 0
 
 def detect(conf):
-  v = conf.env
-  dka_bin='%s/bin'%Params.g_options.devkitarm
-  arm_eabi='arm-eabi-objcopy'
+  env = conf.env
+  dka_bin = '%s/bin' % (Params.g_options.devkitarm)
+  arm_eabi = 'arm-eabi-objcopy'
   objcopy = conf.find_program(arm_eabi, path_list=[dka_bin], var='OBJCOPY')
   if not objcopy:
     conf.fatal('objcopy was not found')
-  v['OBJCOPY'] = objcopy
+  env['OBJCOPY'] = objcopy
 
 def setup(bld):
   objcopy_str = '${OBJCOPY} -O binary ${SRC} ${TGT}'

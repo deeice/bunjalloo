@@ -1,68 +1,40 @@
+""" Waf tool for generating image data using grit """
 import os, os.path
-import Params, Configure,Action, Object, Utils
+import Params, Action
 
 def output_for_source(source, env):
+  """ Given a file name generate a list of outputs """
   # add img.bin, pal.bin and map.bin to the output as side effects
   if ('-fts' in env['GRITFLAGS']):
     fileName = source.split(os.path.extsep)[0]
-    t = []
-    t.append('%s.s'%(fileName))
-    t.append('%s.h'%(fileName))
+    out = []
+    out.append('%s.s' % (fileName))
+    out.append('%s.h' % (fileName))
   elif ('-ftb' in env['GRITFLAGS']):
     fileName = source.split(os.path.extsep)[0]
-    t = []
-    t.append('%s.img.bin'%(fileName))
-    t.append('%s.pal.bin'%(fileName))
-  # t.append('%s.map.bin'%(fileName))
-  return t
-# class gritobj(Object.task_gen):
-#   s_default_ext = ['.png', '.bmp']
-#   def __init__(self):
-#     Object.task_gen.__init__(self)
-#   def output_for_source(self, source):
-#     # add img.bin, pal.bin and map.bin to the output as side effects
-#     if ('-fts' in self.env['GRITFLAGS']):
-#       fileName = source.split(os.path.extsep)[0]
-#       t = []
-#       t.append('%s.s'%(fileName))
-#       t.append('%s.h'%(fileName))
-#     elif ('-ftb' in self.env['GRITFLAGS']):
-#       fileName = source.split(os.path.extsep)[0]
-#       t = []
-#       t.append('%s.img.bin'%(fileName))
-#       t.append('%s.pal.bin'%(fileName))
-#     # t.append('%s.map.bin'%(fileName))
-#     return t
-
-#   def apply(self):
-#     find_source = self.path.find_source
-#     find_build = self.path.find_build
-#     for filename in self.to_list(self.source):
-#       node = find_source(filename)
-#       output_nodes = []
-#       for bld in self.output_for_source(filename):
-#         output_nodes.append(find_build(bld))
-#       task = self.create_task('grit', self.env)
-#       task.set_inputs(node)
-#       task.set_outputs(output_nodes)
-#       self.allnodes.extend(output_nodes)
+    out = []
+    out.append('%s.img.bin' % (fileName))
+    out.append('%s.pal.bin' % (fileName))
+  return out
 
 from Object import extension, taskgen
 
 def add_include(task):
+  """ Add an #include line to the output file for the given input file  """
   outfile = task.m_outputs[0].abspath(task.env())
   infile = task.m_inputs[0].abspath(task.env())
-  f = open(outfile, 'w')
-  f.write('#include "%s"\n'%os.path.basename(infile).replace('.c','.h'))
+  fp = open(outfile, 'w')
+  fp.write('#include "%s"\n' % (os.path.basename(infile).replace('.c','.h')))
   i = open(infile)
   for k in i.readlines():
-    f.write(k)
-  f.close()
+    fp.write(k)
+  fp.close()
 
 
 @taskgen
 @extension('.png')
 def img_file(self, node):
+  """ Convert a png file to a cpp and header file """
   out_source_s = node.change_ext('.c')
   out_source_C = node.change_ext('.cpp')
   out_source_h = node.change_ext('.h')
@@ -79,8 +51,8 @@ def img_file(self, node):
   self.allnodes.append(out_source_C)
 
 def detect(conf):
-  dka_bin='%s/bin'%Params.g_options.devkitarm
-  grit='grit'
+  dka_bin = '%s/bin' % (Params.g_options.devkitarm)
+  grit = 'grit'
   grit = conf.find_program(grit, path_list=[dka_bin], var='GRIT')
   if not grit:
     conf.fatal('grit was not found')
