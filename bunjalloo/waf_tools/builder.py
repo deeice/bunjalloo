@@ -1,9 +1,12 @@
-#!/usr/bin/env python
-# encoding: utf-8
+""" Build test programs """
 import os
 
 def build(bld, buildlib=True, buildsdl=True):
-  APPNAME = os.path.basename(bld.m_curdirnode.srcpath(bld.env()))
+  """
+  Build a test program, optionally building the library and optionally
+  building for SDL
+  """
+  app_name = os.path.basename(bld.m_curdirnode.srcpath(bld.env()))
   if buildlib:
     arm9font = bld.create_obj('bin2o')
     arm9font.source = """
@@ -14,7 +17,7 @@ def build(bld, buildlib=True, buildsdl=True):
     arm9font.target = 'vera'
     arm9font.inst_var = 0
     if buildsdl:
-      sdlfont = arm9font.clone('sdl')
+      arm9font.clone('sdl')
 
   arm9 = bld.create_obj('cpp', 'program')
   arm9.inst_var = 0
@@ -26,12 +29,12 @@ def build(bld, buildlib=True, buildsdl=True):
   arm9.uselib_local = libs.split()
 
   arm9.uselib = 'ARM9'
-  arm9.target = APPNAME+'-arm9'
+  arm9.target = app_name+'-arm9'
 
   if buildsdl:
     sdl = arm9.clone('sdl')
     sdl.uselib = 'HOST'
-    sdl.target = APPNAME
+    sdl.target = app_name
     check_target(sdl)
 
   arm9bin = bld.create_obj('objcopy')
@@ -41,19 +44,22 @@ def build(bld, buildlib=True, buildsdl=True):
 
   nds = bld.create_obj('ndstool')
   nds.source = arm9bin.target
-  nds.target = APPNAME+'.nds'
+  nds.target = app_name+'.nds'
   check_target(nds)
 
 def check_target(obj):
+  """ Check for build targets in the source tree, and delete them """
   import Params, Utils
   if Params.g_options.delete_scons:
     for target in Utils.to_list(obj.target):
-      t = os.path.join(obj.path.abspath(), target)
-      if os.path.exists(t):
-        Params.pprint('YELLOW', 'Deleting %s/%s'%(obj.path.srcpath(obj.env), target))
-        os.unlink(t)
+      abs_target = os.path.join(obj.path.abspath(), target)
+      if os.path.exists(abs_target):
+        Params.pprint('YELLOW',
+            'Deleting %s/%s' % (obj.path.srcpath(obj.env), target))
+        os.unlink(abs_target)
 
 def build_test(bld):
+  """ Build a unit test program """
   tst = bld.create_obj('cpp', 'program')
   tst.inst_var = 0
   tst.env = bld.env('sdl').copy()
@@ -66,7 +72,7 @@ def build_test(bld):
   tst.uselib = 'TEST HOST'
 
   # Cached unit tests.
-  ut = bld.create_obj('unit_test')
-  ut.env = bld.env('sdl').copy()
-  ut.source = tst.target
+  unit_test = bld.create_obj('unit_test')
+  unit_test.env = bld.env('sdl').copy()
+  unit_test.source = tst.target
 
