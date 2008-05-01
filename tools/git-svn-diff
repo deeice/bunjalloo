@@ -3,4 +3,4 @@ git svn dcommit -n | grep diff-tree | awk '{print $1" "$2".."$3}'|\
 while read line
 do
   git ${line/diff-tree/log --color $*} 
-done| LESS=-R less
+done
