@@ -18,6 +18,7 @@
 #include "libnds.h"
 #include "Button.h"
 #include "Canvas.h"
+#include "Palette.h"
 #include "EditableTextArea.h"
 #include "Keyboard.h"
 #include "Language.h"
@@ -254,8 +255,13 @@ void Keyboard::applyResult()
 
 void Keyboard::paint(const nds::Rectangle & clip)
 {
+  if (not dirty())
+   return;
+  m_dirty = false;
   if (visible())
   {
+    nds::Canvas::instance().fillRectangle(m_richTextArea->bounds().left(), m_richTextArea->bounds().top(), clip.w, clip.bottom(),
+        nds::Color(31,31,31));
     std::vector<Component*>::iterator it(m_children.begin());
     for (; it != m_children.end(); ++it)
     {
@@ -428,6 +434,7 @@ bool Keyboard::stylusUp(const Stylus * stylus)
 {
   if (not visible())
     return false;
+  m_dirty = true;
   FOR_EACH_CHILD(stylusUp);
   return false;
 }
@@ -436,6 +443,7 @@ bool Keyboard::stylusDownFirst(const Stylus * stylus)
 {
   if (not visible())
     return false;
+  m_dirty = true;
   FOR_EACH_CHILD(stylusDownFirst);
   return false;
 }
@@ -443,6 +451,7 @@ bool Keyboard::stylusDownRepeat(const Stylus * stylus)
 {
   if (not visible())
     return false;
+  m_dirty = true;
   FOR_EACH_CHILD(stylusDownRepeat);
   return false;
 }

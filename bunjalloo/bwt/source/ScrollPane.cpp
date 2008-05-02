@@ -249,13 +249,13 @@ void ScrollPane::showScrollBar(const nds::Rectangle & clip)
 void ScrollPane::paint(const nds::Rectangle & clip)
 {
   nds::Canvas::instance().setClip(clip);
+  if (not (dirty() or visible())) {
+    return;
+  }
+  m_dirty = false;
   if (m_topLevel) {
     nds::Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_backgroundColour);
   }
-  if (not visible()) {
-    return;
-  }
-
 
   if (s_popup != 0 and this == s_popup)
   {
@@ -322,17 +322,14 @@ bool ScrollPane::stylusUp(const Stylus * stylus)
 {
   if (not visible())
     return false;
+  m_dirty = true;
   if (m_scrollBar->stylusUp(stylus))
   {
     return true;
   }
-  if (m_topLevel and s_popup and s_popup->stylusUp(stylus))
+  if ( not (m_topLevel and s_popup and s_popup->stylusUp(stylus)))
   {
     // do not process other events if we hit the pop-up menu.
-    m_dirty = true;
-  }
-  else
-  {
     // call stylusUp on children too
     FOR_EACH_CHILD(stylusUp);
   }
@@ -345,6 +342,7 @@ bool ScrollPane::stylusDownFirst(const Stylus * stylus)
     return false;
   }
 
+  m_dirty = true;
   if (m_scrollBar->stylusDownFirst(stylus))
   {
     return true;
@@ -372,6 +370,7 @@ bool ScrollPane::stylusDownRepeat(const Stylus * stylus)
   {
     return false;
   }
+  m_dirty = true;
   if (m_scrollBar->stylusDownRepeat(stylus))
   {
     return true;
@@ -386,6 +385,7 @@ bool ScrollPane::stylusDown(const Stylus * stylus)
   {
     return false;
   }
+  m_dirty = true;
   if (m_scrollBar->stylusDown(stylus))
   {
     return true;
