@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 # encoding: utf-8
 import os
-import Constants
+import Constants, Params
 
 def build(bld):
-  #
   obj = bld.create_obj('cpp', 'staticlib')
   obj.inst_var = 0
   obj.env = bld.env('sdl').copy()
@@ -12,7 +11,6 @@ def build(bld):
   obj.target = '''cppunitmain'''
 
   # build subdirs
-  #bld.add_subdirs('patch-test gui-test lang-test images sprite bwtimage parser')
-  here = os.path.join(bld.env('sdl')['TOP'], 'tests')
+  here = os.path.join(Params.g_build.m_srcnode.abspath(), 'tests')
   [bld.add_subdirs(d) for d in os.listdir(here)
       if os.path.exists(os.path.join(here,d,Constants.WSCRIPT_FILE))]

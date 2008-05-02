@@ -109,7 +109,6 @@ def configure(conf):
   conf.env['CPPPATH_ARM9'].extend([top+'/bwt/include', libndspp_inc])
   conf.env['CPPPATH_ARM7'].extend([libndspp_inc])
   conf.env['GRITFLAGS'] = GRITFLAGS
-  conf.env['TOP'] = top
   if Params.g_options.with_dldi:
     conf.env['DLDIFLAGS'] = Params.g_options.with_dldi
 
@@ -118,7 +117,7 @@ def configure(conf):
   conf.set_env_name('sdl', sdl)
   sdl.set_variant('sdl')
 
-  for f in ('GRITFLAGS', 'TOP', 'CXXDEFINES', 'LIBPATH'):
+  for f in ('GRITFLAGS', 'CXXDEFINES', 'LIBPATH'):
     if type(conf.env[f]) == type([]):
       sdl[f] = [x for x in conf.env[f]]
     else:
@@ -144,7 +143,7 @@ def build(bld):
   # overcome chdir problems for jump-to-error
   Params.g_options.jobs = 2
   if not Params.g_commands['clean']:
-    print "waf: Entering directory `%s'"%(os.path.join(bld.env()['TOP'], blddir))
+    print "waf: Entering directory `%s'"%(os.path.join(Params.g_build.m_srcnode.abspath(), blddir))
   # process subfolders from here
 
   arm9obj = bld.create_obj('cpp', 'staticlib')
