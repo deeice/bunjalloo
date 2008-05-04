@@ -54,19 +54,15 @@ FileImplementation::FileImplementation(): m_stream(0)
   if (dldiCheck)
   {
     int ok = strtol(dldiCheck, 0, 0);
-    MiniMessage msg("Initialise FAT card");
     if (not ok)
     {
       // show an error message and "hang"
+      MiniMessage msg("Initialising FAT card...");
       msg.failed();
       for (;;)
       {
         swiWaitForVBlank();
       }
-    }
-    else
-    {
-      msg.ok();
     }
   }
 }

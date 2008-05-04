@@ -42,17 +42,16 @@ FatLibrary & FatLibrary::instance()
 }
 FatLibrary::FatLibrary()
 {
-  MiniMessage msg("Initialise FAT card");
   bool result = fatInitDefault();
   if (not result)
   {
+    MiniMessage msg("Initialising FAT card...");
     msg.failed();
     for (;;)
     {
       swiWaitForVBlank();
     }
   }
-  msg.ok();
 }
 FatLibrary::~FatLibrary()
 {
