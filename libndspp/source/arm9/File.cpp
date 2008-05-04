@@ -14,7 +14,9 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "libnds.h"
 #include "File.h"
+#include "MiniMessage.h"
 #include <string>
 #include <cstring>
 #include <fat.h>
@@ -40,7 +42,17 @@ FatLibrary & FatLibrary::instance()
 }
 FatLibrary::FatLibrary()
 {
-  fatInitDefault();
+  MiniMessage msg("Initialise FAT card");
+  bool result = fatInitDefault();
+  if (not result)
+  {
+    msg.failed();
+    for (;;)
+    {
+      swiWaitForVBlank();
+    }
+  }
+  msg.ok();
 }
 FatLibrary::~FatLibrary()
 {

@@ -14,7 +14,9 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "libnds.h"
 #include "File.h"
+#include "MiniMessage.h"
 #include <errno.h>
 #include <string.h>
 #include <string>
@@ -47,7 +49,27 @@ class nds::FileImplementation
 
 // delegate class:
 FileImplementation::FileImplementation(): m_stream(0)
-{}
+{
+  char * dldiCheck = getenv("NDS_DLDI");
+  if (dldiCheck)
+  {
+    int ok = strtol(dldiCheck, 0, 0);
+    MiniMessage msg("Initialise FAT card");
+    if (not ok)
+    {
+      // show an error message and "hang"
+      msg.failed();
+      for (;;)
+      {
+        swiWaitForVBlank();
+      }
+    }
+    else
+    {
+      msg.ok();
+    }
+  }
+}
 
 void FileImplementation::open(const char * name, const char * mode)
 {
