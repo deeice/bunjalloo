@@ -47,10 +47,6 @@ FatLibrary::FatLibrary()
   {
     MiniMessage msg("Initialising FAT card...");
     msg.failed();
-    for (;;)
-    {
-      swiWaitForVBlank();
-    }
   }
 }
 FatLibrary::~FatLibrary()

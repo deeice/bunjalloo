@@ -59,10 +59,6 @@ FileImplementation::FileImplementation(): m_stream(0)
       // show an error message and "hang"
       MiniMessage msg("Initialising FAT card...");
       msg.failed();
-      for (;;)
-      {
-        swiWaitForVBlank();
-      }
     }
   }
 }

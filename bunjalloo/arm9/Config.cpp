@@ -17,6 +17,7 @@
 #include <cstdlib>
 #include "Config.h"
 #include "CookieJar.h"
+#include "MiniMessage.h"
 #include "File.h"
 #include "Language.h"
 #include "URI.h"
@@ -44,6 +45,13 @@ using namespace std;
 
 void Config::reload()
 {
+  if (nds::File::exists(s_datadir) != nds::File::F_DIR)
+  {
+    using nds::MiniMessage;
+    MiniMessage msg("/data/bunjalloo exists...");
+    msg.failed();
+  }
+
   string cfgFilename;
   cfgFilename += DATADIR;
   cfgFilename += "/";
