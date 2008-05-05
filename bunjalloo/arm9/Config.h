@@ -78,6 +78,10 @@ class Config: public FileParser
      */
     void postConfiguration(const std::string & postedUrl);
 
+    /** Pre configuration check.  */
+    void checkPre();
+    /** Post configuration check.  */
+    void checkPost();
   private:
     KeyValueMap m_resources;
 

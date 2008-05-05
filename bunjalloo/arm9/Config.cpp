@@ -41,15 +41,49 @@ const char Config::BOOKMARK_FILE[] = "/"DATADIR"/user/bookmarks.html";
 const char LANG_STR[] = "language";
 using namespace std;
 
-void Config::reload()
+void Config::checkPre()
 {
-  if (nds::File::exists(s_datadir) != nds::File::F_DIR)
+  bool exists = (nds::File::exists(s_datadir) == nds::File::F_DIR);
+  nds::MiniMessage msg("/data/bunjalloo exists");
+  if (not exists)
   {
-    using nds::MiniMessage;
-    MiniMessage msg("/data/bunjalloo exists...");
     msg.failed();
   }
+  else
+  {
+    msg.ok();
+  }
+}
 
+void Config::checkPost()
+{
+  // post config load checks
+  // check font config
+  string font;
+  {
+    nds::MiniMessage msg("Font config");
+    if (resource(FONT_STR, font))
+    {
+      msg.ok();
+    }
+    else
+    {
+      msg.failed();
+    }
+  }
+  // check font exists
+  {
+    bool exists = (nds::File::exists((font+".img").c_str()) == nds::File::F_REG);
+    nds::MiniMessage msg("Font exists");
+    if (exists)
+      msg.ok();
+    else
+      msg.failed();
+  }
+}
+
+void Config::reload()
+{
   string cfgFilename;
   cfgFilename += DATADIR;
   cfgFilename += "/";
@@ -69,12 +103,12 @@ void Config::reload()
     parseFile(cfgTemplate.c_str());
   }
 
+  parseFile(cfgFilename.c_str());
+
   if (nds::File::exists(USER_DIR) == nds::File::F_NONE)
   {
     nds::File::mkdir(USER_DIR);
   }
-
-  parseFile(cfgFilename.c_str());
 }
 
 void Config::callback(const std::string & first, const std::string & second)
@@ -101,7 +135,6 @@ void Config::callback(const std::string & first, const std::string & second)
 
 Config::Config()
 {
-  reload();
 }
 
 Config::~Config()

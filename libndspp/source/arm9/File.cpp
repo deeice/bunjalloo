@@ -43,11 +43,12 @@ FatLibrary & FatLibrary::instance()
 FatLibrary::FatLibrary()
 {
   bool result = fatInitDefault();
+  MiniMessage msg("Initialising FAT card");
   if (not result)
   {
-    MiniMessage msg("Initialising FAT card...");
     msg.failed();
   }
+  msg.ok();
 }
 FatLibrary::~FatLibrary()
 {

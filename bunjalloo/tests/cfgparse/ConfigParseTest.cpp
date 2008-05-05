@@ -50,6 +50,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ConfigParseTest );
 void ConfigParseTest::setUp()
 {
   m_config = new Config;
+  m_config->reload();
   m_configParser = new ConfigParser(*m_config);
 }
 

@@ -29,8 +29,6 @@ std::string TextAreaFactory::s_name;
 
 TextArea * TextAreaFactory::create(TextType type)
 {
-  // static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
-
   TextArea * t(0);
   switch (type)
   {

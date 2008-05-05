@@ -13,8 +13,6 @@ namespace nds
 
     private:
       static int s_lastRow;
-      int m_x;
-      int m_y;
       int m_max;
       int m_pal;
       Background m_background;

@@ -27,6 +27,36 @@
 
 using namespace nds;
 
+class StaticFileInit
+{
+  private:
+    StaticFileInit()
+    {
+      char * dldiCheck = getenv("NDS_DLDI");
+      if (dldiCheck)
+      {
+        MiniMessage msg("Initialising FAT card");
+        int ok = strtol(dldiCheck, 0, 0);
+        if (not ok)
+        {
+          // show an error message and "hang"
+          msg.failed();
+        }
+        else
+        {
+          msg.ok();
+        }
+      }
+    }
+
+  public:
+    static StaticFileInit & instance()
+    {
+      static StaticFileInit s_instance;
+      return s_instance;
+    }
+};
+
 class nds::FileImplementation
 {
   public:
@@ -50,17 +80,7 @@ class nds::FileImplementation
 // delegate class:
 FileImplementation::FileImplementation(): m_stream(0)
 {
-  char * dldiCheck = getenv("NDS_DLDI");
-  if (dldiCheck)
-  {
-    int ok = strtol(dldiCheck, 0, 0);
-    if (not ok)
-    {
-      // show an error message and "hang"
-      MiniMessage msg("Initialising FAT card...");
-      msg.failed();
-    }
-  }
+  StaticFileInit::instance();
 }
 
 void FileImplementation::open(const char * name, const char * mode)
@@ -218,11 +238,13 @@ bool nds::File::direxists(const char * path)
 
 nds::File::FileType nds::File::exists(const char * path)
 {
+  StaticFileInit::instance();
   return existsCommon(toFat(path).c_str());
 }
 
 bool nds::File::mkdir(const char * path)
 {
+  StaticFileInit::instance();
   return mkdirCommon(path);
 }
 
@@ -234,6 +256,7 @@ int File::mkdir(const char * path, unsigned int mode)
 
 bool File::unlink(const char * path)
 {
+  StaticFileInit::instance();
   //return ::unlink(toFat(path).c_str()) == 0;
   int result(0);
   const std::string & actualPath = toFat(path);

@@ -60,8 +60,7 @@ void MiniMessage::failed()
 {
   m_max = 32;
   m_pal = 1;
-  print("FAILED", 25, s_lastRow);
-  s_lastRow++;
+  print("FAILED", 26, s_lastRow);
   for (;;)
   {
     swiWaitForVBlank();
@@ -72,6 +71,6 @@ void MiniMessage::ok()
 {
   m_max = 32;
   m_pal = 2;
-  print("OK", 28, s_lastRow);
+  print("OK", 26, s_lastRow);
   s_lastRow++;
 }
