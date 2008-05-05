@@ -16,7 +16,7 @@
 */
 #include <cstdlib>
 #include "Config.h"
-#include "CookieJar.h"
+#include "MiniMessage.h"
 #include "File.h"
 #include "Language.h"
 #include "URI.h"
@@ -24,7 +24,6 @@
 static const char * s_datadir = DATADIR;
 static const char s_configFile[] = "config.ini";
 static const char s_templateName[] = "config-example.txt";
-static const char COOKIE_TEMPLATE[] = "ckallow-example.txt";
 static const char USER_DIR[] = "/"DATADIR"/user";
 
 const char Config::PROXY_STR[] = "proxy";
@@ -41,6 +40,47 @@ const char Config::FULL_REF[] = "fullref";
 const char Config::BOOKMARK_FILE[] = "/"DATADIR"/user/bookmarks.html";
 const char LANG_STR[] = "language";
 using namespace std;
+
+void Config::checkPre()
+{
+  bool exists = (nds::File::exists(s_datadir) == nds::File::F_DIR);
+  nds::MiniMessage msg("/data/bunjalloo exists");
+  if (not exists)
+  {
+    msg.failed();
+  }
+  else
+  {
+    msg.ok();
+  }
+}
+
+void Config::checkPost()
+{
+  // post config load checks
+  // check font config
+  string font;
+  {
+    nds::MiniMessage msg("Font config");
+    if (resource(FONT_STR, font))
+    {
+      msg.ok();
+    }
+    else
+    {
+      msg.failed();
+    }
+  }
+  // check font exists
+  {
+    bool exists = (nds::File::exists((font+".img").c_str()) == nds::File::F_REG);
+    nds::MiniMessage msg("Font exists");
+    if (exists)
+      msg.ok();
+    else
+      msg.failed();
+  }
+}
 
 void Config::reload()
 {
@@ -63,15 +103,12 @@ void Config::reload()
     parseFile(cfgTemplate.c_str());
   }
 
+  parseFile(cfgFilename.c_str());
+
   if (nds::File::exists(USER_DIR) == nds::File::F_NONE)
   {
     nds::File::mkdir(USER_DIR);
   }
-
-  parseFile(cfgFilename.c_str());
-
-
-  handleCookies();
 }
 
 void Config::callback(const std::string & first, const std::string & second)
@@ -96,43 +133,8 @@ void Config::callback(const std::string & first, const std::string & second)
   }
 }
 
-void Config::handleCookies() const
+Config::Config()
 {
-  // configure the cookie list, read each line in the m_cookieList file and
-  // add it as an allowed one to CookieJar
-  nds::File cookieList;
-  string cookieFile;
-  resource(COOKIE_STR, cookieFile);
-  if (nds::File::exists(cookieFile.c_str()) == nds::File::F_NONE)
-  {
-    string cookietemp(DATADIR);
-    cookietemp += "/docs/";
-    cookietemp += COOKIE_TEMPLATE;
-    copyTemplate(cookietemp.c_str(), cookieFile.c_str());
-  }
-  cookieList.open(cookieFile.c_str());
-  if (cookieList.is_open())
-  {
-    vector<string> lines;
-    cookieList.readlines(lines);
-    for (vector<string>::iterator it(lines.begin());
-        it != lines.end();
-        ++it)
-    {
-      string & line(*it);
-      stripWhitespace(line);
-      URI uri(line);
-      m_cookieJar.setAcceptCookies(uri.server());
-    }
-    cookieList.close();
-  }
-}
-
-
-Config::Config(CookieJar & cookieJar):
-    m_cookieJar(cookieJar)
-{
-  reload();
 }
 
 Config::~Config()

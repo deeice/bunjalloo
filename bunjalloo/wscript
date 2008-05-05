@@ -141,6 +141,7 @@ def configure(conf):
 
 def build(bld):
   # overcome chdir problems for jump-to-error
+  os.unsetenv('NDS_DLDI')
   Params.g_options.jobs = 2
   if not Params.g_commands['clean']:
     print "waf: Entering directory `%s'"%(os.path.join(Params.g_build.m_srcnode.abspath(), blddir))

@@ -21,6 +21,7 @@
 #include <vector>
 #include <set>
 
+class Config;
 class Cookie;
 class URI;
 
@@ -91,6 +92,8 @@ class CookieJar
     void setAcceptCookies(const std::string & domain, bool accept=true);
 
     void acceptedDomains(AcceptedDomainSet & set) const;
+
+    void loadAcceptList(Config & config);
   private:
     //! List of cookies.
     std::vector<Cookie *> m_cookies;
