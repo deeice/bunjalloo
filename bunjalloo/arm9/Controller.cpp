@@ -50,7 +50,8 @@ Controller::Controller()
   m_httpClient(new HttpClient),
   m_wifiInit(false),m_redirected(0),m_maxRedirects(MAX_REDIRECTS)
 {
-  m_config = new Config(*m_document->cookieJar());
+  m_config = new Config;
+  m_document->cookieJar()->loadAcceptList(*m_config);
   string font;
   m_config->resource(Config::FONT_STR, font);
   TextAreaFactory::setFont(new Font(font));

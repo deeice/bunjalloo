@@ -17,7 +17,6 @@
 #include <cppunit/extensions/HelperMacros.h>
 #include "Config.h"
 #include "ConfigParser.h"
-#include "CookieJar.h"
 
 using namespace std;
 
@@ -39,7 +38,6 @@ class ConfigParseTest : public CPPUNIT_NS::TestFixture
   void tearDown();
 
   private:
-  CookieJar * m_cookieJar;
   Config * m_config;
   ConfigParser * m_configParser;
 
@@ -51,14 +49,12 @@ CPPUNIT_TEST_SUITE_REGISTRATION( ConfigParseTest );
 
 void ConfigParseTest::setUp()
 {
-  m_cookieJar = new CookieJar;
-  m_config = new Config(*m_cookieJar);
+  m_config = new Config;
   m_configParser = new ConfigParser(*m_config);
 }
 
 void ConfigParseTest::tearDown()
 {
-  delete m_cookieJar;
   delete m_config;
   delete m_configParser;
 }

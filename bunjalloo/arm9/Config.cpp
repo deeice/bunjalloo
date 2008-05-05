@@ -16,7 +16,6 @@
 */
 #include <cstdlib>
 #include "Config.h"
-#include "CookieJar.h"
 #include "MiniMessage.h"
 #include "File.h"
 #include "Language.h"
@@ -25,7 +24,6 @@
 static const char * s_datadir = DATADIR;
 static const char s_configFile[] = "config.ini";
 static const char s_templateName[] = "config-example.txt";
-static const char COOKIE_TEMPLATE[] = "ckallow-example.txt";
 static const char USER_DIR[] = "/"DATADIR"/user";
 
 const char Config::PROXY_STR[] = "proxy";
@@ -77,9 +75,6 @@ void Config::reload()
   }
 
   parseFile(cfgFilename.c_str());
-
-
-  handleCookies();
 }
 
 void Config::callback(const std::string & first, const std::string & second)
@@ -104,41 +99,7 @@ void Config::callback(const std::string & first, const std::string & second)
   }
 }
 
-void Config::handleCookies() const
-{
-  // configure the cookie list, read each line in the m_cookieList file and
-  // add it as an allowed one to CookieJar
-  nds::File cookieList;
-  string cookieFile;
-  resource(COOKIE_STR, cookieFile);
-  if (nds::File::exists(cookieFile.c_str()) == nds::File::F_NONE)
-  {
-    string cookietemp(DATADIR);
-    cookietemp += "/docs/";
-    cookietemp += COOKIE_TEMPLATE;
-    copyTemplate(cookietemp.c_str(), cookieFile.c_str());
-  }
-  cookieList.open(cookieFile.c_str());
-  if (cookieList.is_open())
-  {
-    vector<string> lines;
-    cookieList.readlines(lines);
-    for (vector<string>::iterator it(lines.begin());
-        it != lines.end();
-        ++it)
-    {
-      string & line(*it);
-      stripWhitespace(line);
-      URI uri(line);
-      m_cookieJar.setAcceptCookies(uri.server());
-    }
-    cookieList.close();
-  }
-}
-
-
-Config::Config(CookieJar & cookieJar):
-    m_cookieJar(cookieJar)
+Config::Config()
 {
   reload();
 }

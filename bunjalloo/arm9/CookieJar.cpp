@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <algorithm>
+#include "Config.h"
 #include "Cookie.h"
 #include "CookieJar.h"
 #include "File.h"
@@ -27,6 +28,7 @@ static const char * PATH_STR("path");
 static const char * DOMAIN_STR("domain");
 static const char * SECURE_STR("secure");
 static const char * EXPIRES_STR("expires");
+static const char COOKIE_TEMPLATE[] = "ckallow-example.txt";
 
 CookieJar::CookieJar()
 {
@@ -237,4 +239,36 @@ void CookieJar::setAcceptCookies(const std::string & domain, bool accept)
 void CookieJar::acceptedDomains(AcceptedDomainSet & set) const
 {
   set = m_acceptedDomains;
+}
+
+void CookieJar::loadAcceptList(Config & config)
+{
+  // configure the cookie list, read each line in the m_cookieList file and
+  // add it as an allowed one to CookieJar
+  nds::File cookieList;
+  string cookieFile;
+  config.resource(Config::COOKIE_STR, cookieFile);
+  if (nds::File::exists(cookieFile.c_str()) == nds::File::F_NONE)
+  {
+    string cookietemp(DATADIR);
+    cookietemp += "/docs/";
+    cookietemp += COOKIE_TEMPLATE;
+    Config::copyTemplate(cookietemp.c_str(), cookieFile.c_str());
+  }
+  cookieList.open(cookieFile.c_str());
+  if (cookieList.is_open())
+  {
+    vector<string> lines;
+    cookieList.readlines(lines);
+    for (vector<string>::iterator it(lines.begin());
+        it != lines.end();
+        ++it)
+    {
+      string & line(*it);
+      stripWhitespace(line);
+      URI uri(line);
+      setAcceptCookies(uri.server());
+    }
+    cookieList.close();
+  }
 }
