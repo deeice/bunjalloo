@@ -50,6 +50,10 @@ using namespace std;
 void Config::checkPre()
 {
   bool exists = (nds::File::exists(s_datadir) == nds::File::F_DIR);
+#if 1 /* ZIPIT_Z2 */
+  nds::MiniMessage dat(s_datadir);
+  dat.ok();
+#endif
   nds::MiniMessage msg("/data/bunjalloo exists");
   if (not exists)
   {

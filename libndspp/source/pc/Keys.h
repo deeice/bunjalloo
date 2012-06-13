@@ -37,7 +37,11 @@ class Keys
     void setRepeat(int setDelay, int setRepeat);
     int touchX() const;
     int touchY() const;
+#ifdef ZIPIT_Z2
+    int keysRealKeyboard();
+#else
     int keysRealKeyboard() const;
+#endif
 
   private:
     static const int KEY_COUNT = 13;

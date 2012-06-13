@@ -14,6 +14,8 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#ifdef ZIPIT_USE_GL
+
 #include "VideoGL.h"
 #ifdef ARM9
 #include <nds/arm9/videoGL.h>
@@ -57,3 +59,6 @@ int nds::VideoGL::glGenTexture()
   ::glGenTextures(1, &i);
   return i;
 }
+
+#endif /* ZIPIT_USE_GL */
+

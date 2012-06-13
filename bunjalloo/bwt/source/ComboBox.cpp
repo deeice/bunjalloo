@@ -14,6 +14,9 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#ifdef ZIPIT_Z2
+#include "libnds.h"
+#endif
 #include "Palette.h"
 #include "Canvas.h"
 #include "ComboBox.h"
@@ -64,10 +67,17 @@ void ComboBox::addItem(const std::string & item)
   m_items++;
   scrollPane()->add(b);
   int idealHeight = (m_bounds.h+2)*m_items;
+#ifdef ZIPIT_Z2
+  if (idealHeight > (SCREEN_HEIGHT/2))
+  {
+    idealHeight = SCREEN_HEIGHT/2;
+  }
+#else
   if (idealHeight > (192/2))
   {
     idealHeight = 192/2;
   }
+#endif
 
   scrollPane()->setSize(m_bounds.w, idealHeight);
   button()->setSize(m_bounds.w, m_bounds.h);

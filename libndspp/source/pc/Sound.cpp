@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#ifdef ZIPIT_USE_AUDIO
 #include "libnds.h"
 #include "SDLhandler.h"
 
@@ -27,5 +28,6 @@ void playGenericSound(const void* data, u32 length)
 {
   SDLhandler::instance().playSound(data, length);
 }
+#endif /* ZIPIT_USE_AUDIO */
 
 

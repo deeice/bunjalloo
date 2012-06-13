@@ -15,8 +15,10 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "libnds.h"
+#ifdef ZIPIT_USE_GL
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
@@ -30,9 +32,19 @@
 #include "Video.h"
 
 using namespace std;
+#ifdef ZIPIT_Z2
+const int SDLhandler::WIDTH(SCREEN_WIDTH);
+#if 0 /* ZIPIT_SINGLE_HEIGHT */
+const int SDLhandler::HEIGHT(SCREEN_HEIGHT);
+#else
+const int SDLhandler::HEIGHT(2*SCREEN_HEIGHT);
+#endif
+SDL_Rect SDLhandler::GAP = { 0, SCREEN_HEIGHT, SDLhandler::WIDTH, 0};
+#else
 const int SDLhandler::WIDTH(32*8);
 const int SDLhandler::HEIGHT(2*24*8);
 SDL_Rect SDLhandler::GAP = { 0, 192, SDLhandler::WIDTH, 0};
+#endif
 
 SDLhandler::SDLhandler():
     m_screen(0),
@@ -110,17 +122,30 @@ int SDLhandler::totalHeight()
    return HEIGHT+GAP.h;
 }
 
+#ifdef ZIPIT_USE_GL
 void SDLhandler::initGL( )
 {
   int h = totalHeight();
   int y = 0;
+#ifdef ZIPIT_DUAL_SCREEN_HEIGHT
+#else
+  //h = SCREEN_HEIGHT;
+#endif
   if (m_threeD)
   {
+#ifdef ZIPIT_Z2
+    if (!m_mainOnTop)
+    {
+      y = SCREEN_HEIGHT + GAP.h;
+    }
+    h = SCREEN_HEIGHT;
+#else
     if (!m_mainOnTop)
     {
       y = 192 + GAP.h;
     }
     h = 192;
+#endif
   }
   glViewport( 0, y, WIDTH, h );
   /*
@@ -133,6 +158,7 @@ void SDLhandler::initGL( )
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity( );
 }
+#endif
 int SDLhandler::init()
 {
   char *gap(getenv("NDS_GAP"));
@@ -147,10 +173,13 @@ int SDLhandler::init()
 
   char msg[256];
   int initFlags = SDL_INIT_VIDEO | SDL_INIT_TIMER;
+#ifdef ZIPIT_USE_AUDIO
   if (m_hasSound) {
     initFlags |= SDL_INIT_AUDIO;
   }
-
+#else
+  m_hasSound = false;
+#endif
   if (SDL_Init(initFlags) < 0)
   {
     sprintf (msg, "Couldn't initialize SDL: %s\n", SDL_GetError ());
@@ -159,13 +188,21 @@ int SDLhandler::init()
   }
 
   atexit (SDL_Quit);
+#ifdef ZIPIT_USE_GL
   int flags = SDL_SWSURFACE | SDL_OPENGL | SDL_GL_DOUBLEBUFFER;
+#else
+  int flags = SDL_SWSURFACE | SDL_DOUBLEBUF;
+#endif
   if (m_isFullScreen) {
     flags |= SDL_FULLSCREEN;
   } else {
     flags |= SDL_RESIZABLE;
   }
+#ifdef ZIPIT_DUAL_SCREEN_HEIGHT
   m_screen = SDL_SetVideoMode (m_scale*WIDTH,m_scale*totalHeight(), 32, flags);
+#else
+  m_screen = SDL_SetVideoMode (m_scale*WIDTH,m_scale*SCREEN_HEIGHT, 32, flags);
+#endif
   if (m_screen == NULL)
   {
     sprintf (msg, "Couldn't set 16 bit video mode: %s\n",
@@ -211,7 +248,9 @@ int SDLhandler::init()
   }
   */
 
+#ifdef ZIPIT_USE_GL
   initGL();
+#endif
   return 0;
 }
 
@@ -236,6 +275,7 @@ bool SDLhandler::sdlEvent() const
 
 int SDLhandler::initSound(int freq, int format)
 {
+#ifdef ZIPIT_USE_AUDIO
   if (not m_hasSound) {
     return true;
   }
@@ -261,6 +301,9 @@ int SDLhandler::initSound(int freq, int format)
   soundOK = true;
   SDL_PauseAudio(0);
   return soundOK;
+#else
+  return true;
+#endif
 }
 unsigned short * SDLhandler::backgroundPaletteMem()
 {
@@ -283,12 +326,14 @@ unsigned short * SDLhandler::subSpritePaletteMem()
   return m_subSpritePalette;
 }
 
+#ifdef ZIPIT_USE_AUDIO
 static const int NUM_SOUNDS(2);
 struct sample {
     const unsigned char *data;
     Uint32 dpos;
     Uint32 dlen;
 } sounds[NUM_SOUNDS];
+
 
 void SDLhandler::mixaudio(void *unused, Uint8 *stream, int len)
 {
@@ -322,7 +367,7 @@ void SDLhandler::playSound(const void * data, int length)
   sounds[useId].dpos = 0;
   SDL_UnlockAudio();
 }
-
+#endif /* ZIPIT_USE_AUDIO */
 
 SDLhandler & SDLhandler::instance()
 {
@@ -544,7 +589,7 @@ int powerOfTwo( int value )
   return result;
 }
 
-
+#ifdef ZIPIT_USE_GL
 int SDLhandler::uploadTextureFromSurface(
     SDL_Surface * sourceSurface,
     int colorKeyRed, int colorKeyGreen, int colorKeyBlue )
@@ -585,6 +630,7 @@ int SDLhandler::uploadTextureFromSurface(
   return textureID ;
 
 }
+#endif
 void SDLhandler::waitVsync()
 {
   int tmpGF = m_frames;
@@ -606,7 +652,31 @@ void SDLhandler::waitVsync()
     clear();
     BackgroundHandler::render();
     SpriteHandler::render();
+  
+#ifdef ZIPIT_USE_GL
 
+#ifdef ZIPIT_Z2
+    // Must define Texture w,h at least as big as SCREEN_WIDTH, 2*SCREEN_HEIGHT
+    // And I think they need to be powers of 2 to make opengl happy.
+    // We can use 1*SCREEN_HEIGHT when we start displaying only one screenful.
+#define TEX_W 512
+#define TEX_H 512
+    // blit doesn't work with open gl - have to upload as a texture
+    SDL_Surface * alphaImage = SDL_CreateRGBSurface( SDL_SWSURFACE, TEX_W, TEX_H,
+        32,
+#if SDL_BYTEORDER == SDL_LIL_ENDIAN // OpenGL RGBA masks
+      0x000000FF,
+      0x0000FF00,
+      0x00FF0000,
+      0xFF000000
+#else
+      0xFF000000,
+      0x00FF0000,
+      0x0000FF00,
+      0x000000FF
+#endif
+      );
+#else
     // blit doesn't work with open gl - have to upload as a texture
     SDL_Surface * alphaImage = SDL_CreateRGBSurface( SDL_SWSURFACE, 256, 512,
         32,
@@ -622,7 +692,8 @@ void SDLhandler::waitVsync()
       0x000000FF
 #endif
       );
-
+#endif
+  
     SDL_Rect areas[2] = {
       {0, 0, WIDTH, HEIGHT/2 },
       {0, GAP.h + GAP.y, WIDTH, HEIGHT/2}
@@ -659,13 +730,34 @@ void SDLhandler::waitVsync()
     float h = (float)(areas[1].y + areas[1].h);
     if (m_threeD)
     {
+#ifdef ZIPIT_Z2
+      if (!m_mainOnTop)
+        y = (float)(SCREEN_HEIGHT+GAP.h);
+      h = (float)(SCREEN_HEIGHT);
+#else
       if (!m_mainOnTop)
         y = (float)(192+GAP.h);
       h = 192.;
+#endif
     }
     glColor3f(1.0, 1.0, 1.0);
 
     //printf("Draw non-threed layer at 0, %f, size 256, %f\n", y, h);
+#ifdef ZIPIT_Z2
+    float one = ((float)h)/((float)TEX_H);
+    glBegin(GL_QUADS);
+      glTexCoord2f(0.0f, 0.0f);
+      glVertex2f  (0.0f,y);
+      glTexCoord2f(1.0f, 0.0f);
+      glVertex2f  ((float)(TEX_W), y);
+      glTexCoord2f(1.0f, one);
+      glVertex2f  ((float)(TEX_W), y+h);
+      glTexCoord2f(0.0f, one);
+      glVertex2f  (0.0f, y+h);
+    glEnd();
+    glDeleteTextures(1, &texture);
+    glDisable( GL_TEXTURE_2D );
+#else
     float one = ((float)h)/512.;
     glBegin(GL_QUADS);
       glTexCoord2f(0.0f, 0.0f);
@@ -679,6 +771,7 @@ void SDLhandler::waitVsync()
     glEnd();
     glDeleteTextures(1, &texture);
     glDisable( GL_TEXTURE_2D );
+#endif
 
     glFlush();
     if (m_threeD)
@@ -692,6 +785,12 @@ void SDLhandler::waitVsync()
       // 3D progs should call glFlush(0) but non 3D ones should not have to
       SDL_GL_SwapBuffers();
     }
+#else   /* ZIPIT_USE_GL */
+    SDL_Rect area = {0, 0, WIDTH, HEIGHT/2 };
+    SDL_BlitSurface(m_layer[0], &area, m_screen, &area);
+    SDL_Flip(m_screen);
+#endif  /* ZIPIT_USE_GL */
+
   }
   m_dirty = false;
   SDL_Event event;
@@ -705,6 +804,16 @@ void SDLhandler::waitVsync()
         {
           int x,y;
           Uint8 buttons = SDL_GetMouseState(&x, &y);
+#ifdef ZIPIT_Z2
+          if ( (buttons & SDL_BUTTON_LMASK) and y > (SCREEN_HEIGHT-1)) {
+            if (inGap(y)) {
+              break;
+            }
+            y -= GAP.h;
+            y -= SCREEN_HEIGHT;
+            Keys::instance().handleMouseMotion(x, y);
+          }
+#else
           if ( (buttons & SDL_BUTTON_LMASK) and y > 191) {
             if (inGap(y)) {
               break;
@@ -713,11 +822,26 @@ void SDLhandler::waitVsync()
             y -= 192;
             Keys::instance().handleMouseMotion(x, y);
           }
+#endif
         }
         break;
       case SDL_MOUSEBUTTONDOWN:
       case SDL_MOUSEBUTTONUP:
         // offset the y position
+#ifdef ZIPIT_Z2
+#  ifdef ZIPIT_DUAL_SCREEN_HEIGHT
+        if (event.button.y > (SCREEN_HEIGHT-1)) {
+          if (inGap(event.button.y)) {
+            break;
+          }
+          event.button.y -= GAP.h;
+          event.button.y -= SCREEN_HEIGHT;
+          Keys::instance().handleMouseEvent(event.button);
+        }
+#  else
+          Keys::instance().handleMouseEvent(event.button);
+#  endif
+#else
         if (event.button.y > 191) {
           if (inGap(event.button.y)) {
             break;
@@ -726,6 +850,7 @@ void SDLhandler::waitVsync()
           event.button.y -= 192;
           Keys::instance().handleMouseEvent(event.button);
         }
+#endif
         break;
 
       case SDL_VIDEOEXPOSE:
@@ -774,9 +899,11 @@ void SDLhandler::setWhite(int screen, int level)
 
 void SDLhandler::clear3D()
 {
+#ifdef ZIPIT_USE_GL
   if (SDLhandler::instance().m_threeD) {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
   }
+#endif
 }
 
 void SDLhandler::lcdSwap()

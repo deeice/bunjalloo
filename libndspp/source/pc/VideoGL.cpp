@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#ifdef ZIPIT_USE_GL
 #include <cstdio>
 #include "VideoGL.h"
 #include "Video.h"
@@ -139,9 +140,15 @@ void nds::VideoGL::glViewport(int x, int y, int w, int h)
 {
   if (nds::Video::instance(0).onTop())
   {
+#ifdef ZIPIT_Z2
+    // like graph axis, 0,0 is bottom left
+    // increase 192 so it starts half way up the screen
+    y += SCREEN_HEIGHT;
+#else
     // like graph axis, 0,0 is bottom left
     // increase 192 so it starts half way up the screen
     y += 192;
+#endif
   }
   ::glViewport(x, y, w, h);
 }
@@ -268,4 +275,5 @@ void nds::VideoGL::glClearColor(int red, int green, int blue, int alpha)
 {
   ::glClearColor(red/255., green/255., blue/255., alpha/255.);
 }
+#endif /* ZIPIT_USE_GL */
 

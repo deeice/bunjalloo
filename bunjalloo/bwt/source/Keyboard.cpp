@@ -483,7 +483,10 @@ bool Keyboard::tick()
   char sdlKeyPress[2] = { keysRealKeyboard(), 0};
   if ((not pressed) and sdlKeyPress[0])
   {
+#ifdef ZIPIT_Z2
+#else
     pressed = 30;
+#endif
     appendText(std::string(sdlKeyPress));
     m_dirty = true;
     return true;

@@ -122,8 +122,14 @@ void powerOn(void);
 #define MODE_4_2D      0x10004
 #define MODE_5_2D      0x10005
 
+#ifdef ZIPIT_Z2
+// The NDS has 2 screens so fake it on Zipit with 2 half height windows.
+#define SCREEN_HEIGHT  240
+#define SCREEN_WIDTH   320
+#else
 #define SCREEN_HEIGHT  192
 #define SCREEN_WIDTH   256
+#endif
 
 #define IRQ_VBLANK 0
 void irqInit();

@@ -60,18 +60,31 @@ void Canvas::drawPixel(int x, int y, int colour)
 {
   if (not m_clip.hit(x, y))
     return;
+#ifdef ZIPIT_Z2
+  int layer = ( (y < SCREEN_HEIGHT) ? 0:1 );
+  u16 * vram = m_backSub;
+  if (layer) {
+    y-=SCREEN_HEIGHT;
+    vram = SDLhandler::instance().vramMain(0);
+  }
+#else
   int layer = ( (y < 192) ? 0:1 );
   u16 * vram = m_backSub;
   if (layer) {
     y-=192;
     vram = SDLhandler::instance().vramMain(0);
   }
+#endif
   vram[x+y*SCREEN_WIDTH] = colour;
 }
 
 unsigned short * Canvas::vram(int y)
 {
+#ifdef ZIPIT_Z2
+  int layer = ( (y < SCREEN_HEIGHT) ? 1:0 );
+#else
   int layer = ( (y < 192) ? 1:0 );
+#endif
   u16 * vram = SDLhandler::instance().vramMain(0);
   if (layer) {
     vram = m_backSub;
@@ -82,12 +95,25 @@ unsigned short * Canvas::vram(int y)
 void Canvas::endPaint()
 {
   SDLhandler::instance().swapMainBuffer();
+#ifdef ZIPIT_Z2
+# if 1
+  // Try without this to see if sub is always the top screen.
+  // Yes, but I need to render sub because of scroll.
+  // Depending on direction it may copy pixels from sub to main.
   memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
+# endif
+#else
+  memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
+#endif
 }
 
 unsigned short * Canvas::frontVram(int y)
 {
+#ifdef ZIPIT_Z2
+  int layer(y<SCREEN_HEIGHT?1:0);
+#else
   int layer(y<192?1:0);
+#endif
   if (layer) {
     return m_frontSub;
   }

@@ -15,6 +15,9 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <cstdlib>
+#ifdef ZIPIT_Z2
+#include "libnds.h"
+#endif
 #include "Canvas.h"
 #include "Palette.h"
 #include "ScrollPane.h"
@@ -25,9 +28,15 @@
 
 Component * ScrollPane::s_popup(0);
 // TODO: make configurable.
+#ifdef ZIPIT_Z2
+const static int SCROLLER_WIDTH(6);
+const static int MIN_PADDING(2);
+const static int TOP_LEVEL_SIZE(SCREEN_HEIGHT);
+#else
 const static int SCROLLER_WIDTH(6);
 const static int MIN_PADDING(2);
 const static int TOP_LEVEL_SIZE(192);
+#endif
 using std::min;
 using std::max;
 using nds::Rectangle;
@@ -43,7 +52,13 @@ ScrollPane::ScrollPane()
   m_backgroundColour(nds::Color(31,31,31)),
   m_stretchChildren(false),
   m_touchedMe(false),
+#ifdef ZIPIT_Z2
+  // These numbers are not related to screen size.  They define a sprite.
+  //                         Sprite(screen,  w,  h, tile, numcolors)   
   m_scrollAnywhereSprite(new nds::Sprite(0, 16, 16, 20*8, 256))
+#else
+  m_scrollAnywhereSprite(new nds::Sprite(0, 16, 16, 20*8, 256))
+#endif
 {
   m_scrollBar->setScrollable(this);
   m_preferredWidth = nds::Canvas::instance().width();
@@ -694,7 +709,11 @@ void ScrollPane::showScrollAnywhere(const Stylus *stylus)
 
   m_scrollAnywhereSprite->setEnabled(true);
   m_scrollAnywhereSprite->setX(stylus->startX()-m_scrollAnywhereSprite->width()/2);
+#ifdef ZIPIT_Z2
+  m_scrollAnywhereSprite->setY(stylus->startY()-SCREEN_HEIGHT-m_scrollAnywhereSprite->height()/2);
+#else
   m_scrollAnywhereSprite->setY(stylus->startY()-192-m_scrollAnywhereSprite->height()/2);
+#endif
   m_scrollAnywhereSprite->update();
 }
 

@@ -168,7 +168,12 @@ void ViewRender::clear()
   m_richTextAreas.clear();
   m_pendingNewline = false;
   m_box = new BoxLayout();
+#ifdef ZIPIT_Z2
+  // Subtract scrollbar width?
+  m_box->setSize(((SCREEN_WIDTH-1)-6), SCREEN_HEIGHT);
+#else
   m_box->setSize(249, 192);
+#endif
 }
 
 void ViewRender::renderImage()

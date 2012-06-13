@@ -306,7 +306,11 @@ void Toolbar::showCursor(int x, int y, int cursorid)
 {
   // plonk a cursor at the given position
   // coords in world space
+#ifdef ZIPIT_Z2
+  y -= SCREEN_HEIGHT;
+#else
   y -= 192;
+#endif
   if (y < 0)
     return;
   m_cursorSprite->setTile(cursorid * TILES_PER_ICON);

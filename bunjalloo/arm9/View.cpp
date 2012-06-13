@@ -135,8 +135,13 @@ View::View(Document & doc, Controller & c):
     }
     m_search = new SearchEntry(searchFile);
   }
+#ifdef ZIPIT_Z2
+  m_progress->setSize((SCREEN_WIDTH-6), 10);
+  m_progress->setLocation(2, (SCREEN_HEIGHT-20));
+#else
   m_progress->setSize(250, 10);
   m_progress->setLocation(2, 172);
+#endif
 }
 
 View::~View()
@@ -864,12 +869,22 @@ int View::internalLinkPos()
       {
         RichTextArea * text(*it);
         int links = text->linkCount();
+#if 1 /* ZIPIT_Z2 */
+        if ((linksFound + links) > visitor.Index())
+#else
         if ((linksFound + links) > visitor.index())
+#endif
         {
           // if (link is in this text area)...
+#ifdef ZIPIT_Z2 
+          int linkInText = visitor.Index() - linksFound;
+          unsigned int linkPos = text->linkPosition(linkInText)  - SCREEN_HEIGHT;
+          return (linkPos * SCREEN_WIDTH) / (m_scrollPane->visibleHeight());
+#else
           int linkInText = visitor.index() - linksFound;
           unsigned int linkPos = text->linkPosition(linkInText)  - 192;
           return (linkPos * 256) / (m_scrollPane->visibleHeight());
+#endif
         }
         linksFound += links;
       }

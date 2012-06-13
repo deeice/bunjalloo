@@ -89,7 +89,11 @@ void Keys::handleKeyEvent(SDL_KeyboardEvent & event)
         m_keys[i] = true;
       }
     }
+#ifdef ZIPIT_Z2
     m_keypress = event.keysym.sym;
+#else
+    m_keypress = event.keysym.sym;
+#endif
   }
   else if (event.type == SDL_KEYUP)
   {
@@ -99,7 +103,11 @@ void Keys::handleKeyEvent(SDL_KeyboardEvent & event)
         m_keys[i] = false;
       }
     }
+#ifdef ZIPIT_Z2
+    // Keep the keypress until we read it.
+#else
     m_keypress = 0;
+#endif
   }
 }
 
@@ -167,10 +175,20 @@ void Keys::setRepeat(int setDelay, int setRepeat)
   m_count  = setDelay;
   m_heldRepeat = 0;
 }
+#ifdef ZIPIT_Z2
+int Keys::keysRealKeyboard()
+{
+  // Keep the keypress until we read it.
+  int k = m_keypress;
+  m_keypress = 0;
+  return k;
+}
+#else
 int Keys::keysRealKeyboard() const
 {
   return m_keypress;
 }
+#endif
 
 // static functions that emulate libnds
 void scanKeys()
