@@ -14,16 +14,48 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "libnds.h"
 #include "File.h"
+#include "MiniMessage.h"
 #include <errno.h>
-#include <string.h>
+#include <cstring>
+#include <cstdlib>
 #include <string>
 #include <stdio.h>
 #include <unistd.h>
-#include <dirent.h>
 #include <utime.h>
 
 using namespace nds;
+
+class StaticFileInit
+{
+  private:
+    StaticFileInit()
+    {
+      char * dldiCheck = getenv("NDS_DLDI");
+      if (dldiCheck)
+      {
+        MiniMessage msg("Initialising FAT card");
+        int ok = strtol(dldiCheck, 0, 0);
+        if (not ok)
+        {
+          // show an error message and "hang"
+          msg.failed();
+        }
+        else
+        {
+          msg.ok();
+        }
+      }
+    }
+
+  public:
+    static StaticFileInit & instance()
+    {
+      static StaticFileInit s_instance;
+      return s_instance;
+    }
+};
 
 class nds::FileImplementation
 {
@@ -47,7 +79,9 @@ class nds::FileImplementation
 
 // delegate class:
 FileImplementation::FileImplementation(): m_stream(0)
-{}
+{
+  StaticFileInit::instance();
+}
 
 void FileImplementation::open(const char * name, const char * mode)
 {
@@ -204,11 +238,13 @@ bool nds::File::direxists(const char * path)
 
 nds::File::FileType nds::File::exists(const char * path)
 {
+  StaticFileInit::instance();
   return existsCommon(toFat(path).c_str());
 }
 
 bool nds::File::mkdir(const char * path)
 {
+  StaticFileInit::instance();
   return mkdirCommon(path);
 }
 
@@ -220,6 +256,7 @@ int File::mkdir(const char * path, unsigned int mode)
 
 bool File::unlink(const char * path)
 {
+  StaticFileInit::instance();
   //return ::unlink(toFat(path).c_str()) == 0;
   int result(0);
   const std::string & actualPath = toFat(path);
@@ -246,24 +283,7 @@ bool File::unlink(const char * path)
 
 void nds::File::ls(const char * path, std::vector<std::string> & entries)
 {
-  if (exists(path) == F_DIR)
-  {
-    DIR * dir = ::opendir(toFat(path).c_str());
-    if (dir == NULL)
-    {
-      return;
-    }
-    struct dirent * ent;
-
-    while ( (ent = ::readdir(dir)) != 0)
-    {
-      if (strcmp( ent->d_name, ".") != 0 and strcmp(ent->d_name, "..") != 0 )
-      {
-        entries.push_back(ent->d_name);
-      }
-    }
-    ::closedir(dir);
-  }
+  lsCommon(toFat(path).c_str(), entries);
 }
 
 bool nds::File::cp(const char *src, const char *dst)
@@ -280,3 +300,12 @@ void File::utime(const char * path, const utimbuf * buf)
 {
   ::utime(path, buf);
 }
+
+time_t File::mtime(const char * path)
+{
+  struct stat buf;
+  buf.st_mtime = 0;
+  ::stat(toFat(path).c_str(), &buf);
+  return buf.st_mtime;
+}
+

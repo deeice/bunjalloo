@@ -18,9 +18,9 @@
 #include "HtmlAnchorElement.h"
 
 HrefFinder::HrefFinder(const std::string & href)
-  : m_element(0)
+  : m_element(0),
+  m_href(href)
 {
-  m_href = string2unicode(href);
 }
 
 bool HrefFinder::visit(HtmlAnchorElement & element)

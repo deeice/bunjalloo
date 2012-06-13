@@ -27,34 +27,31 @@ class Cookie
   public:
     /** Create an empty Cookie.*/
     Cookie()
+      : m_expires(-1), m_secure(false), m_saved(false)
     {}
 
     /** Create a Cookie from parameters.
      * @param name the name of the parameter.
      * @param value the value to give it.
-     * @param port the server port that set the cookie.
      * @param domain the domain name
      * @param path the path that the cookie applies to.
      * @param secure true if this cookie only applies to secure connections.
      */
     Cookie(const std::string & name,
            const std::string & value,
-           int                 port,
            const std::string & domain,
            const std::string & path,
+           int                 expires,
            bool secure
         )
       : m_name(name),
         m_value(value),
-        m_port(port),
         m_domain(domain),
         m_path(path),
-        m_secure(secure)
+        m_expires(expires),
+        m_secure(secure),
+        m_saved(false)
     {
-      if (m_domain[0] == '.')
-      {
-        m_domain = CookieJar::topLevel(m_domain);
-      }
     }
 
     /** Check if a domain name matches this Cookie's domain field.
@@ -63,7 +60,9 @@ class Cookie
      */
     bool matchesDomain(const std::string & domain) const
     {
-      return (domain == m_domain or CookieJar::topLevel(domain) == m_domain);
+      return (domain == m_domain or CookieJar::topLevel(domain) == m_domain
+          or (m_domain[0] == '.'
+            and CookieJar::topLevel(m_domain) == CookieJar::topLevel(domain)));
     }
 
     /** Get the name of the Cookie.
@@ -106,13 +105,44 @@ class Cookie
       return m_path;
     }
 
+    bool expired(time_t now) const
+    {
+      return not session() and (now > m_expires);
+    }
+
+    void setExpires(time_t expires)
+    {
+      m_expires = expires;
+    }
+
+    bool session() const
+    {
+      return m_expires == -1;
+    }
+
+    const std::string &domain() const
+    {
+      return m_domain;
+    }
+
+    std::string asString() const;
+
+    void setSaved(bool saved) {
+      m_saved = saved;
+    }
+
+    bool saved() const {
+      return m_saved;
+    }
+
   private:
     std::string m_name;
     std::string m_value;
-    int         m_port;
     std::string m_domain;
     std::string m_path;
+    int m_expires;
     bool m_secure;
+    bool m_saved;
 
 };
 #endif

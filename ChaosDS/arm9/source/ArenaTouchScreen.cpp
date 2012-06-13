@@ -29,13 +29,13 @@ using nds::Video;
 
 ArenaTouchScreen::ArenaTouchScreen():m_examineScreen(new ExamineSquare)
 {
-  Rectangle screenRect = {Arena::POSITION_X, Arena::POSITION_Y, Arena::PIXEL_WIDTH, Arena::PIXEL_HEIGHT};
+  Rectangle screenRect(Arena::POSITION_X, Arena::POSITION_Y, Arena::PIXEL_WIDTH, Arena::PIXEL_HEIGHT);
   m_hotspots.push_back(new HotSpot(screenRect, arenaCb, this));
 
-  Rectangle examineRect = { 0,  Text16::MESSAGE_Y*8, SCREEN_WIDTH-32, 16};
+  Rectangle examineRect(0,  Text16::MESSAGE_Y*8, SCREEN_WIDTH-32, 16);
   m_hotspots.push_back(new HotSpot(examineRect, examineCb, this));
 
-  Rectangle endRect = { SCREEN_WIDTH - 16,  Text16::MESSAGE_Y*8, 8, 16};
+  Rectangle endRect(SCREEN_WIDTH - 16,  Text16::MESSAGE_Y*8, 8, 16);
   m_hotspots.push_back(new HotSpot(endRect, exitCb, this));
 }
 

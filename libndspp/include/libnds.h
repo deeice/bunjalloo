@@ -113,7 +113,7 @@ void dmaCopy(const void * source, void * destination, unsigned int length);
 
 #define POWER_ALL
 #define POWER_ALL_2D
-void powerON(void);
+void powerOn(void);
 
 #define MODE_0_2D      0x10000
 #define MODE_1_2D      0x10001
@@ -165,7 +165,7 @@ typedef struct {
   int py;
 } touchPosition;
 
-touchPosition touchReadXY();
+void touchRead(touchPosition *data);
 // tolua_end
 u32 keysRealKeyboard();
 
@@ -173,13 +173,16 @@ void irqSet(int irq, VoidFunctionPointer fp);
 
 void setGenericSound( u32 rate, u8 vol, u8 pan, u8 format);
 void playGenericSound(const void* data, u32 length);
-// 1024 byte lut.
-extern short COS[512];
-extern short SIN[512];
+
+short cosLerp(short angle);
+short sinLerp(short angle);
 
 // ARM9, ARM7
 #else
-#include <nds/jtypes.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+#include <nds/ndstypes.h>
 #include <nds/bios.h>
 #include <nds/card.h>
 #include <nds/dma.h>
@@ -203,5 +206,12 @@ extern short SIN[512];
 // No! #include <nds/arm9/videoGL.h>
 // No! #include <nds/arm9/boxtest.h>
 #include <nds/arm9/sprite.h>
+#ifdef __cplusplus
+}
+#endif
+#ifdef ARM9
+void setGenericSound( u32 rate, u8 vol, u8 pan, u8 format);
+void playGenericSound(const void* data, u32 length);
+#endif
 #endif
 #endif

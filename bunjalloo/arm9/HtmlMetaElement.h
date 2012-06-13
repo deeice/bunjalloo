@@ -26,9 +26,9 @@ class HtmlMetaElement : public HtmlElement
     HtmlElement * clone() const;
     DEFINE_ACCEPT();
   protected:
-    UnicodeString m_httpEquiv;
-    UnicodeString m_content;
-    const UnicodeString * attributePtr(const std::string & name) const;
+    std::string m_httpEquiv;
+    std::string m_content;
+    const std::string * attributePtr(const std::string & name) const;
     void copyAttributes(HtmlElement * copyTo) const;
 };
 #endif

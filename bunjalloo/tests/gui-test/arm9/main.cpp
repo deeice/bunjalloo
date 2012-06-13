@@ -23,6 +23,7 @@
 #include "ComboBox.h"
 #include "EditableTextArea.h"
 #include "Font.h"
+#include "FontFactory.h"
 #include "Keyboard.h"
 #include "RadioButton.h"
 #include "RichTextArea.h"
@@ -31,27 +32,27 @@
 #include "TextAreaFactory.h"
 #include "TextArea.h"
 #include "TextField.h"
-#include "vera.h"
+#include "sans.h"
 
 extern const char _binary_test_map_bin_start[];
 
 using namespace nds;
 int main(int argc, char * argv[])
 {
-  irqInit();
-  irqSet(IRQ_VBLANK,0);
-  static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
-  TextAreaFactory::setFont(&font);
-  TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
+  Font *font(FontFactory::create(
+        (unsigned char*)_binary_sans_set_bin_start,
+        (unsigned char*)_binary_sans_map_bin_start));
+  TextAreaFactory::setFont(font);
+  //TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
   Keyboard * keyBoard = new Keyboard();
   ScrollPane scrollPane;
   keyBoard->setTopLevel(&scrollPane);
 #if 1
-  TextField * tf = new TextField(string2unicode("Enter the value here. This line is too big to fit in"));
-  TextField * passwd = new TextField(UnicodeString());
+  TextField * tf = new TextField("Enter the value here. This line is too big to fit in");
+  TextField * passwd = new TextField(std::string());
   RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
-  Button * goBtn = new Button(string2unicode("Go"));
-  rich->appendText(string2unicode("This is some long text "));
+  Button * goBtn = new Button("Go");
+  rich->appendText("This is some long text ");
   passwd->setSize(60,18);
   
   scrollPane.setTopLevel();
@@ -84,34 +85,28 @@ int main(int argc, char * argv[])
   ComboBox * combo2 = new ComboBox();
   combo2->setSize(90, 18);
   
-  std::string shw("Hello World");
-  UnicodeString str = string2unicode(shw);
+  std::string str("Hello World");
   Button * b1 = new Button(str);
 
-  shw = "Combo box!";
-  str = string2unicode(shw);
+  str = "Combo box!";
   oneValCombo->addItem(str);
   combo->addItem(str);
   combo2->addItem(str);
   combo2->addItem(str);
-  shw = "Another One - with very wide text";
-  str = string2unicode(shw);
+  str = "Another One - with very wide text";
   Button * b2 = new Button(str);
   combo->addItem(str);
   combo2->addItem(str);
   combo2->addItem(str);
-  shw = "Three- wide, but fixed width";
-  str = string2unicode(shw);
+  str = "Three- wide, but fixed width";
   Button * b3 = new Button(str);
   b3->setSize(60, 18);
   combo2->addItem(str);
   combo2->addItem(str);
-  shw = "Go";
-  str = string2unicode(shw);
+  str = "Go";
   Button * b4 = new Button(str);
   //b4->setSize(6*13, 10);
-  shw = "Last one!";
-  str = string2unicode(shw);
+  str = "Last one!";
   Button * b5 = new Button(str);
   combo->addItem(str);
   combo2->addItem(str);
@@ -119,21 +114,18 @@ int main(int argc, char * argv[])
 
   t2->setListener(keyBoard);
   
-  shw = "A text field that has a very, very long and pointless string";
-  str = string2unicode(shw);
+  str = "A text field that has a very, very long and pointless string";
   TextField * tf1 = new TextField(str);
   tf1->setSize(160, 18);
   tf1->setListener(keyBoard);
   combo2->addItem(str);
 
   TextArea * rbLabel = TextAreaFactory::create();
-  shw = "Radio button label.";
-  str = string2unicode(shw);
+  str = "Radio button label.";
   rbLabel->appendText(str);
 
   TextArea * cbLabel = TextAreaFactory::create();
-  shw = "CheckBox label.";
-  str = string2unicode(shw);
+  str = "CheckBox label.";
   cbLabel->appendText(str);
 
   RadioButton * rb = new RadioButton();
@@ -175,26 +167,26 @@ int main(int argc, char * argv[])
   std::string richText3("Longer text, but still normal. ");
   std::string richText4("Normal text. ");
   std::string richText5("Link text. ");
-  rich->appendText(string2unicode(richText1));
+  rich->appendText(richText1);
   rich->insertNewline();
-  rich->appendText(string2unicode(richText1));
-  rich->appendText(string2unicode(richText1));
-  rich->appendText(string2unicode(richText3));
-  rich->appendText(string2unicode(richText4));
+  rich->appendText(richText1);
+  rich->appendText(richText1);
+  rich->appendText(richText3);
+  rich->appendText(richText4);
   rich->addLink("www.link1.com");
-  rich->appendText(string2unicode(richText2));
+  rich->appendText(richText2);
   rich->endLink();
-  rich->appendText(string2unicode(richText3));
-  rich->appendText(string2unicode(richText1));
+  rich->appendText(richText3);
+  rich->appendText(richText1);
   rich->addLink("www.link2.com");
-  rich->appendText(string2unicode(richText5));
+  rich->appendText(richText5);
   rich->endLink();
 
 
   std::string s(_binary_test_map_bin_start, 1000);
-  t->appendText(string2unicode(s));
+  t->appendText(s);
   std::string s2(&_binary_test_map_bin_start[1200], 1300);
-  t2->appendText(string2unicode(s2));
+  t2->appendText(s2);
   subPane->setSize(t2->width(), 100);
   t2->setParentScroller(subPane);
 #endif
@@ -234,7 +226,8 @@ int main(int argc, char * argv[])
 
     if (keys & KEY_TOUCH)
     {
-      touchPosition tp = touchReadXY();
+      touchPosition tp;
+      touchRead(&tp);
       Stylus stylus;
       stylus.update(Stylus::DOWN, true, tp.px, tp.py+SCREEN_HEIGHT);
       needsPainting = keyBoard->dirty();

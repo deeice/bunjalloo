@@ -14,77 +14,76 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "ImageTest.h"
 #include "Image.h"
+#include <gtest/gtest.h>
 
 using namespace std;
-
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( ImageTest );
-
 using nds::Image;
 
-void ImageTest::setUp()
+class ImageTest : public testing::Test
 {
-  m_image = 0;
-}
+  protected:
+    Image * m_image;
 
-void ImageTest::tearDown()
-{
-  delete m_image;
-}
+    void SetUp() {
+      m_image = 0;
+    }
 
-void ImageTest::testWide()
+    void TearDown() {
+      delete m_image;
+    }
+};
+
+TEST_F(ImageTest, Wide)
 {
   m_image = new Image("inputs/wide.jpg");
-  CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 250;
+  EXPECT_TRUE(m_image->isValid());
+  int expected = 249;
   int result = m_image->width();
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
 
-void ImageTest::testTall()
+TEST_F(ImageTest, Tall)
 {
   m_image = new Image("inputs/tall.jpg");
-  CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 192*2;
+  EXPECT_TRUE(m_image->isValid());
+  int expected = 382;
   int result = m_image->height();
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
 
-void ImageTest::testWidePng()
+TEST_F(ImageTest, WidePng)
 {
   m_image = new Image("inputs/wide.png");
-  CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 250;
+  EXPECT_TRUE(m_image->isValid());
+  int expected = 249;
   int result = m_image->width();
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
 
-void ImageTest::testTallPng()
+TEST_F(ImageTest, TallPng)
 {
   m_image = new Image("inputs/tall.png");
-  CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 192*2;
+  EXPECT_TRUE(m_image->isValid());
+  int expected = 382;
   int result = m_image->height();
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
 
-void ImageTest::testWideGif()
+TEST_F(ImageTest, WideGif)
 {
   m_image = new Image("inputs/wide.gif");
-  CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 250;
+  EXPECT_TRUE(m_image->isValid());
+  int expected = 249;
   int result = m_image->width();
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
 
-void ImageTest::testTallGif()
+TEST_F(ImageTest, TallGif)
 {
   m_image = new Image("inputs/tall.gif");
-  CPPUNIT_ASSERT(m_image->isValid());
-  int expected = 192*2;
+  EXPECT_TRUE(m_image->isValid());
+  int expected = 382;
   int result = m_image->height();
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
-

@@ -111,5 +111,6 @@ class ScrollBar: public Component
     bool hitHandle(int x, int y);
     bool hitBottomArrow(int y);
     bool hitTopArrow(int y);
+    DISALLOW_COPY_AND_ASSIGN(ScrollBar);
 };
 #endif

@@ -53,5 +53,6 @@ class ToggleButton: public Component, public ButtonI
 
   private:
     bool m_touched;
+    DISALLOW_COPY_AND_ASSIGN(ToggleButton);
 };
 #endif

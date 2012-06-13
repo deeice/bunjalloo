@@ -29,14 +29,14 @@ Background::Background(
     int charBlock,
     int screenBlock,
     int priority):
-  m_DISPCNT(screen?SUB_DISPLAY_CR:DISPLAY_CR)
+  m_DISPCNT(screen?REG_DISPCNT_SUB:REG_DISPCNT)
 {
 
   m_bg.screen = screen;
   m_bg.number = number;
   m_bg.charBaseBlock = charBlock;
   m_bg.screenBaseBlock = screenBlock;
-  m_bg.flags = BG_SIZE(0) | BG_16_COLOR | priority;
+  m_bg.flags = BG_SIZE(0) | BG_COLOR_16 | priority;
 
   m_bg.PA = 1<<8;
   m_bg.PB = 0;
@@ -74,18 +74,18 @@ void Background::setCharBaseBlock(unsigned char var)
 };
 int Background::color() const
 {
-  return (m_bg.flags & BG_256_COLOR)?256:16;
+  return (m_bg.flags & BG_COLOR_256)?256:16;
 };
 void Background::setColor(int var)
 {
   switch(var) {
     case 16:
-      m_bg.flags &= ~BG_256_COLOR;
-      m_bg.flags |= BG_16_COLOR;
+      m_bg.flags &= ~BG_COLOR_256;
+      m_bg.flags |= BG_COLOR_16;
       break;
     case 256:
-      m_bg.flags &= ~BG_16_COLOR;
-      m_bg.flags |= BG_256_COLOR;
+      m_bg.flags &= ~BG_COLOR_16;
+      m_bg.flags |= BG_COLOR_256;
       break;
     default:
       break;
@@ -135,7 +135,7 @@ unsigned short Background::flags() const
 };
 void Background::setFlags(unsigned short var)
 {
-  m_bg.flags = var;// &(3|BG_MOSAIC_ON|BG_16_COLOR|BG_256_COLOR|BG_WRAP_ON|);
+  m_bg.flags = var;// &(3|BG_MOSAIC_ON|BG_COLOR_16|BG_COLOR_256|BG_WRAP_ON|);
 };
 unsigned char Background::number() const
 {
@@ -181,7 +181,7 @@ void Background::setRotateFlags(volatile unsigned short * BG_REG)
 
 void Background::update()
 {
-  vuint16 * BG_REG( m_bg.screen?&SUB_BG0_X0:&BG0_X0);
+  vuint16 * BG_REG( m_bg.screen?&REG_BG0HOFS_SUB:&REG_BG0HOFS);
   switch(m_bg.number)
   {
     case 0: 

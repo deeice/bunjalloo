@@ -19,15 +19,15 @@
 #include "GfxData.h"
 
 const GfxData s_paletteData[10] = {
-  {_binary_palette0_pal_start, (u32)_binary_palette0_pal_size},
-  {_binary_palette1_pal_start, (u32)_binary_palette1_pal_size},
-  {_binary_palette2_pal_start, (u32)_binary_palette2_pal_size},
-  {_binary_palette3_pal_start, (u32)_binary_palette3_pal_size},
-  {_binary_palette4_pal_start, (u32)_binary_palette4_pal_size},
-  {_binary_palette5_pal_start, (u32)_binary_palette5_pal_size},
-  {_binary_palette6_pal_start, (u32)_binary_palette6_pal_size},
-  {_binary_palette7_pal_start, (u32)_binary_palette7_pal_size},
-  {_binary_palette8_pal_start, (u32)_binary_palette8_pal_size},
-  {_binary_palette9_pal_start, (u32)_binary_palette9_pal_size},
+  {palette0Pal, (u32)palette0PalLen},
+  {palette1Pal, (u32)palette1PalLen},
+  {palette2Pal, (u32)palette2PalLen},
+  {palette3Pal, (u32)palette3PalLen},
+  {palette4Pal, (u32)palette4PalLen},
+  {palette5Pal, (u32)palette5PalLen},
+  {palette6Pal, (u32)palette6PalLen},
+  {palette7Pal, (u32)palette7PalLen},
+  {palette8Pal, (u32)palette8PalLen},
+  {palette9Pal, (u32)palette9PalLen},
 };
 

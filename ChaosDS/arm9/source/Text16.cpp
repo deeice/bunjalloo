@@ -19,8 +19,7 @@
 #include "ndspp.h"
 #include "Text16.h"
 #include "Wizard.h"
-// external data
-extern const u16 _binary_chaosfont_raw_start[];
+#include "images.h"
 
 // static data
 const static int DEFAULT_OFFSET(605);
@@ -56,7 +55,7 @@ Text16::Text16(int screen):
   // each one is 16*8, 4bpp = 16*4 pixels = 64 u8 transfers, 32 u16 transfers per char
   // total = 32*84
   u16 * tileData = m_bg->tileData();
-  dmaCopy(_binary_chaosfont_raw_start,&tileData[realOffset],64*MAX_LETTERS);
+  dmaCopy(chaosfontTiles,&tileData[realOffset],64*MAX_LETTERS);
   m_bg->setEnabled();
   
 }

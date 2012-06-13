@@ -15,8 +15,11 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <nds/bios.h>
+#include <nds/interrupts.h>
 #include <nds/memory.h>
+extern "C" {
 #include <nds/system.h>
+}
 #include <nds/arm9/video.h>
 #include "Video.h"
 #include "Sprite.h"
@@ -24,15 +27,15 @@
 using namespace nds;
 
 Video::Video(int screen):
-  m_DISPCNT(screen?SUB_DISPLAY_CR:DISPLAY_CR),
+  m_DISPCNT(screen?REG_DISPCNT_SUB:REG_DISPCNT),
   m_screen(screen)
 {
-  powerON(POWER_ALL_2D);
+  powerOn(POWER_ALL_2D);
   m_DISPCNT = 0;
-  clear();
   setObjectsEnabled();
   setObjectMapDimensions(1);
   setBanks();
+  clear();
 }
 
 void Video::setBanks()
@@ -61,19 +64,31 @@ void Video::blend(BLDMOD_MODE_t mode, int first, int second)
 {
   int blnd((first)|((second)<<8)|(BLDMOD_MODE(mode)));
   if (m_screen)
-    SUB_BLEND_CR = blnd;
+    REG_BLDCNT_SUB = blnd;
   else
-    BLEND_CR = blnd;
+    REG_BLDCNT = blnd;
 }
 
 void Video::clear()
 {
-  for (int i = 0; i < 256; ++i) {
-    BG_PALETTE[i] = 0;
-    BG_PALETTE_SUB[i] = 0;
-    SPRITE_PALETTE[i] = 0;
-    SPRITE_PALETTE_SUB[i] = 0;
+  u16 *bgpal = BG_PALETTE;
+  u16 *sppal = SPRITE_PALETTE;
+  u16 *gfx = BG_GFX;
+  if (m_screen) {
+    bgpal = BG_PALETTE_SUB;
+    sppal = SPRITE_PALETTE_SUB;
+    gfx = BG_GFX_SUB;
   }
+
+  for (int i = 0; i < 256; ++i) {
+    bgpal[i] = 0;
+    sppal[i] = 0;
+  }
+  /* Clear VRAM */
+  for (int i = 0; i < 0x40000; ++i) {
+    gfx[i] = 0;
+  }
+
   /* Clear all sprites */
   Sprite::disableAll(m_screen);
 }
@@ -111,10 +126,10 @@ void Video::setFade(int level)
          BLDMOD_BG0 | BLDMOD_BG1 | BLDMOD_BG2| BLDMOD_OBJ ,
          BLDMOD_BD );
   if (m_screen) {
-    SUB_BLEND_Y = level;
+    REG_BLDY_SUB = level;
   }
   else {
-    BLEND_Y = level;
+    REG_BLDY = level;
   }
 
 }
@@ -124,10 +139,10 @@ void Video::setBlendAB(int A, int B)
   A = A>0x1f?0x1f:A<0?0:A;
   B = B>0x1f?0x1f:B<0?0:B;
   if (m_screen) {
-    SUB_BLEND_AB = (A)|((B)<<8);
+    REG_BLDALPHA_SUB = (A)|((B)<<8);
   }
   else {
-    BLEND_AB = (A)|((B)<<8);
+    REG_BLDALPHA = (A)|((B)<<8);
   }
 }
 
@@ -173,9 +188,9 @@ void Video::setWhite(int level)
         BLDMOD_BG2 | BLDMOD_BG1 | BLDMOD_BG0 | BLDMOD_BD | BLDMOD_OBJ,
          0 );
   if (m_screen)
-    SUB_BLEND_Y = level;
+    REG_BLDY_SUB = level;
   else
-    BLEND_Y = level;
+    REG_BLDY = level;
 }
 
 void Video::whiteout(bool towhite, unsigned int speed)
@@ -195,12 +210,12 @@ void Video::setThreeD(bool td)
 {
   if (td) {
     // textures? should enable a vram bank for textures too
-    powerON(POWER_ALL);
+    powerOn(POWER_ALL);
     m_DISPCNT |= ENABLE_3D|DISPLAY_BG0_ACTIVE;
     vramSetBankA(VRAM_A_TEXTURE);
   } else {
     vramSetBankA(VRAM_A_MAIN_BG);
-    powerOFF(POWER_3D_CORE|POWER_MATRIX);
+    powerOff((PM_Bits)(POWER_3D_CORE|POWER_MATRIX));
     m_DISPCNT &= ~(ENABLE_3D|DISPLAY_BG0_ACTIVE);
   }
 }

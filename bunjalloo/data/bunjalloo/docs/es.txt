@@ -34,3 +34,4 @@ delsel=Borrar los seleccionados
 edsel=Editar los seleccionados
 clrcache=Vaciar cache en arranque
 logger=Registro para depurar
+images=Muestra imágenes

@@ -15,7 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <vector>
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include "ParameterSet.h"
 #include "File.h"
 #include "FileParser.h"

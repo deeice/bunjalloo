@@ -22,8 +22,6 @@
 #include "ParameterSet.h"
 #include "FileParser.h"
 
-class CookieJar;
-
 /** Configuration file parser. */
 class Config: public FileParser
 {
@@ -38,13 +36,14 @@ class Config: public FileParser
     static const char CLEARCACHE[];
     static const char DOWNLOAD[];
     static const char UPDATE[];
+    static const char USER_AGENT_STR[];
     static const char FULL_REF[];
+    static const char SHOW_IMAGES[];
     static const char BOOKMARK_FILE[];
+    static const char LEFTY[];
 
-    /** Initialise the config class. Set the document parser and the controller.
-     * @param doc the document model of the configuration file.
-     */
-    Config(CookieJar & doc);
+    /** Initialise the config class. Set the document parser and the controller.  */
+    Config();
 
     /** End of life time. */
     ~Config();
@@ -80,13 +79,14 @@ class Config: public FileParser
      */
     void postConfiguration(const std::string & postedUrl);
 
+    /** Pre configuration check.  */
+    void checkPre();
+    /** Post configuration check.  */
+    void checkPost();
   private:
-    CookieJar & m_cookieJar;
     KeyValueMap m_resources;
 
     void configPathMember(const std::string & value, std::string & member);
-    void handleCookies() const;
-
     void updateConfig(const std::string & first, const std::string & second,
         std::vector<std::string> & lines);
 };

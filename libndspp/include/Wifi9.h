@@ -20,6 +20,7 @@
 #ifdef ARM7
 #error Wifi9 is only available on the ARM9
 #endif
+#include "util/classhelper.h"
 //tolua_begin
 namespace nds
 {
@@ -79,6 +80,7 @@ namespace nds
       //! initialise the DS wifi hardware but do not connect.
       void initialise();
 
+      DISALLOW_COPY_AND_ASSIGN(Wifi9);
   }; // tolua_export
 }; // tolua_export
 #endif

@@ -21,6 +21,7 @@
 #include "Language.h"
 #include "NodeDumper.h"
 #include "View.h"
+#include "string_utils.h"
 
 EditPopup::EditPopup(View * parent):
   m_parent(parent)
@@ -67,23 +68,24 @@ void EditPopup::editElement()
   m_parent->editBookmark();
 }
 
-UnicodeString EditPopup::details() const
+std::string EditPopup::details() const
 {
-  UnicodeString val(m_element->attribute("href"));
+  std::string val(m_element->attribute("href"));
   val += '\n';
   val += m_element->firstChild()->text();
   return val;
 }
 
-void EditPopup::postEdit(const UnicodeString & val)
+void EditPopup::postEdit(const std::string & val)
 {
   using std::vector;
   using std::string;
-  vector<UnicodeString> tokens;
-  unicodeint newline[] = { '\n', 0};
-  tokenize(val, tokens, UnicodeString(newline));
+  vector<std::string> tokens;
+  tokenize(val, tokens, "\n");
+  if (tokens.size() != 2)
+    return;
   m_element->setAttribute("href", tokens[0]);
-  UnicodeString & t(m_element->firstChild()->text());
+  std::string & t(m_element->firstChild()->text());
   t = tokens[1];
   for (size_t i = 2; i < tokens.size(); ++i)
   {

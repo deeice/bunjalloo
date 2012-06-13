@@ -19,7 +19,6 @@
 #include "Language.h"
 
 using namespace std;
-const char Language::LANGUAGE_DIR[] = DATADIR"/docs/";
 
 /** Names of the built in languages, ordered the same as user settings */
 const char * Language::BUILTIN_LANGS[6] = {
@@ -37,15 +36,15 @@ Language & Language::instance()
   return s_language;
 }
 
-UnicodeString Language::translate(const std::string & s)
+const std::string &Language::translate(const std::string & s)
 {
   // find s, if exists return m_strings[s] else return string2unicode(s);
   TranslateMap::const_iterator it(m_strings.find(s));
   if (it != m_strings.end())
   {
-    return string2unicode(it->second);
+    return it->second;
   }
-  return string2unicode(s);
+  return s;
 }
 
 void Language::setLanguage(const std::string & l)
@@ -94,18 +93,26 @@ void Language::callback(const std::string & first, const std::string & second)
 void Language::loadLanguageFile()
 {
   // load english defaults.
-  std::string lf(LANGUAGE_DIR);
+  std::string lf(m_directory);
   lf += "en.txt";
   parseFile(lf.c_str());
 
   if (nds::File::exists(lf.c_str()) != nds::File::F_NONE)
   {
     // default to english...
-    lf = LANGUAGE_DIR;
+    lf = m_directory;
     lf += m_lang;
     lf += ".txt";
     parseFile(lf.c_str());
   }
 }
 
-
+void Language::setDirectory(const std::string & dir)
+{
+  m_directory = dir;
+  if (m_directory[m_directory.length()-1] != '/')
+  {
+    m_directory += '/';
+  }
+  loadLanguageFile();
+}

@@ -34,7 +34,6 @@ class EditPopup;
 class ProgressBar;
 class ScrollPane;
 class SearchEntry;
-class Stylus;
 class TextField;
 class Toolbar;
 class Updater;
@@ -79,6 +78,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void enterUrl();
 
     void editBookmark();
+
+    void stopOrReload();
 
     /** User wants to bookmark a URL or show the bookmark page.
      */
@@ -178,6 +179,8 @@ class View : public ViewI, public ButtonListener, public LinkListener
     void setToolbar(Toolbar * toolbar);
 
     void makeNiceFileName(std::string & fileName);
+
+    int internalLinkPos();
 };
 
 Controller & View::controller() const

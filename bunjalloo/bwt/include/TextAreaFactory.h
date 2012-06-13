@@ -42,24 +42,8 @@ class TextAreaFactory
      */
     static void setFont(Font * font);
 
-    /** Set the palette name to be used. Either usePaletteName() or
-     * usePaletteData() must be called before using create().
-     * @param name the palette file name to use.
-     */
-    static void usePaletteName(const std::string & name);
-
-    /** Set the palette data to be used. Either usePaletteName() or
-     * usePaletteData() must be called before using create().
-     * @param data the palette data to use.
-     * @param size the size of the data.
-     */
-    static void usePaletteData(const char * data, int size);
-
   private:
     static Font * s_font;
-    static std::string s_name;
-    static const char * s_paletteData;
-    static int s_paletteSize;
 
     TextAreaFactory();
     ~TextAreaFactory();

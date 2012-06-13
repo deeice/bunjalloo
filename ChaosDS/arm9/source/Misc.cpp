@@ -163,8 +163,8 @@ bool Misc::confirm()
   int yes_pressed = 0;
   // 012345678901234567890123456
   // DISMOUNT WIZARD? A=YES B=NO
-  nds::Rectangle yesRect = {17*8, Text16::MESSAGE_Y*8, 5*8, 16 };
-  nds::Rectangle noRect = { 23*8, Text16::MESSAGE_Y*8, 4*8, 16 };
+  nds::Rectangle yesRect(17*8, Text16::MESSAGE_Y*8, 5*8, 16 );
+  nds::Rectangle noRect(23*8, Text16::MESSAGE_Y*8, 4*8, 16 );
   while (yes_pressed == 0) {
     swiWaitForVBlank();
     scanKeys();
@@ -175,7 +175,8 @@ bool Misc::confirm()
       yes_pressed = 1;
     if (keysSlow & KEY_TOUCH)
     {
-      touchPosition pos = touchReadXY();
+      touchPosition pos;
+      touchRead(&pos);
       if ( yesRect.hit(pos.px, pos.py) )
       {
         yes_pressed = 2;

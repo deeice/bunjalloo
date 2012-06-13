@@ -17,6 +17,7 @@
 #ifndef Stylus_h_seen
 #define Stylus_h_seen
 #include <vector>
+#include "util/classhelper.h"
 class StylusListener;
 /** Stylus idea inspired by Jeff Lait's Powder.
  * User places the pointer on the screen in an area. He then let's go.
@@ -156,5 +157,7 @@ class Stylus
     void notifyDownRepeat();
     void notifyDown();
     void notifyUp();
+
+    DISALLOW_COPY_AND_ASSIGN(Stylus);
 };
 #endif

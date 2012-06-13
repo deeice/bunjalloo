@@ -27,6 +27,8 @@ class Select: public ComboBox
   public:
     Select(HtmlElement * select);
 
+    void init();
+
     /** Overridden from ComboBox::pressed() in order to capture selection
      * events and set the HtmlElement value.
      * @param button the menu button pressed.

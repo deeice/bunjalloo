@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "utf8.h"
 #include "HtmlParserDriver.h"
 #include "ElementFactory.h"
 #include "HtmlElement.h"
@@ -53,5 +54,10 @@ void HtmlParserDriver::handleData(unsigned int ucodeChar)
 {
   if (ucodeChar == '\n')
     return;
-  m_data += ucodeChar;
+  utf8::unchecked::append(ucodeChar, back_inserter(m_data));
+}
+
+void HtmlParserDriver::handleBinaryData(const void * data, unsigned int len)
+{
+  m_data += static_cast<const char*>(data);
 }

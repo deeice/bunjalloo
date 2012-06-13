@@ -37,30 +37,30 @@ bool Wifi9::connected() const
 void Wifi9::initialise()
 { 
   // wifi init complete - wifi lib can now be used!
+  m_connected = true;
 }
 
 void Wifi9::connect()
 { 
   // nop
+  m_connected = true;
 } 
 
 Wifi9::WifiStatus Wifi9::status() const
 {
-  static WifiStatus s = DISCONNECTED;
-  switch (s)
+  if (m_connected)
   {
-    case ASSOCIATING:
-      s = ASSOCIATED;
-      break;
-    default:
-      s = ASSOCIATING;
-      break;
+    return ASSOCIATED;
   }
-  return s;
+  else
+  {
+    return DISCONNECTED;
+  }
 }
 
 void Wifi9::disconnect()
 {
+  m_connected = false;
 }
 
 int Wifi9::signalStrength() const

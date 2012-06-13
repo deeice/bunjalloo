@@ -27,15 +27,15 @@ class HtmlImageElement : public HtmlElement
 
     HtmlElement * clone() const;
     virtual void setAttribute(const std::string & name,
-        const UnicodeString & value);
+        const std::string & value);
     bool hasAltText() const;
     DEFINE_ACCEPT();
   protected:
-    UnicodeString m_src;
-    UnicodeString m_alt;
-    UnicodeString m_name;
+    std::string m_src;
+    std::string m_alt;
+    std::string m_name;
     bool m_hasAltText;
-    const UnicodeString * attributePtr(const std::string & name) const;
+    const std::string * attributePtr(const std::string & name) const;
     void copyAttributes(HtmlElement * copyTo) const;
 };
 #endif

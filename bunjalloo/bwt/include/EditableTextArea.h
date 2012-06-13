@@ -36,7 +36,7 @@ class EditableTextArea: public TextArea, public TextEntryI
     /** Reimplemented (shadowed) from TextArea::appendText()
      * @param unicodeString the string to append to the text
      */
-    void appendText(const UnicodeString & unicodeString);
+    void appendText(const std::string &unicodeString);
     /** Delete a character at the current caret position.*/
     void deleteChar();
     /** Clear all text, reset caret. */
@@ -60,8 +60,8 @@ class EditableTextArea: public TextArea, public TextEntryI
     inline bool echoText() const;
 
     // interface implementation
-    virtual void text(UnicodeString & returnString) const;
-    virtual void setText(const UnicodeString & text);
+    virtual void text(std::string &returnString) const;
+    virtual void setText(const std::string &text);
     virtual void paint(const nds::Rectangle & clip);
     virtual bool isMultiLine() const;
 
@@ -71,10 +71,11 @@ class EditableTextArea: public TextArea, public TextEntryI
     virtual bool stylusDown(const Stylus * stylus);
   protected:
     /** Overloaded from TextArea. If echo is off, shows * instead of text.*/
-    virtual void printu(const UnicodeString & unicodeString);
+    virtual void printu(const std::string &unicodeString);
 
   private:
     int m_caretLine;
+    // the character in the current line (not the byte)
     int m_caretChar;
     int m_caretPixelX;
     bool m_appendedNewLine;
@@ -87,6 +88,7 @@ class EditableTextArea: public TextArea, public TextEntryI
     void resizeParent();
 
     bool inBounds(int x, int y);
+    DISALLOW_COPY_AND_ASSIGN(EditableTextArea);
 };
 void EditableTextArea::setEchoText(bool echo)
 {

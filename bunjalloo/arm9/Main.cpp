@@ -23,9 +23,8 @@
 using namespace nds;
 int main(int argc, char * argv[])
 {
-  irqInit();
-  irqSet(IRQ_VBLANK,0);
-  Controller * c = new Controller;
+  Controller * c = new Controller();
+  c->initialise();
   if (argc > 1) {
     std::string fileName(argv[1]);
     File check;
@@ -39,10 +38,15 @@ int main(int argc, char * argv[])
     else {
       c->doUri(URI(fileName));
     }
+    // pass 2 arguments to exit early!
+    if (argc > 2)
+    {
+      return 0;
+    }
   }
   else
   {
-    c->showLicence();
+    c->doUri(URI(std::string(Controller::LICENCE_URL)));
   }
   c->mainLoop();
 }

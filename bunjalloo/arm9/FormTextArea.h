@@ -17,7 +17,6 @@
 #ifndef FormTextArea_h_seen
 #define FormTextArea_h_seen
 
-#include "UnicodeString.h"
 #include "ScrollPane.h"
 #include "TextEntryI.h"
 #include "TextListener.h"
@@ -37,8 +36,8 @@ class FormTextArea: public ScrollPane, public TextEntryI, public TextListener
 
     /** Implements TextEntryI by proxy to the textArea.  */
     virtual bool isMultiLine() const;
-    virtual void text(UnicodeString & returnString) const;
-    virtual void setText(const UnicodeString & text);
+    virtual void text(std::string & returnString) const;
+    virtual void setText(const std::string & text);
 
   private:
     inline EditableTextArea * textArea();

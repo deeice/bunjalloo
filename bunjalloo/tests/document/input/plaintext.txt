@@ -1,0 +1,8 @@
+HTTP/1.0 200 OK
+Content-type: text/plain
+
+this is plain text
+line 2
+line 3
+
+end

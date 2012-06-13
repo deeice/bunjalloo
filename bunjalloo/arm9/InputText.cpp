@@ -22,7 +22,7 @@ InputText::InputText(HtmlElement * element)
 {
 }
 
-void InputText::setText(const UnicodeString & text)
+void InputText::setText(const std::string &text)
 {
   TextField::setText(text);
   m_element->setAttribute("value", text);

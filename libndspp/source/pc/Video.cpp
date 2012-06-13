@@ -20,8 +20,8 @@
 #include "SDLhandler.h"
 
 using namespace nds;
-static unsigned long int SUB_DISPLAY_CR(0);
-static unsigned long int DISPLAY_CR(0);
+static unsigned int SUB_DISPLAY_CR(0);
+static unsigned int DISPLAY_CR(0);
 static unsigned short SUB_BLEND_CR;
 static unsigned short BLEND_CR;
 static unsigned short BLEND_Y;
@@ -33,7 +33,7 @@ Video::Video(int screen):
   m_DISPCNT(screen?SUB_DISPLAY_CR:DISPLAY_CR),
   m_screen(screen)
 {
-  powerON(POWER_ALL_2D);
+  powerOn(POWER_ALL_2D);
   m_DISPCNT = 0;
   clear();
   setObjectsEnabled();

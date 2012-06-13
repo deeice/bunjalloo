@@ -17,7 +17,7 @@
 #ifndef Document_h_seen
 #define Document_h_seen
 #include <vector>
-#include "UnicodeString.h"
+#include <string>
 #include "ViewI.h"
 
 class HeaderParser;
@@ -34,7 +34,9 @@ class Document
     //! Status of the document.
     enum Status {
       NOTHING,   //!< No status set.
-      LOADED,    //!< Has fully loaded.
+      LOADED_HTML,  //!< Has loaded the HTML page
+      LOADED_ITEM,  //!< Has loaded an item on the page
+      LOADED_PAGE,  //!< Has fully loaded the page
       INPROGRESS, //!< Is in the progress of loading.
       HAS_HEADERS,//!< Has got the HTTP headers
       REDIRECTED  //!< Page has been redirected
@@ -69,7 +71,7 @@ class Document
     /** Get the model as text.
      * @return a string of universal characters.
      */
-    const UnicodeString & asText() const;
+    const std::string &asText() const;
 
     /** Get the root node of the document model.
      * @return The root node.
@@ -144,8 +146,6 @@ class Document
     void refresh(std::string & refresh, int & time) const;
 
     void setCacheFile(const std::string & cacheFile);
-
-    bool shouldCache() const;
 
     HtmlDocument * htmlDocument() const
     {

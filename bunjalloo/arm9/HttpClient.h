@@ -41,7 +41,6 @@ class HttpClient: public nds::Client
 
 
     HttpClient();
-    HttpClient(const URI & uri);
     ~HttpClient();
     void setController(Controller * c);
 
@@ -118,6 +117,10 @@ class HttpClient: public nds::Client
     void readFirst();
     void readAll();
     void finish();
+    std::string cookieString(const URI &uri) const;
+    std::string filenamePart(const URI &uri) const;
+    std::string userAgent() const;
+    std::string proxyString() const;
     inline bool isSsl() const;
 };
 

@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <algorithm>
 #include "Canvas.h"
 #include "Delete.h"
 #include "LinkListener.h"
@@ -21,7 +22,8 @@
 #include "Rectangle.h"
 #include "RichTextArea.h"
 #include "Stylus.h"
-#include "UTF8.h"
+#include "utf8.h"
+#include "string_utils.h"
 #include "WidgetColors.h"
 using namespace std;
 using namespace nds;
@@ -36,6 +38,7 @@ RichTextArea::RichTextArea(Font * font) :
   m_linkListener(0),
   m_centred(false),
   m_outlined(false),
+  m_underLine(false),
   m_linkTouched(0),
   m_downCount(0)
 {
@@ -53,9 +56,9 @@ void RichTextArea::removeClickables()
   m_state = Link::STATE_PLAIN;
 }
 
-static bool isEmpty(const UnicodeString & line)
+static bool isEmpty(const std::string & line)
 {
-  UnicodeString::const_iterator it(line.begin());
+  std::string::const_iterator it(line.begin());
   for (; it != line.end(); ++it)
   {
     if (not isWhitespace(*it))
@@ -66,88 +69,34 @@ static bool isEmpty(const UnicodeString & line)
   return true;
 }
 
-void RichTextArea::appendText(const UnicodeString & unicodeString)
+void RichTextArea::appendText(const std::string & unicodeString)
 {
-  if (m_document.size() > 1 and isEmpty(unicodeString) and isEmpty(currentLine()) and isEmpty(m_document[m_document.size()-2])
-      and not lineHasComponent(m_document.size()-1))
+  if (m_document.empty()) {
+    m_documentSize = 0;
+  }
+  if (m_document.size() > 1
+      and isEmpty(unicodeString)
+      and isEmpty(currentLine())
+      and isEmpty(m_document[m_document.size()-2]))
   {
     // avoid duplicate empty lines
     return;
   }
   TextArea::appendText(unicodeString);
-  m_documentSize = documentSize();
-}
-
-void RichTextArea::add(Component * child)
-{
-  Component::add(child);
-
-  Rectangle bounds(child->preferredSize());
-  child->setSize(bounds.w, bounds.h);
-  int w = bounds.w;
-  if (m_bounds.w < bounds.w) {
-    w = m_bounds.w;
-  }
-  child->setSize(w, bounds.h);
-
-  int x = m_appendPosition;
-  if ((x + child->width()) > width())
+  // recalculate document size
+  m_documentSize += utf8::distance(unicodeString.begin(), unicodeString.end());
+  if (m_centred)
   {
-    // out of bounds
-    m_appendPosition = child->width();
-    m_document.push_back(UnicodeString());
-    m_preferredHeight += lineHasComponent(m_document.size()-1)? m_lineHeight[m_document.size()-1]:font().height();
-    x = 0;
-  }
-  else
-  {
-    m_appendPosition += child->width();
-  }
-
-  int y = 0;
-  for (unsigned int i = 0; i < m_document.size()-1; ++i)
-  {
-    if (lineHasComponent(i))
-      y += m_lineHeight[i];
-    else
-      y += font().height();
-  }
-
-  child->setLocation(x, y);
-
-  m_lineHeight[m_document.size()-1] = std::max(child->height(), font().height());
-  m_childPositions.push_back(m_documentSize);
-  m_preferredHeight += m_lineHeight[m_document.size()-1] - font().height();
-  // problems here -
-  // setSize should update the child sizes and text positions
-  // setLocation should update the child locations
-  // on paint, should constantly look for next child component while printing text
-  // upon finding the child component, increment the cursorx, cursory to account for it.
-}
-
-void RichTextArea::setLocation(unsigned int x, unsigned int y)
-{
-  // work out dx, dy
-  int dx = this->x() - x;
-  int dy = this->y() - y;
-  Component::setLocation(x, y);
-  if (dx == 0 and dy == 0)
-    return;
-
-  for (std::vector<Component*>::iterator it(m_children.begin());
-      it != m_children.end();
-      ++it)
-  {
-    // move children dx, dy
-    Component * child(*it);
-    child->setLocation( child->x() - dx, child->y() - dy);
+    m_preferredWidth = m_bounds.w;
   }
 }
 
 void RichTextArea::addLink(const std::string & href, bool visited)
 {
+  if (m_state == Link::STATE_LINK)
+    return;
   Link * link = new Link(href);
-  link->setTextStart(m_documentSize);
+  link->setTextStart(totalCharacters());
   m_links.push_back(link);
   m_state = Link::STATE_LINK;
   if (visited)
@@ -162,13 +111,13 @@ void RichTextArea::endLink()
   {
     m_state = Link::STATE_PLAIN;
     Link & link(*m_links.back());
-    link.setTextEnd(m_documentSize);
+    link.setTextEnd(totalCharacters());
     if (link.textEnd() != link.textStart())
     {
       int lastChar = (int) ( currentLine()[currentLine().length()-1] );
       if (isWhitespace(lastChar))
       {
-        link.setTextEnd(m_documentSize-1);
+        link.setTextEnd(totalCharacters()-1);
       }
     }
   }
@@ -188,7 +137,7 @@ void RichTextArea::addImage(const std::string & src)
   else
   {
     Link * link = new Link(WidgetColors::LINK_IMAGE);
-    link->setTextStart(m_documentSize);
+    link->setTextStart(totalCharacters());
     m_links.push_back(link);
     m_state = Link::STATE_COLOR;
   }
@@ -201,7 +150,7 @@ void RichTextArea::endImage()
   {
     m_state = Link::STATE_PLAIN;
     Link & link(*m_links.back());
-    link.setTextEnd(m_documentSize);
+    link.setTextEnd(totalCharacters());
   }
   else if (m_state == Link::STATE_LINK)
   {
@@ -213,102 +162,43 @@ void RichTextArea::endImage()
 
 void RichTextArea::incrLine()
 {
-  LineHeightMap::const_iterator it(m_lineHeight.find(m_lineNumber));
-  if (m_lineHeight.end() != it)
-  {
-    m_cursory += it->second;
+  if (underline()) {
+    endUnderline();
+    TextArea::incrLine();
+    startUnderline();
+  } else {
+    TextArea::incrLine();
   }
-  else
-  {
-    m_cursory += font().height();
-  }
-  m_cursorx = m_initialCursorx;
   m_lineNumber++;
 }
 
-bool RichTextArea::lineHasComponent(int line) const
+void RichTextArea::printu(const std::string & unicodeString)
 {
-  LineHeightMap::const_iterator it(m_lineHeight.find(line));
-  return (m_lineHeight.end() != it);
-}
-
-void RichTextArea::printu(const UnicodeString & unicodeString)
-{
-  // print at the start of the line this line's text
-  // but adding components means that the text may be interspersed between components
-  // i.e. any combination of
-  // text [   ]  text [  ] text [ ] text
-
-  // take care - can have text first or component first
-  UnicodeString::const_iterator it(unicodeString.begin());
-  static const UnicodeString delimeter(string2unicode(" \r\n	"));
-  unsigned int lastPosition = unicodeString.find_last_not_of(delimeter);
+  static const std::string delimeter(" \r\n\t");
+  unsigned int lastPosition = findLastNotOf(unicodeString, delimeter);
   unsigned int i = 0;
-  bool hasComponent(lineHasComponent(m_lineNumber));
-  bool centred(m_centred);
-  // can't centre the line if there is a component on it
-  if (hasComponent)
-  {
-    centred = false;
-  }
-  if (centred)
-  {
+  if (m_centred) {
     // find size of line, change m_cursorx accordingly
     int w = textSize(unicodeString.substr(0, lastPosition));
-    m_cursorx = (m_bounds.w - w)/2;
+    m_cursorx = ((m_bounds.x << 8) + (((m_bounds.w << 8) - w)/2));
   }
 
-  /*
-  printf("hasComponent %s , m_currentChildIndex %d string %d\n", hasComponent?"Yes":"no", m_currentChildIndex,
-      unicodeString.size());
-  */
-  // this is for the case of components alone on a line, still need to jump past them
-  // so that the next component is considered (otherwise we miss them)
-  if (unicodeString.size() == 0 and hasComponent)
+  std::string::const_iterator it(unicodeString.begin());
+  std::string::const_iterator end_it(unicodeString.end());
+  while (it != end_it)
   {
-    // how to factor this loop?
-    while (hasComponent and m_currentChildIndex < m_childPositions.size()
-        and m_paintPosition == m_childPositions[m_currentChildIndex])
-    {
-      Component * c(m_children[m_currentChildIndex]);
-      if (m_cursory == c->y())
-      {
-        m_cursorx += c->width();
-      }
-      else
-      {
-        break;
-      }
-      ++m_currentChildIndex;
-    }
-  }
-
-  for (; it != unicodeString.end() ; ++it, ++i)
-  {
-    // check for components
-    while (hasComponent and m_currentChildIndex < m_childPositions.size()
-        and m_paintPosition == m_childPositions[m_currentChildIndex])
-    {
-      Component * c(m_children[m_currentChildIndex]);
-      if (m_cursory == c->y())
-      {
-        m_cursorx += c->width();
-      }
-      ++m_currentChildIndex;
-    }
     if (m_nextEvent == m_paintPosition)
     {
       handleNextEvent();
     }
     ++m_paintPosition;
+    unsigned int value(utf8::next(it, end_it));
     if (i > lastPosition) {
       continue;
     }
-    unsigned int value(*it);
-    if ( doSingleChar(value) )
-    {
+    if (doSingleChar(value))
       break;
-    }
+    ++i;
   }
 }
 
@@ -325,24 +215,12 @@ void RichTextArea::handleNextEvent()
   switch (m_nextEventType)
   {
     case Link::STATE_LINK:
-      if (not currentLink->href().empty())
-      {
-        if (currentLink->clicked())
-        {
-          setTextColor(WidgetColors::LINK_CLICKED);
-        }
-        else
-        {
-          setTextColor(currentLink->color());
-        }
-        setUnderline();
-      }
+      startUnderline();
       m_nextEvent = currentLink->textEnd();
       m_nextEventType = Link::STATE_PLAIN;
       break;
     case Link::STATE_PLAIN:
-      setTextColor(0);
-      setUnderline(false);
+      endUnderline();
       if (m_currentLink != m_links.end())
         ++m_currentLink;
       if (m_currentLink != m_links.end())
@@ -355,7 +233,7 @@ void RichTextArea::handleNextEvent()
           handleNextEvent();
         }
       } else {
-        m_nextEvent = m_documentSize;
+        m_nextEvent = totalCharacters();
         m_nextEventType = Link::STATE_PLAIN;
       }
       break;
@@ -375,58 +253,49 @@ void RichTextArea::handleNextEvent()
   }
 }
 
-unsigned int RichTextArea::charIndexToYPos(unsigned int charIndex) const
+unsigned int RichTextArea::charIndexToLine(unsigned int charIndex) const
 {
   // given a cursor position, find the equivalent line/ypos
-  unsigned int ypos = 0;
+  unsigned int line = 0;
   unsigned int total = 0;
   int fontHeight = font().height();
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator it(m_document.begin());
   for (; it != m_document.end() and total < charIndex; ++it)
   {
-    total += it->length();
-    ypos++;
+    total += utf8::distance(it->begin(), it->end());
+    line++;
   }
-  return ypos*fontHeight;
+  return line*fontHeight;
 }
 
-unsigned int RichTextArea::documentSize(int endLine, unsigned int * childIndex) const
+unsigned int RichTextArea::totalCharacters()
+{
+  if (m_documentSize == 0)
+  {
+    m_documentSize = documentSize(NO_INDEX);
+  }
+  return m_documentSize;
+}
+
+unsigned int RichTextArea::documentSize(int endLine) const
 {
   unsigned int total = 0;
-  if (endLine == -1)
+  if (endLine == NO_INDEX)
   {
     endLine = m_document.size();
   }
-  unsigned int currentChildIndex = 0;
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
-  for (int i = 0; it != m_document.end() and i != endLine; ++it, ++i)
+  std::vector<std::string>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator end(m_document.end());
+  for (int i = 0; it != end and i != endLine; ++it, ++i)
   {
-    total += it->length();
-
-    // skip to the next child position
-    while (currentChildIndex < m_childPositions.size() and total > m_childPositions[currentChildIndex])
-    {
-      ++currentChildIndex;
-    }
-  }
-  if (childIndex)
-  {
-    *childIndex = currentChildIndex;
+    total += utf8::distance(it->begin(), it->end());
   }
   return total;
 }
 
-int RichTextArea::linesToSkip() const
-{
-  if (m_bounds.y < 0)
-  {
-    return lineAt(0);
-  }
-  return 0;
-}
-
 void RichTextArea::paint(const nds::Rectangle & clip)
 {
+  nds::Canvas::instance().setClip(clip);
   m_dirty = false;
   // ensure we switch off links
   setTextColor(0);
@@ -442,32 +311,12 @@ void RichTextArea::paint(const nds::Rectangle & clip)
   else
   {
     m_currentLink = m_links.end();
-    m_nextEvent = m_documentSize;
+    m_nextEvent = totalCharacters();
     m_nextEventType = Link::STATE_PLAIN;
   }
-  nds::Canvas::instance().setClip(clip);
   m_paintPosition = 0;
   m_lineNumber = 0;
-  // work out what happens when we skip lines.
-  int dy;
-  int lineNum = lineAt(0, dy);
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
-  int skipLines(lineNum);
-  m_currentChildIndex = 0;
-  // printf("Skip %d lines dy %d\n", skipLines, dy);
-  if (skipLines > 0)
-  {
-    checkSkippedLines(skipLines);
-    m_lineNumber = skipLines;
-    setCursor(m_bounds.x, -dy);
-    it += skipLines;
-  }
-  else
-  {
-    setCursor(m_bounds.x, m_bounds.y);
-  }
-
-  //TextArea::paint(clip);
+  setCursor(m_bounds.x + 2, m_bounds.y);
   if (m_outlined)
   {
     nds::Canvas::instance().
@@ -478,31 +327,32 @@ void RichTextArea::paint(const nds::Rectangle & clip)
             m_bounds.h,
             WidgetColors::BUTTON_SHADOW);
   }
+  // work out what happens when we skip lines.
+  std::vector<std::string>::const_iterator it(m_document.begin());
+  if (m_cursory < clip.top()) {
+    // cursor is above the top of the clip area
+    unsigned int diff = (clip.top() - m_cursory) / font().height();
+    if (diff > m_document.size())
+      return;
+    if (diff > 0) {
+      checkSkippedLines(diff);
+      it += diff;
+      m_lineNumber += diff;
+      m_cursory += diff * font().height();
+    }
+  }
 
   for (; it != m_document.end() and (m_cursory < m_bounds.bottom()) and (m_cursory < clip.bottom()); ++it)
   {
     printu(*it);
     incrLine();
   }
-  for (std::vector<Component*>::iterator it(m_children.begin());
-      it != m_children.end();
-      ++it)
-  {
-    Component * c(*it);
-    Rectangle bounds(c->bounds());
-    Rectangle thisClip(clip.intersect(bounds));
-    if (thisClip.w == 0 and thisClip.h == 0)
-      continue;
-    c->paint(thisClip);
-    nds::Canvas::instance().setClip(clip);
-  }
-
 }
 
 void RichTextArea::checkSkippedLines(int skipLines)
 {
   // the lines are skipped - see which link applies to us, if any
-  unsigned int total = documentSize(skipLines, &m_currentChildIndex);
+  unsigned int total = documentSize(skipLines);
 
   // skipped "total" characters.
   m_paintPosition = total;
@@ -535,85 +385,34 @@ void RichTextArea::checkSkippedLines(int skipLines)
   if (not handled)
   {
     m_currentLink = m_links.end();
-    m_nextEvent = m_documentSize;
+    m_nextEvent = totalCharacters();
     m_nextEventType = Link::STATE_PLAIN;
   }
 }
-
-int RichTextArea::lineAt(int y, int &leftover) const
-{
-  int dy = (y - m_bounds.y);
-  int lineNum = 0;
-  for (; dy > font().height();)
-  {
-    LineHeightMap::const_iterator it(m_lineHeight.find(lineNum));
-
-    if (m_lineHeight.end() != it)
-    {
-      dy -= it->second;
-    }
-    else
-    {
-      dy -= font().height();
-    }
-    lineNum++;
-  }
-  leftover = dy;
-  return lineNum;
-}
-
 int RichTextArea::lineAt(int y) const
 {
-  int tmp;
-  return lineAt(y, tmp);
+  int fh = font().height();
+  int bnds = y - m_bounds.y;
+  int lineNum = bnds / fh;
+  return lineNum;
 }
 
 int RichTextArea::pointToCharIndex(int x, int y) const
 {
+  if (x < m_bounds.x)
+    return NO_INDEX;
+
   unsigned int lineNum = lineAt(y);
   if (lineNum >= m_document.size())
     return NO_INDEX;
-  unsigned int currentChildIndex = 0;
-  unsigned int charNumber = documentSize(lineNum, &currentChildIndex);
-  const UnicodeString & line(m_document[lineNum]);
-  int caretChar = NO_INDEX;
-  bool hasComponent(lineHasComponent(lineNum));
-  for (int i = 0, size = 0; i < (int)line.length(); ++i, ++charNumber)
-  {
-    // check if component here too
-    while (hasComponent and currentChildIndex < m_childPositions.size()
-        and charNumber == m_childPositions[currentChildIndex])
-    {
-      Component * c(m_children[currentChildIndex]);
-      ++currentChildIndex;
-      // if the bounds of the component are smaller than the scrollpane, clip to the component.
-      if (y >= c->y() and (y <= (c->y()+c->width())))
-      {
-        size += c->width();
-      }
-      if (size > x)
-      {
-        // gone past x, not here
-        caretChar = NO_INDEX;
-        goto done;
-      }
-    }
 
-    unsigned int value(line[i]);
-    if (value == UTF8::MALFORMED)
-      value = '?';
-    Font::Glyph g;
-    font().glyph(value, g);
-    size += g.width;
-    if (size > x)
-    {
-      size -= g.width;
-      caretChar = i;
-      break;
-    }
-  }
-done:
-  if (caretChar != NO_INDEX and lineNum > 0)
+  //unsigned int charNumber = documentSize(lineNum);
+  const std::string & line(m_document[lineNum]);
+
+  unsigned int caretChar, size;
+  bool ended(font().findEnd(line, x - m_bounds.x, 0, &size, &caretChar));
+
+  if (not ended and lineNum > 0)
   {
     int charsToLine = documentSize(lineNum);
     caretChar += charsToLine;
@@ -636,7 +435,7 @@ int RichTextArea::linkPosition(int linkIndex) const
   {
     // now know where it starts
     Link * l(*it);
-    return charIndexToYPos(l->textStart());
+    return m_bounds.top() + charIndexToLine(l->textStart());
   }
   return -1;
 }
@@ -680,7 +479,7 @@ bool RichTextArea::stylusUp(const Stylus * stylus)
   }
   m_linkTouched = 0;
   if (not consumed)
-    FOR_EACH_CHILD(stylusUp);
+    return FOR_EACH_CHILD(stylusUp);
   return consumed;
 }
 
@@ -704,7 +503,7 @@ bool RichTextArea::stylusDownFirst(const Stylus * stylus)
     }
     else
     {
-      FOR_EACH_CHILD(stylusDownFirst);
+      return FOR_EACH_CHILD(stylusDownFirst);
     }
   }
   return consumed;
@@ -713,7 +512,7 @@ bool RichTextArea::stylusDownFirst(const Stylus * stylus)
 bool RichTextArea::stylusDownRepeat(const Stylus * stylus)
 {
   // do nothing to avoid accidental clicks
-  FOR_EACH_CHILD(stylusDownRepeat);
+  // FOR_EACH_CHILD(stylusDownRepeat);
   return false;
 }
 
@@ -751,8 +550,13 @@ bool RichTextArea::stylusDown(const Stylus * stylus)
     else
     {
       m_downCount = 0;
-      FOR_EACH_CHILD(stylusDown);
+      return FOR_EACH_CHILD(stylusDown);
     }
+  }
+  else if (m_linkTouched)
+  {
+    m_linkTouched->setClicked(false);
+    return true;
   }
   return false;
 }
@@ -767,7 +571,7 @@ void RichTextArea::insertNewline()
 {
   bool pnl = parseNewline();
   setParseNewline();
-  RichTextArea::appendText(string2unicode("\n"));
+  RichTextArea::appendText("\n");
   setParseNewline(pnl);
 }
 
@@ -791,3 +595,48 @@ void RichTextArea::setOutlined(bool outline)
   m_outlined = outline;
 }
 
+unsigned int RichTextArea::linkCount() const
+{
+  return m_links.size();
+}
+
+void RichTextArea::endUnderline()
+{
+  if (underline() and (m_cursorx > m_startUnderlineX)) {
+    Canvas::instance().horizontalLine(
+        m_startUnderlineX>>8,
+        m_cursory + font().base(),
+        (m_cursorx - m_startUnderlineX) >>8,
+        foregroundColor());
+  }
+  setTextColor(0);
+  setUnderline(false);
+}
+
+void RichTextArea::startUnderline()
+{
+  Link * currentLink(*m_currentLink);
+  if (not currentLink->href().empty())
+  {
+    if (currentLink->clicked())
+    {
+      setTextColor(WidgetColors::LINK_CLICKED);
+    }
+    else
+    {
+      setTextColor(currentLink->color());
+    }
+    m_startUnderlineX = m_cursorx;
+    m_startUnderlineY = m_cursory;
+    setUnderline();
+  }
+}
+
+void RichTextArea::setUnderline(bool underline)
+{
+  m_underLine = underline;
+}
+bool RichTextArea::underline() const
+{
+  return m_underLine;
+}

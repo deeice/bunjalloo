@@ -28,7 +28,7 @@ class FormControl : public Button
   public:
     static const int MAX_SIZE;
     static const int MIN_SIZE;
-    FormControl(const HtmlElement * element, const UnicodeString & text);
+    FormControl(const HtmlElement * element, const std::string & text);
 
     /** input a touch value after clicking.
      * @param controller the controller that will handle updates, new uris

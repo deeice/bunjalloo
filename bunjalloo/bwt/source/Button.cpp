@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <cstdio>
 #include "Button.h"
 #include "ButtonListener.h"
 #include "Canvas.h"
@@ -36,7 +37,7 @@ Button::Button() :
   setBackgroundColor(WidgetColors::BUTTON_FOREGROUND);
 }
 
-Button::Button(const UnicodeString & label) :
+Button::Button(const std::string & label) :
   TextContainer(label),
   m_decoration(true)
 {

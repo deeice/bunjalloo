@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <memory>
+#include <cstdlib>
 #include "libnds.h"
 #include "Image.h"
 #include "File.h"
@@ -31,7 +32,7 @@ static const u8 JPEG_SIGNATURE[11] = {
   0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x4A, 0x46,
   0x49, 0x46, 0x00
 };
-static const unsigned int MAX_IMAGE_WIDTH(250);
+static const unsigned int MAX_IMAGE_WIDTH(SCREEN_WIDTH-7);
 static const unsigned int MAX_IMAGE_HEIGHT(SCREEN_HEIGHT*2);
 
 static bool isPng(const char *filename)
@@ -140,8 +141,10 @@ Image::ImageType Image::imageType(const char * filename)
 Image::Image(const char * filename, ImageType type, bool keepPalette):
   m_valid(false),
   m_keepPalette(keepPalette),
+  m_filename(filename),
   m_width(0),
   m_height(0),
+  m_currentLine(0),
   m_paletteSize(0),
   m_channels(3),
   m_data(0),
@@ -157,21 +160,25 @@ Image::Image(const char * filename, ImageType type, bool keepPalette):
   {
     return;
   }
-  readImage(filename, type);
+  m_type = type;
+  reload();
 }
 
 Image::Image(const char * filename, bool keepPalette):
   m_valid(false),
   m_keepPalette(keepPalette),
+  m_filename(filename),
   m_width(0),
   m_height(0),
+  m_currentLine(0),
   m_paletteSize(0),
   m_channels(3),
   m_data(0),
   m_palette(0)
 {
   ImageType type(imageType(filename));
-  readImage(filename, type);
+  m_type = type;
+  reload();
 }
 
 Image::~Image()
@@ -217,7 +224,9 @@ void Image::renderLine(const unsigned char * line, int n)
 
   //printf("m_currentLine %d\n", m_currentLine);
   u16 *db = &m_data[m_width*m_currentLine];
-  for (int x = m_realWidth; x > 0; x--, line += m_bpp)
+  int bytes = (m_channels * m_bpp)/8;
+
+  for (int x = m_realWidth; x > 0; x--, line += bytes)
   {
     int lastX = x-1;
     if (((lastX * xScale)/256) == ((x*xScale)/256))
@@ -227,7 +236,14 @@ void Image::renderLine(const unsigned char * line, int n)
     if (m_channels >= 3)
     {
       // standard RGB or RGBA images.
-      db[0] = RGB8(line[0], line[1], line[2]);
+      switch (m_bpp) {
+        case 16:
+          db[0] = RGB8(line[0], line[2], line[4]);
+          break;
+        default:
+          db[0] = RGB8(line[0], line[1], line[2]);
+          break;
+      }
     }
     else if (m_paletteSize == 0)
     {
@@ -249,20 +265,39 @@ void Image::renderLine(const unsigned char * line, int n)
   m_currentLine++;
 }
 
+// allocate data, assuming it isn't already alloc'd
+void Image::allocData()
+{
+  size_t size(m_width * m_height * sizeof(u16));
+  m_data = (unsigned short*)realloc( m_data, size);
+  memset(m_data, 0, size);
+}
+
+void Image::allocPalette(size_t size)
+{
+  if (!m_palette) {
+    m_palette = (unsigned short*)malloc(size);
+  }
+  else {
+    m_palette = (unsigned short*)realloc(m_palette, size);
+  }
+}
+
 static void user_read_fn(png_structp png_ptr, unsigned char *data, png_size_t size)
 {
   nds::File * f = (nds::File*)png_get_io_ptr(png_ptr);
   size_t n = f->read((char*)data, size);
   if(size && (n == 0)) {
-    // meh
+    // ups - go to the error handler
+    longjmp(png_jmpbuf(png_ptr), 1);
   }
 }
 
-void Image::readPng(const char * filename)
+void Image::readPng()
 {
    m_valid = false;
    nds::File f;
-   f.open(filename, "rb");
+   f.open(m_filename.c_str(), "rb");
    if (not f.is_open())
    {
      return;
@@ -316,7 +351,7 @@ void Image::readPng(const char * filename)
        int palette_entries;
        png_get_PLTE(png_ptr,info_ptr, &png_palette, &palette_entries);
        m_paletteSize = palette_entries;
-       m_palette = (unsigned short*)malloc(sizeof(unsigned short) * palette_entries);
+       allocPalette(sizeof(unsigned short) * palette_entries);
        for (int i = 0; i < palette_entries; ++i)
        {
          m_palette[i] = RGB8(png_palette[i].red, png_palette[i].green, png_palette[i].blue);
@@ -331,9 +366,14 @@ void Image::readPng(const char * filename)
    m_realWidth =info_ptr->width;
    m_realHeight =info_ptr->height;
    m_channels = png_get_channels(png_ptr, info_ptr);
-   m_bpp = m_channels;
+   m_bpp = png_get_bit_depth(png_ptr, info_ptr);
+   unsigned int h = m_height;
+   unsigned int w = m_width;
    calculateScale();
-   m_data = (unsigned short*)malloc( m_width * m_height * sizeof(u16));
+   if (!m_data or (w != m_width or h != m_height))
+   {
+     allocData();
+   }
 
    png_bytep rowBuffer = (png_bytep)malloc(sizeof(png_bytep) * info_ptr->rowbytes);
    for (int pass = 0; pass < number_passes; pass++)
@@ -345,6 +385,7 @@ void Image::readPng(const char * filename)
        renderLine((const unsigned char*)rowBuffer, line);
      }
    }
+   m_height = m_currentLine;
    free(rowBuffer);
 
    /* clean up after the read, and free any memory allocated - REQUIRED */
@@ -403,10 +444,10 @@ class GifClass
 static const int InterlacedOffset[] = { 0, 4, 2, 1 };
 static const int InterlacedJumps[] = { 8, 8, 4, 2 };
 
-void Image::readGif(const char * filename)
+void Image::readGif()
 {
   m_valid = false;
-  GifClass gifFile(filename);
+  GifClass gifFile(m_filename.c_str());
   if (gifFile == 0)
   {
     return;
@@ -414,9 +455,14 @@ void Image::readGif(const char * filename)
   m_realWidth = gifFile->SWidth;
   m_realHeight = gifFile->SHeight;
   m_channels = 1;
-  m_bpp = m_channels;
+  m_bpp = m_channels * 8;
+  unsigned int h = m_height;
+  unsigned int w = m_width;
   calculateScale();
-  m_data = (unsigned short*)malloc( m_width * m_height * sizeof(u16));
+  if (!m_data or w != m_width or h != m_height)
+  {
+    allocData();
+  }
   if (!m_data)
   {
     return;
@@ -424,8 +470,11 @@ void Image::readGif(const char * filename)
 
   // map ScreenBuffer to m_data
   ColorMapObject * colorMap = (gifFile->Image.ColorMap ? gifFile->Image.ColorMap : gifFile->SColorMap);
+  // TODO: handle other gif types
+  if (!colorMap)
+    return;
   m_paletteSize = colorMap->ColorCount;
-  m_palette = (unsigned short*)malloc(sizeof(unsigned short) * m_paletteSize);
+  allocPalette(sizeof(unsigned short) * m_paletteSize);
   if (!m_palette)
   {
     return;
@@ -501,6 +550,7 @@ void Image::readGif(const char * filename)
               renderLine(rowBuffer, i);
             }
           }
+          m_height = m_currentLine;
         }
         break;
       case EXTENSION_RECORD_TYPE:
@@ -519,7 +569,8 @@ void Image::readGif(const char * filename)
         break;
       case TERMINATE_RECORD_TYPE:
         break;
-      default:		    /* Should be traps by DGifGetRecordType. */
+      default:
+        /* Should be traps by DGifGetRecordType. */
         break;
     }
   }
@@ -529,21 +580,39 @@ void Image::readGif(const char * filename)
   m_valid = true;
 }
 
+struct safer_err_mgr
+{
+  struct jpeg_error_mgr pub;
+  jmp_buf jumpbuf;
+};
+
+void user_error_exit (j_common_ptr cinfo)
+{
+  safer_err_mgr* err = (safer_err_mgr*) cinfo->err;
+  (*cinfo->err->output_message) (cinfo);
+  longjmp(err->jumpbuf, 1);
+}
+
 // create a new jpeg_decoder_file_stream
 class JpegFileStream
 {
   public:
     JpegFileStream(const char * filename):m_scanLine(0)
     {
-      cinfo.err = jpeg_std_error(&jerr);
+      cinfo.err = jpeg_std_error(&jerr.pub);
+      jerr.pub.error_exit = user_error_exit;
       jpeg_create_decompress(&cinfo);
       m_file.open(filename);
+    }
+
+    jmp_buf * get_jmpbuf()
+    {
+      return &jerr.jumpbuf;
     }
 
     ~JpegFileStream()
     {
       free(m_scanLine);
-      jpeg_finish_decompress(&cinfo);
       jpeg_destroy_decompress(&cinfo);
 
     }
@@ -556,11 +625,15 @@ class JpegFileStream
     bool begin()
     {
       jpeg_stdio_src(&cinfo, (FILE*)m_file.file());
-      jpeg_read_header(&cinfo, TRUE);
+      int retcode = jpeg_read_header(&cinfo, FALSE);
+      if (retcode != JPEG_HEADER_OK)
+      {
+        return false;
+      }
+
       jpeg_calc_output_dimensions(&cinfo);
-      m_scanLine = (unsigned char*)calloc(bytes_per_pixel()*width(), 1);
-      jpeg_start_decompress(&cinfo);
-      return true;
+      m_scanLine = (unsigned char*)calloc(components()*width(), 1);
+      return jpeg_start_decompress(&cinfo);
     }
 
     int width() const
@@ -580,19 +653,27 @@ class JpegFileStream
 
     int bytes_per_pixel() const
     {
-      return cinfo.output_components;
+      return 1;
     }
 
     bool decode(void * &scanline)
     {
-      jpeg_read_scanlines(&cinfo, &m_scanLine, 1);
-      scanline = m_scanLine;
-      return true;
+      if (jpeg_read_scanlines(&cinfo, &m_scanLine, 1))
+      {
+        scanline = m_scanLine;
+        return true;
+      }
+      return false;
+    }
+
+    void done()
+    {
+      jpeg_finish_decompress(&cinfo);
     }
 
   private:
     struct jpeg_decompress_struct cinfo;
-    struct jpeg_error_mgr jerr;
+    struct safer_err_mgr jerr;
     nds::File m_file;
     unsigned char * m_scanLine;
 };
@@ -642,10 +723,16 @@ void Image::calculateScale()
     m_height = m_realHeight;
   }
 }
-void Image::readJpeg(const char * filename)
+void Image::readJpeg()
 {
   m_valid = false;
-  auto_ptr<JpegFileStream> inputStream(new JpegFileStream(filename));
+  auto_ptr<JpegFileStream> inputStream(new JpegFileStream(m_filename.c_str()));
+  if (setjmp(*inputStream->get_jmpbuf()))
+  {
+    /* If we get here, we had a problem reading the file */
+    return;
+  }
+
   if (not inputStream->is_open())
   {
     return;
@@ -659,9 +746,13 @@ void Image::readJpeg(const char * filename)
   m_realWidth = inputStream->width();
   m_realHeight = inputStream->height();
   m_channels = inputStream->components();
+  unsigned int h = m_height;
+  unsigned int w = m_width;
   calculateScale();
-
-  m_data = (unsigned short*)malloc( m_width * m_height * sizeof(u16));
+  if (!m_data or (w != m_width or h != m_height))
+  {
+    allocData();
+  }
   if (!m_data)
   {
     return;
@@ -672,10 +763,11 @@ void Image::readJpeg(const char * filename)
     void * scanline;
     if (not inputStream->decode(scanline))
       break;
-
-    m_bpp = inputStream->bytes_per_pixel();
+    m_bpp = inputStream->bytes_per_pixel() * 8;
     renderLine((const unsigned char*)scanline, line);
   }
+  inputStream->done();
+  m_height = m_currentLine;
 
   m_valid = true;
 }
@@ -689,20 +781,21 @@ const unsigned short * Image::palette() const
   return m_palette;
 }
 
-void Image::readImage(const char *filename, ImageType type)
+void Image::reload()
 {
-  switch (type)
+  switch (m_type)
   {
     case ImagePNG:
-      readPng(filename);
+      readPng();
       break;
     case ImageGIF:
-      readGif(filename);
+      readGif();
       break;
     case ImageJPEG:
-      readJpeg(filename);
+      readJpeg();
       break;
     case ImageUNKNOWN:
+      m_type = imageType(m_filename.c_str());
       break;
   }
 }
@@ -710,4 +803,18 @@ void Image::readImage(const char *filename, ImageType type)
 unsigned int Image::channels() const
 {
   return m_channels;
+}
+
+std::string Image::filename() const
+{
+  return m_filename;
+}
+
+void Image::setType(ImageType type)
+{
+  m_type = type;
+}
+Image::ImageType Image::type() const
+{
+  return m_type;
 }

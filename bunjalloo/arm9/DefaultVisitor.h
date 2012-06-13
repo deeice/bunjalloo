@@ -70,6 +70,7 @@ class DefaultVisitor: public Visitor
     virtual void begin(HtmlTextAreaElement & element);
     virtual void end(HtmlTextAreaElement & element);
 
+    virtual ~DefaultVisitor();
 };
 
 #endif

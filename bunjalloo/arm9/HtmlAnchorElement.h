@@ -29,9 +29,9 @@ class HtmlAnchorElement : public HtmlElement
 
     DEFINE_ACCEPT();
   protected:
-    UnicodeString m_href;
-    UnicodeString m_name;
-    const UnicodeString * attributePtr(const std::string & name) const;
+    std::string m_href;
+    std::string m_name;
+    const std::string * attributePtr(const std::string & name) const;
     void copyAttributes(HtmlElement * copyTo) const;
 };
 #endif

@@ -17,8 +17,9 @@
 #ifndef HtmlElement_h_seen
 #define HtmlElement_h_seen
 
+#include <string>
+#include <cstring>
 #include "ElementList.h"
-#include "UnicodeString.h"
 
 class Visitor;
 
@@ -56,13 +57,13 @@ class HtmlElement
      * @param name the attribute name
      * @param value the value
      */
-    virtual void setAttribute(const std::string & name, const UnicodeString & value);
+    virtual void setAttribute(const std::string & name, const std::string & value);
 
     /** Get an attribute value.
      * @param name the attribute name.
      * @return the attribute value as a string.
      */
-    virtual UnicodeString attribute(const std::string & name) const;
+    virtual std::string attribute(const std::string & name) const;
 
     /** Append a child node.
      * @param child the node to append
@@ -136,6 +137,7 @@ class HtmlElement
      * @return true if the tag name matches the given name.
      */
     inline bool isa(const std::string & name) const;
+    inline bool isa(const char *name) const;
 
     /** Is this element a particular type?. This ptr variation is for use as a
      * matching function in find_if. @see isa() for the preferred version.
@@ -152,12 +154,12 @@ class HtmlElement
     /** Get the text value.
      * @return the unicode text.
      */
-    inline const UnicodeString & text() const;
+    inline const std::string & text() const;
 
     /** Get the text value.
      * @return the unicode text.
      */
-    inline UnicodeString & text();
+    inline std::string & text();
 
     /** Make a shallow copy. Copies only the attributes, not the children.
      * @return the cloned element.
@@ -174,11 +176,11 @@ class HtmlElement
     //void dump() const;
   protected:
     std::string m_tagName;
-    UnicodeString m_id;
-    UnicodeString m_title;
-    UnicodeString m_lang;
-    UnicodeString m_dir;
-    mutable UnicodeString m_text;
+    std::string m_id;
+    std::string m_title;
+    std::string m_lang;
+    std::string m_dir;
+    mutable std::string m_text;
     // not implemented
     //std::string m_className;
     // std::vector<std::string> m_classList;
@@ -186,7 +188,7 @@ class HtmlElement
     ElementList m_children;
     bool m_block;
 
-    virtual const UnicodeString * attributePtr(const std::string & name) const;
+    virtual const std::string * attributePtr(const std::string & name) const;
     virtual void copyAttributes(HtmlElement * copyTo) const;
     void visitChildren(Visitor & visitor);
 };
@@ -199,6 +201,12 @@ bool HtmlElement::isa(const std::string & name) const
 {
   return m_tagName == name;
 }
+
+bool HtmlElement::isa(const char *name) const
+{
+  return strcmp(name, m_tagName.c_str()) == 0;
+}
+
 bool HtmlElement::isa_ptr(const std::string * name) const
 {
   return name and isa(*name);
@@ -228,11 +236,11 @@ const std::string & HtmlElement::tagName() const
 {
   return m_tagName;
 }
-const UnicodeString & HtmlElement::text() const
+const std::string & HtmlElement::text() const
 {
   return m_text;
 }
-UnicodeString & HtmlElement::text()
+std::string & HtmlElement::text()
 {
   return m_text;
 }

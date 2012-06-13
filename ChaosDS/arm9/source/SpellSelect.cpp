@@ -64,22 +64,22 @@ SpellSelect::SpellSelect(bool examine):
 { 
   // register callbacks for touch screen
   // "scrollbar" - the 2 little arrows:
-  Rectangle upRect = {(ARROW_X*8)-4, ARROW_UP_Y*8, 16, 16};
+  Rectangle upRect((ARROW_X*8)-4, ARROW_UP_Y*8, 16, 16);
   m_hotspots.push_back(new HotSpot(upRect, scrollUpCb, this));
-  Rectangle downRect = {(ARROW_X*8)-4, ARROW_DOWN_Y*8, 16, 16};
+  Rectangle downRect((ARROW_X*8)-4, ARROW_DOWN_Y*8, 16, 16);
   m_hotspots.push_back(new HotSpot(downRect, scrollDownCb, this));
 
   // spell selection - one big rectangle
-  Rectangle spellRect = {
+  Rectangle spellRect(
     SPELL_NAME_X*8, 
     ARROW_UP_Y*8, 
     SPELL_NAME_WIDTH*8, 
     8*16
-  };
+  );
   m_hotspots.push_back(new HotSpot(spellRect, spellSelectCb, this));
 
   // return to menu
-  Rectangle returnRect = {RETURN_MENU_X*8, RETURN_MENU_Y*8, 14*8, 16};
+  Rectangle returnRect(RETURN_MENU_X*8, RETURN_MENU_Y*8, 14*8, 16);
   m_hotspots.push_back(new HotSpot(returnRect, returnCb, this));
 }
 

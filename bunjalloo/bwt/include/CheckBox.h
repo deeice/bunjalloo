@@ -30,5 +30,7 @@ class CheckBox : public ToggleButton
     virtual const unsigned char * getGfxData();
     virtual const unsigned short * getPaletteData();
 
+  private:
+    DISALLOW_COPY_AND_ASSIGN(CheckBox);
 };
 #endif

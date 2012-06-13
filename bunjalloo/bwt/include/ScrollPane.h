@@ -21,6 +21,7 @@
 #include "StylusListener.h"
 
 class ScrollBar;
+namespace nds { class Sprite; }
 
 /** A scrollable view of many Components. The view may be larger than the
  * screen and this class handles the positioning of all the child widgets. */
@@ -54,6 +55,11 @@ class ScrollPane: public Component
      * @return the scroll increment in pixels.
      */
     int scrollIncrement() const;
+
+    /** Move the contents a screen up */
+    void screenUp();
+    /** Move the contents a screen down */
+    void screenDown();
 
     void pageUp();
     void pageDown();
@@ -105,16 +111,21 @@ class ScrollPane: public Component
     // From Component
     virtual void paint(const nds::Rectangle & clip);
     virtual void setSize(unsigned int w, unsigned int h);
-    virtual void setLocation(unsigned int x, unsigned int y);
+    virtual void setLocation(int x, int y);
 
     virtual bool stylusUp(const Stylus * stylus);
     virtual bool stylusDownFirst(const Stylus * stylus);
     virtual bool stylusDownRepeat(const Stylus * stylus);
     virtual bool stylusDown(const Stylus * stylus);
 
+    void forceRedraw();
+
+    int visibleHeight() const;
+
   private:
     static Component * s_popup;
     int m_scrollIncrement;
+    int m_distanceScrolled;
     bool m_topLevel;
     bool m_canScrollUp;
     bool m_canScrollDown;
@@ -122,6 +133,7 @@ class ScrollPane: public Component
     unsigned short m_backgroundColour;
     bool m_stretchChildren;
     bool m_touchedMe;
+    nds::Sprite *m_scrollAnywhereSprite;
 
     void layoutChildren();
     void calculateScrollBar();
@@ -129,6 +141,19 @@ class ScrollPane: public Component
     void showScrollBar(const nds::Rectangle & clip);
     void adjustScroll(int & scrollIncrement);
     void adjustScrollUp(int & scrollIncrement);
+    enum ScrollType
+    {
+      SCROLL_NO_ADJUST,
+      SCROLL_WITH_ADJUST,
+    };
+    void up(ScrollType type);
+    void down(ScrollType type);
+    bool anywhereScroll(const Stylus *stylus);
+    void showScrollAnywhere(const Stylus *stylus);
+    void hideScrollAnywhere();
+    bool isScrollBarShowing() const;
+
+    DISALLOW_COPY_AND_ASSIGN(ScrollPane);
 };
 
 #endif

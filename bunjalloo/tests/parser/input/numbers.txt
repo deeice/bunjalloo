@@ -1,5 +1,4 @@
 HTTP/1.1 200 OK
-Date: Sun, 08 Apr 2007 11:20:39 GMT
 Server: Apache/1.3.37 (Unix) mod_perl/1.29
 HEADER3: Value
 

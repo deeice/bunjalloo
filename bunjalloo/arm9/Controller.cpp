@@ -14,12 +14,16 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "libnds.h"
 #include <vector>
+#include <cstring>
+#include "libnds.h"
+#include "config_defs.h"
 #include "Cache.h"
 #include "Config.h"
 #include "ConfigParser.h"
 #include "CookieJar.h"
+#include "FontFactory.h"
+#include "HeaderParser.h"
 #include "Language.h"
 #include "Controller.h"
 #include "Document.h"
@@ -27,6 +31,8 @@
 #include "Font.h"
 #include "HttpClient.h"
 #include "TextAreaFactory.h"
+#include "System.h"
+#include "Wifi9.h"
 #include "Updater.h"
 #include "URI.h"
 #include "View.h"
@@ -40,27 +46,40 @@ static const char s_errorText[] = {
 "<html> <meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"
 };
 
-const static char * LICENCE_URL = "file:///licence";
+const char Controller::LICENCE_URL[] = "file:///licence";
 const static char * UNABLE_TO_LOAD = "cannot_load";
 const static int MAX_REDIRECTS(7);
 
 Controller::Controller()
-  : m_document(new Document()),
-  m_httpClient(new HttpClient),
-  m_wifiInit(false),m_redirected(0),m_maxRedirects(MAX_REDIRECTS)
+: m_document(new Document()),
+  m_view(0),
+  m_config(0),
+  m_cache(new Cache(*m_document, false)),
+  m_httpClient(new HttpClient()),
+  m_wifiInit(false),
+  m_stop(false),
+  m_redirected(0),
+  m_maxRedirects(MAX_REDIRECTS),
+  m_saveAs(NO_SAVE),
+  m_checkingQueue(false)
 {
-  m_config = new Config(*m_document->cookieJar());
+}
+
+void Controller::initialise()
+{
+  m_config = new Config();
+  m_config->checkPre();
+  m_config->reload();
+  m_config->checkPost();
+  m_document->cookieJar()->loadAcceptList(*m_config);
   string font;
   m_config->resource(Config::FONT_STR, font);
-  TextAreaFactory::setFont(new Font(font));
-  TextAreaFactory::usePaletteName(font+".pal");
-  m_view = new View(*m_document, *this);
+  TextAreaFactory::setFont(FontFactory::create(font.c_str()));
   bool useCache(false);
-  bool clearCache(false);
-  m_config->resource(Config::USECACHE, useCache);
-  m_config->resource(Config::CLEARCACHE, clearCache);
+  if (m_config->resource(Config::USECACHE, useCache))
+    m_cache->setUseCache(useCache);
 
-  m_cache = new Cache(*m_document, useCache, clearCache);
+  m_view = new View(*m_document, *this);
   m_config->resource("redirects", m_maxRedirects);
   m_httpClient->setController(this);
 }
@@ -77,7 +96,7 @@ void Controller::showLicence()
   m_document->reset();
   m_document->setUri(LICENCE_URL);
   m_document->appendLocalData(s_licenceText, strlen(s_licenceText));
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
 }
 
 const Config & Controller::config() const
@@ -87,6 +106,7 @@ const Config & Controller::config() const
 
 void Controller::handleUri(const URI & uri)
 {
+  m_document->reset();
   m_document->setCacheFile("");
   switch (uri.protocol())
   {
@@ -120,8 +140,20 @@ void Controller::doUri(const URI & uri)
   // cout << uri.asString() << endl;
   if (uri.isValid()) {
     m_document->setUri(uri.asString());
-    handleUri(uri);
-    m_document->setPosition(-1);
+    do {
+      if (m_document->status() == Document::REDIRECTED)
+      {
+        handleUri(uri.navigateTo(m_document->uri()));
+      }
+      else
+      {
+        handleUri(uri);
+        m_document->setPosition(-1);
+      }
+    }
+    while (m_document->status() == Document::REDIRECTED);
+    checkDownloadQueue();
+
   }
 }
 
@@ -147,7 +179,7 @@ void Controller::saveAs(const char * fileName, SaveAs_t saveType)
     default:
       // download the file first!
       m_saveFileName = fileName;
-      if (m_document->status() == Document::LOADED)
+      if (m_document->status() == Document::LOADED_ITEM or m_document->status() == Document::LOADED_HTML)
       {
         checkSave();
       }
@@ -177,21 +209,27 @@ void Controller::saveCurrentFileAs(const char * fileName)
 
 void Controller::previous()
 {
+  if (m_document->status() != Document::LOADED_PAGE)
+    stop();
   string ph = m_document->gotoPreviousHistory();
   if (not ph.empty())
   {
     URI uri(ph);
     handleUri(uri);
+    checkDownloadQueue();
   }
 }
 
 void Controller::next()
 {
+  if (m_document->status() != Document::LOADED_PAGE)
+    stop();
   string ph = m_document->gotoNextHistory();
   if (not ph.empty())
   {
     URI uri(ph);
     handleUri(uri);
+    checkDownloadQueue();
   }
 }
 
@@ -207,7 +245,7 @@ void Controller::loadError()
 {
   m_document->reset();
   m_document->appendLocalData(s_errorText, strlen(s_errorText));
-  string errorStr(unicode2string(T(UNABLE_TO_LOAD), true));
+  string errorStr(T(UNABLE_TO_LOAD));
   m_document->appendLocalData(errorStr.c_str(), errorStr.length());
   string href("<a href='");
   href += m_document->uri();
@@ -215,7 +253,7 @@ void Controller::loadError()
   href += m_document->uri();
   href += "</a>";
   m_document->appendLocalData(href.c_str(), href.length());
-  m_document->setStatus(Document::LOADED);
+  m_document->setStatus(Document::LOADED_HTML);
 }
 
 void Controller::configureUrl(const std::string & fileName)
@@ -255,7 +293,7 @@ void Controller::checkUpdates()
   }
   Updater * updater = new Updater(*this, *m_document, *m_view);
   m_view->setUpdater(updater);
-  updater->init();
+  updater->show();
 }
 
 void Controller::localConfigFile(const std::string & fileName)
@@ -275,7 +313,7 @@ void Controller::localConfigFile(const std::string & fileName)
       configParser.replaceMarkers(line);
       m_document->appendLocalData(line.c_str(), line.length());
     }
-    m_document->setStatus(Document::LOADED);
+    m_document->setStatus(Document::LOADED_HTML);
   }
   else
   {
@@ -298,7 +336,7 @@ void Controller::localFile(const std::string & fileName)
     data[size] = 0;
     m_document->reset();
     m_document->appendLocalData(data, size);
-    m_document->setStatus(Document::LOADED);
+    m_document->setStatus(Document::LOADED_HTML);
     delete [] data;
     uriFile.close();
   }
@@ -331,13 +369,13 @@ void Controller::fetchHttp(const URI & uri)
    *
    */
   bool hasPage = false;
+  m_httpClient->setUri(uri);
+  m_httpClient->reset();
+  m_stop = false;
   if (not m_cache->load(uri))
   {
     // loop one, if get, then head
     // if that is ok, then get again
-    m_httpClient->setUri(uri);
-    m_httpClient->reset();
-    m_stop = false;
     m_saveAs = NO_SAVE;
     while (not m_httpClient->finished())
     {
@@ -346,13 +384,13 @@ void Controller::fetchHttp(const URI & uri)
       {
         m_wifiInit = true;
       }
-      m_view->tick();
+      if (m_view)
+        m_view->tick();
       if (m_stop)
       {
-        loadError();
         return;
       }
-      swiWaitForVBlank();
+      waitVBlank();
     }
     hasPage = m_httpClient->hasPage();
     m_httpClient->disconnect();
@@ -369,31 +407,44 @@ void Controller::fetchHttp(const URI & uri)
   }
 }
 
+URI Controller::downloadingFile() const
+{
+  URI uri(m_document->uri());
+  switch (uri.protocol())
+  {
+    case URI::HTTPS_PROTOCOL:
+    case URI::HTTP_PROTOCOL:
+      return m_httpClient->uri();
+
+    default:
+      return uri;
+  }
+}
+
 void Controller::finishFetchHttp(const URI & uri)
 {
-  // check the caching status
-  if (not m_document->shouldCache())
-  {
-    // oops, remove it
-    m_cache->remove(uri);
-  }
-  URI docUri(m_document->uri());
-  if (docUri != uri and m_document->historyEnabled() and m_redirected < m_maxRedirects)
+  if (m_document->status() == Document::REDIRECTED and m_document->historyEnabled() and m_redirected < m_maxRedirects)
   {
     // redirected.
     m_redirected++;
-    swiWaitForVBlank();
-    swiWaitForVBlank();
-    m_document->setStatus(Document::REDIRECTED);
+    waitVBlank();
+    waitVBlank();
     m_document->reset();
-    doUri(uri.navigateTo(m_document->uri()));
+    m_document->setStatus(Document::REDIRECTED);
   }
   else
   {
     m_redirected = 0;
-    m_document->setStatus(Document::LOADED);
+    if (m_checkingQueue)
+    {
+      m_document->setStatus(Document::LOADED_ITEM);
+    }
+    else
+    {
+      m_document->setStatus(Document::LOADED_HTML);
+    }
+    checkSave();
   }
-  checkSave();
 }
 
 void Controller::checkSave()
@@ -415,6 +466,17 @@ void Controller::stop()
   m_stop = true;
   m_saveAs = NO_SAVE;
   m_saveFileName.clear();
+  if (m_checkingQueue)
+  {
+    const URI &uri(m_httpClient->uri());
+    if (uri.protocol() == URI::HTTPS_PROTOCOL or uri.protocol() == URI::HTTP_PROTOCOL)
+    {
+      m_cache->remove(uri);
+      while (not m_downloadQ.empty()) {
+        m_downloadQ.pop();
+      }
+    }
+  }
 }
 
 bool Controller::stopped() const
@@ -456,4 +518,33 @@ void Controller::saveCookieSettings()
       }
     }
   }
+}
+
+void Controller::queueUri(const URI & uri)
+{
+  if (uri.protocol() == URI::HTTPS_PROTOCOL or
+      uri.protocol() == URI::HTTP_PROTOCOL)
+  {
+    m_downloadQ.push(uri);
+  }
+}
+
+void Controller::checkDownloadQueue()
+{
+  m_document->setHistoryEnabled(false);
+  m_checkingQueue = true;
+  while (m_downloadQ.size())
+  {
+    URI uri(m_downloadQ.front());
+    m_downloadQ.pop();
+    fetchHttp(uri);
+  }
+  m_document->setHistoryEnabled(true);
+  m_document->setStatus(Document::LOADED_PAGE);
+  m_checkingQueue = false;
+}
+
+void Controller::waitVBlank() const
+{
+  if (m_view) swiWaitForVBlank();
 }

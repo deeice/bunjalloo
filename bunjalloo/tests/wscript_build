@@ -1,0 +1,95 @@
+#!/usr/bin/python
+import os
+is_nds = bld.env.variant().startswith('nds')
+bld.add_subdirs('common/fonts')
+
+unit_tests = '''
+boxlayout
+bwtimage
+cache-control
+cache
+cfgparse
+cookies
+date
+document
+element
+font
+parameters
+parser
+richtextarea
+searcher
+stylus
+textfiddling
+updater
+uri
+versions
+zipfile
+'''.split()
+
+# special flags required for some tests
+veralibs = 'vera bunjalloo'
+has_uselib_locals = {
+    'font': veralibs,
+    'richtextarea': veralibs,
+    'updater': veralibs
+}
+has_hostlib = {
+    'updater': ' MATRIXSSLSTATIC'
+}
+
+api_tests = '''
+gui-test
+lang-test
+zip-test
+images
+sprite
+'''.split()
+
+other_tests = '''
+split
+'''.split()
+
+if is_nds:
+    unit_tests = []
+    other_tests = []
+    host_libs = 'NDS DSWIFI9 '
+else:
+    host_libs = 'GL SDL '
+host_libs += 'UNZIP PNG Z GIF JPEG'
+
+here = bld.path.abspath()
+for ut in unit_tests:
+    uselib_local = 'bunjalloo'
+    if ut in has_uselib_locals:
+        uselib_local = has_uselib_locals[ut]
+    hl = host_libs
+    if ut in has_hostlib:
+        hl += has_hostlib[ut]
+
+    bld.new_task_gen(
+        features='cxx cprogram unit_test',
+        source=bld.glob(ut+'/*.cpp'),
+        target=ut+'-test',
+        uselib=hl + ' GTEST',
+        run_from_dir=os.path.join(here, ut),
+        uselib_local=uselib_local)
+
+for t in api_tests:
+    tgt = t+'-test'
+    bld.new_task_gen(
+        features='cxx cprogram',
+        source=bld.glob(t+'/*.cpp') + bld.glob(t+'/*/*.cpp'),
+        target=tgt,
+        uselib=host_libs,
+        uselib_local='vera bunjalloo')
+    if is_nds:
+        bld.create_nds(t+'.nds', tgt)
+
+for t in other_tests:
+    tgt = t+'-test'
+    bld.new_task_gen(
+        features='cxx cprogram',
+        source=bld.glob(t+'/*.cpp') + bld.glob(t+'/*/*.cpp'),
+        target=tgt,
+        uselib=host_libs,
+        uselib_local='bwt')

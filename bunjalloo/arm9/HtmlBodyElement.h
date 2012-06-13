@@ -30,8 +30,8 @@ class HtmlBodyElement : public HtmlElement
     unsigned int bgColor() const;
     DEFINE_ACCEPT();
   protected:
-    UnicodeString m_bgcolor;
-    const UnicodeString * attributePtr(const std::string & name) const;
+    std::string m_bgcolor;
+    const std::string * attributePtr(const std::string & name) const;
     void copyAttributes(HtmlElement * copyTo) const;
 };
 #endif

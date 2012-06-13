@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "libnds.h"
+#include <cstring>
 #include <algorithm>
 #include <functional>
 #include "ndspp.h"
@@ -35,9 +36,6 @@
 #include "WizardData.h"
 #include "Wizard.h"
 
-
-// external data
-extern const unsigned short _binary_bg_raw_start[];
 
 // static defines
 static const int ARENA_BORDER_1(2);
@@ -237,7 +235,7 @@ void Arena::decorativeBorder(int pal, unsigned short col1,  unsigned short col2,
   // board size = 10*15, == 20*30 tiles
   // each tile is 32 bytes (8*8 pixels, 4 bits per pixel)
   // 20*30*32 = 19200, but have to write in u16, so divide by 2 
-  dmaCopy(_binary_bg_raw_start, &tileData[16 + (19200/2)], 128);
+  dmaCopy(bgTiles, &tileData[16 + (19200/2)], 128);
 
   // top left corner
   mapData[0] = ARENA_CORNER_TILE|(pal<<12);
@@ -417,12 +415,12 @@ void Arena::display() {
 
 // map Cursor_t to cursor gfx
 static const unsigned short * const s_cursorGfx[][2] = {
-  {_binary_cursor_spell_raw_start,  _binary_cursor_spell_map_start },
-  {_binary_cursor_engaged_raw_start,_binary_cursor_engaged_map_start },
-  {_binary_cursor_fire_raw_start,   _binary_cursor_fire_map_start },
-  {_binary_cursor_fly_raw_start,    _binary_cursor_fly_map_start },
-  {_binary_cursor_ground_raw_start, _binary_cursor_ground_map_start },
-  {_binary_cursor_raw_start,        _binary_cursor_map_start }
+  {cursor_spellTiles,  cursor_spellMap },
+  {cursor_engagedTiles,cursor_engagedMap },
+  {cursor_fireTiles,   cursor_fireMap },
+  {cursor_flyTiles,    cursor_flyMap },
+  {cursor_groundTiles, cursor_groundMap },
+  {cursorTiles,        cursorMap }
 };
 
 void Arena::initialiseCursor(int x, int y, Cursor_t type)
@@ -776,14 +774,14 @@ bool Arena::isBlockedLOS(bool printMessage) const
 void Arena::drawPopFrame(int x, int y, int frame)
 {
   setPalette8(x*2, y*2, 8);
-  drawGfx8(_binary_disappear_raw_start, _binary_disappear_map_start, x*2, y*2, frame);
+  drawGfx8(disappearTiles, disappearMap, x*2, y*2, frame);
 }
 
 
 void Arena::drawSpellcastFrame(int x, int y, int frame)
 {
   setPalette8(x*2, y*2, 0);
-  drawGfx8(_binary_spell_raw_start, _binary_spell_map_start, x*2, y*2, frame);
+  drawGfx8(spellTiles, spellMap, x*2, y*2, frame);
 }
 
 void Arena::creatureSpellSucceeds() 

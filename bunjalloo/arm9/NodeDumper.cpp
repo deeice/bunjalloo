@@ -36,12 +36,12 @@ void NodeDumper::addAttribute(HtmlElement & element, const std::string & name)
 {
   if (not m_file.is_open()) return;
 
-  const UnicodeString & attr(element.attribute(name));
+  const std::string & attr(element.attribute(name));
   if (not attr.empty())
   {
     m_file.write(name.c_str());
     m_file.write("=\"");
-    m_file.write(unicode2string( attr, true ).c_str());
+    m_file.write(attr.c_str());
     m_file.write("\" ");
   }
 }
@@ -92,7 +92,7 @@ bool NodeDumper::visit(HtmlElement & element)
 {
   if (m_file.is_open() and element.isa(HtmlConstants::TEXT))
   {
-    m_file.write(unicode2string(element.text(), true).c_str());
+    m_file.write(element.text().c_str());
   }
   return true;
 }

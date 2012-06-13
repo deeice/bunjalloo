@@ -16,8 +16,8 @@
 */
 #ifndef HrefFinder_h_seen
 #define HrefFinder_h_seen
+#include <string>
 #include "DefaultVisitor.h"
-#include "UnicodeString.h"
 
 class HrefFinder: public DefaultVisitor
 {
@@ -38,6 +38,6 @@ class HrefFinder: public DefaultVisitor
 
   private:
     HtmlElement * m_element;
-    UnicodeString m_href;
+    std::string m_href;
 };
 #endif

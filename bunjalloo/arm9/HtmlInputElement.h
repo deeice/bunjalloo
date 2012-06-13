@@ -38,21 +38,21 @@ class HtmlInputElement:public HtmlElement
     InputType inputType() const;
 
     virtual void setAttribute(const std::string & name,
-        const UnicodeString & value);
+        const std::string & value);
     bool checked() const;
     void setChecked(bool checked);
     bool hasAltText() const;
 
     DEFINE_ACCEPT();
   protected:
-    UnicodeString m_type;
-    UnicodeString m_value;
-    UnicodeString m_name;
-    UnicodeString m_alt;
-    UnicodeString m_src;
-    UnicodeString m_size;
+    std::string m_type;
+    std::string m_value;
+    std::string m_name;
+    std::string m_alt;
+    std::string m_src;
+    std::string m_size;
     bool m_checked;
     bool m_hasAltText;
-    const UnicodeString * attributePtr(const std::string & name) const;
+    const std::string * attributePtr(const std::string & name) const;
 };
 #endif

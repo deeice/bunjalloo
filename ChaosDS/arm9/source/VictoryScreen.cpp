@@ -45,8 +45,8 @@ VictoryScreen::VictoryScreen(Victory_t winOrDraw):
   if (m_winOrDraw == CONTINUE)
   {
     // hostpots on continue
-    Rectangle yes = {YES_POS_X*8, YES_POS_Y*8, 3*8, 16};
-    Rectangle no = {NO_POS_X*8, NO_POS_Y*8, 2*8, 16};
+    Rectangle yes(YES_POS_X*8, YES_POS_Y*8, 3*8, 16);
+    Rectangle no(NO_POS_X*8, NO_POS_Y*8, 2*8, 16);
 
     m_hotspots.push_back(new HotSpot(yes, continueYesCb, this));
     m_hotspots.push_back(new HotSpot(no, continueNoCb, this));
@@ -54,7 +54,7 @@ VictoryScreen::VictoryScreen(Victory_t winOrDraw):
   }
   else
   {
-    Rectangle screenRect = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
+    Rectangle screenRect(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
     m_hotspots.push_back(new HotSpot(screenRect, exitCb, this));
   }
 }

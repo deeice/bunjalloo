@@ -875,8 +875,8 @@ void Movement::doSuccessfulMove(int distanceMoved)
 static void drawBreathFrame(int x, int y, int frame) {
     
   Arena::instance().setPalette8(x*2,y*2,8);
-  Arena::instance().drawGfx8(_binary_fire_anim_raw_start, 
-      _binary_fire_anim_map_start, 
+  Arena::instance().drawGfx8(fire_animTiles,
+      fire_animMap,
       x*2, y*2, frame);
 }
 // this code was originally at b94f...
@@ -1179,8 +1179,8 @@ void Movement::makeAttack()
 void draw_fight_frame(int x, int y, int frame) {
   
   Arena::instance().setPalette8(x*2, y*2, 8);
-  Arena::instance().drawGfx8(_binary_fight_raw_start, 
-      _binary_fight_map_start, x*2, y*2, frame);
+  Arena::instance().drawGfx8(fightTiles,
+      fightMap, x*2, y*2, frame);
   
 }
 

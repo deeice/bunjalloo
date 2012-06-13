@@ -41,6 +41,7 @@ void Graphics::loadPalette(int from, int to)
 {
   Palette p(0,to);
   p.load(s_paletteData[from].data, s_paletteData[from].size);
+  p[0] = 0;
 }
 void Graphics::loadAllPalettes()
 {
@@ -55,7 +56,7 @@ void Graphics::loadAllPalettes()
 
 void Graphics::initialiseScreen()
 {
-  powerON(POWER_ALL_2D);
+  powerOn(POWER_ALL_2D);
   Video & mainScreen = Video::instance();
   Video & subScreen  = Video::instance(1);
   subScreen.setMode(0);
@@ -69,7 +70,7 @@ void Graphics::initialiseScreen()
   
   // load the sprite palette...
   ObjectPalette p(0);
-  p.load(_binary_paletteb_pal_start, 128);
+  p.load(palettebPal, 128);
 
 }
 
@@ -148,8 +149,8 @@ void Graphics::drawSplatFrame(int x, int y, int frame)
 {
   Arena::instance().setPalette8(x*2,y*2,8);
   Arena::instance().drawGfx8(
-      _binary_bolt_anim_raw_start, 
-      _binary_bolt_anim_map_start, 
+      bolt_animTiles,
+      bolt_animMap,
       x*2, y*2, frame);
 }
 

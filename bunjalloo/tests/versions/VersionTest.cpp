@@ -14,60 +14,38 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 #include "Version.h"
 
-using namespace std;
-
-class VersionTest : public CPPUNIT_NS::TestFixture
-{
-  private:
-    CPPUNIT_TEST_SUITE( VersionTest );
-    CPPUNIT_TEST( test0 );
-    CPPUNIT_TEST( test1 );
-    CPPUNIT_TEST( test2 );
-    CPPUNIT_TEST_SUITE_END();
-
-  public:
-    void test0();
-    void test1();
-    void test2();
-  private:
-
-};
-
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( VersionTest );
-
-void VersionTest::test0()
+TEST(VersionTest, 0)
 {
   Version v1("0.5.5");
   Version v2("0.6");
 
-  CPPUNIT_ASSERT(v1 < v2);
-  CPPUNIT_ASSERT(v2 > v1);
+  EXPECT_TRUE(v1 < v2);
+  EXPECT_TRUE(v2 > v1);
 
 }
 
-void VersionTest::test1()
+TEST(VersionTest, 1)
 {
   Version v1("1");
   Version v2("0");
 
-  CPPUNIT_ASSERT(v1 > v2);
-  CPPUNIT_ASSERT(v2 != v1);
+  EXPECT_TRUE(v1 > v2);
+  EXPECT_TRUE(v2 != v1);
 
 }
 
 
-void VersionTest::test2()
+TEST(VersionTest, 2)
 {
   Version v1("1.0");
   Version v2("0.6.0");
 
-  CPPUNIT_ASSERT(v1 > v2);
-  CPPUNIT_ASSERT(v2 < v1);
-  CPPUNIT_ASSERT( !( v2 == v1) );
+  EXPECT_TRUE(v1 > v2);
+  EXPECT_TRUE(v2 < v1);
+  EXPECT_TRUE( !( v2 == v1) );
 
 }
 

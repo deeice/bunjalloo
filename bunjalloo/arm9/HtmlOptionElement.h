@@ -24,15 +24,15 @@ class HtmlOptionElement : public HtmlElement
     HtmlOptionElement(const std::string & tagName)
       : HtmlElement(tagName), m_selected(false) { }
 
-    virtual void setAttribute(const std::string & name, const UnicodeString & value);
+    virtual void setAttribute(const std::string & name, const std::string & value);
 
     bool selected() const;
     DEFINE_ACCEPT();
   private:
     bool m_selected;
-    UnicodeString m_value;
-    UnicodeString m_label;
+    std::string m_value;
+    std::string m_label;
 
-    const UnicodeString * attributePtr(const std::string & name) const;
+    const std::string * attributePtr(const std::string & name) const;
 };
 #endif

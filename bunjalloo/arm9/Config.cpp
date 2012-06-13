@@ -14,17 +14,20 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <cstdlib>
+#include "config_defs.h"
 #include "Config.h"
-#include "CookieJar.h"
+#include "MiniMessage.h"
 #include "File.h"
 #include "Language.h"
 #include "URI.h"
+#include "string_utils.h"
 
 static const char * s_datadir = DATADIR;
 static const char s_configFile[] = "config.ini";
 static const char s_templateName[] = "config-example.txt";
-static const char COOKIE_TEMPLATE[] = "ckallow-example.txt";
 static const char USER_DIR[] = "/"DATADIR"/user";
+static const char DOCS_DIR[] = "/"DATADIR"/docs/";
 
 const char Config::PROXY_STR[] = "proxy";
 const char Config::FONT_STR[] = "font";
@@ -36,10 +39,54 @@ const char Config::USECACHE[] = "usecache";
 const char Config::CLEARCACHE[] = "clearcache";
 const char Config::DOWNLOAD[] = "download";
 const char Config::UPDATE[] = "update";
+const char Config::USER_AGENT_STR[] = "useragent";
 const char Config::FULL_REF[] = "fullref";
+const char Config::SHOW_IMAGES[] = "images";
 const char Config::BOOKMARK_FILE[] = "/"DATADIR"/user/bookmarks.html";
+const char Config::LEFTY[] = "lefty";
 const char LANG_STR[] = "language";
 using namespace std;
+
+void Config::checkPre()
+{
+  bool exists = (nds::File::exists(s_datadir) == nds::File::F_DIR);
+  nds::MiniMessage msg("/data/bunjalloo exists");
+  if (not exists)
+  {
+    msg.failed();
+  }
+  else
+  {
+    msg.ok();
+  }
+}
+
+void Config::checkPost()
+{
+  // post config load checks
+  // check font config
+  string font;
+  {
+    nds::MiniMessage msg("Font config");
+    if (resource(FONT_STR, font))
+    {
+      msg.ok();
+    }
+    else
+    {
+      msg.failed();
+    }
+  }
+  // check font exists
+  {
+    bool exists = (nds::File::exists((font+".set").c_str()) == nds::File::F_REG);
+    nds::MiniMessage msg("Font exists");
+    if (exists)
+      msg.ok();
+    else
+      msg.failed();
+  }
+}
 
 void Config::reload()
 {
@@ -48,9 +95,9 @@ void Config::reload()
   cfgFilename += "/";
   cfgFilename += s_configFile;
 
-  string cfgTemplate(s_datadir);
-  cfgTemplate += "/docs/";
+  string cfgTemplate(DOCS_DIR);
   cfgTemplate += s_templateName;
+  string update;
   if (nds::File::exists(cfgFilename.c_str()) == nds::File::F_NONE)
   {
     // write default config file
@@ -60,17 +107,17 @@ void Config::reload()
   {
     // load new values.
     parseFile(cfgTemplate.c_str());
+    resource(UPDATE, update);
   }
+
+  parseFile(cfgFilename.c_str());
+  if (not update.empty())
+    callback(UPDATE, update);
 
   if (nds::File::exists(USER_DIR) == nds::File::F_NONE)
   {
     nds::File::mkdir(USER_DIR);
   }
-
-  parseFile(cfgFilename.c_str());
-
-
-  handleCookies();
 }
 
 void Config::callback(const std::string & first, const std::string & second)
@@ -95,43 +142,9 @@ void Config::callback(const std::string & first, const std::string & second)
   }
 }
 
-void Config::handleCookies() const
+Config::Config()
 {
-  // configure the cookie list, read each line in the m_cookieList file and
-  // add it as an allowed one to CookieJar
-  nds::File cookieList;
-  string cookieFile;
-  resource(COOKIE_STR, cookieFile);
-  if (nds::File::exists(cookieFile.c_str()) == nds::File::F_NONE)
-  {
-    string cookietemp(DATADIR);
-    cookietemp += "/docs/";
-    cookietemp += COOKIE_TEMPLATE;
-    copyTemplate(cookietemp.c_str(), cookieFile.c_str());
-  }
-  cookieList.open(cookieFile.c_str());
-  if (cookieList.is_open())
-  {
-    vector<string> lines;
-    cookieList.readlines(lines);
-    for (vector<string>::iterator it(lines.begin());
-        it != lines.end();
-        ++it)
-    {
-      string & line(*it);
-      stripWhitespace(line);
-      URI uri(line);
-      m_cookieJar.setAcceptCookies(uri.server());
-    }
-    cookieList.close();
-  }
-}
-
-
-Config::Config(CookieJar & cookieJar):
-    m_cookieJar(cookieJar)
-{
-  reload();
+  Language::instance().setDirectory(DOCS_DIR);
 }
 
 Config::~Config()
@@ -220,8 +233,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
     std::vector<std::string> & lines)
 {
   bool replaced(false);
-  string valUnescaped(unicode2string(URI::unescape(string2unicode(second)), true));
-  callback(first, valUnescaped);
+  callback(first, second);
   for (std::vector<std::string>::iterator it(lines.begin());
       it != lines.end(); ++it)
   {
@@ -235,7 +247,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
       {
         win = true;
       }
-      line = first + "=" + valUnescaped;
+      line = first + "=" + second;
       if (win)
         line += "\r";
       break;
@@ -246,7 +258,7 @@ void Config::updateConfig(const std::string & first, const std::string & second,
   {
     string line(first);
     line += "=";
-    line += valUnescaped;
+    line += second;
     string & firstLine(lines.front());
     if (firstLine[firstLine.length()-1] == '\r')
     {
@@ -276,7 +288,7 @@ void Config::postConfiguration(const std::string & postedUrl)
   for (KeyValueMap::const_iterator it(kv.begin()); it != kv.end(); ++it)
   {
     // update the config.ini file, without breaking things
-    updateConfig(it->first, it->second, lines);
+    updateConfig(it->first, URI::unescape(it->second), lines);
   }
   file.open(cfgFilename.c_str(), "w");
   for (std::vector<std::string>::iterator it(lines.begin());

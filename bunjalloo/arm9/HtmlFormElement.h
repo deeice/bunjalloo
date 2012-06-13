@@ -27,8 +27,8 @@ class HtmlFormElement:public HtmlElement
 
     DEFINE_ACCEPT();
   protected:
-    UnicodeString m_action;
-    UnicodeString m_method;
-    const UnicodeString * attributePtr(const std::string & name) const;
+    std::string m_action;
+    std::string m_method;
+    const std::string * attributePtr(const std::string & name) const;
 };
 #endif

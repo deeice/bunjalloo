@@ -14,15 +14,12 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "ParamSetTest.h"
+#include <gtest/gtest.h>
 #include "ParameterSet.h"
 
 using namespace std;
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( ParamSetTest );
-
-void ParamSetTest::testBasic()
+TEST(ParamSetTest, Basic)
 {
   string header = "a=b\r\n";
   ParameterSet paramSet(header);
@@ -30,11 +27,11 @@ void ParamSetTest::testBasic()
   string key = "a";
   string result;
   paramSet.parameter(key, result);
-  CPPUNIT_ASSERT(paramSet.hasParameter(key));
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_TRUE(paramSet.hasParameter(key));
+  EXPECT_EQ(expected, result);
 }
 
-void ParamSetTest::testQuote()
+TEST(ParamSetTest, Quote)
 {
   string header = "key= 'my value'\n";
   ParameterSet paramSet(header);
@@ -42,20 +39,20 @@ void ParamSetTest::testQuote()
   string key = "key";
   string result;
   paramSet.parameter(key, result);
-  CPPUNIT_ASSERT(paramSet.hasParameter(key));
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_TRUE(paramSet.hasParameter(key));
+  EXPECT_EQ(expected, result);
 
   string refresh="0; url='redirected.html'";
   ParameterSet paramSet2(refresh);
   expected = "redirected.html";
   key = "url";
   result = "";
-  CPPUNIT_ASSERT(paramSet2.hasParameter(key));
+  EXPECT_TRUE(paramSet2.hasParameter(key));
   paramSet2.parameter(key, result);
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
 
-void ParamSetTest::testDoubleQuote()
+TEST(ParamSetTest, DoubleQuote)
 {
   string header = "key = \"another	value\"\r\n";
   ParameterSet paramSet(header);
@@ -63,11 +60,11 @@ void ParamSetTest::testDoubleQuote()
   string key = "key";
   string result;
   paramSet.parameter(key, result);
-  CPPUNIT_ASSERT(paramSet.hasParameter(key));
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_TRUE(paramSet.hasParameter(key));
+  EXPECT_EQ(expected, result);
 }
 
-void ParamSetTest::testAmphersand()
+TEST(ParamSetTest, Amphersand)
 {
   string header = "proxy=234.56.78.90&proxyOn=no";
   ParameterSet paramSet(header, '&');
@@ -75,14 +72,11 @@ void ParamSetTest::testAmphersand()
   string key = "proxy";
   string result;
   paramSet.parameter(key, result);
-  CPPUNIT_ASSERT(paramSet.hasParameter(key));
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_TRUE(paramSet.hasParameter(key));
+  EXPECT_EQ(expected, result);
   key = "proxyOn";
   expected = "no";
   paramSet.parameter(key, result);
-  CPPUNIT_ASSERT(paramSet.hasParameter(key));
-  CPPUNIT_ASSERT_EQUAL(expected, result);
-
-
+  EXPECT_TRUE(paramSet.hasParameter(key));
+  EXPECT_EQ(expected, result);
 }
-

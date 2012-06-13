@@ -41,6 +41,8 @@
 */
 #include <string>
 #include <algorithm>
+#include <cstring>
+#include <cstdio>
 #include "libnds.h"
 #include "System.h"
 #include "Config.h"
@@ -68,7 +70,11 @@ class SslClient
 {
   public:
     SslClient(HttpClient & httpClient)
-      : m_httpClient(httpClient), m_conn(0), m_sessionId(NULL), m_cipherSuite(0)
+      : m_httpClient(httpClient),
+      m_conn(0),
+      m_sessionId(NULL),
+      m_buffer(new char[SSL_BUFFER_SIZE]),
+      m_cipherSuite(0)
     {}
     ~SslClient();
 
@@ -82,6 +88,8 @@ class SslClient
     int read();
 
     void handle(void * bufferIn, int amountRead);
+
+    void freeSession();
 
   private:
 
@@ -99,6 +107,7 @@ class SslClient
     };
     sslConn_t * m_conn;
     sslSessionId_t *m_sessionId;
+    char * m_buffer;
     short m_cipherSuite;
     int m_lastRead;
 
@@ -119,18 +128,26 @@ const int SslClient::SOCKET_ERROR(-1);
 SslClient::~SslClient()
 {
   freeConnection();
+  delete [] m_buffer;
+}
+
+void SslClient::freeSession()
+{
+  if (not m_conn) {
+    return;
+  }
+  matrixSslFreeSessionId(m_sessionId);
+  matrixSslDeleteSession(m_conn->ssl);
+  m_conn->ssl = 0;
 }
 
 void SslClient::freeConnection()
 {
-  if (not m_conn)
-  {
+  if (not m_conn) {
     return;
   }
+  freeSession();
 
-  matrixSslFreeSessionId(m_sessionId);
-  matrixSslDeleteSession(m_conn->ssl); // mem leak, but this crashes
-  m_conn->ssl = 0;
   if (m_conn->insock.buf) {
     free(m_conn->insock.buf);
     m_conn->insock.buf = 0;
@@ -143,7 +160,6 @@ void SslClient::freeConnection()
     free(m_conn->inbuf.buf);
     m_conn->inbuf.buf = 0;
   }
-  // none of the above works > 1 time.
   free(m_conn);
   m_conn = 0;
 }
@@ -207,11 +223,11 @@ int SslClient::sslHandshake()
   m_conn->insock.size = SSL_BUFFER_SIZE;
   m_conn->insock.start =
     m_conn->insock.end =
-    m_conn->insock.buf = (unsigned char *)malloc(m_conn->insock.size);
+    m_conn->insock.buf = (unsigned char *)realloc(m_conn->insock.buf, m_conn->insock.size);
   m_conn->outsock.size = SSL_BUFFER_SIZE;
   m_conn->outsock.start =
     m_conn->outsock.end =
-    m_conn->outsock.buf = (unsigned char *)malloc(m_conn->outsock.size);
+    m_conn->outsock.buf = (unsigned char *)realloc(m_conn->outsock.buf, m_conn->outsock.size);
   m_conn->inbuf.size = 0;
   m_conn->inbuf.start =
     m_conn->inbuf.end =
@@ -233,14 +249,13 @@ int SslClient::sslHandshake()
 
   m_httpClient.print("Read back hello respose\n");
   // read back the data.
-  char buf[SSL_BUFFER_SIZE];
 
   int result(-1);
   m_lastRead = 0;
   do
   {
     m_httpClient.print("Read hello respose");
-    result = sslRead(buf, SSL_BUFFER_SIZE);
+    result = sslRead(m_buffer, SSL_BUFFER_SIZE);
     //printf("hello response read - result %d\n", result);
   } while (result == 0 and not matrixSslHandshakeIsComplete(m_conn->ssl));
 
@@ -276,9 +291,8 @@ int SslClient::writeBuffer(sslBuf_t * out)
 
 int SslClient::read()
 {
-  char buf[SSL_BUFFER_SIZE];
   m_lastRead = 0;
-  int result = sslRead(buf, SSL_BUFFER_SIZE);
+  int result = sslRead(m_buffer, SSL_BUFFER_SIZE);
   if (result < 0)
   {
     return HttpClient::CONNECTION_CLOSED;
@@ -293,7 +307,7 @@ int SslClient::read()
     else
       return HttpClient::READ_ERROR;
   }
-  m_httpClient.handleRaw(buf, result);
+  m_httpClient.handleRaw(m_buffer, result);
   return result;
 }
 
@@ -366,7 +380,7 @@ retryEncode:
 
 int SslClient::sslRead(char * buf, int len)
 {
-  int bytes, rc, remaining;
+  int bytes, rc;
   unsigned char error, alertLevel, alertDescription, performRead;
 
   if (m_conn->ssl == 0 || len <= 0) {
@@ -378,7 +392,7 @@ int SslClient::sslRead(char * buf, int len)
      returned, free the inbuf.  */
   if (m_conn->inbuf.buf) {
     if (m_conn->inbuf.start < m_conn->inbuf.end) {
-      remaining = (int)(m_conn->inbuf.end - m_conn->inbuf.start);
+      int remaining = (int)(m_conn->inbuf.end - m_conn->inbuf.start);
       bytes = (int)min(len, remaining);
       memcpy(buf, m_conn->inbuf.start, bytes);
       m_conn->inbuf.start += bytes;
@@ -591,35 +605,12 @@ HttpClient::HttpClient():
   m_finished(false),
   m_connectAttempts(0),
   m_state(WIFI_OFF),
+  m_controller(0),
   m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
+  m_hasSsl(true),
   m_sslClient(new SslClient(*this)),
   m_log(false)
 {
-}
-
-HttpClient::HttpClient(const URI & uri) :
-  nds::Client(uri.server().c_str(),uri.port()),
-  m_total(0),
-  m_finished(false),
-  m_connectAttempts(0),
-  m_uri(uri),
-  m_state(WIFI_OFF),
-  m_maxConnectAttempts(MAX_CONNECT_ATTEMPTS),
-  m_sslClient(new SslClient(*this)),
-  m_log(false)
-{
-  debug("In HttpClient, uri.server.c_str:");
-  debug(uri.server().c_str());
-  debug(uri.asString().c_str());
-  if (s_sslKeys == 0 and matrixSslOpen() < 0)
-  {
-    // no HTTPS
-    debug("No HTTPS");
-  }
-  else
-  {
-    m_hasSsl = true;
-  }
 }
 
 HttpClient::~HttpClient()
@@ -627,11 +618,21 @@ HttpClient::~HttpClient()
   delete m_sslClient;
 }
 
+std::string HttpClient::proxyString() const
+{
+  string proxy;
+  if (m_controller
+      and m_controller->config().resource(Config::PROXY_STR, proxy)) {
+    return proxy;
+  }
+  return "";
+}
+
 void HttpClient::setController(Controller * c)
 {
   m_controller = c;
-  string proxy;
-  if (m_controller->config().resource(Config::PROXY_STR, proxy))
+  const string &proxy(proxyString());
+  if (not proxy.empty())
   {
     URI uri(proxy);
     setConnection(uri.server().c_str(), uri.port());
@@ -676,7 +677,7 @@ void HttpClient::handleRaw(void * bufferIn, int amountRead)
   char * buffer = (char*)bufferIn;
   buffer[amountRead] = 0;
   // printf("%s", buffer);
-  m_controller->m_document->appendData(buffer, amountRead);
+  if (m_controller) m_controller->m_document->appendData(buffer, amountRead);
   m_total += amountRead;
   // FIXME: cache this?
   if (m_uri.method() == "HEAD")
@@ -696,11 +697,12 @@ void HttpClient::finish() {
   //printf("%d\n",m_total);
   if (m_total == 0)
   {
-    m_controller->loadError();
+    if (m_controller)
+      m_controller->loadError();
   }
   else
   {
-    m_controller->m_document->setStatus(Document::LOADED);
+    m_controller->m_document->setStatus(Document::LOADED_HTML);
   }
 }
 
@@ -717,13 +719,12 @@ void HttpClient::debug(const char * s)
     log.write("\n");
     //printf("debug:%s\n",s);
   }
-  //m_controller->m_document->appendLocalData(s, strlen(s));
 }
 
 void HttpClient::proxyConnect()
 {
-  string proxy;
-  if (isSsl() and m_controller->config().resource(Config::PROXY_STR, proxy))
+  const string &proxy(proxyString());
+  if (isSsl() and not proxy.empty())
   {
     // need to trick the proxy into providing the TCP/IP tunnel.
     string s;
@@ -746,27 +747,54 @@ void HttpClient::proxyConnect()
   }
 }
 
+std::string HttpClient::cookieString(const URI &uri) const
+{
+  string cookies;
+  if (m_controller) {
+    m_controller->m_document->cookieJar()->cookiesForRequest(uri, cookies);
+  }
+  return cookies;
+}
+
+std::string HttpClient::filenamePart(const URI &uri) const
+{
+  const string &proxy(proxyString());
+  if (not isSsl() and not proxy.empty())
+  {
+    // for proxy connection, need to send the whole request:
+    return uri.asString();
+  }
+  return uri.fileName();
+}
+
+std::string HttpClient::userAgent() const
+{
+  std::string useragent;
+  if (m_controller and m_controller->config().resource(Config::USER_AGENT_STR, useragent))
+  {
+    return useragent;
+  }
+  else {
+    useragent += "Bunjalloo/";
+    useragent += VERSION;
+    useragent += "(";
+    useragent += nds::System::uname();
+    useragent += ";U;";
+    useragent += Language::instance().currentLanguage();
+    useragent += ")";
+    return useragent;
+  }
+}
+
 // GET stuff
 void HttpClient::get(const URI & uri)
 {
   if (isConnected())
   {
-    string cookieString;
-    m_controller->m_document->cookieJar()->cookiesForRequest(uri, cookieString);
-
-    string proxy;
     string s;
     s += uri.method();
     s += " ";
-    if (not isSsl() and m_controller->config().resource(Config::PROXY_STR, proxy))
-    {
-      // for proxy connection, need to send the whole request:
-      s += uri.asString();
-    }
-    else
-    {
-      s += uri.fileName();
-    }
+    s += filenamePart(uri);
     s += " HTTP/1.1\r\n";
     s += "Host:" + uri.server()+"\r\n";
     if (uri.method() != "HEAD")
@@ -791,13 +819,13 @@ void HttpClient::get(const URI & uri)
     //If the Accept-Encoding field-value is empty, then only the "identity" encoding is acceptable.
     // -- RFC2616-sec14
     s += "Accept-encoding: gzip,deflate\r\n";
-    s += "Accept: text/html\r\n";
-    s += "User-Agent: Bunjalloo (";
-    s += nds::System::uname();
-    s += ";v";
-    s += VERSION;
-    s += ")\r\n";
-    s += cookieString;
+    s += "Accept: text/html,image/png,image/jpeg,image/gif,text/plain\r\n";
+
+    s += "User-Agent: ";
+    s += userAgent();
+    s += "\r\n";
+
+    s += cookieString(uri);
     if (uri.requestHeader().empty())
     {
       s += "\r\n";
@@ -825,8 +853,6 @@ void HttpClient::get(const URI & uri)
     }
     m_finished = false;
   }
-  // reset the document for downloading
-  m_controller->m_document->reset();
 }
 
 void HttpClient::wifiConnection()
@@ -869,7 +895,7 @@ void HttpClient::handleNextState()
 
     case CONNECT_SOCKET:
       // connect to the socket.
-      setTimeout(5);
+      setTimeout(1);
       this->connect();
       if (isConnected())
       {
@@ -881,8 +907,8 @@ void HttpClient::handleNextState()
         else
         {
           m_state = GET_URL;
-          swiWaitForVBlank();
-          swiWaitForVBlank();
+          m_controller->waitVBlank();
+          m_controller->waitVBlank();
         }
         m_connectAttempts = 0;
       }
@@ -916,8 +942,8 @@ void HttpClient::handleNextState()
     case GET_URL:
       setTimeout(5);
       get(m_uri);
-      swiWaitForVBlank();
-      swiWaitForVBlank();
+      m_controller->waitVBlank();
+      m_controller->waitVBlank();
       m_state = READING_FIRST;
       break;
 
@@ -935,6 +961,7 @@ void HttpClient::handleNextState()
 
     case FINISHED:
       m_finished = true;
+      m_sslClient->freeSession();
       break;
 
     case FAILED:
@@ -986,16 +1013,16 @@ void HttpClient::readFirst()
             m_state = FAILED;
           }
         }
-        swiWaitForVBlank();
-        swiWaitForVBlank();
+        m_controller->waitVBlank();
+        m_controller->waitVBlank();
       }
       break;
 
     case RETRY_LATER:
       /* Keep going! */
       debug("RETRY_LATER readFirst");
-      swiWaitForVBlank();
-      swiWaitForVBlank();
+      m_controller->waitVBlank();
+      m_controller->waitVBlank();
       m_connectAttempts++;
       if (m_connectAttempts == m_maxConnectAttempts) {
         m_state = FAILED;
@@ -1047,8 +1074,8 @@ void HttpClient::readAll()
         debug("m_maxConnectAttempts reached - surely it is done...");
         m_state = FINISHED;
       } else {
-        swiWaitForVBlank();
-        swiWaitForVBlank();
+        m_controller->waitVBlank();
+        m_controller->waitVBlank();
       }
       break;
 
@@ -1075,7 +1102,11 @@ void HttpClient::setUri(const URI & uri)
   m_uri = uri;
   m_state = GET_URL;
   m_finished = false;
-  setConnection(uri.server().c_str(), uri.port());
+  const string &proxy(proxyString());
+  if (proxy.empty()) {
+    // when no proxy, connect directly to the remote http server
+    setConnection(uri.server().c_str(), uri.port());
+  }
 }
 
 const URI & HttpClient::uri() const
@@ -1091,10 +1122,6 @@ void HttpClient::reset()
   m_connectAttempts = 0;
   m_state = WIFI_OFF;
   m_maxConnectAttempts = MAX_CONNECT_ATTEMPTS;
-  /*delete m_sslClient;
-  m_sslClient = new SslClient(*this);
-  m_log = false;
-  */
 }
 
 void HttpClient::setReferer(const URI & referer)

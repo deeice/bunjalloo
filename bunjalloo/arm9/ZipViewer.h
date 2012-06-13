@@ -22,7 +22,6 @@
 #include "ButtonListener.h"
 #include "ZipFile.h"
 
-class RichTextArea;
 class CheckBox;
 class View;
 
@@ -34,7 +33,6 @@ class ZipViewer: public ButtonListener, public ExtractListener
     void setFilename(const std::string & filename);
 
     void unzip();
-    void unzipAndPatch();
     void show();
     virtual void pressed(ButtonI * button);
 
@@ -48,9 +46,8 @@ class ZipViewer: public ButtonListener, public ExtractListener
     // no need to delete these - the text area they get added to deals with
     // memory management.
     ButtonI * m_unzip;
-    ButtonI * m_unzipAndPatch;
     std::vector<CheckBox*> m_checkboxes;
     int m_fileCount;
-    int m_index;
+    size_t m_index;
 };
 #endif

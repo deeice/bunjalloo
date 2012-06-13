@@ -36,9 +36,13 @@
     3. This notice may not be removed or altered from any source distribution.
 
 */
+#include <cstring>
+#include <cstdlib>
+#include <cstdio>
 #include "unzip.h"
 #include "ZipFile.h"
 #include "File.h"
+#include "scoped_ptr.h"
 #include <errno.h>
 #include <time.h>
 #include <utime.h>
@@ -121,7 +125,6 @@ static int do_extract_currentfile(
   char* p;
   int err=UNZ_OK;
   FILE *fout=NULL;
-  void* buf;
   uInt size_buf;
 
   unz_file_info file_info;
@@ -135,8 +138,8 @@ static int do_extract_currentfile(
   }
 
   size_buf = WRITEBUFFERSIZE;
-  buf = (void*)malloc(size_buf);
-  if (buf==NULL)
+  scoped_ptr_malloc<unsigned char> buf(static_cast<unsigned char*>(malloc(size_buf)));
+  if (buf.get() == NULL)
   {
     // printf("Error allocating memory\n");
     return UNZ_INTERNALERROR;
@@ -208,14 +211,14 @@ static int do_extract_currentfile(
 
       do
       {
-        err = unzReadCurrentFile(uf,buf,size_buf);
+        err = unzReadCurrentFile(uf,buf.get(),size_buf);
         if (err<0)
         {
           // printf("error %d with zipfile in unzReadCurrentFile\n",err);
           break;
         }
         if (err>0)
-          if (fwrite(buf,err,1,fout)!=1)
+          if (fwrite(buf.get(),err,1,fout)!=1)
           {
             // printf("error in writing extracted file\n");
             err=UNZ_ERRNO;
@@ -244,7 +247,6 @@ static int do_extract_currentfile(
   }
 
   if (listener) listener->after(filename_inzip);
-  free(buf);
   return err;
 }
 
@@ -292,9 +294,9 @@ class ZipFileImpl
         return;
       }
 
+      char filename_inzip[256];
       for (unsigned int i = 0; i < gi.number_entry; i++)
       {
-        char filename_inzip[256];
         unz_file_info file_info;
         err = unzGetCurrentFileInfo(m_file,&file_info,filename_inzip,sizeof(filename_inzip),NULL,0,NULL,0);
         if (err!=UNZ_OK)

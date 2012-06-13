@@ -17,6 +17,7 @@
 #ifndef Background_h_seen
 #define Background_h_seen
 
+#include <stdint.h>
 // tolua_begin
 namespace nds {
 
@@ -216,7 +217,7 @@ namespace nds {
       } background_t;
 
       //! the background register to use
-      volatile unsigned long int & m_DISPCNT;
+      volatile uint32_t & m_DISPCNT;
       //! the current hardware state for this background
       background_t m_bg;
 

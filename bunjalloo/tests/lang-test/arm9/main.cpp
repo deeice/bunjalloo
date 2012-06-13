@@ -18,7 +18,7 @@
 #include "libnds.h"
 #include "Button.h"
 #include "Canvas.h"
-#include "Font.h"
+#include "FontFactory.h"
 #include "RichTextArea.h"
 #include "ScrollPane.h"
 #include "Stylus.h"
@@ -26,25 +26,22 @@
 #include "TextArea.h"
 #include "TextField.h"
 #include "Language.h"
-#include "vera.h"
-
-extern const char _binary_test_map_bin_start[];
+#include "sans.h"
 
 using namespace nds;
 int main(int argc, char * argv[])
 {
-  irqInit();
-  irqSet(IRQ_VBLANK,0);
   // wait for arm7 to read settings.
   for (int i = 0; i < 120; ++i)
     swiWaitForVBlank();
 
-  static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
-  TextAreaFactory::setFont(&font);
-  TextAreaFactory::usePaletteData((const char*)_binary_vera_pal_bin_start, 32);
+  TextAreaFactory::setFont(FontFactory::create(
+        (unsigned char*)_binary_sans_set_bin_start,
+        (unsigned char*)_binary_sans_map_bin_start));
   ScrollPane scrollPane;
+  Language::instance().setDirectory("data/docs");
   TextField * tf = new TextField(T("text"));
-  TextField * passwd = new TextField(UnicodeString());
+  TextField * passwd = new TextField(std::string());
   RichTextArea * rich = (RichTextArea*)TextAreaFactory::create(TextAreaFactory::TXT_RICH);
   Button * goBtn = new Button(T("Go"));
   rich->appendText(T("long"));
@@ -93,7 +90,8 @@ int main(int argc, char * argv[])
 
     if (keys & KEY_TOUCH)
     {
-      touchPosition tp = touchReadXY();
+      touchPosition tp;
+      touchRead(&tp);
       Stylus stylus;
       stylus.update(Stylus::DOWN, true, tp.px, tp.py+SCREEN_HEIGHT);
       if (not needsPainting)

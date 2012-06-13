@@ -14,9 +14,12 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "config_defs.h"
 #include "URI.h"
+#include "string_utils.h"
 #include <zlib.h>
 #include <algorithm>
+#include <cstdio>
 #include <vector>
 #include <functional>
 
@@ -86,7 +89,7 @@ void URI::setUri(const std::string & uriString)
   }
   if (sep != string::npos) {
     m_protocol = tmpUri.substr(0,sep);
-    transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), tolower);
+    transform(m_protocol.begin(), m_protocol.end(), m_protocol.begin(), ::tolower);
     m_address = tmpUri.substr(sep+3, tmpUri.length());
   }
 }
@@ -213,10 +216,10 @@ const std::string URI::fileName() const
       }
       break;
     default:
-      return "";
+      return file;
   }
   // sigh.
-  return "";
+  return file;
 }
 
 URI URI::navigateTo(const std::string & newFile ) const
@@ -276,6 +279,19 @@ URI URI::navigateTo(const std::string & newFile ) const
       newURI += tmp.m_address.substr(0,lastHash) + newFile;
     }
   }
+  else if (newFile[0] == '?')
+  {
+    // internal link, add newFile to the existing address
+    size_t lastQuestionMark(tmp.m_address.rfind("?"));
+    if (lastQuestionMark == string::npos)
+    {
+      newURI = tmp.m_address.substr(0,tmp.m_address.rfind("#")) + newFile;
+    }
+    else
+    {
+      newURI += tmp.m_address.substr(0,lastQuestionMark) + newFile;
+    }
+  }
   else
   {
     // strip off last part of file and go here.
@@ -292,9 +308,17 @@ URI URI::navigateTo(const std::string & newFile ) const
   // if contains dots -> strip them out
   vector<string> pathElements;
   vector<string> newPath;
-  tokenize(newURI, pathElements, string("/"));
+  split(newURI, pathElements, string("/"));
 
   vector<string>::const_iterator it(pathElements.begin());
+
+  // skip empties at the start
+  for (; it != pathElements.end(); ++it)
+  {
+    if (not it->empty())
+      break;
+  }
+
   for (; it != pathElements.end();++it)
   {
     if ( (*it) == "..")
@@ -326,10 +350,10 @@ URI URI::navigateTo(const std::string & newFile ) const
     needSep = true;
   }
   // Make sure not to lose trailing slash
-  if (newFile[newFile.length()-1] == '/')
+  /*if (newFile[newFile.length()-1] == '/')
   {
     newURI += "/";
-  }
+  }*/
 
   tmp.setUri(newURI);
   return tmp;
@@ -340,11 +364,11 @@ const std::string URI::asString() const
   return m_protocol+"://"+m_address;
 }
 
-bool URI::operator==(const URI & other)
+bool URI::operator==(const URI & other) const
 {
   return m_protocol == other.m_protocol and m_address==other.m_address;
 }
-bool URI::operator!=(const URI & other)
+bool URI::operator!=(const URI & other) const
 {
   return not operator==(other);
 }
@@ -352,18 +376,19 @@ bool URI::operator!=(const URI & other)
 static bool isEscapable(unsigned int value)
 {
   return ::isblank(value) or value == '&' or value == '#' or value == '?'
-    or value == '=' or value == '/' or value == ':' or value == '@';
+    or value == '=' or value == '/' or value == ':' or value == '@' or value == '%'
+    or value == '+';
 }
 
-UnicodeString URI::escape(const UnicodeString & input)
+std::string URI::escape(const std::string &input)
 {
   // escape non URI values like space and stuff.
-  UnicodeString output;
-  UnicodeString::const_iterator it(input.begin());
+  std::string output;
+  std::string::const_iterator it(input.begin());
   char buffer[4];
   for ( ; it != input.end(); ++it)
   {
-    unsigned int value = *it;
+    char value = *it;
     if ( isEscapable(value))
     {
       sprintf_platform(buffer, "%%%02X", value);
@@ -381,11 +406,11 @@ UnicodeString URI::escape(const UnicodeString & input)
   return output;
 }
 
-UnicodeString URI::unescape(const UnicodeString & input)
+std::string URI::unescape(const std::string & input)
 {
   // convert %XX to char
-  UnicodeString output;
-  UnicodeString::const_iterator it(input.begin());
+  std::string output;
+  std::string::const_iterator it(input.begin());
   for ( ; it != input.end(); ++it)
   {
     unsigned int value = *it;

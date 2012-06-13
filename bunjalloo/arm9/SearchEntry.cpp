@@ -17,7 +17,7 @@
 #include <vector>
 #include "File.h"
 #include "SearchEntry.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 
 using namespace std;
 

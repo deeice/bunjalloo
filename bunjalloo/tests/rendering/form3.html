@@ -1,0 +1,30 @@
+<html>
+  <title>Test form again</title>
+
+  <form name="top_form" action="cgi-bin/form" method=GET>
+    <fieldset>
+      <legend>Data 1</legend>
+      <label for="p" accesskey=P>Project</label>
+      <input type=text name="p" id=p></input>
+      <label for="r" accesskey=R>Interest<sup>+</sup></label>
+      <input type=text name="r" id=r></input>
+      <input type=submit value="Show Result"></input>
+      <input type=hidden name="t" value="l"></input>
+    </fieldset>
+  </form>
+
+  <form name="list_form" action="cgi-bin/form2" method=GET>
+    <fieldset>
+      <legend>Data 2</legend>
+      <input type=hidden name="t" value="d"></input>
+      <label for="p" accesskey=P>Project</label>
+      <input type=text name="p" id=p></input>
+      <input type=submit value="Show Activity"></input>
+
+      <select name="adults" id="airadults">
+        <option value="0" >0</option>
+      </select>
+    </fieldset>
+  </form>
+  <sup>+</sup> Interest:Size weight, default is 1:0
+</html>

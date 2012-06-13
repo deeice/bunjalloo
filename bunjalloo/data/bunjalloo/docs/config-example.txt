@@ -46,4 +46,10 @@ fullref=0
 download=/
 
 # Place to look for updates
-update=http://quirkysoft.googlecode.com/svn/wiki/BunjallooVersion.wiki
+update=https://wiki.quirkysoft.googlecode.com/hg/BunjallooVersion.wiki
+
+# Allow inline images
+images=1
+
+# left handed, swaps controls
+lefty=0

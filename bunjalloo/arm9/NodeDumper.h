@@ -21,7 +21,6 @@ namespace nds
 {
   class File;
 }
-#include "UnicodeString.h"
 #include "DefaultVisitor.h"
 
 class NodeDumper: public DefaultVisitor

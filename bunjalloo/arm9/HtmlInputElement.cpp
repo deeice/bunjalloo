@@ -18,9 +18,9 @@
 #include "Visitor.h"
 IMPLEMENT_ACCEPT(HtmlInputElement);
 
-const UnicodeString * HtmlInputElement::attributePtr(const std::string & name) const
+const std::string * HtmlInputElement::attributePtr(const std::string & name) const
 {
-  const UnicodeString * p = HtmlElement::attributePtr(name);
+  const std::string * p = HtmlElement::attributePtr(name);
   if (p) {
     return p;
   }
@@ -55,7 +55,7 @@ const UnicodeString * HtmlInputElement::attributePtr(const std::string & name) c
 
 HtmlInputElement::InputType HtmlInputElement::inputType() const
 {
-  std::string type = unicode2string(m_type);
+  const std::string &type(m_type);
   if (type == "submit") return SUBMIT;
   if (type == "image") return IMAGE;
   if (type == "button") return SUBMIT;
@@ -77,7 +77,7 @@ void HtmlInputElement::setChecked(bool checked)
 }
 
 void HtmlInputElement::setAttribute(const std::string & name,
-        const UnicodeString & value)
+        const std::string & value)
 {
   HtmlElement::setAttribute(name, value);
   if (name == "checked")

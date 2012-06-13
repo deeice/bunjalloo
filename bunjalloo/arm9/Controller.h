@@ -17,10 +17,12 @@
 #ifndef Controller_h_seen
 #define Controller_h_seen
 
+#include "URI.h"
+#include <queue>
+
 class Document;
 class View;
 class Config;
-class URI;
 class Cache;
 
 class HttpClient;
@@ -30,8 +32,11 @@ class Controller
 {
   friend class HttpClient;
   public:
+
+    static const char LICENCE_URL[];
     //!Constructor.
     Controller();
+    void initialise();
     //! Destructor
     ~Controller();
 
@@ -39,6 +44,8 @@ class Controller
      * @param uri the URI to use.
      */
     void doUri(const URI & uri);
+
+    void queueUri(const URI & uri);
 
     /** Set the HTTP Referer URI.
      * @param referer the referring site.
@@ -77,9 +84,6 @@ class Controller
      */
     const Config & config() const;
 
-    /** Show the software licence.*/
-    void showLicence();
-
     /** Loops forever.*/
     void mainLoop();
 
@@ -96,6 +100,10 @@ class Controller
     /** Save the list of accepted domains to file.  */
     void saveCookieSettings();
 
+    URI downloadingFile() const;
+
+    void waitVBlank() const;
+
   private:
     Document * m_document;
     View * m_view;
@@ -108,6 +116,8 @@ class Controller
     int m_maxRedirects;
     SaveAs_t m_saveAs;
     std::string m_saveFileName;
+    std::queue<URI> m_downloadQ;
+    bool m_checkingQueue;
 
 
     void localFile(const std::string &);
@@ -123,6 +133,11 @@ class Controller
     // Check saving when page loads or user tries to save
     void checkSave();
     void checkUpdates();
+
+    void checkDownloadQueue();
+
+    /** Show the software licence.*/
+    void showLicence();
 
 };
 #endif

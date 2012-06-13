@@ -145,6 +145,6 @@ namespace nds
        */
       ObjectPalette(int screen, int palette);
   }; //tolua_export
-  #include "Palette.inl"
+  #include "Palette-inl.h"
 }; //tolua_export
 #endif

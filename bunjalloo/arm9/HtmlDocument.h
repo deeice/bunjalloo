@@ -17,7 +17,6 @@
 #ifndef HtmlDocument_h_seen
 #define HtmlDocument_h_seen
 
-#include "UnicodeString.h"
 #include "HtmlParser.h"
 #include "ElementList.h"
 
@@ -38,7 +37,7 @@ class HtmlDocument : public HtmlParser
     /** Get the data contents.
      * @return reference to the data.
      */
-    inline const UnicodeString & data() const;
+    inline const std::string & data() const;
 
     /** Get the current amount of data retrieved.
      * @return amount of data retrieved.
@@ -61,7 +60,6 @@ class HtmlDocument : public HtmlParser
     void dumpAF();
 
     void handleEOF();
-
   protected:
     virtual void handleStartEndTag(const std::string & tag, const AttributeVector & attrs);
     virtual void handleStartTag(const std::string & tag, const AttributeVector & attrs);
@@ -99,7 +97,7 @@ class HtmlDocument : public HtmlParser
       IN_FRAMESET,
       AFTER_FRAMESET
     };
-    UnicodeString m_data;
+    std::string m_data;
     unsigned int m_dataGot;
     TreeState m_state;
     InsertionMode m_insertionMode;
@@ -165,6 +163,7 @@ class HtmlDocument : public HtmlParser
     void startScopeClosedElement(const std::string & tag, const std::string & alternate="");
 
     bool headerInScope() const;
+    void appendTextToCurrentNode(unsigned int ucodeChar);
     // disable copies
     HtmlDocument (const HtmlDocument&);
     const HtmlDocument& operator=(const HtmlDocument&);
@@ -175,7 +174,7 @@ class HtmlDocument : public HtmlParser
 
 
 // inline implementation
-const UnicodeString & HtmlDocument::data() const
+const std::string & HtmlDocument::data() const
 {
   return m_data;
 }

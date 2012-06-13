@@ -14,6 +14,8 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "utf8.h"
+#include <stdint.h>
 #include "TextAreaFactory.h"
 #include "TextArea.h"
 #include "TextContainer.h"
@@ -21,7 +23,7 @@
 const int TextContainer::BORDER_WIDTH(5);
 const int TextContainer::BORDER_HEIGHT(5);
 
-TextContainer::TextContainer(const UnicodeString & text) :
+TextContainer::TextContainer(const std::string & text) :
   Component()
 {
   add(TextAreaFactory::create());
@@ -40,7 +42,7 @@ TextContainer::TextContainer():
   add(TextAreaFactory::create());
 }
 
-void TextContainer::setText(const UnicodeString & text)
+void TextContainer::setText(const std::string & text)
 {
   bool needLayout = false;
   if (m_text != text)
@@ -57,21 +59,9 @@ void TextContainer::setSize(unsigned int w, unsigned int h)
   bool needLayout = ((int)w != m_bounds.w or (int)h != m_bounds.h);
   Component::setSize(w, h);
 
-  if ((int)w < (m_preferredWidth+BORDER_WIDTH))
-  {
-    m_preferredWidth = w+BORDER_WIDTH;
-  }
-  else
-  {
-    m_preferredWidth = w;
-  }
+  m_preferredWidth = w;
   textArea()->setSize(w, h);
   m_preferredHeight = textArea()->font().height()+BORDER_HEIGHT;
-  /*
-  int tmpPW = textArea()->preferredSize().w+BORDER_WIDTH;
-  if (tmpPW > m_preferredWidth)
-    m_preferredWidth = tmpPW;
-  */
   if (needLayout)
   {
     layout();
@@ -84,25 +74,15 @@ void TextContainer::layout()
   {
     textArea()->setSize(textArea()->textSize(m_text), textArea()->font().height());
   }
-  UnicodeString appendText;
-  UnicodeString::const_iterator it(m_text.begin());
+  std::string::const_iterator it(m_text.begin());
+  std::string::const_iterator end_it(m_text.end());
   int size(0);
-  for (; it != m_text.end() and size <= textArea()->width(); ++it)
-  {
-    Font::Glyph g;
-    textArea()->font().glyph(*it, g);
-    if ((size + g.width) <= textArea()->width()) {
-      size += g.width;
-      appendText += *it;
-    } else {
-      break;
-    }
-  }
+  std::string subs(textArea()->font().shorterWordFromLong(&it, end_it, textArea()->width(), &size));
   textArea()->clearText();
-  textArea()->appendText(appendText);
+  textArea()->appendText(subs);
   if (width() == 0)
   {
-    m_bounds.w = size + BORDER_WIDTH;
+    m_bounds.w = (size >> 8) + BORDER_WIDTH;
     m_preferredWidth = m_bounds.w;
     m_bounds.h = textArea()->font().height() + BORDER_HEIGHT;
     m_preferredHeight = m_bounds.h;
@@ -120,7 +100,7 @@ void TextContainer::setBackgroundColor(unsigned short color)
   textArea()->setBackgroundColor(color);
 }
 
-const UnicodeString & TextContainer::text() const
+const std::string & TextContainer::text() const
 {
   return m_text;
 }

@@ -30,6 +30,7 @@
 #include "ParameterSet.h"
 #include "RichTextArea.h"
 #include "Updater.h"
+#include "string_utils.h"
 #include "Version.h"
 #include "View.h"
 #include "ViewRender.h"
@@ -82,61 +83,47 @@ void Updater::show()
 void Updater::getZip()
 {
   m_state = INI_FAIL;
-  if (m_document.status() == Document::LOADED
+  if ((m_document.status() == Document::LOADED_HTML
+        or m_document.status() == Document::LOADED_PAGE)
       and not m_controller.stopped()
       and m_document.htmlDocument()->mimeType() == HtmlParser::TEXT_PLAIN)
   {
     // loaded. check it is what we expect
-    const HtmlElement * rootNode = m_document.rootNode();
-    if (rootNode->hasChildren())
+    const std::string &data(m_document.htmlDocument()->data());
+    vector<string> lines;
+    string download, size;
+    tokenize(data, lines, string("\n"));
+    for (vector<string>::const_iterator it(lines.begin()); it != lines.end(); ++it)
     {
-      const HtmlElement * body(rootNode->lastChild());
-      if (body and body->hasChildren())
+      ParameterSet set(*it);
+      if (set.hasParameter("version"))
       {
-        const HtmlElement * text(body->firstChild());
-        if (text->isa(HtmlConstants::TEXT))
-        {
-          // yipee
-          const string & data = unicode2string(text->text(), true);
-          vector<string> lines;
-          string download, size;
-          tokenize(data, lines, string("\n"));
-          for (vector<string>::const_iterator it(lines.begin()); it != lines.end(); ++it)
-          {
-            ParameterSet set(*it);
-            if (set.hasParameter("version"))
-            {
-              set.parameter("version", m_newVersion);
-            }
-            if (set.hasParameter("URL"))
-            {
-              set.parameter("URL", download);
-            }
-            if (set.hasParameter("size"))
-            {
-              set.parameter("size", size);
-            }
-          }
-          Version current(VERSION);
-          Version online(m_newVersion.c_str());
-          m_state = GOT_ZIP;
-          if (online > current)
-          {
-            string update;
-            m_controller.config().resource(Config::UPDATE, update);
-            m_downloadUrl = URI(update).navigateTo(download);
-            m_document.setHistoryEnabled(false);
-            m_view.setSaveAsEnabled(false);
-            m_controller.doUri(m_downloadUrl);
-            m_view.setSaveAsEnabled(true);
-            m_document.setHistoryEnabled(true);
-          }
-          else
-          {
-            alreadyGotLatest();
-          }
-        }
+        set.parameter("version", m_newVersion);
       }
+      if (set.hasParameter("URL"))
+      {
+        set.parameter("URL", download);
+      }
+      if (set.hasParameter("size"))
+      {
+        set.parameter("size", size);
+      }
+    }
+    Version current(VERSION);
+    Version online(m_newVersion.c_str());
+    m_state = GOT_ZIP;
+    if (online > current) {
+      string update;
+      m_controller.config().resource(Config::UPDATE, update);
+      m_downloadUrl = URI(update).navigateTo(download);
+      m_document.setHistoryEnabled(false);
+      m_view.setSaveAsEnabled(false);
+      m_controller.doUri(m_downloadUrl);
+      m_view.setSaveAsEnabled(true);
+      m_document.setHistoryEnabled(true);
+    } else {
+      m_state = CANCELLED;
+      alreadyGotLatest();
     }
   }
   if (m_state == INI_FAIL)
@@ -151,25 +138,27 @@ void Updater::iniFail()
   RichTextArea & textArea(*(m_view.renderer()->textArea()));
   textArea.appendText(T("fail_ini"));
   textArea.insertNewline();
-  addCancel(textArea);
+  addCancel();
 }
 
 void Updater::doUpdate()
 {
-  RichTextArea & textArea(*(m_view.renderer()->textArea()));
+  // RichTextArea & textArea(*(m_view.renderer()->textArea()));
   string cachedFile = m_controller.cache()->fileName(m_downloadUrl);
   ZipViewer viewer(m_view);
   viewer.setFilename(cachedFile);
-  viewer.unzipAndPatch();
-  textArea.appendText(T("done"));
-  m_view.resetScroller();
+  viewer.unzip();
+  RichTextArea *textArea(m_view.renderer()->textArea());
+  textArea->appendText(T("done"));
+  m_view.renderer()->done(true);
 }
 
 extern const char * VERSION;
 void Updater::askUpdate()
 {
   doTitle();
-  RichTextArea & textArea(*(m_view.renderer()->textArea()));
+  ViewRender &renderer(*m_view.renderer());
+  RichTextArea & textArea(*(renderer.textArea()));
   // now find out where that was saved...
   string cachedFile = m_controller.cache()->fileName(m_downloadUrl);
   if (not m_controller.stopped()
@@ -179,46 +168,47 @@ void Updater::askUpdate()
     textArea.appendText(T("update_ask"));
     textArea.insertNewline();
     textArea.appendText(T("new_ver"));
-    textArea.appendText(string2unicode(m_newVersion));
+    textArea.appendText(m_newVersion);
     textArea.insertNewline();
     textArea.appendText(T("cur_ver"));
-    textArea.appendText(string2unicode(VERSION));
-    textArea.insertNewline();
-    textArea.insertNewline();
-    addOk(textArea);
-    addCancel(textArea);
-    textArea.insertNewline();
-    m_view.resetScroller();
+    textArea.appendText(VERSION);
+    renderer.insertNewline();
+    addOk();
+    addCancel();
+    renderer.insertNewline();
+    renderer.done(true);
   }
   else
   {
     textArea.appendText(T("fail_zip"));
-    textArea.appendText(string2unicode(m_newVersion));
-    textArea.insertNewline();
-    addCancel(textArea);
+    textArea.appendText(m_newVersion);
+    renderer.insertNewline();
+    addCancel();
+    renderer.insertNewline();
+    renderer.done(true);
     m_state = ZIP_FAIL;
   }
 }
 
-void Updater::addOk(RichTextArea & textArea)
+void Updater::addOk()
 {
   m_ok = new Button(T("ok"));
   m_ok->setListener(this);
-  textArea.add(m_ok);
+  m_view.renderer()->add(m_ok);
 }
 
-void Updater::addCancel(RichTextArea & textArea)
+void Updater::addCancel()
 {
   m_cancel = new Button(T("cancel"));
   m_cancel->setListener(this);
-  textArea.add(m_cancel);
+  m_view.renderer()->add(m_cancel);
 }
 
 void Updater::pressed(ButtonI * button)
 {
   if (m_state == GOT_ZIP)
   {
-    if (button == (ButtonI*)m_ok)
+    if (button == m_ok)
     {
       m_state = DO_UPDATE;
     }
@@ -245,8 +235,8 @@ void Updater::alreadyGotLatest()
   RichTextArea & textArea(*(m_view.renderer()->textArea()));
   textArea.appendText(T("alrdy_upd"));
   textArea.insertNewline();
-  textArea.appendText(string2unicode(m_newVersion));
+  textArea.appendText(m_newVersion);
   textArea.insertNewline();
   textArea.insertNewline();
-  addCancel(textArea);
+  addCancel();
 }

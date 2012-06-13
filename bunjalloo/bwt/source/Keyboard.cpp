@@ -14,9 +14,12 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <cstring>
+#include <utf8.h>
 #include "libnds.h"
 #include "Button.h"
 #include "Canvas.h"
+#include "Palette.h"
 #include "EditableTextArea.h"
 #include "Keyboard.h"
 #include "Language.h"
@@ -34,20 +37,16 @@ static const char * LETTERS          = "qwertyuiopasdfghjklzxcvbnm,./[]:\"";
 static const char * LETTERS_SHIFT    = "QWERTYUIOPASDFGHJKLZXCVBNM<>?{};'";
 
 // QWERTYUIOPASDFGHJKLZXCVBNM{};'<>?
-// ~àáâãäåèéêëìíîïñðòóôõöùúûü¿£¥ýþç¡
-// ÀÀÁÂÃÄÅÈÉÊÝÞËÌÍÎÏÑÐÇßÒÓÔÕÖÙÚÛÜ¢|ÿ
-static const char * EXTRA =
-"~\xe1\xe2\xe3\xe4\xe5\xe6\xe8\xe9\xea\xeb\xec\xed\xee\xef\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf9\xfa\xfb\xfc\xbf\xa3\xa5\xfd\xfe\xe7\xa1";
-static const char * EXTRA_SHIFT =
-"\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd9\xda\xdb\xdc\xa2\x7c\xff\xdd\xde\xc7\xdf";
+static const char * EXTRA = "~\\àáãäåèéêëìíîïñðòóôõöùúûü¿£¥ýþç¡";
+static const char * EXTRA_SHIFT = "ÀÀÁÂÃÄÅÈÉÊÝÞËÌÍÎÏÑÐÇßÒÓÔÕÖÙÚÛÜ¢|ÿ";
 
-static const UnicodeString BACKSPACE_STR(string2unicode("BkSp."));
-static const UnicodeString CAPS_STR(string2unicode("Cap"));
-static const UnicodeString ENTER_STR(string2unicode(" Enter"));
-static const UnicodeString SHIFT_STR(string2unicode("Shift"));
-static const UnicodeString SPACE_STR(string2unicode(" "));
-static const UnicodeString EXTRA_STR(string2unicode(" Alt"));
-static const UnicodeString CLEAR_STR(string2unicode(" Clr"));
+static const std::string BACKSPACE_STR("BkSp.");
+static const std::string CAPS_STR("Cap");
+static const std::string ENTER_STR(" Enter");
+static const std::string SHIFT_STR("Shift");
+static const std::string SPACE_STR(" ");
+static const std::string EXTRA_STR(" Alt");
+static const std::string CLEAR_STR(" Clr");
 
 const static int KEY_HEIGHT = 18;
 const static int KEY_WIDTH = 19;
@@ -66,8 +65,6 @@ const static int TICK_COUNT = 20;
 const static int SCROLLBAR_DECOR = 7;
 
 Keyboard::Keyboard():
-  Component(),
-  m_extra(false),
   m_shift(false),
   m_capsLock(false),
   m_selectedStatus(OK),
@@ -201,7 +198,7 @@ void Keyboard::initUI()
   m_scrollPane->setVisible(true);
 }
 
-void Keyboard::createSpecialKey(int x, int y, int w, int h, const UnicodeString & text, Button * button)
+void Keyboard::createSpecialKey(int x, int y, int w, int h, const std::string & text, Button * button)
 {
   button->setSize(w, h);
   button->setLocation(x, y);
@@ -212,11 +209,15 @@ void Keyboard::createSpecialKey(int x, int y, int w, int h, const UnicodeString 
 
 void Keyboard::updateRow(const char * newText, int keys, int offset)
 {
+  // TODO: fix this to use utf-8
+  const char *it(newText);
+  const char *end(newText + strlen(newText));
   for (int i = 0; i < keys; ++i)
   {
     Button & key(*(Button*)m_children[i+offset]);
-    unicodeint uchar[] = { (unsigned char)newText[i]&0xff, 0};
-    key.setText(UnicodeString(uchar));
+    std::string uchar;
+    utf8::unchecked::append(utf8::next(it, end), back_inserter(uchar));
+    key.setText(uchar);
   }
 }
 
@@ -225,9 +226,10 @@ void Keyboard::createRow(int x, int y, const char * text, int keys)
   for (int i = 0; i < keys; ++i)
   {
     Button * key = new Button();
-    unicodeint uchar[] = {text[i], 0};
+    // TODO: fix this for utf-8
+    char uchar[] = {text[i], 0};
     key->setSize(KEY_WIDTH, KEY_HEIGHT);
-    key->setText(UnicodeString(uchar));
+    key->setText(std::string(uchar));
     //key->setLocation(x+i*(KEY_WIDTH+1), y);
     key->setLocation(x+i*(KEY_WIDTH), y);
     add(key);
@@ -235,45 +237,63 @@ void Keyboard::createRow(int x, int y, const char * text, int keys)
   }
 }
 
-UnicodeString Keyboard::result() const
+std::string Keyboard::result() const
 {
-  UnicodeString tmp;
+  std::string tmp;
   m_textArea->text(tmp);
   return tmp;
 }
 
 void Keyboard::applyResult()
 {
-  UnicodeString tmp;
-  m_textArea->text(tmp);
-  if (m_entry) {
-    m_entry->setText(tmp);
+  tick();
+  m_topLevel->setVisible();
+  m_topLevel->screenUp();
+  m_topLevel->forceRedraw();
+  this->setVisible(false);
+  if (m_selectedStatus == OK)
+  {
+    std::string tmp;
+    m_textArea->text(tmp);
+    if (m_entry) {
+      m_entry->setText(tmp);
+    }
   }
 }
 
 void Keyboard::paint(const nds::Rectangle & clip)
 {
+  if (not dirty())
+   return;
+  m_dirty = false;
   if (visible())
   {
+    nds::Canvas::instance().setClip(clip);
+    nds::Canvas::instance().fillRectangle(m_richTextArea->bounds().left(), m_richTextArea->bounds().top(), clip.right(), clip.bottom(),
+        nds::Color(31,31,31));
+    // FIXME: this is a hack to get the edit area to repaint
+    // really we should only redraw what is necessary each time
+    // eg. clear once at the start only.
+    m_scrollPane->forceRedraw();
     std::vector<Component*>::iterator it(m_children.begin());
     for (; it != m_children.end(); ++it)
     {
       Component * c(*it);
       c->paint(c->bounds());
     }
-    m_scrollPane->paint(m_scrollPane->bounds());
   }
 }
 
 void Keyboard::editText(TextEntryI * entry)
 {
-  m_topLevel->setVisible(false);
+  m_topLevel->screenDown();
+  m_topLevel->forceRedraw();
   this->setVisible();
   m_initialText.clear();
   entry->text(m_initialText);
-  //m_textArea->clearText();
   m_textArea->setEchoText(entry->echoText());
-  m_textArea->setText(m_initialText);
+  m_textArea->setText("");
+  m_textArea->appendText(m_initialText);
   m_entry = entry;
   layoutViewer();
 }
@@ -309,7 +329,7 @@ void Keyboard::pressed(ButtonI * button)
       m_capsLock = not m_capsLock;
       break;
     case SPKY_ENTER:
-      appendText(string2unicode("\n"));
+      appendText("\n");
       break;
     case SPKY_BACKSPACE:
       m_textArea->deleteChar();
@@ -325,16 +345,10 @@ void Keyboard::pressed(ButtonI * button)
       m_selectedStatus = CANCEL;
       m_textArea->clearText();
       m_textArea->appendText(m_initialText);
-      tick();
-      m_topLevel->setVisible();
-      this->setVisible(false);
       applyResult();
       break;
     case SPKY_OK:
       m_selectedStatus = OK;
-      tick();
-      m_topLevel->setVisible();
-      this->setVisible(false);
       applyResult();
       break;
     case SPKY_CLEAR:
@@ -351,7 +365,7 @@ void Keyboard::pressed(ButtonI * button)
   updateModifierKeys();
 }
 
-void Keyboard::appendText(const UnicodeString & text)
+void Keyboard::appendText(const std::string & text)
 {
   m_textArea->appendText(text);
   layoutViewer();
@@ -417,7 +431,7 @@ void Keyboard::updateLayout(const char * text, const char * numbers)
   updateRow(text, size, start);
   // now the odd keys
   // special, end of chars. [] and /"
-  text += size;
+  utf8::unchecked::advance(text, size);
   start += size;
   updateRow(text, ROW4_LENGTH, start);
 
@@ -427,33 +441,32 @@ bool Keyboard::stylusUp(const Stylus * stylus)
 {
   if (not visible())
     return false;
-  FOR_EACH_CHILD(stylusUp);
-  return false;
+  m_dirty = true;
+  return FOR_EACH_CHILD(stylusUp);
 }
 
 bool Keyboard::stylusDownFirst(const Stylus * stylus)
 {
   if (not visible())
     return false;
-  FOR_EACH_CHILD(stylusDownFirst);
-  return false;
+  m_dirty = true;
+  return FOR_EACH_CHILD(stylusDownFirst);
 }
 bool Keyboard::stylusDownRepeat(const Stylus * stylus)
 {
   if (not visible())
     return false;
-  FOR_EACH_CHILD(stylusDownRepeat);
-  return false;
+  m_dirty = true;
+  return FOR_EACH_CHILD(stylusDownRepeat);
 }
 bool Keyboard::stylusDown(const Stylus * stylus)
 {
   if (not visible())
     return false;
-  FOR_EACH_CHILD(stylusDown);
-  return false;
+  return FOR_EACH_CHILD(stylusDown);
 }
 
-void Keyboard::setTopLevel(Component * topLevel)
+void Keyboard::setTopLevel(ScrollPane * topLevel)
 {
   m_topLevel = topLevel;
 }
@@ -467,17 +480,18 @@ bool Keyboard::tick()
 
 #ifndef ARM9
   static int pressed = 0;
-  unicodeint sdlKeyPress[2] = { keysRealKeyboard(), 0};
+  char sdlKeyPress[2] = { keysRealKeyboard(), 0};
   if ((not pressed) and sdlKeyPress[0])
   {
     pressed = 30;
-    appendText(UnicodeString(sdlKeyPress));
+    appendText(std::string(sdlKeyPress));
+    m_dirty = true;
     return true;
   }
   if (pressed)
     pressed--;
 #endif
-  return false;
+  return m_dirty;
 }
 
 bool Keyboard::multiLine() const
@@ -485,10 +499,17 @@ bool Keyboard::multiLine() const
   return m_entry->isMultiLine();
 }
 
-void Keyboard::setTitle(const UnicodeString & title)
+void Keyboard::setTitle(const std::string & title)
 {
   m_richTextArea->clearText();
   m_richTextArea->appendText(title);
   m_richTextArea->setLocation(0, SCREEN_HEIGHT -  m_richTextArea->preferredSize().h-GAP);
   m_richTextArea->setSize(nds::Canvas::instance().width()-1,m_richTextArea->preferredSize().h);
+  m_dirty = true;
+}
+
+void Keyboard::forceRedraw()
+{
+  m_dirty = true;
+  m_scrollPane->forceRedraw();
 }

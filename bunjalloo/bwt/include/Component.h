@@ -20,22 +20,10 @@
 #include <vector>
 #include "Rectangle.h"
 #include "StylusListener.h"
+#include "util/classhelper.h"
 
 //! Helper define for calling stylus callbacks on children
-#define FOR_EACH_CHILD(fn) \
-{  \
-  bool hit_(false); \
-  std::vector<Component*>::iterator first(m_children.begin()); \
-  std::vector<Component*>::iterator end(m_children.end()); \
-  for (; first != end; ++first) \
-  { \
-    if ( (*first)->fn(stylus) ) { \
-      hit_ = true; \
-    } \
-  } \
-  if (hit_) return true; \
-}
-
+#define FOR_EACH_CHILD(fn) callStylusFunction(&Component::fn, stylus)
 
 /** The base class for all GUI Widgets.*/
 class Component: public StylusListener
@@ -65,7 +53,7 @@ class Component: public StylusListener
      * @param x the horizontal x position.
      * @param y the vertical y position.
      */
-    virtual void setLocation(unsigned int x, unsigned int y);
+    virtual void setLocation(int x, int y);
 
     /** Set the size in pixels.
      * @param w the width.
@@ -126,6 +114,8 @@ class Component: public StylusListener
 
     /** @return true if the Component needs repainting. */
     virtual bool dirty() const;
+
+    bool callStylusFunction(bool (StylusListener::*fun)(const Stylus*), const Stylus *stylus);
   protected:
     /** Holds the position and size. */
     nds::Rectangle m_bounds;
@@ -143,6 +133,9 @@ class Component: public StylusListener
     std::vector<Component *> m_children;
 
     bool m_dirty;
+
+  private:
+    DISALLOW_COPY_AND_ASSIGN(Component);
 };
 
 int Component::width() const

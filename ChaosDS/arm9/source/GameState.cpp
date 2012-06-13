@@ -42,9 +42,6 @@ void GameState::mainLoopExecute()
   if (m_nextScreen != 0) {
     this->currentScreen(m_nextScreen);
   }
-  
-  nds::System::checkSleep();
-
   m_currentScreen->handleKeys();
   if (m_gameFrames&1)
     m_currentScreen->animate();

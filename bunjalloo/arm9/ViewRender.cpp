@@ -14,48 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <assert.h>
-#include "ndspp.h"
-#include "libnds.h"
-#include "Cache.h"
-#include "Canvas.h"
-#include "Controller.h"
-#include "Document.h"
-#include "ElementFactory.h"
-#include "File.h"
-#include "FormCheckBox.h"
-#include "FormControl.h"
-#include "FormRadio.h"
-#include "FormTextArea.h"
-#include "HtmlAnchorElement.h"
-#include "HtmlBlockElement.h"
-#include "HtmlBodyElement.h"
-#include "HtmlConstants.h"
-#include "HtmlDocument.h"
-#include "HtmlElement.h"
-#include "HtmlFormElement.h"
-#include "HtmlImageElement.h"
-#include "HtmlInputElement.h"
-#include "HtmlMetaElement.h"
-#include "HtmlOptionElement.h"
-#include "HtmlPreElement.h"
-#include "HtmlTextAreaElement.h"
-#include "ImageComponent.h"
-#include "Image.h"
-#include "InputText.h"
-#include "Keyboard.h"
-#include "Language.h"
-#include "PasswordField.h"
-#include "RadioButton.h"
-#include "RichTextArea.h"
-#include "ScrollPane.h"
-#include "Select.h"
-#include "TextAreaFactory.h"
-#include "Updater.h"
-#include "URI.h"
-#include "View.h"
-#include "ViewRender.h"
-#include "ZipViewer.h"
+#include "ViewRenderHeaders.h"
 
 using namespace std;
 const static char * NOT_VIEWABLE("not_view");
@@ -67,6 +26,18 @@ ViewRender::ViewRender(View * self):
   m_updater(0),
   m_lastElement(0)
 {
+  m_self->document().registerView(this);
+}
+
+// Add a link to a "something" - see ImageComponent::addLink and
+// RichTextArea::addLink for details
+template<typename T, typename A>
+void ViewRender::addLink(T *component, A &a)
+{
+  if (not m_hrefForLink.empty())
+  {
+    component->addLink(m_hrefForLink, a);
+  }
 }
 
 RichTextArea * ViewRender::textArea()
@@ -78,33 +49,41 @@ RichTextArea * ViewRender::textArea()
     m_textArea->addLinkListener(m_self);
     bool parseNewline(m_self->m_document.htmlDocument()->mimeType() == HtmlDocument::TEXT_PLAIN);
     m_textArea->setParseNewline(parseNewline);
-    m_self->m_scrollPane->add(m_textArea);
+    m_richTextAreas.push_back(m_textArea);
   }
+  else
+  {
+    if (m_pendingNewline)
+    {
+      m_textArea->insertNewline();
+    }
+  }
+  m_pendingNewline = false;
+  addLink(m_textArea, m_hrefViewed);
   return m_textArea;
 }
 
-static UnicodeString extractImageText(const HtmlElement * element, bool hasAltText)
+static std::string extractImageText(const HtmlElement * element, bool hasAltText)
 {
-  const UnicodeString & altText = element->attribute("alt");
+  const std::string & altText = element->attribute("alt");
   // NO! It might not be a HtmlImageElement - could be a HtmlInputElement
   if (hasAltText) {
     return altText;
   }
-  const UnicodeString & srcText = element->attribute("src");
+  const std::string & srcText = element->attribute("src");
   if (not srcText.empty())
   {
-    string tmp = unicode2string(srcText);
-    const char * bname = nds::File::base(tmp.c_str());
+    const char * bname = nds::File::base(srcText.c_str());
     string bnamestr(bname);
     bnamestr = "["+ bnamestr+"]";
-    return string2unicode(bnamestr);
+    return bnamestr;
   }
-  return string2unicode("[IMG]");
+  return "[IMG]";
 }
 
 void ViewRender::setBgColor(const HtmlElement * body)
 {
-  UnicodeString bgcolor = body->attribute("bgcolor");
+  std::string bgcolor = body->attribute("bgcolor");
   if (not bgcolor.empty())
   {
     unsigned int rgb8 = ((HtmlBodyElement*)body)->bgColor();
@@ -117,12 +96,58 @@ void ViewRender::setBgColor(const HtmlElement * body)
   }
 }
 
-void ViewRender::doImage(const UnicodeString & imgStr,
-    const UnicodeString & src)
+static std::string uri2filename(const URI &uri) {
+  std::string filename;
+  switch (uri.protocol())
+  {
+    case URI::FILE_PROTOCOL:
+    case URI::CONFIG_PROTOCOL:
+      filename = uri.fileName();
+      break;
+    case URI::HTTPS_PROTOCOL:
+    case URI::HTTP_PROTOCOL:
+      filename = Cache::CACHE_DIR;
+      filename += "/";
+      filename += uri.crc32();
+      break;
+    default:
+      break;
+  }
+  return filename;
+}
+
+void ViewRender::doImage(const std::string & imgStr,
+    const std::string & src)
 {
-  textArea()->addImage(unicode2string(src));
-  textArea()->appendText(imgStr);
-  textArea()->endImage();
+  bool show(false);
+  m_self->controller().config().resource(Config::SHOW_IMAGES,show);
+  if (show)
+  {
+    // configured to show images inline
+    if (not src.empty())
+    {
+      URI uri(m_self->document().uri());
+      const URI &imgUri(uri.navigateTo(src));
+      const std::string &filename(uri2filename(imgUri));
+      if (filename.empty())
+        return;
+      nds::Image *image = new nds::Image(filename.c_str());
+      ImageComponent *imageComponent = new ImageComponent(image, m_box, &m_self->document());
+      add(imageComponent);
+      addLink(imageComponent, m_self);
+      m_self->controller().queueUri(imgUri);
+    }
+  }
+  else
+  {
+    // the old image display - shows a text value only + clickage
+    if (not imgStr.empty())
+    {
+      textArea()->addImage(src);
+      textArea()->appendText(imgStr);
+      textArea()->endImage();
+    }
+  }
 }
 
 void ViewRender::clearRadioGroups()
@@ -140,49 +165,63 @@ void ViewRender::clear()
   m_self->m_scrollPane->removeChildren();
   clearRadioGroups();
   m_textArea = 0;
+  m_richTextAreas.clear();
+  m_pendingNewline = false;
+  m_box = new BoxLayout();
+  m_box->setSize(249, 192);
+}
+
+void ViewRender::renderImage()
+{
+  URI uri(m_self->m_document.uri());
+  string filename;
+  if (uri.protocol() == URI::FILE_PROTOCOL)
+  {
+    filename = uri.fileName();
+  }
+  else
+  {
+    filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
+  }
+  nds::Image * image(0);
+  if (not filename.empty())
+  {
+    image = new nds::Image(filename.c_str(),
+        (nds::Image::ImageType)m_self->m_document.htmlDocument()->mimeType());
+  }
+  ImageComponent * imageComponent = new ImageComponent(image, m_box, &m_self->document());
+  m_self->m_scrollPane->add(imageComponent);
+}
+
+bool ViewRender::hasImage()
+{
+  HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
+  return (mimeType == HtmlDocument::IMAGE_PNG
+      or mimeType == HtmlDocument::IMAGE_GIF
+      or mimeType == HtmlDocument::IMAGE_JPEG);
 }
 
 void ViewRender::render()
 {
-  clear();
-
   const HtmlElement * root = m_self->m_document.rootNode();
-  HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
   bool useScrollPane(false);
 
   if (m_updater)
   {
+    clear();
     m_updater->show();
     useScrollPane = true;
   }
   else
   {
-    if (mimeType == HtmlDocument::IMAGE_PNG
-        or mimeType == HtmlDocument::IMAGE_GIF
-        or mimeType == HtmlDocument::IMAGE_JPEG)
+    HtmlDocument::MimeType mimeType = m_self->m_document.htmlDocument()->mimeType();
+    if (hasImage())
     {
-      URI uri(m_self->m_document.uri());
-      string filename;
-      if (uri.protocol() == URI::FILE_PROTOCOL)
-      {
-        filename = uri.fileName();
-      }
-      else
-      {
-        filename = m_self->m_controller.cache()->fileName(m_self->m_document.uri());
-      }
-      nds::Image * image(0);
-      if (not filename.empty())
-      {
-        image = new nds::Image(filename.c_str(), (nds::Image::ImageType)mimeType);
-      }
-      ImageComponent * imageComponent = new ImageComponent(image);
-      textArea()->add(imageComponent);
       useScrollPane = true;
-
     }
     else if (mimeType == HtmlParser::ZIP)
     {
+      clear();
       URI uri(m_self->m_document.uri());
       string filename;
       if (uri.protocol() == URI::FILE_PROTOCOL)
@@ -199,13 +238,25 @@ void ViewRender::render()
     }
     else if (mimeType == HtmlParser::OTHER)
     {
+      clear();
       textArea()->appendText(T(NOT_VIEWABLE));
+      textArea()->appendText(": ");
+      textArea()->appendText(m_self->m_document.htmlDocument()->mimeTypeValue());
+      useScrollPane = false;
+    }
+    else if (mimeType == HtmlParser::TEXT_PLAIN)
+    {
+      clear();
+      textArea()->appendText(m_self->document().htmlDocument()->data());
       useScrollPane = true;
     }
     else
     {
-      assert(root->isa(HtmlConstants::HTML_TAG));
-      assert(root->hasChildren());
+      clear();
+      if (not root->isa(HtmlConstants::HTML_TAG))
+        return;
+      if (not root->hasChildren())
+        return;
       doTitle(m_self->m_document.titleNode());
 
       HtmlElement * body = (HtmlElement*)root->lastChild();
@@ -216,8 +267,14 @@ void ViewRender::render()
       useScrollPane = true;
     }
   }
+  done(useScrollPane);
+}
 
-  if (useScrollPane)
+void ViewRender::done(bool resetScroller)
+{
+  pushTextArea();
+  m_self->m_scrollPane->add(m_box);
+  if (resetScroller)
   {
     m_self->resetScroller();
   }
@@ -229,7 +286,7 @@ void ViewRender::setUpdater(Updater * updater)
   m_updater = updater;
 }
 
-void ViewRender::doTitle(const UnicodeString & str)
+void ViewRender::doTitle(const std::string & str)
 {
   HtmlElement * newElement = ElementFactory::create(HtmlConstants::TITLE_TAG);
   HtmlElement * text = ElementFactory::create(HtmlConstants::TEXT);
@@ -247,12 +304,12 @@ void ViewRender::doTitle(const HtmlElement * title)
     m_textArea->setCentred();
     m_textArea->setOutlined();
     m_textArea->setSize(nds::Canvas::instance().width()-7, m_textArea->font().height());
-    m_self->m_scrollPane->add(m_textArea);
     HtmlElement * titleText = title->firstChild();
     if (titleText)
     {
       visit(*titleText);
     }
+    m_self->m_scrollPane->add(m_textArea);
     m_textArea = 0;
   }
 }
@@ -260,9 +317,38 @@ void ViewRender::doTitle(const HtmlElement * title)
 void ViewRender::renderSelect(const HtmlElement * selectElement)
 {
   Select * select = new Select(const_cast<HtmlElement*>(selectElement));
-  textArea()->add(select);
+  select->init();
+  add(select);
 }
 
+void ViewRender::pushTextArea()
+{
+  if (m_textArea) {
+    m_box->add(m_textArea);
+    m_textArea = 0;
+  }
+}
+
+void ViewRender::insertNewline()
+{
+  m_pendingNewline = true;
+  if (m_textArea == 0)
+  {
+    m_box->insertNewline();
+    m_pendingNewline = false;
+  }
+}
+
+void ViewRender::add(Component *component)
+{
+  pushTextArea();
+  if (m_pendingNewline)
+  {
+    m_box->insertNewline();
+    m_pendingNewline = false;
+  }
+  m_box->add(component);
+}
 
 // FIXME - where should this go?
 static const int MAX_SIZE(SCREEN_WIDTH-7);
@@ -270,7 +356,7 @@ static const int MIN_SIZE(8);
 
 void ViewRender::renderInput(const HtmlElement * inputElement)
 {
-  string sizeText = unicode2string(inputElement->attribute("size"));
+  string sizeText = inputElement->attribute("size");
   int size(0);
   if (not sizeText.empty())
   {
@@ -290,8 +376,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         FormControl * submitButton = new FormControl(inputElement,
             type == HtmlInputElement::SUBMIT?(
             inputElement->attribute("value").empty()?
-            string2unicode("Submit"):
-            inputElement->attribute("value")):
+            "Submit" : inputElement->attribute("value")):
             extractImageText(inputElement, hasAltText)
             );
         submitButton->setListener(m_self);
@@ -301,7 +386,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
           submitButton->setSize(size, submitButton->preferredSize().h);
         }
         /* m_self->m_scrollPane->add(submitButton); */
-        textArea()->add(submitButton);
+        add(submitButton);
       }
       break;
     case HtmlInputElement::TEXT:
@@ -313,7 +398,7 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         text->setListener(m_self->m_keyboard);
         text->setSize(size, text->preferredSize().h);
         /*m_self->m_scrollPane->add(text);*/
-        textArea()->add(text);
+        add(text);
       }
       break;
     case HtmlInputElement::PASSWORD:
@@ -326,24 +411,24 @@ void ViewRender::renderInput(const HtmlElement * inputElement)
         text->setListener(m_self->m_keyboard);
         text->setSize(size, text->preferredSize().h);
         // m_self->m_scrollPane->add(text);
-        textArea()->add(text);
+        add(text);
       }
       break;
     case HtmlInputElement::CHECKBOX:
       {
         // m_textArea = 0;
         FormCheckBox * checkbox = new FormCheckBox(const_cast<HtmlElement*>(inputElement));
-        textArea()->add(checkbox);
+        add(checkbox);
       }
       break;
     case HtmlInputElement::RADIO:
       {
         // see if there is a RadioGroup with this name
-        UnicodeString name = inputElement->attribute("name");
+        std::string name = inputElement->attribute("name");
         // FIXME - get the group.
         // m_textArea = 0;
         RadioButton * radio = new RadioButton;
-        textArea()->add(radio);
+        add(radio);
         if (not name.empty())
         {
           FormGroupMap::iterator it(m_radioGroup.find(name));
@@ -370,20 +455,66 @@ void ViewRender::renderTextArea(const HtmlElement * textAreaElement)
   FormTextArea * text = new FormTextArea(const_cast<HtmlElement*>(textAreaElement));
   text->setListener(m_self->m_keyboard);
   m_textArea = 0;
-  m_self->m_scrollPane->add(text);
+  add(text);
+}
+
+void ViewRender::notify()
+{
+  Document::Status status(m_self->document().status());
+  static int progressId(0);
+  static int pc(0);
+  switch (status)
+  {
+    case Document::LOADED_ITEM:
+    case Document::LOADED_HTML:
+      {
+        progressId = 0;
+        pc = 0;
+        m_self->m_scrollPane->setSize(nds::Canvas::instance().width(), nds::Canvas::instance().height());
+      }
+      break;
+    case Document::INPROGRESS:
+      {
+        if (hasImage() and m_self->controller().downloadingFile() == m_self->document().uri())
+        {
+          if (progressId == 0)
+          {
+            clear();
+            renderImage();
+            m_self->resetScroller();
+          }
+        }
+        progressId++;
+      }
+      break;
+    default:
+      if (hasImage() and m_self->controller().downloadingFile() == m_self->document().uri())
+      {
+        clear();
+        renderImage();
+      }
+      progressId = 0;
+      pc = 0;
+      break;
+  }
 }
 
 // Visitor implementation
 void ViewRender::begin(HtmlAnchorElement & element)
 {
-  const UnicodeString & href(element.attribute("href"));
-  bool viewed = false;
+  const std::string & href(element.attribute("href"));
+  m_hrefViewed = false;
+  m_hrefForLink.clear();
   if (not href.empty())
   {
-    URI newUri = URI(m_self->m_document.uri()).navigateTo(unicode2string(href));
-    viewed = m_self->m_controller.cache()->contains(newUri, false);
+    URI newUri = URI(m_self->m_document.uri()).navigateTo(href);
+    m_hrefViewed = m_self->m_controller.cache()->contains(newUri, false);
+    m_hrefForLink = href;
   }
-  textArea()->addLink( unicode2string(href), viewed);
+  else
+  {
+    textArea()->addLink(href);
+  }
 }
 
 bool ViewRender::visit(HtmlAnchorElement & element)
@@ -392,7 +523,11 @@ bool ViewRender::visit(HtmlAnchorElement & element)
 }
 void ViewRender::end(HtmlAnchorElement & element)
 {
-  textArea()->endLink();
+  if (m_textArea)
+  {
+    m_textArea->endLink();
+  }
+  m_hrefForLink.clear();
 }
 
 void ViewRender::begin(HtmlBlockElement & element)
@@ -431,8 +566,8 @@ void ViewRender::begin(HtmlElement & element)
   {
     // FIXME!!
     /** m_self->m_textArea->increaseIndent(); */
-    if (not element.isBlock() and element.parent()->isa(HtmlConstants::LI_TAG))
-      textArea()->insertNewline();
+    //if (not element.isBlock() and element.parent()->isa(HtmlConstants::LI_TAG))
+    textArea()->insertNewline();
   }
   else if (element.isa(HtmlConstants::LI_TAG)) {
     const HtmlElement * prev(element.parent()->previousSibling(&element));
@@ -445,25 +580,15 @@ void ViewRender::begin(HtmlElement & element)
 
 bool ViewRender::visit(HtmlElement & element)
 {
-  if (not element.text().empty())
+  if (not element.text().empty() and element.isa(HtmlConstants::TEXT))
   {
-    textArea()->appendText(element.text());
+    const std::string &et(element.text());
+    textArea()->appendText(et.c_str());
   }
   else if (element.isa(HtmlConstants::BR_TAG))
   {
-    textArea()->insertNewline();
+    insertNewline();
   }
-  else if (element.isa(HtmlConstants::TEXTAREA_TAG))
-  {
-    renderTextArea(&element);
-  }
-  /*else if (element.isa(HtmlConstants::TITLE_TAG))
-  {
-    if (element.hasChildren())
-    {
-      visit(*element.firstChild());
-    }
-  }*/
   return true;
 }
 void ViewRender::end(HtmlElement & element)
@@ -491,7 +616,9 @@ void ViewRender::end(HtmlElement & element)
 
 void ViewRender::begin(HtmlFormElement & element)
 {
-  textArea()->insertNewline();
+  pushTextArea();
+  m_box->insertNewline();
+  m_pendingNewline = false;
 }
 bool ViewRender::visit(HtmlFormElement & element)
 {
@@ -509,11 +636,11 @@ bool ViewRender::visit(HtmlImageElement & element)
   // hurrah for alt text. some people set it to "", which screws up any
   // easy way to display it (see w3m google.com - Google [hp1] [hp2] [hp3]... huh?)
   bool hasAltText = element.hasAltText();
-  UnicodeString imgText = extractImageText(&element, hasAltText);
-  if (not imgText.empty())
-  {
-    doImage(imgText, element.attribute("src"));
+  const std::string &imgText = extractImageText(&element, hasAltText);
+  if (m_textArea) {
+    m_textArea->endLink();
   }
+  doImage(imgText, element.attribute("src"));
   return true;
 }
 void ViewRender::end(HtmlImageElement & element)
@@ -581,8 +708,13 @@ void ViewRender::begin(HtmlTextAreaElement & element)
 bool ViewRender::visit(HtmlTextAreaElement & element)
 {
   renderTextArea(&element);
-  return true;
+  return false;
 }
 void ViewRender::end(HtmlTextAreaElement & element)
 {
+}
+
+void ViewRender::textAreas(std::list<RichTextArea*>& textAreas)
+{
+  textAreas = m_richTextAreas;
 }

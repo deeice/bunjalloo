@@ -20,8 +20,12 @@
 #include <iostream>
 #include "SDLhandler.h"
 
-short COS[512] = {};
-short SIN[512] = {};
+short cosLerp(short angle) {
+  return 0;
+}
+short sinLerp(short angle) {
+  return 0;
+}
 
 void dmaCopy(const void * source, void * destination, unsigned int length)
 {
@@ -29,7 +33,7 @@ void dmaCopy(const void * source, void * destination, unsigned int length)
 }
 using namespace std;
 
-void powerON()
+void powerOn()
 {
 }
 void irqInit()

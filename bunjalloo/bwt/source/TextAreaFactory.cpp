@@ -23,14 +23,9 @@
 // #include "vera.h"
 
 Font * TextAreaFactory::s_font(0);
-const char* TextAreaFactory::s_paletteData(0);
-int TextAreaFactory::s_paletteSize(0);
-std::string TextAreaFactory::s_name;
 
 TextArea * TextAreaFactory::create(TextType type)
 {
-  // static Font font((unsigned char*)_binary_vera_img_bin_start, (unsigned char*)_binary_vera_map_bin_start);
-
   TextArea * t(0);
   switch (type)
   {
@@ -44,14 +39,6 @@ TextArea * TextAreaFactory::create(TextType type)
       t = new RichTextArea(s_font);
       break;
   }
-  if (s_name.empty())
-  {
-    t->setPalette(s_paletteData, s_paletteSize);
-  }
-  else
-  {
-    t->setPalette(s_name);
-  }
   return t;
 }
 
@@ -60,14 +47,3 @@ void TextAreaFactory::setFont(Font * font)
   s_font = font;
 }
 
-void TextAreaFactory::usePaletteName(const std::string & name)
-{
-  s_name = name;
-  s_paletteData = 0;
-}
-void TextAreaFactory::usePaletteData(const char * data, int size)
-{
-  s_name.clear();
-  s_paletteData = data;
-  s_paletteSize = size;
-}

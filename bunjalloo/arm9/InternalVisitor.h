@@ -17,7 +17,7 @@
 #ifndef InternalVisitor_h_seen
 #define InternalVisitor_h_seen
 #include "DefaultVisitor.h"
-#include "UnicodeString.h"
+#include <string>
 
 class InternalVisitor: public DefaultVisitor
 {
@@ -37,8 +37,8 @@ class InternalVisitor: public DefaultVisitor
     bool visit(HtmlAnchorElement & element);
 
   private:
-    UnicodeString m_name;
     int m_index;
     bool m_found;
+    std::string m_name;
 };
 #endif

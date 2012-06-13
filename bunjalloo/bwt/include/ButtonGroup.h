@@ -19,11 +19,14 @@
 
 #include <vector>
 #include "ButtonListener.h"
+#include "util/classhelper.h"
 
 /** Class to handle single selection across a group of buttons. */
 class ButtonGroup: public ButtonListener
 {
   public:
+
+    ButtonGroup() {}
 
     /** Add a ButtonI to the group.
      * @param button the button to add.
@@ -42,6 +45,7 @@ class ButtonGroup: public ButtonListener
 
   private:
     std::vector<ButtonI*> m_group;
+    DISALLOW_COPY_AND_ASSIGN(ButtonGroup);
 };
 
 #endif

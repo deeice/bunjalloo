@@ -1,5 +1,6 @@
 HTTP/1.1 200 OK
 Content-type: text/html
+Cache-control: max-age=200
 
 <html>
 </html>

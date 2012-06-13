@@ -41,19 +41,17 @@ void drawImage(Canvas & canvas, Image & image, int startx, int starty)
 const char * filenames[] = {
   "test.gif",
   "test.png",
-  "test.jpg"
+  "test.jpg",
+  0
 };
-
 int main(int argc, char * argv[])
 {
-  irqInit();
-  irqSet(IRQ_VBLANK,0);
   Canvas & canvas = Canvas::instance();
   canvas.fillRectangle(0, 0, canvas.width(), canvas.height(), nds::Color(31,21,21));
   int y = 0;
-  for (int i = 0; i < 3; ++i)
+  for (const char **file = filenames; *file != 0; ++file)
   {
-    Image img(filenames[i]);
+    Image img(*file);
     if (img.isValid())
     {
       drawImage(canvas, img, 0, y);

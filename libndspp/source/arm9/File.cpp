@@ -14,12 +14,15 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include "libnds.h"
 #include "File.h"
+#include "MiniMessage.h"
 #include <string>
+#include <cstring>
 #include <fat.h>
 #include <unistd.h>
 #include <stdio.h>
-#include <sys/dir.h>
+#include <dirent.h>
 
 using namespace nds;
 
@@ -39,7 +42,13 @@ FatLibrary & FatLibrary::instance()
 }
 FatLibrary::FatLibrary()
 {
-  fatInitDefault();
+  bool result = fatInitDefault();
+  MiniMessage msg("Initialising FAT card");
+  if (not result)
+  {
+    msg.failed();
+  }
+  msg.ok();
 }
 FatLibrary::~FatLibrary()
 {
@@ -224,25 +233,9 @@ bool nds::File::unlink(const char * path)
 
 void nds::File::ls(const char * path, std::vector<std::string> & entries)
 {
-  if (exists(path) == F_DIR)
-  {
-    DIR_ITER * dir = ::diropen(path);
-    if (dir == NULL)
-    {
-      return;
-    }
-    struct stat st;
-    char filename[256];
-    while (::dirnext(dir, filename, &st) == 0)
-    {
-      if (strcmp(filename, ".") != 0 and strcmp(filename, "..") != 0 )
-      {
-        entries.push_back(filename);
-      }
-    }
-    ::dirclose(dir);
-  }
+  lsCommon(path, entries);
 }
+
 bool nds::File::cp(const char *src, const char *dst)
 {
   FatLibrary::instance();
@@ -274,3 +267,10 @@ void File::utime(const char * path, const utimbuf * buf)
   */
 }
 
+
+time_t nds::File::mtime(const char * path) {
+  struct stat buf;
+  buf.st_mtime = 0;
+  ::stat(path, &buf);
+  return buf.st_mtime;
+}

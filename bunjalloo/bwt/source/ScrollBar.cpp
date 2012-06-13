@@ -76,7 +76,7 @@ bool ScrollBar::hitBottomArrow(int y)
 bool ScrollBar::hitHandle(int x, int y)
 {
   // check if clicking on the handle:
-  nds::Rectangle handle = {m_bounds.x, m_handlePosition, m_bounds.w, m_handleSize};
+  nds::Rectangle handle(m_bounds.x, m_handlePosition, m_bounds.w, m_handleSize);
   if (handle.hit(x, y))
   {
     return true;

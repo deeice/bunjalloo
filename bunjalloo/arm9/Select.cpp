@@ -22,6 +22,9 @@
 
 Select::Select(HtmlElement * select):m_element(select)
 {
+}
+
+void Select::init() {
   if (m_element->hasChildren())
   {
     bool haveSelected(false);

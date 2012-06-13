@@ -18,9 +18,9 @@
 #include "Visitor.h"
 IMPLEMENT_ACCEPT(HtmlFormElement);
 
-const UnicodeString * HtmlFormElement::attributePtr(const std::string & name) const
+const std::string *HtmlFormElement::attributePtr(const std::string & name) const
 {
-  const UnicodeString * p = HtmlElement::attributePtr(name);
+  const std::string *p(HtmlElement::attributePtr(name));
   if (p) {
     return p;
   }

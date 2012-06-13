@@ -16,29 +16,28 @@
 */
 #include <algorithm>
 #include <functional>
-#include <cstdio>
 #include "BookmarkToolbar.h"
 #include "Sprite.h"
 #include "View.h"
 
 using nds::Sprite;
 
-enum ToolbarSpriteID
+enum BookmarkToolbarSpriteID
 {
-  SPRITE_BACK,
-  SPRITE_ADD,
-  SPRITE_END_OF_ENTRIES,
+  BOOKMARK_SPRITE_BACK,
+  BOOKMARK_SPRITE_ADD,
+  BOOKMARK_SPRITE_END_OF_ENTRIES,
 };
 
 BookmarkToolbar::BookmarkToolbar(View & view) :
-  Toolbar(view, SPRITE_END_OF_ENTRIES)
+  Toolbar(view, BOOKMARK_SPRITE_END_OF_ENTRIES)
 {
 }
 
 void BookmarkToolbar::updateIcons()
 {
-  m_sprites[SPRITE_BACK]->setTile( TILES_PER_ICON * ICON_BACK);
-  m_sprites[SPRITE_ADD]->setTile( TILES_PER_ICON * ICON_ADD_BOOKMARK);
+  m_sprites[BOOKMARK_SPRITE_BACK]->setTile(TILES_PER_ICON * ICON_BACK);
+  m_sprites[BOOKMARK_SPRITE_ADD]->setTile(TILES_PER_ICON * ICON_ADD_BOOKMARK);
 }
 
 void BookmarkToolbar::tick()
@@ -46,12 +45,12 @@ void BookmarkToolbar::tick()
 
 void BookmarkToolbar::handlePress(int i)
 {
-  switch ((ToolbarSpriteID)i)
+  switch ((BookmarkToolbarSpriteID)i)
   {
-    case (SPRITE_BACK):
+    case (BOOKMARK_SPRITE_BACK):
       m_view.endBookmark();
       break;
-    case (SPRITE_ADD):
+    case (BOOKMARK_SPRITE_ADD):
       m_view.bookmarkCurrentPage();
       break;
     default:

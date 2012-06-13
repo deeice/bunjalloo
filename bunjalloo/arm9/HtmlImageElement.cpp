@@ -18,9 +18,9 @@
 #include "Visitor.h"
 IMPLEMENT_ACCEPT(HtmlImageElement);
 
-const UnicodeString * HtmlImageElement::attributePtr(const std::string & name) const
+const std::string * HtmlImageElement::attributePtr(const std::string & name) const
 {
-  const UnicodeString * p = HtmlElement::attributePtr(name);
+  const std::string * p = HtmlElement::attributePtr(name);
   if (p) {
     return p;
   }
@@ -56,7 +56,7 @@ HtmlElement * HtmlImageElement::clone() const
   return theClone;
 }
 
-void HtmlImageElement::setAttribute(const std::string & name, const UnicodeString & value)
+void HtmlImageElement::setAttribute(const std::string & name, const std::string & value)
 {
   HtmlElement::setAttribute(name, value);
   if (name == "alt")

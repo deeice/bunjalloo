@@ -59,3 +59,4 @@ bool DefaultVisitor::visit(HtmlTextAreaElement & element) { return true; }
 void DefaultVisitor::begin(HtmlTextAreaElement & element) {}
 void DefaultVisitor::end(HtmlTextAreaElement & element) {}
 
+DefaultVisitor::~DefaultVisitor() {}

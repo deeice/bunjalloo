@@ -46,28 +46,28 @@ CreatePlayers::CreatePlayers(bool start)
   : m_start(start)
 {
   // Increase/decrease players
-  Rectangle decrPlayerRect = {(HOW_MANY_NUM_POS_X-1)*8, HOW_MANY_NUM_POS_Y*8, 24, 16 };
-  Rectangle incrPlayerRect = {(HOW_MANY_NUM_POS_X+3)*8, HOW_MANY_NUM_POS_Y*8, 24, 16 };
+  Rectangle decrPlayerRect((HOW_MANY_NUM_POS_X-1)*8, HOW_MANY_NUM_POS_Y*8, 24, 16 );
+  Rectangle incrPlayerRect((HOW_MANY_NUM_POS_X+3)*8, HOW_MANY_NUM_POS_Y*8, 24, 16 );
   m_hotspots.push_back(new HotSpot(decrPlayerRect, decrPlayerCb, this));
   m_hotspots.push_back(new HotSpot(incrPlayerRect, incrPlayerCb, this));
 
   // adjust player icons - have a giant rectangle that covers the icons
   int rectHeight(16*8);
-  Rectangle iconRect = {16, 24, 8, rectHeight };
+  Rectangle iconRect(16, 24, 8, rectHeight );
   m_hotspots.push_back(new HotSpot(iconRect, changeIconCb, this));
-  Rectangle iconColRect = {16+8, 24, 8, rectHeight };
+  Rectangle iconColRect(16+8, 24, 8, rectHeight );
   m_hotspots.push_back(new HotSpot(iconColRect, changeIconColCb, this));
   // name rect - width is the width of the name (start of where level is drawn to start of name)
-  Rectangle nameRect = {PLAYER_WIZ_NAME_X*8, 24, 8*(PLAYER_WIZ_LEVEL_X-PLAYER_WIZ_NAME_X), rectHeight };
+  Rectangle nameRect(PLAYER_WIZ_NAME_X*8, 24, 8*(PLAYER_WIZ_LEVEL_X-PLAYER_WIZ_NAME_X), rectHeight );
   m_hotspots.push_back(new HotSpot(nameRect, changeNameCb, this));
   // level rect
-  Rectangle levelRect = {PLAYER_WIZ_LEVEL_X*8, 24, 8*9, rectHeight };
+  Rectangle levelRect(PLAYER_WIZ_LEVEL_X*8, 24, 8*9, rectHeight );
   m_hotspots.push_back(new HotSpot(levelRect, changeLevelCb, this));
 
-  Rectangle resetRect = {4*8, HOW_MANY_NUM_POS_Y*8, 17*8, 16 };
+  Rectangle resetRect(4*8, HOW_MANY_NUM_POS_Y*8, 17*8, 16 );
   m_hotspots.push_back(new HotSpot(resetRect, resetPlayersCb, this));
 
-  Rectangle startRect = {START_POS_X*8, START_POS_Y*8, 11*8, 16};
+  Rectangle startRect(START_POS_X*8, START_POS_Y*8, 11*8, 16);
   m_hotspots.push_back(new HotSpot(startRect, startCb, this));
 
 }
@@ -91,9 +91,6 @@ void CreatePlayers::show()
   p[0] = 0;
   text16.setColour(10, Color(31,30,30));
   text16.print("How many players?", 4, 1, 10);
-
-  text16.setColour(12, Color(31,30,0));
-  text16.print("Press Start", START_POS_X, START_POS_Y, 12);
 
   if (m_start) {
     // create the default start wizards
@@ -312,6 +309,8 @@ void CreatePlayers::updatePlayers(void)
   Text16::instance().print(str, HOW_MANY_NUM_POS_X,HOW_MANY_NUM_POS_Y, 10);
   str[0] = Text16::RIGHT_ARROW_INDEX;
   Text16::instance().print(str, HOW_MANY_NUM_POS_X+4,HOW_MANY_NUM_POS_Y, 10);
+  Text16::instance().setColour(12, Color(31,30,0));
+  Text16::instance().print("Press Start", START_POS_X, START_POS_Y, 12);
 }
 
 void CreatePlayers::up(void) {

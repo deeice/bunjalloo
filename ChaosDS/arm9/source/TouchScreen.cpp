@@ -35,7 +35,8 @@ void TouchScreen::clearHotSpots()
 
 void TouchScreen::handleTouch()
 {
-  touchPosition tp = touchReadXY();
+  touchPosition tp;
+  touchRead(&tp);
   m_x = tp.px;
   m_y = tp.py;
   std::list<HotSpot*>::iterator it(m_hotspots.begin());

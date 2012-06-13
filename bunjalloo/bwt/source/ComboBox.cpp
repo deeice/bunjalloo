@@ -41,7 +41,7 @@ ComboBox::ComboBox():
   scrollPane()->setTopLevel(false);
 }
 
-void ComboBox::addItem(const UnicodeString & item)
+void ComboBox::addItem(const std::string & item)
 {
   if (button()->text().empty())
   {
@@ -111,7 +111,7 @@ bool ComboBox::stylusDownFirst(const Stylus * stylus)
 bool ComboBox::stylusDownRepeat(const Stylus * stylus) { return false; }
 bool ComboBox::stylusDown(const Stylus * stylus) { return false; }
 
-void ComboBox::setLocation(unsigned int x, unsigned int y)
+void ComboBox::setLocation(int x, int y)
 {
   Component::setLocation(x, y);
   button()->setLocation(x, y);
@@ -179,7 +179,7 @@ Button * ComboBox::button() {
   return (Button*)m_children.back();
 }
 
-const UnicodeString & ComboBox::selectedItem() const
+const std::string & ComboBox::selectedItem() const
 {
   return ((Button*)scrollPane()->childAt(m_selectedIndex))->text();
 }

@@ -15,83 +15,44 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <assert.h>
+#include "utf8.h"
 #include "libnds.h"
 #include "ndspp.h"
 #include "File.h"
 #include "Font.h"
-//#include "FormControl.h"
+#include "string_utils.h"
 #include "Canvas.h"
 #include "Link.h"
 #include "Palette.h"
 #include "TextArea.h"
-#include "UTF8.h"
+#include "utf8.h"
 
 using namespace nds;
 using namespace std;
-const static nds::Color EDGE(20,20,20);
-const static nds::Color SHADOW(28,28,28);
 const static unsigned char NEWLINE('\n');
-
-static const unicodeint intDelimiters[] = {0x0020, 0x0009, 0x000a, 0x000b, 0x000c, 0x000d};
-static const UnicodeString s_delimiters(intDelimiters,6);
-static const int INDENT(16);
+static int INITIAL_POSITION(2<<8);
 
 TextArea::TextArea(Font * font) :
-  m_appendPosition(0),
   m_font(0),
-  m_palette(0),
-  m_basePalette(0),
-  m_paletteLength(0),
-  m_parseNewline(true),
-  m_bgCol(0),
-  m_fgCol(0),
-  m_underLine(false)
+  m_appendPosition(INITIAL_POSITION),
+  m_parseNewline(true)
 {
   setFont(font);
-  m_document.clear();
+  setDefaultColor();
   m_preferredHeight = m_font->height();
-  m_preferredWidth = Canvas::instance().width();
-  m_bounds.w = Canvas::instance().width();
+  m_preferredWidth = SCREEN_WIDTH;
+  m_preferredWidthFixed = m_preferredWidth << 8;
+  m_bounds.w = SCREEN_WIDTH;
 }
-
 
 void TextArea::setFont(Font * font)
 {
   m_font = font;
 }
 
-void TextArea::printAt(Font::Glyph & g, int xPosition, int yPosition)
+void TextArea::document(std::string & returnString) const
 {
-  const unsigned char * data = g.data;
-  int dataInc = (m_font->totalWidth() - g.width)/2;
-  for (int y = 0; y < g.height; ++y)
-  {
-    for (int x = 0; x < g.width/2; ++x)
-    {
-      unsigned char pixelPair = *data++;
-      int pix1 = ((pixelPair)&0xf);
-      if (pix1)
-        Canvas::instance().drawPixel(xPosition+(x*2), yPosition+y, m_palette[pix1]);
-      int pix2 = ((pixelPair>>4)&0xf);
-      if (pix2)
-        Canvas::instance().drawPixel(xPosition+(x*2)+1, yPosition+y, m_palette[pix2]);
-    }
-    data += dataInc;
-  }
-  if (m_underLine)
-  {
-    // draw underline
-    Canvas::instance().horizontalLine(xPosition,
-                                      yPosition+m_font->height()-1,
-                                      g.width,
-                                      m_palette[m_paletteLength-1]);
-
-  }
-}
-
-void TextArea::document(UnicodeString & returnString) const
-{
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator it(m_document.begin());
   for (; it != m_document.end(); ++it)
   {
     returnString.append(*it);
@@ -102,47 +63,67 @@ void TextArea::clearText()
 {
   // Could do the following to completely free the memory, but there
   // is a fair chance it will be reused anyway... speed vs memory again :-/
-  std::vector<UnicodeString> tmp;
+  std::vector<std::string> tmp;
   m_document.swap(tmp);
-  m_appendPosition = 0;
+  m_appendPosition = INITIAL_POSITION;
   m_preferredWidth = -1;
+  m_preferredWidthFixed = 0;
   m_preferredHeight = m_font->height();
   currentLine();
 }
 
-void TextArea::appendText(const UnicodeString & unicodeString)
+void TextArea::appendText(const std::string &unicodeString)
 {
-  // append text, adding in new lines as needed to wrap.
-  int currPosition = 0;
-  // find the next space character
-  for (UnicodeString::const_iterator it(unicodeString.begin());
-      it != unicodeString.end();)
+  if (m_document.empty())
   {
-    const UnicodeString word(nextWord(unicodeString, currPosition));
+    m_preferredWidth = 0;
+    m_preferredWidthFixed = 0;
+  }
+  // append text, adding in new lines as needed to wrap.
+  // int currPosition = 0;
+  // find the next space character
+  std::string::const_iterator it = unicodeString.begin();
+  std::string::const_iterator end_it = unicodeString.end();
+  while (it != end_it)
+  {
+
+    std::string::const_iterator backup_it(it);
+    std::string word(nextWordAdvanceWord(&it, end_it));
     int size = textSize(word);
+    if ((size>>8) > width() and word.size() > 1)
+    {
+      it = backup_it;
+      word = m_font->shorterWordFromLong(&it, end_it, width(), &size);
+    }
 
     // if the word ends with a new line, then increment the height.
     // otherwise, if we go off the end of the line, increment the height.
-    if ((m_appendPosition + size) > width())
+    if (((m_appendPosition + size)>>8) > width())
     {
       // trim spaces from the end of the line
       // this word overflows the line - make a new line to hold the text.
-      m_document.push_back(UnicodeString());
-      m_appendPosition = 0;
+      m_document.push_back(std::string());
+      m_appendPosition = INITIAL_POSITION;
       m_preferredHeight += m_font->height();
     }
-    if (m_preferredWidth < 0)
+    if (m_preferredWidth < 0) {
       m_preferredWidth = 0;
-    m_preferredWidth += size;
+      m_preferredWidthFixed = INITIAL_POSITION;
+    }
+    m_preferredWidthFixed += size;
+    m_preferredWidth = (m_preferredWidthFixed >> 8);
+    size_t last = word.length() - 1;
+    if (not m_parseNewline and word[last] == NEWLINE) {
+      // skip empty new lines
+      word[last] = ' ';
+    }
     currentLine().append(word);
     m_appendPosition += size;
-    advanceWord(unicodeString, word.length(), currPosition, it);
-
     // if the word ended in a NEWLINE, then go onto the next line.
-    if (m_parseNewline and word[word.length()-1] == NEWLINE)
+    if (m_parseNewline and word[last] == NEWLINE)
     {
-      m_appendPosition = 0;
-      m_document.push_back(UnicodeString());
+      m_appendPosition = INITIAL_POSITION;
+      m_document.push_back(std::string());
       m_preferredHeight += font().height();
     }
   }
@@ -151,7 +132,7 @@ void TextArea::appendText(const UnicodeString & unicodeString)
 void TextArea::layoutText()
 {
   // need to shuffle the document about... this requires a new copy of it.
-  UnicodeString tmp;
+  std::string tmp;
   bool pnl = parseNewline();
   setParseNewline();
   document(tmp);
@@ -160,10 +141,6 @@ void TextArea::layoutText()
     appendText(tmp);
   if (m_preferredHeight == 0)
     m_preferredHeight = m_font->height();
-  int wInt = static_cast<int>(m_bounds.w);
-  if ( m_preferredWidth < 0 or (wInt <= m_preferredWidth)) {
-    m_preferredWidth = m_bounds.w;
-  }
   setParseNewline(pnl);
 }
 
@@ -179,9 +156,9 @@ void TextArea::setSize(unsigned int w, unsigned int h)
 
 void TextArea::setCursor(int x, int y)
 {
-  m_cursorx = x;
+  m_cursorx = x << 8;
   m_cursory = y;
-  m_initialCursorx = x;
+  m_initialCursorx = x << 8;
 }
 
 void TextArea::incrLine()
@@ -190,137 +167,62 @@ void TextArea::incrLine()
   m_cursory += m_font->height();
 }
 
-void TextArea::checkLetter(Font::Glyph & g)
+bool TextArea::doSingleChar(int value)
 {
-  if ( (m_cursorx + g.width) > m_bounds.right())
-  {
+  int advance = m_font->doSingleChar(
+      value,
+      m_cursorx,
+      m_cursory,
+      m_bounds.right() << 8,
+      m_fgCol,
+      m_bgCol);
+  if (advance == -2) {
+    // requires more space
     incrLine();
+    advance = m_font->doSingleChar(
+        value,
+        m_cursorx,
+        m_cursory,
+        m_bounds.right() << 8,
+        m_fgCol,
+        m_bgCol);
+    if (advance < 0)
+      return false;
   }
+  m_cursorx += advance;
+  return m_cursory > m_bounds.bottom();
 }
 
-const UnicodeString TextArea::nextWord(const UnicodeString & unicodeString, int currPosition) const
+void TextArea::printu(const std::string & unicodeString)
 {
-  UnicodeString word;
-  if (m_parseNewline)
+  std::string::const_iterator it(unicodeString.begin());
+  for (; it != unicodeString.end() and m_cursory < m_bounds.bottom(); )
   {
-    // if we are parsing new lines, look for the next delimiter
-    unsigned int position = unicodeString.find_first_of(s_delimiters,currPosition);
-    position = position==string::npos?unicodeString.length():position;
-    word = unicodeString.substr(currPosition,position-currPosition+1);
-  }
-  else
-  {
-    // not parsing new lines, so look for the next proper word, then the next non word
-    unsigned int position = unicodeString.find_first_not_of(s_delimiters,currPosition);
-    position = unicodeString.find_first_of(s_delimiters,position);
-    position = position==string::npos?unicodeString.length():position;
-    // now make a word delimited with spaces.
-    word = unicodeString.substr(currPosition,position-currPosition);
-    word += ' ';
-  }
-  int size(textSize(word));
-  if (size > width())
-  {
-    // This is a very long word, split it up
-    UnicodeString::const_iterator it(word.begin());
-    UnicodeString shorterWord;
-    int size(0);
-    for (; it != word.end(); ++it)
-    {
-      unsigned int value(*it);
-      if (value == UTF8::MALFORMED)
-        value = '?';
-      Font::Glyph g;
-      m_font->glyph(value, g);
-      if ( (size + g.width) >= width()) {
-        return shorterWord;
-      }
-      shorterWord += *it;
-      size += g.width;
-    }
-  }
-  return word;
-}
-
-void TextArea::advanceWord(const UnicodeString & unicodeString, int wordLength,
-    int & currPosition, UnicodeString::const_iterator & it) const
-{
-  if (m_parseNewline) {
-    it += wordLength;
-    currPosition += wordLength;
-  }
-  else {
-    unsigned int position = unicodeString.find_first_not_of(s_delimiters,currPosition+wordLength);
-    position = position==string::npos?unicodeString.length():position;
-    it += position - currPosition;
-    currPosition = position;
-  }
-}
-
-void TextArea::printu(const UnicodeString & unicodeString)
-{
-  UnicodeString::const_iterator it(unicodeString.begin());
-  for (; it != unicodeString.end() and m_cursory < m_bounds.bottom(); ++it)
-  {
-    unsigned int value(*it);
-    if ( doSingleChar(value) )
-    {
+    uint32_t value = utf8::next(it, unicodeString.end());
+    if (doSingleChar(value))
       break;
-    }
   }
 }
 
-int TextArea::textSize(const UnicodeString & unicodeString) const
+int TextArea::textSize(const std::string &unicodeString) const
 {
-  UnicodeString::const_iterator it(unicodeString.begin());
-  int size(0);
-  for (; it != unicodeString.end(); ++it)
-  {
-    unsigned int value(*it);
-    if (value != NEWLINE)
-    {
-      if (value == UTF8::MALFORMED)
-        value = '?';
-      Font::Glyph g;
-      m_font->glyph(value, g);
-      size += g.width;
-    }
-  }
-  return size;
-}
+  int width(0);
+  int height(0);
+  m_font->textSize(unicodeString.c_str(), unicodeString.length(),
+      width, height, "utf-8");
 
-bool TextArea::doSingleChar(unsigned int value)
-{
-  if (value == UTF8::MALFORMED) {
-    value = '?';
-  }
-  Font::Glyph g;
-  m_font->glyph(value, g);
-  if (value != NEWLINE) {
-    checkLetter(g);
-    if (g.data) {
-      printAt(g, m_cursorx, m_cursory);
-    }
-    m_cursorx += g.width;
-  }
-  // else ignore new line character. New lines are parsed at entry time
-  return (m_cursory > m_bounds.bottom());
+  return width;
 }
 
 void TextArea::setDefaultColor()
 {
-  m_bgCol = m_basePalette[0];
+  m_bgCol = RGB5(31, 31, 31);
   m_fgCol = 0;
-  setTextColor(m_fgCol);
 }
 
 void TextArea::setBackgroundColor(unsigned short color)
 {
-  if (color != m_bgCol)
-  {
-    m_bgCol = color;
-    setTextColor(m_fgCol);
-  }
+  m_bgCol = color;
 }
 
 unsigned short TextArea::backgroundColor() const
@@ -331,83 +233,15 @@ unsigned short TextArea::backgroundColor() const
 void TextArea::setTextColor(unsigned short color)
 {
   m_fgCol = color;
-  Color newColor(color);
-  Color bgCol(m_bgCol);
-  // assuming m_basePalette is black and white...
-  int mred = bgCol.red() - newColor.red();
-  int mgreen = bgCol.green() - newColor.green();
-  int mblue = bgCol.blue() - newColor.blue();
-
-  for (int i = 0; i < m_paletteLength; ++i)
-  {
-    // convert from grey scale to colour scale.
-    Color c(m_basePalette[i]);
-
-    // y |       ____   y = mx+c
-    //  c|___----
-    //   |___________
-    //                x
-    //  c = initial colour      (intercept)
-    //  m = 31 - initial  / 32  (gradient)
-    //  x = grey value
-
-    int yred   = (mred * c.red())/32 + newColor.red();
-    int ygreen = (mgreen * c.green())/32 + newColor.green();
-    int yblue  = (mblue * c.blue())/32 + newColor.blue();
-    c.red(yred);
-    c.green(ygreen);
-    c.blue(yblue);
-
-    m_palette[i] = c;
-
-  }
 }
 
-void TextArea::setPalette(const std::string & fileName)
+unsigned short TextArea::foregroundColor() const
 {
-  File palFile;
-  palFile.open(fileName.c_str());
-  // read the lot
-  if (palFile.is_open())
-  {
-    int size = palFile.size();
-    char * data = new char[size+2];
-    palFile.read(data);
-    data[size] = 0;
-    m_palette = (unsigned short*) data;
-    char * baseData = new char[size+2];
-    copy(data, data+size, baseData);
-    m_basePalette = (unsigned short*)baseData;
-    m_paletteLength = size/2;
-    setBackgroundColor(m_palette[0]);
-  } else {
-    /* If the font is not opened, then set the background red */
-    Canvas::instance().fillRectangle(0,0,256,192,Color(31,0,0));
-    setBackgroundColor(Color(31,0,0));
-  }
-}
-
-void TextArea::setPalette(const char * data, unsigned int size)
-{
-  m_palette = new unsigned short[size/2];
-  copy(data, data+size, (char*)m_palette);
-  char * baseData = new char[size+2];
-  copy(data, data+size, baseData);
-  m_basePalette = (unsigned short*)baseData;
-  m_paletteLength = size/2;
-  setBackgroundColor(m_palette[0]);
+  return m_fgCol;
 }
 
 TextArea::~TextArea()
 {
-  //delete m_font;
-  delete [] m_basePalette;
-  delete [] m_palette;
-}
-
-int TextArea::linesToSkip() const
-{
-  return - ( (m_bounds.y-(m_font->height()/2))/m_font->height() );
 }
 
 /** Paint the text area. */
@@ -420,18 +254,19 @@ void TextArea::paint(const nds::Rectangle & clip)
   //
   // Theres "width" which is the possible width (wraps at)
   // then theres clip-width which is where it should draw to.
-  setCursor(m_bounds.x, m_bounds.y);
+  int startPos = m_bounds.x + (INITIAL_POSITION>>8);
+  setCursor(startPos, m_bounds.y);
   Canvas::instance().fillRectangle(clip.x, clip.y, clip.w, clip.h, m_bgCol);
   // work out the number of lines to skip
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
-  int skipLines = linesToSkip();
-  if (skipLines > 0)
-  {
-    setCursor(m_bounds.x, m_bounds.y + skipLines*m_font->height());
-    it += skipLines;
-    if (skipLines >= (int)m_document.size())
-    {
+  std::vector<std::string>::const_iterator it(m_document.begin());
+  if (m_cursory < clip.top()) {
+    // cursor is above the top of the clip area
+    unsigned int diff = (clip.top() - m_cursory) / font().height();
+    if (diff >= m_document.size())
       return;
+    if (diff > 0) {
+      it += diff;
+      m_cursory += diff * font().height();
     }
   }
 
@@ -446,13 +281,13 @@ std::string TextArea::asString() const
 {
   std::string returnString;
   bool needComma(false);
-  std::vector<UnicodeString>::const_iterator it(m_document.begin());
+  std::vector<std::string>::const_iterator it(m_document.begin());
   for (; it != m_document.end(); ++it)
   {
     if (needComma)
       returnString += ",\n";
     returnString += "[\"";
-    returnString.append(unicode2string(*it));
+    returnString.append(*it);
     returnString += "\"]";
     needComma = true;
   }
@@ -460,3 +295,8 @@ std::string TextArea::asString() const
   return returnString;
 }
 
+size_t TextArea::characters(size_t line) const
+{
+  return utf8::distance(m_document[line].begin(),
+      m_document[line].end());
+}

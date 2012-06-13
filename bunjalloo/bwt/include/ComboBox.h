@@ -17,8 +17,8 @@
 #ifndef ComboBox_h_seen
 #define ComboBox_h_seen
 #include "Component.h"
-#include "UnicodeString.h"
 #include "ButtonListener.h"
+#include <string>
 
 class ScrollPane;
 class Button;
@@ -38,7 +38,7 @@ class ComboBox: public Component,
     /** Add an item to the list. If it is the first item, it is selected.
      * @param item the text to add.
      */
-    void addItem(const UnicodeString & item);
+    void addItem(const std::string &item);
 
     /** A button on the drop down list has been pressed. Set the text of the
      * main button to the selected item.
@@ -47,28 +47,30 @@ class ComboBox: public Component,
     void pressed(ButtonI * button);
 
     int selectedIndex() const;
-    const UnicodeString & selectedItem() const;
+    const std::string & selectedItem() const;
     void setSelectedIndex(int select);
     unsigned int items() const;
 
     // implemented from Component.
     virtual void paint(const nds::Rectangle & clip);
-    virtual void setLocation(unsigned int x, unsigned int y);
+    virtual void setLocation(int x, int y);
     virtual void setSize(unsigned int w, unsigned int h);
 
     virtual bool stylusUp(const Stylus * stylus);
     virtual bool stylusDownFirst(const Stylus * stylus);
     virtual bool stylusDownRepeat(const Stylus * stylus);
     virtual bool stylusDown(const Stylus * stylus);
-  private:
-    int m_items;
-    int m_selectedIndex;
-    bool m_open;
 
   protected:
     inline ScrollPane * scrollPane();
     inline const ScrollPane * scrollPane() const;
     inline Button * button();
+
+  private:
+    int m_items;
+    int m_selectedIndex;
+    bool m_open;
+    DISALLOW_COPY_AND_ASSIGN(ComboBox);
 
 };
 

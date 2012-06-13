@@ -14,7 +14,6 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "nds.h"
 #include <vector>
 #include "libnds.h"
 #include "Canvas.h"
@@ -25,30 +24,6 @@
 #include "Palette.h"
 static const int screen = 1;
 using nds::Image;
-
-void initConsole()
-{
-  // set the mode for 2 text layers and two extended background layers
-  videoSetMode(MODE_5_2D | DISPLAY_BG3_ACTIVE | DISPLAY_SPR_ACTIVE|DISPLAY_SPR_1D);
-
-  // set the sub background up for text display (we could just print to one
-  // of the main display text backgrounds just as easily
-  videoSetModeSub(MODE_0_2D | DISPLAY_BG0_ACTIVE|DISPLAY_SPR_ACTIVE|DISPLAY_SPR_1D); //sub bg 0 will be used to print text
-
-  // set the first bank as background memory and the third as sub background memory
-  // B and D are not used (if you want a bitmap greater than 256x256 you will need more
-  // memory so another vram bank must be used and mapped consecutivly
-  vramSetMainBanks(	VRAM_A_MAIN_BG_0x06000000, VRAM_B_MAIN_SPRITE,
-      VRAM_C_SUB_BG , VRAM_D_LCD);
-
-  // set up text background for text
-  SUB_BG0_CR = BG_MAP_BASE(31);
-
-  BG_PALETTE_SUB[255] = RGB15(31,31,31);//by default font will be rendered with color 255
-
-  //consoleInit() is a lot more flexible but this gets you up and running quick
-  consoleInitDefault((u16*)SCREEN_BASE_BLOCK_SUB(31), (u16*)CHAR_BASE_BLOCK_SUB(0), 16);
-}
 
 static void loadImage(Image & image, unsigned short * oamData)
 {
@@ -119,9 +94,6 @@ static void loadImage(Image & image, unsigned short * oamData)
 
 int main(void) {
 
-  irqInit();
-  irqSet(IRQ_VBLANK, 0);
-  //initConsole();
   Image image("open.png", true);
   nds::Palette p(0);
   p[0] = nds::Color(31, 31, 31);
@@ -175,14 +147,13 @@ int main(void) {
   int fadeLvl = 0;
   while(1)
   {
-    affine+=32;
-    affine &= 0x1ff;
+    affine += 182;
     // Compute sin and cos
     nds::Sprite * spinner(sprites[7]);
     spinner->setRotateScale(true);
     spinner->setRotate(1);
-    u16 cosAng = COS[affine] / 16;
-    u16 sinAng = SIN[affine] / 16;
+    u16 cosAng = cosLerp(affine) / 16;
+    u16 sinAng = sinLerp(affine) / 16;
     spinner->setAffine(cosAng, sinAng, -sinAng, cosAng);
     fadeLvl++;
     fadeLvl&=0xf;

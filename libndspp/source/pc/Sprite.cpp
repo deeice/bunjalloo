@@ -649,7 +649,7 @@ void Sprite::render()
   if ( (sprite.attribute[0] & ATTR0_DISABLED) )
     return;
 
-  unsigned int w,h;
+  unsigned int w(0),h(0);
   getSize(w,h);
   uint16 * oamRam = this->oamData();
   int xPos = OBJ_X(sprite.attribute[1]);

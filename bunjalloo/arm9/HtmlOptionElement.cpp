@@ -18,9 +18,9 @@
 #include "Visitor.h"
 IMPLEMENT_ACCEPT(HtmlOptionElement);
 
-const UnicodeString * HtmlOptionElement::attributePtr(const std::string & name) const
+const std::string * HtmlOptionElement::attributePtr(const std::string & name) const
 {
-  const UnicodeString * p = HtmlElement::attributePtr(name);
+  const std::string * p = HtmlElement::attributePtr(name);
   if (p) {
     return p;
   }
@@ -36,7 +36,7 @@ const UnicodeString * HtmlOptionElement::attributePtr(const std::string & name) 
   return 0;
 }
 
-void HtmlOptionElement::setAttribute(const std::string & name, const UnicodeString & value)
+void HtmlOptionElement::setAttribute(const std::string & name, const std::string & value)
 {
   if (name == "selected")
   {

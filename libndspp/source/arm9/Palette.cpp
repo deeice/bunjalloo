@@ -56,7 +56,7 @@ void Palette::load(const unsigned short * palette, unsigned int length)
 {
   if (!length)
     length = m_16?16:256;
-  dmaCopy(palette,m_p,length);
+  dmaCopy(palette, m_p, length * 2);
 }
 
 void Palette::clear()

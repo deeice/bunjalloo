@@ -21,6 +21,8 @@
 #include "CookieHandler.h"
 #include "CookieJar.h"
 #include "Document.h"
+#include "HtmlConstants.h"
+#include "HtmlElement.h"
 #include "Language.h"
 #include "RadioButton.h"
 #include "RichTextArea.h"
@@ -77,29 +79,37 @@ void CookieHandler::show()
 void CookieHandler::showAdd()
 {
   initAdd();
-  m_view.renderer()->doTitle(T("add_ck_title"));
+  ViewRender * renderer(m_view.renderer());
+  renderer->clear();
+  renderer->doTitle(T("add_ck_title"));
   m_siteButton->setSelected();
   URI uri(m_view.document().uri());
-  RichTextArea & textArea(*m_view.renderer()->textArea());
+  std::string server(uri.server());
+  std::string topLevel(CookieJar::topLevel(uri.server()));
+
   switch (uri.protocol())
   {
     case URI::HTTPS_PROTOCOL:
     case URI::HTTP_PROTOCOL:
-      textArea.appendText(T("add_cookie"));
-      textArea.insertNewline();
-      textArea.add(m_siteButton);
-      textArea.appendText(string2unicode(uri.server()));
-      textArea.insertNewline();
-      textArea.add(m_allButton);
-      textArea.appendText(string2unicode(CookieJar::topLevel(uri.server())));
-      textArea.insertNewline();
-      textArea.add(static_cast<Button*>(m_ok));
-      textArea.add(static_cast<Button*>(m_cancel));
+      renderer->textArea()->appendText(T("add_cookie"));
+      renderer->insertNewline();
+      renderer->add(m_siteButton);
+      renderer->textArea()->appendText(server);
+      renderer->insertNewline();
+      if (server != topLevel)
+      {
+        renderer->add(m_allButton);
+        renderer->textArea()->appendText(topLevel);
+        renderer->insertNewline();
+      }
+      renderer->add(static_cast<Button*>(m_ok));
+      renderer->add(static_cast<Button*>(m_cancel));
+      renderer->insertNewline();
       break;
     default:
       break;
   }
-  m_view.resetScroller();
+  renderer->done(true);
 }
 
 void CookieHandler::initEdit()
@@ -131,7 +141,7 @@ void CookieHandler::showEdit()
   */
   initEdit();
   m_view.renderer()->doTitle(T("edit_ck_title"));
-  RichTextArea & textArea(*m_view.renderer()->textArea());
+  ViewRender * renderer(m_view.renderer());
   CookieJar::AcceptedDomainSet domains;
   m_view.document().cookieJar()->acceptedDomains(domains);
   for (CookieJar::AcceptedDomainSet::const_iterator it(domains.begin());
@@ -139,17 +149,17 @@ void CookieHandler::showEdit()
   {
     CheckBox * check(new CheckBox);
     m_checkboxes.push_back(check);
-    textArea.add(check);
-    textArea.appendText(string2unicode(*it));
-    textArea.insertNewline();
+    renderer->add(check);
+    renderer->textArea()->appendText(*it);
+    renderer->insertNewline();
   }
-  textArea.add(static_cast<Button*>(m_deleteSelected));
-  textArea.add(static_cast<Button*>(m_editSelected));
-  textArea.insertNewline();
-  textArea.appendText(string2unicode(" --- "));
-  textArea.insertNewline();
-  textArea.add(static_cast<Button*>(m_ok));
-  m_view.resetScroller();
+  renderer->add(static_cast<Button*>(m_deleteSelected));
+  renderer->add(static_cast<Button*>(m_editSelected));
+  renderer->insertNewline();
+  renderer->textArea()->appendText(" --- ");
+  renderer->insertNewline();
+  renderer->add(static_cast<Button*>(m_ok));
+  renderer->done(true);
 }
 
 void CookieHandler::acceptEdit()

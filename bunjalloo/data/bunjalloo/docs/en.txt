@@ -34,3 +34,6 @@ delsel=Delete Selected
 edsel=Edit Selected
 clrcache=Clear cache at start
 logger=Debug logging
+lefth=Left handed
+righth=Right handed
+images=Show images

@@ -19,24 +19,11 @@
 #include "TextArea.h"
 #include "ProgressBar.h"
 
-ProgressBar::ProgressBar(int min, int max): TextContainer(),
+ProgressBar::ProgressBar(int min, int max): Component(),
   m_min(min),
   m_max(max),
-  m_value(min),
-  m_showString(false)
+  m_value(min)
 {
-  setBackgroundColor(nds::Color(0,29,10));
-}
-
-void ProgressBar::setShowString(bool show)
-{
-  m_showString = show;
-  m_dirty = true;
-}
-
-bool ProgressBar::showString() const
-{
-  return m_showString;
 }
 
 void ProgressBar::setValue(int val)
@@ -50,50 +37,46 @@ unsigned int ProgressBar::value() const
   return m_value;
 }
 
-void ProgressBar::setMin(int min)
+void ProgressBar::setMinimum(int mini)
 {
-  m_min = min;
+  m_min = mini;
   m_dirty = true;
 }
 
-unsigned int ProgressBar::min() const
+unsigned int ProgressBar::minimum() const
 {
   return m_min;
 }
 
-void ProgressBar::setMax(int max)
+void ProgressBar::setMaximum(int maxi)
 {
-  m_max = max;
+  m_max = maxi;
   m_dirty = true;
 }
 
-unsigned int ProgressBar::max() const
+unsigned int ProgressBar::maximum() const
 {
   return m_max;
 }
 
 void ProgressBar::paint(const nds::Rectangle & clip)
 {
-  m_dirty = false;
-  if (not visible())
+  if (not visible() or not dirty())
     return;
+  m_dirty = false;
   // fill the bg rectangle in the text container to the desired colour
   nds::Canvas::instance().setClip(clip);
   // fill to %
   // min = x
   // max = x+w
   // val = x + ( (w*val) / (max-min))
-  nds::Canvas::instance().drawRectangle(clip.x, clip.y, clip.w-1, clip.h, 0);
-  unsigned int range = (clip.w * m_value) / (m_max-m_min);
-  nds::Rectangle progress = {clip.x+1,clip.y+1, range, clip.h};
-  if (m_showString)
+  unsigned int range = clip.w;
+  if (m_max > m_min)
   {
-    TextContainer::paint(progress);
+     range = (clip.w * m_value) / (m_max-m_min);
   }
-  else
-  {
-    nds::Canvas::instance().fillRectangle(progress.x, progress.y,
-        progress.w, progress.h, textArea()->backgroundColor());
-  }
+  nds::Rectangle progress(clip.x+1,clip.y+1, range, clip.h);
+  nds::Canvas::instance().fillRectangle(progress.x, progress.y,
+      progress.w, progress.h, nds::Color(0,29,10));
 }
 

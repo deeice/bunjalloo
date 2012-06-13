@@ -203,12 +203,10 @@ u32 keysRealKeyboard()
   return Keys::instance().keysRealKeyboard();
 }
 
-touchPosition touchReadXY()
+void touchRead(touchPosition *touch)
 {
-  touchPosition position;
-  position.px = Keys::instance().touchX();
-  position.py = Keys::instance().touchY();
-  position.x = position.px*100;
-  position.y = position.py*100;
-  return position;
+  touch->px = Keys::instance().touchX();
+  touch->py = Keys::instance().touchY();
+  touch->x = touch->px*100;
+  touch->y = touch->py*100;
 }

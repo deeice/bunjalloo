@@ -14,295 +14,334 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "UriTest.h"
+#include <gtest/gtest.h>
 #include "URI.h"
 
 using namespace std;
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( UriTest );
-
-void UriTest::testSimpleHttp()
+TEST(UriTest, SimpleHttp)
 {
   URI uri("http://test");
   string expected("test");
-  CPPUNIT_ASSERT( uri.isValid());
-  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
-  CPPUNIT_ASSERT_EQUAL( expected, uri.server());
+  EXPECT_TRUE( uri.isValid());
+  EXPECT_EQ( URI::HTTP_PROTOCOL, uri.protocol());
+  EXPECT_EQ( expected, uri.server());
   expected = "/";
-  CPPUNIT_ASSERT_EQUAL( expected, uri.fileName());
+  EXPECT_EQ( expected, uri.fileName());
 }
 
 
-void UriTest::testBroken()
+TEST(UriTest, Broken)
 {
   URI uri("htp:test", false);
-  CPPUNIT_ASSERT( not uri.isValid());
+  EXPECT_TRUE( not uri.isValid());
 }
 
-void UriTest::testPort()
+TEST(UriTest, Port)
 {
   URI uri("http://server/file");
   int expectedPort = 80;
   string expectedServer("server");
   string expectedFile("/file");
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedPort, uri.port());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri.setUri("http://server:1500");
   expectedPort = 1500;
   expectedFile = "/";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedPort, uri.port());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri.setUri("http://server:90/wiki/Documents:Main");
   expectedPort = 90;
   expectedFile = "/wiki/Documents:Main";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedPort, uri.port());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri.setUri("http://server:");
   expectedPort = 80;
   expectedFile = "/";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedPort, uri.port());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri.setUri("http://server/wiki/Documents:Main");
   expectedPort = 80;
   expectedFile = "/wiki/Documents:Main";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedPort, uri.port());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
 }
 
-void UriTest::testNavigate()
+TEST(UriTest, Navigate)
 {
   URI uri("http://server/file");
   string expectedServer("server");
   string expectedFile("/file");
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("newFile");
   expectedFile = "/newFile";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("newPath/newfile.html");
   expectedFile = "/newPath/newfile.html";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("index.html");
   expectedFile = "/newPath/index.html";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("/index.html");
   expectedFile = "/index.html";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("/directory/");
   expectedFile = "/directory/";
   expectedServer = "server";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedFile, uri.fileName());
 }
 
-void UriTest::testToString()
+TEST(UriTest, ToString)
 {
   URI uri("http://server/file");
   string expectedServer("server");
   string expectedFile("/file");
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
   uri = uri.navigateTo("newPath/newfile.html");
   expectedFile = "/newPath/newfile.html";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
   string expectedURI = "http://server/newPath/newfile.html";
-  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+  EXPECT_EQ( expectedURI, uri.asString());
 
 }
 
-void UriTest::testNavigateFile()
+TEST(UriTest, NavigateFile)
 {
   URI uri("file:///path/file");
 
   string expectedFile = "/path/file";
-  CPPUNIT_ASSERT_EQUAL( URI::FILE_PROTOCOL, uri.protocol());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( URI::FILE_PROTOCOL, uri.protocol());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("newPath/newfile.html");
   expectedFile = "/path/newPath/newfile.html";
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("/root/index.txt");
   expectedFile = "/root/index.txt";
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
 }
 
-void UriTest::testNavigateDots()
+TEST(UriTest, NavigateDots)
 {
   URI uri("http://server/file");
   string expectedServer("server");
   string expectedFile("/file");
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("../newfile.html");
   expectedFile = "/newfile.html";
   expectedServer = "server";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
   string expectedURI = "http://server/newfile.html";
-  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+  EXPECT_EQ( expectedURI, uri.asString());
 
   // make sure we can't go higher than root dir
   uri = uri.navigateTo("../newDir/index.html");
   expectedFile = "/newDir/index.html";
   expectedServer = "server";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
   expectedURI = "http://server/newDir/index.html";
-  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+  EXPECT_EQ( expectedURI, uri.asString());
 
   // dots and absolute == rubbish
   uri = uri.navigateTo("/../another/file.html");
   expectedFile = "/another/file.html";
   expectedServer = "server";
   expectedURI = "http://server/another/file.html";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
-  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedURI, uri.asString());
 
   // and dots later on..
   uri = uri.navigateTo("/another/directory/sub/../file.html");
   expectedFile = "/another/directory/file.html";
   expectedServer = "server";
   expectedURI = "http://server/another/directory/file.html";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
-  CPPUNIT_ASSERT_EQUAL( expectedURI, uri.asString());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedURI, uri.asString());
 
 
 }
 
 
-void UriTest::testHttpFromFile()
+TEST(UriTest, HttpFromFile)
 {
   URI uri("file:///some/file.txt");
 
   string expectedFile = "/some/file.txt";
-  CPPUNIT_ASSERT_EQUAL( URI::FILE_PROTOCOL, uri.protocol());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( URI::FILE_PROTOCOL, uri.protocol());
+  EXPECT_EQ( expectedFile, uri.fileName());
 
   uri = uri.navigateTo("http://myserver.com/newfile.html");
   expectedFile = "/newfile.html";
   string expectedServer = "myserver.com";
-  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
+  EXPECT_EQ( URI::HTTP_PROTOCOL, uri.protocol());
+  EXPECT_EQ( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedServer, uri.server());
 
 }
 
-void UriTest::testSecurityFile()
+TEST(UriTest, SecurityFile)
 {
   // should not be able to link to local URIs from http.
   URI uri("http://someserver.com/file.html");
-  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+  EXPECT_EQ( URI::HTTP_PROTOCOL, uri.protocol());
   uri = uri.navigateTo("file:///my/secret/file.txt");
-  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+  EXPECT_EQ( URI::HTTP_PROTOCOL, uri.protocol());
   uri = uri.navigateTo("config://options.html?proxy=123");
-  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
-  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
+  EXPECT_EQ( URI::HTTP_PROTOCOL, uri.protocol());
+  EXPECT_EQ( URI::HTTP_PROTOCOL, uri.protocol());
 }
 
-void UriTest::testPort2()
+TEST(UriTest, Port2)
 {
   URI uri("123.56.78.90:8080");
   int expectedPort = 8080;
   string expectedServer = "123.56.78.90";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri.server());
-  CPPUNIT_ASSERT_EQUAL( expectedPort, uri.port());
+  EXPECT_EQ( expectedServer, uri.server());
+  EXPECT_EQ( expectedPort, uri.port());
 
   // try breaking things
   URI uri2("123.56.78.90:");
   expectedPort = 80;
   expectedServer = "123.56.78.90";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri2.server());
-  CPPUNIT_ASSERT_EQUAL( expectedPort, uri2.port());
+  EXPECT_EQ( expectedServer, uri2.server());
+  EXPECT_EQ( expectedPort, uri2.port());
 
   // try breaking things
   URI uri3("123.56.78.90/wherevr");
   expectedPort = 80;
   expectedServer = "123.56.78.90";
-  CPPUNIT_ASSERT_EQUAL( expectedServer, uri3.server());
-  CPPUNIT_ASSERT_EQUAL( expectedPort, uri3.port());
+  EXPECT_EQ( expectedServer, uri3.server());
+  EXPECT_EQ( expectedPort, uri3.port());
   URI breakage(uri3.navigateTo("/search?q=label:c"));
   string expectedFile("/search?q=label:c");
-  CPPUNIT_ASSERT_EQUAL( expectedServer, breakage.server());
+  EXPECT_EQ( expectedServer, breakage.server());
 
 }
 
-void UriTest::testSpaces()
+TEST(UriTest, Spaces)
 {
   URI uri("http://server/some file with spaces.jpeg");
   string expectedFile = "/some%20file%20with%20spaces.jpeg";
-  CPPUNIT_ASSERT_EQUAL( URI::HTTP_PROTOCOL, uri.protocol());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( URI::HTTP_PROTOCOL, uri.protocol());
+  EXPECT_EQ( expectedFile, uri.fileName());
 }
 
-void UriTest::testHttps()
+TEST(UriTest, Https)
 {
   URI uri("https://server/filename.html");
   string expectedFile = "/filename.html";
-  CPPUNIT_ASSERT_EQUAL( URI::HTTPS_PROTOCOL, uri.protocol());
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( URI::HTTPS_PROTOCOL, uri.protocol());
+  EXPECT_EQ( expectedFile, uri.fileName());
 }
 
-void UriTest::testInternal()
+TEST(UriTest, Internal)
 {
   URI uri("http://server/filename.html");
   string expectedFile = "/filename.html";
-  CPPUNIT_ASSERT_EQUAL( expectedFile, uri.fileName());
+  EXPECT_EQ( expectedFile, uri.fileName());
   const URI & internal(uri.navigateTo("#section1"));
   string expectedInternal("section1");
-  CPPUNIT_ASSERT_EQUAL( expectedFile, internal.fileName());
-  CPPUNIT_ASSERT_EQUAL( expectedInternal, internal.internalLink());
+  EXPECT_EQ( expectedFile, internal.fileName());
+  EXPECT_EQ( expectedInternal, internal.internalLink());
   const URI & internal2(internal.navigateTo("#section2"));
   expectedInternal = "section2";
-  CPPUNIT_ASSERT_EQUAL( expectedInternal, internal2.internalLink());
+  EXPECT_EQ( expectedInternal, internal2.internalLink());
 
 }
 
-void UriTest::testCRC()
+TEST(UriTest, CRC)
 {
   URI uri("http://server.com/");
   unsigned int crc = uri.crc32int();
   unsigned int expected(0x7fec9bc0);
-  CPPUNIT_ASSERT_EQUAL(expected, crc);
+  EXPECT_EQ(expected, crc);
 }
 
-void UriTest::testEscape()
+TEST(UriTest, Escape)
 {
-  string result = unicode2string(URI::escape(string2unicode("/blah&#?=:@")), true);
+  string result = URI::escape("/blah&#?=:@");
   string expected("%2Fblah%26%23%3F%3D%3A%40");
-  CPPUNIT_ASSERT_EQUAL(expected, result);
-  result = unicode2string(URI::unescape(string2unicode("%2Fblah%26%23%3F%3D%3A%40")), true);
+  EXPECT_EQ(expected, result);
+  result = URI::unescape("%2Fblah%26%23%3F%3D%3A%40");
   expected = "/blah&#?=:@";
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 
-  result = unicode2string(URI::unescape(string2unicode("%2Fblah%2%2")), true);
+  result = URI::unescape("%2Fblah%2%2");
   expected = "/blah%2%2";
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 
+}
+
+TEST(UriTest, TwoDots)
+{
+  URI uri("http://tbn0.example.com/images?q=tbn:xFaRtM:http://www.example.net/es/blabla/FOO.jpg");
+  string expected("/images?q=tbn:xFaRtM:http://www.example.net/es/blabla/FOO.jpg");
+  EXPECT_EQ(expected, uri.fileName());
+  uri = uri.navigateTo(uri.fileName());
+  EXPECT_EQ(expected, uri.fileName());
+
+}
+
+TEST(UriTest, Port3)
+{
+  URI uri("http://www.example.com:1234/index");
+  uri = uri.navigateTo("/index2");
+  int expected = 1234;
+  EXPECT_EQ(expected, uri.port());
+}
+
+TEST(UriTest, relative_query)
+{
+  URI uri("http://www.example.com/test.php");
+  uri = uri.navigateTo("?a");
+  string expected("http://www.example.com/test.php?a");
+  EXPECT_EQ(expected, uri.asString());
+}
+
+TEST(UriTest, relativeQueryInternal)
+{
+  URI uri("http://www.example.com/test.php#a");
+  uri = uri.navigateTo("?c");
+  string expected("http://www.example.com/test.php?c");
+  EXPECT_EQ(expected, uri.asString());
+}
+
+TEST(UriTest, relative_item)
+{
+  URI uri("http://www.example.com/");
+  uri = uri.navigateTo("item?id=123");
+  string expected("http://www.example.com/item?id=123");
+  EXPECT_EQ(expected, uri.asString());
 }

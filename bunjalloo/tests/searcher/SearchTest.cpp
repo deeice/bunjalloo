@@ -15,44 +15,47 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "SearchEntry.h"
-#include "SearchTest.h"
+#include <gtest/gtest.h>
 
 using namespace std;
 
-CPPUNIT_TEST_SUITE_REGISTRATION( SearchTest );
-
-void SearchTest::tearDown()
+class SearchTest : public testing::Test
 {
-  delete m_search;
-}
-void SearchTest::setUp()
-{
-  m_search = new SearchEntry("input/search.cfg");
-}
+  protected:
+    SearchEntry * m_search;
 
-void SearchTest::test0()
+    void TearDown() {
+      delete m_search;
+    }
+
+    void SetUp() {
+      m_search = new SearchEntry("input/search.cfg");
+    }
+};
+
+TEST_F(SearchTest, 0)
 {
   string result;
   bool check(m_search->checkSearch("g bunjalloo", result));
-  CPPUNIT_ASSERT(check);
+  EXPECT_TRUE(check);
   string expected = "http://www.google.com/search?q=bunjalloo&btnG=Google+Search";
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }
 
-void SearchTest::testInvalid()
+TEST_F(SearchTest, Invalid)
 {
   string result;
   bool valid(m_search->checkSearch("x bunjalloo", result));
   // should not be valid
-  CPPUNIT_ASSERT(not valid);
+  EXPECT_TRUE(not valid);
 }
 
-void SearchTest::testPercentage()
+TEST_F(SearchTest, Percentage)
 {
   // tests for %s at the end of a line and with a %20 in the url
   string result;
   bool valid(m_search->checkSearch("s bunjalloo", result));
-  CPPUNIT_ASSERT(valid);
+  EXPECT_TRUE(valid);
   string expected = "http://checkpercentage/%20/bunjalloo";
-  CPPUNIT_ASSERT_EQUAL(expected, result);
+  EXPECT_EQ(expected, result);
 }

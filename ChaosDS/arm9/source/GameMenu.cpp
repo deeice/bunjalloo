@@ -40,13 +40,13 @@ static const int TOUCH_PAUSE(4);
 GameMenu::GameMenu()
 {
   int width = 20*8;
-  Rectangle selectSpellRect = {MENU_XPOS*8, MENU_YPOS*8, width, 16+16+8 };
+  Rectangle selectSpellRect(MENU_XPOS*8, MENU_YPOS*8, width, 16+16+8 );
   m_hotspots.push_back(new HotSpot(selectSpellRect, selectSpellCb, this));
 
-  Rectangle examineRect = {MENU_XPOS*8, (6+MENU_YPOS)*8, width, 16 };
+  Rectangle examineRect(MENU_XPOS*8, (6+MENU_YPOS)*8, width, 16 );
   m_hotspots.push_back(new HotSpot(examineRect, examineCb, this));
 
-  Rectangle continueRect = {MENU_XPOS*8, (9+MENU_YPOS)*8, width, 16 };
+  Rectangle continueRect(MENU_XPOS*8, (9+MENU_YPOS)*8, width, 16 );
   m_hotspots.push_back(new HotSpot(continueRect, continueCb, this));
 }
 

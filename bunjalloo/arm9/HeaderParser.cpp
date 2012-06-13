@@ -15,13 +15,18 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <assert.h>
+#include <zlib.h>
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
+#include "CacheControl.h"
 #include "CookieJar.h"
 #include "File.h"
 #include "HeaderParser.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
 #include "URI.h"
-#include <zlib.h>
+#include "DateUtils.h"
 
 using namespace std;
 static const string HTTP1("HTTP/1.");
@@ -30,13 +35,22 @@ static const unsigned char FIELD_VALUE_SEP(':');
 static const int ZWINDOW_SIZE(47);
 static const unsigned int WINSIZE(16384);
 
-HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
+HeaderParser::HeaderParser(HtmlParser * htmlParser,
+    CookieJar * cookieJar,
+    CacheControl *cacheControl
+    )
+:
   m_uri(*(new URI())),
+  m_value(0),
+  m_position(0),
+  m_end(0),
+  m_lastPosition(0),
   m_gzip(false),
-  m_cache(true),
+  m_httpStatusCode(200),
   m_expected(0),
   m_htmlParser(htmlParser),
   m_cookieJar(cookieJar),
+  m_cacheControl(cacheControl),
   m_headerListener(0),
   m_stream(new z_stream_s),
   m_window(new char[WINSIZE])
@@ -44,7 +58,9 @@ HeaderParser::HeaderParser(HtmlParser * htmlParser, CookieJar * cookieJar):
   reset();
 }
 HeaderParser::~HeaderParser()
-{ }
+{
+  delete m_cacheControl;
+}
 
 void HeaderParser::setListener(HeaderListener * listener)
 {
@@ -61,6 +77,7 @@ void HeaderParser::reset()
   m_redirect = "";
   m_chunked = false;
   m_gzip = false;
+  m_cacheControl->reset();
   m_chunkLength = 0;
   m_chunkLengthString = "";
   m_htmlParser->setToStart();
@@ -156,7 +173,9 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
     m_expected = strtol(value.c_str(), 0 , 0);
   }
   else if (field == "content-type") {
-    m_htmlParser->parseContentType(value);
+    string content(value);
+    std::transform(content.begin(), content.end(), content.begin(), ::tolower);
+    m_htmlParser->parseContentType(content);
   }
   else if (field == "refresh") {
     m_htmlParser->parseRefresh(value);
@@ -166,13 +185,19 @@ void HeaderParser::handleHeader(const std::string & field, const std::string & v
   }
   else if (field == "cache-control")
   {
-    if (value.find("no-cache") != string::npos)
-    {
-      if (not m_cacheFile.empty())
-      {
-        m_cache = false;
-      }
-    }
+    m_cacheControl->setCacheControl(value);
+  }
+  else if (field == "expires")
+  {
+    m_cacheControl->setExpires(DateUtils::parseDate(value.c_str()));
+  }
+  else if (field == "date")
+  {
+    m_cacheControl->setDate(DateUtils::parseDate(value.c_str()));
+  }
+  else if (field == "last-modified")
+  {
+    m_cacheControl->setLastModified(DateUtils::parseDate(value.c_str()));
   }
   else if (field == "set-cookie")
   {
@@ -377,6 +402,7 @@ void HeaderParser::httpResponse()
   if (response.substr(0,HTTP1_LEN) == HTTP1 and response[HTTP1_LEN+1] == ' ') {
     m_httpStatusCode = strtol(response.substr(9,3).c_str(), 0, 0);
     addToCacheFile(response+"\n");
+    if (m_cacheControl) m_cacheControl->setResponseTime(::time(0));
     m_state = BEFORE_FIELD;
   } else {
     m_state = PARSE_ERROR;
@@ -435,13 +461,18 @@ void HeaderParser::fireData()
 }
 void HeaderParser::setCacheFile(const std::string & cacheFile)
 {
+  reset();
   m_cacheFile = cacheFile;
   if (not m_cacheFile.empty())
   {
     nds::File f;
     f.open(cacheFile.c_str(), "w");
-    m_cache = true;
   }
+}
+
+const std::string & HeaderParser::cacheFile() const
+{
+  return m_cacheFile;
 }
 
 void HeaderParser::addToCacheFile(const std::string & text)
@@ -454,7 +485,7 @@ void HeaderParser::addToCacheFile(const std::string & text)
   }
 }
 
-bool HeaderParser::shouldCache() const
+const CacheControl &HeaderParser::cacheControl() const
 {
-  return m_cache;
+  return *m_cacheControl;
 }

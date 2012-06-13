@@ -21,7 +21,6 @@
 class ButtonGroup;
 class RadioButton;
 class CheckBox;
-class Button;
 class View;
 class CookieHandler: public ButtonListener
 {

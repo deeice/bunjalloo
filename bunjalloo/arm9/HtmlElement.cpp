@@ -15,17 +15,20 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <vector>
+#include <algorithm>
 #include "ElementFactory.h"
 #include "HtmlConstants.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
+#include "string_utils.h"
+#include "utf8.h"
 
 using namespace std;
 
 #include "Visitor.h"
 IMPLEMENT_ACCEPT(HtmlElement);
 
-const UnicodeString * HtmlElement::attributePtr(const std::string & name) const
+const std::string *HtmlElement::attributePtr(const std::string & name) const
 {
   if (name == "id")
   {
@@ -46,19 +49,19 @@ const UnicodeString * HtmlElement::attributePtr(const std::string & name) const
   return 0;
 }
 
-UnicodeString HtmlElement::attribute(const std::string & name) const
+std::string HtmlElement::attribute(const std::string & name) const
 {
-   const UnicodeString * ptr = attributePtr(name);
+   const std::string *ptr = attributePtr(name);
    if (ptr)
    {
      return *ptr;
    }
-   return UnicodeString();
+   return std::string();
 }
 
-void HtmlElement::setAttribute(const std::string & name, const UnicodeString & value)
+void HtmlElement::setAttribute(const std::string & name, const std::string & value)
 {
-   UnicodeString * ptr = const_cast<UnicodeString*>(attributePtr(name));
+  std::string * ptr = const_cast<std::string*>(attributePtr(name));
    if (ptr)
    {
      *ptr = value;
@@ -86,19 +89,28 @@ void HtmlElement::appendText(unsigned int value)
   {
     if (m_children.back()->isa(HtmlConstants::TEXT))
     {
-      UnicodeString & text(m_children.back()->m_text);
-      if (not isWhitespace(value) or (isWhitespace(value) and not isWhitespace(text[text.length()-1])))
-      {
-        m_children.back()->m_text += value;
+      std::string & text(m_children.back()->m_text);
+      if (isWhitespace(value)) {
+        if (not isWhitespace(text[text.length()-1]))
+          text += ' ';
+      }
+      else {
+        utf8::unchecked::append(value, back_inserter(text));
       }
       return;
     }
   }
   // ignore spaces at the start.
-  if (isWhitespace(value))
+  if (isWhitespace(value)) {
+    utf8::unchecked::append(value, back_inserter(m_text));
     return;
+  }
   HtmlElement* textNode = new HtmlElement(HtmlConstants::TEXT);
-  textNode->m_text = value;
+  if (!m_text.empty()) {
+    utf8::unchecked::append(' ', back_inserter(textNode->m_text));
+    m_text.clear();
+  }
+  utf8::unchecked::append(value, back_inserter(textNode->m_text));
   append(textNode);
 }
 
@@ -126,7 +138,7 @@ HtmlElement * HtmlElement::clone() const
 void HtmlElement::dump() const
 {
   std::basic_string<wchar_t> dumper;
-  UnicodeString::const_iterator it(m_text.begin());
+  std::string::const_iterator it(m_text.begin());
   for (; it != m_text.end(); ++it)
   {
     dumper += *it;
@@ -184,7 +196,7 @@ ElementList HtmlElement::elementsByTagName(const std::string & name) const
 
 void HtmlElement::clearText() const
 {
-  UnicodeString().swap(m_text);
+  std::string().swap(m_text);
 }
 
 void HtmlElement::visitChildren(Visitor & visitor)

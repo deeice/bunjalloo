@@ -115,7 +115,9 @@ void ConfigParser::replaceMarkers(std::string & line, const char marker)
         string middle = line.substr(pos+1, endpos-pos-1);
         // see if the middle is simple, or if it needs computing
         parseMiddle(middle);
-        a += unicode2string(T(middle), true).c_str();
+        // FIXME - need to escape unicodes to HTML %3C type values
+        // Fix this when utf8 is working
+        a += T(middle).c_str();
         a += line.substr(endpos+1, line.length()-endpos-1);
         line = a;
         found = true;

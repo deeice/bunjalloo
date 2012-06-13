@@ -172,10 +172,7 @@ Stylus::TouchType Stylus::keysToTouchType(bool held, bool up)
 
 void Stylus::registerStylus(Stylus * stylus)
 {
-  if (s_stylus)
-  {
-    delete s_stylus;
-  }
+  delete s_stylus;
   s_stylus = stylus;
 }
 

@@ -18,7 +18,7 @@
 #define TextContainer_h_seen
 
 #include "Component.h"
-#include "UnicodeString.h"
+#include <string>
 
 class TextArea;
 /** A container that prevents text from overflowing its boundary. */
@@ -37,18 +37,18 @@ class TextContainer: public Component
     /** Create a container with the given text.
      * @param text the text to display
      */
-    TextContainer(const UnicodeString & text);
+    TextContainer(const std::string &text);
 
     /** Set the text contents.
      * @param text the new text contents.
      */
-    void setText(const UnicodeString & text);
+    void setText(const std::string &text);
 
     /** Get the text contents. Note that not all of the text may have been
      * displayed.
      * @return the current text.
      */
-    const UnicodeString & text() const;
+    const std::string & text() const;
 
     /** Set the background color.
      * @param color the color to use.
@@ -67,8 +67,9 @@ class TextContainer: public Component
     }
 
   private:
-    UnicodeString m_text;
+    std::string m_text;
     void layout();
 
+    DISALLOW_COPY_AND_ASSIGN(TextContainer);
 };
 #endif

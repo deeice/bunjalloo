@@ -17,6 +17,8 @@
 #ifndef Image_h_seen
 #define Image_h_seen
 #include <stdint.h>
+#include <string>
+#include "util/classhelper.h"
 
 // tolua_begin
 namespace nds
@@ -49,6 +51,11 @@ namespace nds
        *   palette data will be lost (converted to RGB triplets vs indexed)
        */
       Image(const char * filename, bool keepPalette=false);
+
+      std::string filename() const;
+
+      void setType(ImageType type);
+      ImageType type() const;
 
       /** Free up the data.*/
       ~Image();
@@ -90,11 +97,14 @@ namespace nds
        */
       const uint16_t * data() const;
 
+      void reload();
       //tolua_end
     private:
 
       bool m_valid;
       bool m_keepPalette;
+      ImageType m_type;
+      std::string m_filename;
 
       // scaled w, h
       unsigned int m_width;
@@ -112,16 +122,18 @@ namespace nds
       unsigned short * m_data;
       unsigned short * m_palette;
 
-      void readPng(const char *filename);
-      void readGif(const char *filename);
-      void readJpeg(const char *filename);
-      void readImage(const char *filename, ImageType type);
+      void readPng();
+      void readGif();
+      void readJpeg();
       static ImageType imageType(const char * filename);
 
       /** Render line n from the given data. */
       void renderLine(const unsigned char * line, int n);
       void calculateScale();
+      void allocData();
+      void allocPalette(size_t size);
 
+      DISALLOW_COPY_AND_ASSIGN(Image);
   }; //tolua_export
 }
 #endif

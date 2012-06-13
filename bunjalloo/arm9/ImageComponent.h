@@ -18,23 +18,35 @@
 #define ImageComponent_h_seen
 
 #include "Component.h"
+#include "ViewI.h"
 #include <string>
 namespace nds {
 class Image;
 }
-class ImageComponent: public Component
+class BoxLayout;
+class Document;
+class Link;
+class LinkListener;
+class ImageComponent: public Component, public ViewI
 {
   public:
-    ImageComponent(nds::Image * image);
+    ImageComponent(nds::Image * image, BoxLayout * m_boxLayout=0, Document * doc=0);
+    void reload();
+    void addLink(const std::string & href, LinkListener * listener);
+
     virtual void paint(const nds::Rectangle & clip);
     virtual ~ImageComponent();
-
-    virtual bool stylusUp(const Stylus * stylus) { return false; }
-    virtual bool stylusDownFirst(const Stylus * stylus) { return false; }
-    virtual bool stylusDownRepeat(const Stylus * stylus) { return false; }
-    virtual bool stylusDown(const Stylus * stylus) { return false; }
+    virtual void notify();
+    virtual bool stylusUp(const Stylus * stylus);
+    virtual bool stylusDownFirst(const Stylus * stylus);
+    virtual bool stylusDownRepeat(const Stylus * stylus);
+    virtual bool stylusDown(const Stylus * stylus);
   private:
     nds::Image * m_image;
+    BoxLayout * m_boxLayout;
+    Document * m_document;
+    Link * m_link;
+    LinkListener * m_linkListener;
 
 };
 #endif

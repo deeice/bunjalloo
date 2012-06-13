@@ -25,8 +25,8 @@ class EditPopup: public PopupMenu
   public:
     EditPopup(View * parent);
     void setElement(HtmlElement * el);
-    UnicodeString details() const;
-    void postEdit(const UnicodeString & val);
+    std::string details() const;
+    void postEdit(const std::string & val);
 
   private:
     View * m_parent;

@@ -14,6 +14,8 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <cstdio>
+#include "config_defs.h"
 #include "FormControl.h"
 #include "HtmlElement.h"
 #include "HtmlConstants.h"
@@ -24,7 +26,7 @@
 const int FormControl::MAX_SIZE(120);
 const int FormControl::MIN_SIZE(8);
 
-FormControl::FormControl(const HtmlElement * element, const UnicodeString & text):
+FormControl::FormControl(const HtmlElement * element, const std::string &text):
   Button(text),
   m_element(element)
 {
@@ -33,10 +35,10 @@ FormControl::FormControl(const HtmlElement * element, const UnicodeString & text
 #if 0
 void FormControl::walkForm(const HtmlElement * formElement)
 {
-  UnicodeString name = formElement->attribute("name");
+  std::string name = formElement->attribute("name");
   if (not name.empty() )
   {
-    UnicodeString value = formElement->attribute("value");
+    std::string value = formElement->attribute("value");
     m_processedData +=
   }
   if (formElement->hasChildren())
@@ -97,7 +99,7 @@ void FormControl::input(Controller & controller, URI & uri)
   {
     return;
   }
-  uri.setMethod(unicode2string(currentNode->attribute("method")));
+  uri.setMethod(currentNode->attribute("method"));
 
   ElementList inputs;
   appendFormElements(inputs, currentNode);
@@ -115,13 +117,13 @@ void FormControl::input(Controller & controller, URI & uri)
   }
   */
   std::string processedData;
-  UnicodeString myName = m_element->attribute("name");
-  const UnicodeString one(string2unicode("1"));
+  std::string myName = m_element->attribute("name");
+  const std::string one("1");
   for (; inputIt != inputs.end(); ++inputIt)
   {
     const HtmlElement * element(*inputIt);
-    UnicodeString name = element->attribute("name");
-    UnicodeString value = element->attribute("value");
+    std::string name = element->attribute("name");
+    std::string value = element->attribute("value");
     bool includeValue(false);
     if (element->isa(HtmlConstants::INPUT_TAG))
     {
@@ -154,7 +156,7 @@ void FormControl::input(Controller & controller, URI & uri)
           includeValue = checked;
           if (value.empty())
           {
-            value = string2unicode("on");
+            value = "on";
           }
           break;
 
@@ -179,9 +181,9 @@ void FormControl::input(Controller & controller, URI & uri)
       if (needAmp) {
         processedData += '&';
       }
-      processedData += unicode2string(URI::escape(name));
+      processedData += URI::escape(name);
       processedData += "=";
-      processedData += unicode2string(element->firstChild()->text());
+      processedData += element->firstChild()->text();
     }
     if (m_element == element and not myName.empty())
     {
@@ -193,9 +195,9 @@ void FormControl::input(Controller & controller, URI & uri)
           if (needAmp) {
             processedData += '&';
           }
-          processedData += unicode2string(URI::escape(name));
+          processedData += URI::escape(name);
           processedData += "=";
-          processedData += unicode2string(URI::escape(value));
+          processedData += URI::escape(value);
           needAmp = true;
         /*}
         else
@@ -210,7 +212,7 @@ void FormControl::input(Controller & controller, URI & uri)
     }
   }
   if (isGet) {
-    m_processedData = unicode2string(currentNode->attribute("action"));
+    m_processedData = currentNode->attribute("action");
     m_processedData += '?';
     m_processedData += processedData;
     uri = uri.navigateTo(m_processedData);
@@ -225,7 +227,7 @@ void FormControl::input(Controller & controller, URI & uri)
     contentType += "Content-Type: application/x-www-form-urlencoded\r\n";
     contentType += "\r\n";
     // add url
-    std::string action = unicode2string(currentNode->attribute("action"));
+    std::string action = currentNode->attribute("action");
     if (not action.empty())
     {
       uri = uri.navigateTo(action);

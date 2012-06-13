@@ -18,7 +18,7 @@
 #define Language_h_seen
 
 #include <map>
-#include "UnicodeString.h"
+#include "util/classhelper.h"
 
 /** Define to make translation a bit easier.
  * @code
@@ -33,20 +33,16 @@
 class Language: public FileParser
 {
   public:
-    /** Name of the directory where language settings are kept.
-     * Settings are kept in lang.txt, e.g. en.txt */
-    const static char LANGUAGE_DIR[];
-
     const static char * BUILTIN_LANGS[6];
     /** Singleton pattern used. Again. */
     static Language & instance();
 
     /** Translate a string to the locale specific translation. If a
-     * translation doesn't exist, then s is unicodified and returned.
+     * translation doesn't exist, then s returned unchanged.
      * @param s the programmer string
-     * @return the user string in the current language.
+     * @return the user string in the current language in UTF8.
      */
-    UnicodeString translate(const std::string & s);
+    const std::string &translate(const std::string & s);
 
     /** Set the language */
     void setLanguage(const std::string & l);
@@ -56,11 +52,17 @@ class Language: public FileParser
      */
     std::string currentLanguage() const;
 
+    /** Set the language directory where the translation files live.
+     * @param dir  the directory name
+     */
+    void setDirectory(const std::string & dir);
+
     void callback(const std::string & first, const std::string & second);
   private:
     typedef std::map<std::string, std::string> TranslateMap;
     TranslateMap m_strings;
     std::string m_lang;
+    std::string m_directory;
 
     /** Read language settings.
      */
@@ -69,6 +71,7 @@ class Language: public FileParser
 
     void loadLanguageFile();
     void setBuiltin();
+    DISALLOW_COPY_AND_ASSIGN(Language);
 };
 
 #endif

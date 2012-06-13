@@ -83,6 +83,8 @@ class SDLhandler
     {
       return m_mainOnTop;
     }
+
+    void swapMainBuffer();
   private:
     static SDL_Rect GAP;
 
@@ -108,6 +110,9 @@ class SDLhandler
     Uint32 m_subSpritePaletteSDL[256];
     unsigned short * m_vramMain;
     unsigned short * m_vramSub;
+    // back buffer for main
+    unsigned short * m_vramMainBack;
+    bool m_vramMainIsShown;
     unsigned short * m_spriteGfx;
     unsigned short * m_subSpriteGfx;
 
@@ -129,7 +134,6 @@ class SDLhandler
 
     int init();
     void initGL();
-    void drawGap();
     void clear();
     bool inGap(int y) const;
     int uploadTextureFromSurface(
@@ -137,5 +141,6 @@ class SDLhandler
         int colorKeyRed, int colorKeyGreen, int colorKeyBlue );
 
     static void clear3D();
+    Uint32 alphaBlend(int layer, Uint32 col, int x, int y);
 };
 #endif

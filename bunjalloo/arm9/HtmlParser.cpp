@@ -16,20 +16,24 @@
 */
 //#include <iostream>
 #include <assert.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstdio>
 #include <ctype.h>
 #include <algorithm>
 #include "Entity.h"
 #include "HtmlElement.h"
 #include "HtmlParser.h"
 #include "ParameterSet.h"
-#include "UnicodeString.h"
+#include "string_utils.h"
 #include "ISO_8859_1.h"
-#include "UTF8.h"
+#include "utf8.h"
 #include "File.h"
 #include "Delete.h"
 
 using namespace std;
+
+const char * HtmlParser::IMAGE_JPEG_STR = "image/jpeg";
+const char * HtmlParser::IMAGE_JPG_STR = "image/jpg"; // some people...
 
 //! The private implementation of the parser.
 class HtmlParserImpl
@@ -196,14 +200,16 @@ class HtmlParserImpl
     void handleDoctypeName();
     void handleAfterDoctypeName();
     void handleBogusDoctype();
+
+    void appendValueToAttributeName();
+    void appendValueToAttributeValue();
 };
 
 void HtmlParserImpl::next()
 {
   m_lastPosition = m_position;
   if (m_encoding == HtmlParser::UTF8_ENCODING) {
-    unsigned int read = UTF8::decode(m_position, m_value);
-    m_position += read;
+    m_value = utf8::next(m_position, m_end);
   } else {
     m_value = ISO_8859_1::decode((*m_position)&0xff);
     m_position++;
@@ -340,7 +346,8 @@ void HtmlParserImpl::handleCloseTagOpen()
     if (nextFew.substr(0, nextFew.length()-1) == m_lastStartTagToken)
     {
       // check next
-      switch (nextFew[nextFew.length()-1])
+      int check = nextFew[nextFew.length()-1];
+      switch (check)
       {
         case 0x0009:
         case 0x000A:
@@ -416,10 +423,8 @@ void HtmlParserImpl::emitTagToken()
   }
   for_each( m_tagAttributes.begin(), m_tagAttributes.end(), delete_ptr());
   m_tagAttributes.clear();
-  if (m_attribute) {
-    delete m_attribute;
-    m_attribute = 0;
-  }
+  delete m_attribute;
+  m_attribute = 0;
 }
 void HtmlParserImpl::emitComment()
 {
@@ -506,6 +511,18 @@ void HtmlParserImpl::handleBeforeAttributeName()
   }
 }
 
+void HtmlParserImpl::appendValueToAttributeName()
+{
+  if (m_attribute != 0)
+    utf8::unchecked::append(m_value, back_inserter(m_attribute->name));
+}
+
+void HtmlParserImpl::appendValueToAttributeValue()
+{
+  if (m_attribute != 0)
+    utf8::unchecked::append(m_value, back_inserter(m_attribute->value));
+}
+
 void HtmlParserImpl::handleAttributeName()
 {
   next();
@@ -540,7 +557,7 @@ void HtmlParserImpl::handleAttributeName()
         {
           m_value = ::tolower(m_value);
         }
-        m_attribute->name+=m_value;
+        appendValueToAttributeName();
       }
       break;
   }
@@ -636,9 +653,7 @@ void HtmlParserImpl::handleBeforeAttributeValue()
       break;
     default:
       {
-        if (m_attribute) {
-          m_attribute->value += m_value;
-        }
+        appendValueToAttributeValue();
         m_state = ATTRIBUTE_VALUE_UNQUOTED;
       }
       break;
@@ -668,9 +683,7 @@ void HtmlParserImpl::handleAttributeValueQuote()
         m_state = DATA;
         break;
       default:
-        if (m_attribute) {
-          m_attribute->value += m_value;
-        }
+        appendValueToAttributeValue();
         break;
     }
   }
@@ -702,9 +715,7 @@ void HtmlParserImpl::handleAttributeValueUnquoted()
       m_state = DATA;
       break;
     default:
-      if (m_attribute) {
-        m_attribute->value += m_value;
-      }
+      appendValueToAttributeValue();
       break;
   }
 }
@@ -765,7 +776,7 @@ unsigned int HtmlParserImpl::consumeEntity()
       next();
       if (filter(m_value))
       {
-        entity+=m_value;
+        entity += m_value;
       } else {
         break;
       }
@@ -795,8 +806,7 @@ unsigned int HtmlParserImpl::consumeEntity()
     rewind();
 
     // check that it isn't nbsp - that is very common
-    string nbspCheck = asUnconsumedCharString(5);
-    if (nbspCheck == "nbsp;") {
+    if (asUnconsumedCharString(5) == "nbsp;") {
       //cout << "Entity shortcut - nbsp." << endl;
       consume(5);
       return NBSP;
@@ -804,7 +814,7 @@ unsigned int HtmlParserImpl::consumeEntity()
     const char * start = m_position;
     unsigned int found(0);
     // the longest entity is 10 characters.
-    char sofar[11];
+    char sofar[12];
     int index = 0;
     while ((m_position != m_end) and index < 11)
     {
@@ -855,7 +865,7 @@ void HtmlParserImpl::handleEntityInAttributeValue()
     }
     else
     {
-      m_attribute->value += value;
+      utf8::unchecked::append(value, back_inserter(m_attribute->value));
     }
   }
   m_state = m_lastState;
@@ -1369,10 +1379,8 @@ void HtmlParser::feed(const char * data, unsigned int length)
 {
   m_details->initialise(data, length);
   if (mimeType() == HtmlParser::TEXT_HTML
-      or mimeType() == HtmlParser::TEXT_PLAIN
       or mimeType() == HtmlParser::UNINITIALISED)
   {
-    //printf("%s", data);
     while (m_details->position() < m_details->end()) {
       m_details->fire();
     }
@@ -1422,7 +1430,10 @@ void HtmlParser::parseContentType(const std::string & value)
     }
   }
 
-  setMimeType(paramSet);
+  std::vector<std::string> segments;
+  split(value, segments, ";");
+  if (not segments.empty())
+    setMimeType(segments[0]);
 
   if (m_mimeType == TEXT_PLAIN)
   {
@@ -1446,35 +1457,30 @@ std::string HtmlParser::getContentDisposition() const
   return m_details->getContentDisposition();
 }
 
-void HtmlParser::setMimeType(ParameterSet & paramSet)
+void HtmlParser::setMimeType(const std::string &mt)
 {
   m_mimeType = OTHER;
+  m_mimeTypeValue = mt;
   // mime type is set to a parameter name...
-  if (paramSet.hasParameter("text/plain"))
-  {
+  if (mt == "text/plain") {
     m_mimeType = TEXT_PLAIN;
   }
-  else if (paramSet.hasParameter("text/html")
-      or paramSet.hasParameter("application/xhtml+xml")
-      or paramSet.hasParameter("application/xhtml")
-      )
-  {
+  else if (mt == "text/html"
+      or mt == "application/xhtml+xml"
+      or mt == "text/vnd.wap.wml"
+      or mt == "application/xhtml") {
     m_mimeType = TEXT_HTML;
   }
-  else if (paramSet.hasParameter("image/png"))
-  {
+  else if (mt == "image/png") {
     m_mimeType = IMAGE_PNG;
   }
-  else if (paramSet.hasParameter("image/gif"))
-  {
+  else if (mt == "image/gif") {
     m_mimeType = IMAGE_GIF;
   }
-  else if (paramSet.hasParameter("image/jpeg"))
-  {
+  else if (mt == IMAGE_JPEG_STR or mt == IMAGE_JPG_STR) {
     m_mimeType = IMAGE_JPEG;
   }
-  else if (paramSet.hasParameter("application/zip"))
-  {
+  else if (mt == "application/zip") {
     m_mimeType = ZIP;
   }
 }
@@ -1502,8 +1508,8 @@ void HtmlParser::refresh(std::string & refreshUrl, int & time) const
 
 void HtmlParser::checkMetaTagHttpEquiv(const HtmlElement * meta)
 {
-  string httpEquiv = unicode2string(meta->attribute("http-equiv"));
-  string content = unicode2string( meta->attribute("content"));
+  string httpEquiv = meta->attribute("http-equiv");
+  string content =  meta->attribute("content");
   if (not httpEquiv.empty() and not content.empty())
   {
     transform(httpEquiv.begin(), httpEquiv.end(), httpEquiv.begin(), ::tolower);
@@ -1538,4 +1544,9 @@ void HtmlParser::setCacheFile(const std::string & filename)
 HtmlParser::MimeType HtmlParser::mimeType() const
 {
   return m_mimeType;
+}
+
+std::string HtmlParser::mimeTypeValue() const
+{
+  return m_mimeTypeValue;
 }

@@ -17,6 +17,7 @@
 #include "HtmlConstants.h"
 #include "HtmlPreElement.h"
 #include "Visitor.h"
+#include "utf8.h"
 IMPLEMENT_ACCEPT(HtmlPreElement);
 
 
@@ -26,11 +27,11 @@ void HtmlPreElement::appendText(unsigned int value)
   {
     if (m_children.back()->isa(HtmlConstants::TEXT))
     {
-      m_children.back()->text() += value;
+      utf8::unchecked::append(value, back_inserter(m_children.back()->text()));
       return;
     }
   }
   HtmlElement* textNode = new HtmlElement(HtmlConstants::TEXT);
-  textNode->text() = value;
+  utf8::unchecked::append(value, back_inserter(textNode->text()));
   append(textNode);
 }

@@ -16,6 +16,7 @@
 */
 #ifndef Sprite_h_seen
 #define Sprite_h_seen
+#include "util/classhelper.h"
 
 // tolua_begin
 namespace nds {
@@ -338,8 +339,7 @@ namespace nds {
 
       void draw8x8Tile(int xPos, int yPos, int xi, int yi, const unsigned char * gfx);
 
-      Sprite(const Sprite &);
-      const Sprite & operator=(const Sprite &);
+      DISALLOW_COPY_AND_ASSIGN(Sprite);
   }; // tolua_export
 }; // tolua_export
 #endif

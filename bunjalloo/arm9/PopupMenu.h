@@ -42,7 +42,7 @@ class PopupMenu: public ComboBox
      * @param cb the callback function to use when the menu is activated.
      * @param data use defined data passed in to the @a cb.
      */
-    void addMenuItem(const UnicodeString & name, Callback cb, void * data);
+    void addMenuItem(const std::string & name, Callback cb, void * data);
 
     /** Layout the menu correctly once all the items are added. */
     void updateLayout();

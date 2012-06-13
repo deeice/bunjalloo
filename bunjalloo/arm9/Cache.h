@@ -19,10 +19,11 @@
 
 
 #include <string>
-#include <map>
+#include <set>
 
 class Document;
 class URI;
+class CacheControl;
 /** Store web pages on disk to save requesting them again. */
 class Cache
 {
@@ -32,9 +33,8 @@ class Cache
     /** Create the cache.
      * @param document needed for setCacheFile, so doc model persists itself.
      * @param useCache use a cache or not.
-     * @param clearCache clear the cache at start or not.
      */
-    Cache(Document & document, bool useCache, bool clearCache);
+    Cache(Document & document, bool useCache);
 
     /** Does the given URI live in the cache already?
      * @param uri the uri to check.
@@ -71,10 +71,15 @@ class Cache
      */
     inline bool useCache() const;
 
+    /**
+     * @param useCache use the cache
+     */
+    void setUseCache(bool useCache);
+
   private:
     Document & m_document;
     bool m_useCache;
-    typedef std::map<int, int> CachedMap;
+    typedef std::set<int> CachedMap;
     CachedMap m_fileIds;
 
     void feed(const std::string & filename);

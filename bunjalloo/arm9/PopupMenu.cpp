@@ -30,7 +30,7 @@ PopupMenu::~PopupMenu()
   Stylus::instance()->unregisterListener(this);
 }
 
-void PopupMenu::addMenuItem(const UnicodeString & name, Callback cb, void * data)
+void PopupMenu::addMenuItem(const std::string &name, Callback cb, void * data)
 {
   addItem(name);
   using std::pair;
@@ -87,7 +87,10 @@ bool PopupMenu::stylusUp(const Stylus * stylus)
   {
     return false;
   }
-  FOR_EACH_CHILD(stylusUp);
+  if (FOR_EACH_CHILD(stylusUp)) {
+    m_dirty = true;
+    return true;
+  }
   return false;
 }
 
@@ -97,7 +100,10 @@ bool PopupMenu::stylusDownFirst(const Stylus * stylus)
   {
     return false;
   }
-  FOR_EACH_CHILD(stylusDownFirst);
+  if (FOR_EACH_CHILD(stylusDownFirst)) {
+    m_dirty = true;
+    return true;
+  }
   // nothing hit? hide me then
   setVisible(false);
   return false;

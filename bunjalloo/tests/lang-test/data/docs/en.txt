@@ -1,0 +1,3 @@
+Go=going
+long="this is a long"
+text="some other exciting text"

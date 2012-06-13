@@ -19,10 +19,6 @@
 
 #include "TextContainer.h"
 #include "ButtonI.h"
-#include "UnicodeString.h"
-
-class TextArea;
-class ButtonListener;
 
 /** A press-style button with a textual label. */
 class Button: public TextContainer, public ButtonI
@@ -33,7 +29,7 @@ class Button: public TextContainer, public ButtonI
     /** Creates a new Button with the given label.
      * @param label the text label that is to be shown.
      */
-    Button(const UnicodeString & label);
+    Button(const std::string &label);
 
     /** Set whether to paint decoration - the shadow and highlight, plus
      * pressed/depressed colours - or not.
@@ -50,5 +46,6 @@ class Button: public TextContainer, public ButtonI
 
   private:
     bool m_decoration;
+    DISALLOW_COPY_AND_ASSIGN(Button);
 };
 #endif

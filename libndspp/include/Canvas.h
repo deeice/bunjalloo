@@ -18,6 +18,7 @@
 #define Canvas_h_seen
 
 #include "Rectangle.h"
+#include "util/classhelper.h"
 
 namespace nds   // tolua_export
 {               // tolua_export
@@ -35,6 +36,20 @@ namespace nds   // tolua_export
        * @param color the 15 bit RGB color.
        */
       void drawPixel(int x, int y, int color);
+
+      void unsafeDrawPixel(int x, int y, int color);
+
+      /** 
+       *  Copy a block of vram at x1, y1 to the new area at x2, y2
+       * @param x1 the absolute start coordinate in pixels
+       * @param y1 the absolute start coordinate in pixels
+       * @param w the width of the area to copy in pixels
+       * @param h the height of the area to copy in pixels
+       * @param x2 the absolute target coordinate in pixels
+       * @param y2 the absolute target coordinate in pixels
+       */
+      void copyBlock(int x1, int y1, int w, int h,
+                     int x2, int y2);
 
       /** Fill a rectangle at the given position with the given dimensions.
        * @param x the x position.
@@ -97,13 +112,11 @@ namespace nds   // tolua_export
       ~Canvas();
 
       unsigned short * vram();
-
-      Canvas(const Canvas &);
-      const Canvas operator=(const Canvas &);
       unsigned short * vram(int y);
+      unsigned short * frontVram(int y);
       void init();
 
-
+      DISALLOW_COPY_AND_ASSIGN(Canvas);
   }; //tolua_export
 } //tolua_export
 #endif

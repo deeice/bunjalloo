@@ -22,12 +22,11 @@
 #include "Graphics.h"
 #include "Interrupt.h"
 #include "Splash.h"
+#include "System.h"
 #include "Text16.h"
 
 int main(void) {
-  irqInit();
   irqSet(IRQ_VBLANK, Interrupt::processVblank);
-  
   Graphics::initialiseScreen();
   // debug...
   /*

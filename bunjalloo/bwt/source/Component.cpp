@@ -15,6 +15,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <algorithm>
+#include <functional>
 #include "Component.h"
 #include "Stylus.h"
 #include "Delete.h"
@@ -27,12 +28,7 @@ Component::Component() :
   m_preferredHeight(NO_PREFERRED_SIZE),
   m_visible(true),
   m_dirty(true)
-{
-  m_bounds.x = 0;
-  m_bounds.y = 0;
-  m_bounds.w = 0;
-  m_bounds.h = 0;
-}
+{ }
 
 Component::~Component()
 {
@@ -69,7 +65,7 @@ nds::Rectangle Component::bounds() const
 
 nds::Rectangle Component::preferredSize() const
 {
-  nds::Rectangle r = {0, 0, m_preferredWidth, m_preferredHeight};
+  nds::Rectangle r(0, 0, m_preferredWidth, m_preferredHeight);
   if (m_preferredWidth == NO_PREFERRED_SIZE)
   {
     r.w = m_bounds.w;
@@ -81,7 +77,7 @@ nds::Rectangle Component::preferredSize() const
   return r;
 }
 
-void Component::setLocation(unsigned int x, unsigned int y)
+void Component::setLocation(int x, int y)
 {
   m_bounds.x = x;
   m_bounds.y = y;
@@ -112,4 +108,14 @@ void Component::setVisible(bool visible)
   if (visible != m_visible)
     m_dirty = true;
   m_visible = visible;
+}
+
+static bool is(bool v) { return v; }
+
+bool Component::callStylusFunction(bool (StylusListener::*fun)(const Stylus*), const Stylus *stylus)
+{
+  std::vector<bool> results(m_children.size());
+  transform(m_children.begin(), m_children.end(), results.begin(),
+      std::bind2nd(std::mem_fun(fun), stylus));
+  return results.end() != find_if(results.begin(), results.end(), is);
 }

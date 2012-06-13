@@ -15,12 +15,9 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "Stylus.h"
-#include "StylusTest.h"
+#include <gtest/gtest.h>
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( StylusTest );
-
-void StylusTest::testClick()
+TEST(StylusTest, Click)
 {
   Stylus stylus;
   // unclick...
@@ -28,18 +25,18 @@ void StylusTest::testClick()
 
   // press once
   stylus.update(Stylus::DOWN, false, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
-  CPPUNIT_ASSERT(stylus.down());
-  CPPUNIT_ASSERT(not stylus.isRepeat());
+  EXPECT_EQ(Stylus::DOWN, stylus.touchType());
+  EXPECT_TRUE(stylus.down());
+  EXPECT_TRUE(not stylus.isRepeat());
 
   // release
   stylus.update(Stylus::UP, false, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::UP, stylus.touchType());
-  CPPUNIT_ASSERT(stylus.up());
-  CPPUNIT_ASSERT(not stylus.isRepeat());
+  EXPECT_EQ(Stylus::UP, stylus.touchType());
+  EXPECT_TRUE(stylus.up());
+  EXPECT_TRUE(not stylus.isRepeat());
 }
 
-void StylusTest::testHold()
+TEST(StylusTest, Hold)
 {
   Stylus stylus;
   // unclick...
@@ -47,21 +44,21 @@ void StylusTest::testHold()
 
   // press...
   stylus.update(Stylus::DOWN, false, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
+  EXPECT_EQ(Stylus::DOWN, stylus.touchType());
 
   stylus.update(Stylus::DOWN, true, 1, 1);
   // hold..
-  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
-  CPPUNIT_ASSERT(stylus.down());
-  CPPUNIT_ASSERT(stylus.isRepeat());
+  EXPECT_EQ(Stylus::DOWN, stylus.touchType());
+  EXPECT_TRUE(stylus.down());
+  EXPECT_TRUE(stylus.isRepeat());
 
   // release
   stylus.update(Stylus::UP, true, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::UP, stylus.touchType());
-  CPPUNIT_ASSERT(not stylus.isRepeat());
+  EXPECT_EQ(Stylus::UP, stylus.touchType());
+  EXPECT_TRUE(not stylus.isRepeat());
 }
 
-void StylusTest::testHoldAndMove()
+TEST(StylusTest, HoldAndMove)
 {
   Stylus stylus;
   // unclick...
@@ -69,11 +66,11 @@ void StylusTest::testHoldAndMove()
 
   // press...
   stylus.update(Stylus::DOWN, false, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
+  EXPECT_EQ(Stylus::DOWN, stylus.touchType());
   int x, y;
   stylus.startPoint(x, y);
-  CPPUNIT_ASSERT_EQUAL(1, x);
-  CPPUNIT_ASSERT_EQUAL(1, y);
+  EXPECT_EQ(1, x);
+  EXPECT_EQ(1, y);
 
   // hold..
   for (int i = 0; i < 200; ++i)
@@ -82,21 +79,21 @@ void StylusTest::testHoldAndMove()
   }
   stylus.update(Stylus::DOWN, true, 99, 27);
   stylus.startPoint(x, y);
-  CPPUNIT_ASSERT_EQUAL(1, x);
-  CPPUNIT_ASSERT_EQUAL(1, y);
+  EXPECT_EQ(1, x);
+  EXPECT_EQ(1, y);
 
   stylus.lastPoint(x, y);
-  CPPUNIT_ASSERT_EQUAL(99, x);
-  CPPUNIT_ASSERT_EQUAL(99, stylus.lastX());
-  CPPUNIT_ASSERT_EQUAL(27, y);
-  CPPUNIT_ASSERT_EQUAL(27, stylus.lastY());
-  CPPUNIT_ASSERT_EQUAL(Stylus::DOWN, stylus.touchType());
-  CPPUNIT_ASSERT(stylus.isRepeat());
+  EXPECT_EQ(99, x);
+  EXPECT_EQ(99, stylus.lastX());
+  EXPECT_EQ(27, y);
+  EXPECT_EQ(27, stylus.lastY());
+  EXPECT_EQ(Stylus::DOWN, stylus.touchType());
+  EXPECT_TRUE(stylus.isRepeat());
 
   // release
   stylus.update(Stylus::UP, false, 1, 1);
-  CPPUNIT_ASSERT_EQUAL(Stylus::UP, stylus.touchType());
+  EXPECT_EQ(Stylus::UP, stylus.touchType());
   stylus.lastPoint(x, y);
-  CPPUNIT_ASSERT_EQUAL(99, x);
-  CPPUNIT_ASSERT_EQUAL(27, y);
+  EXPECT_EQ(99, x);
+  EXPECT_EQ(27, y);
 }

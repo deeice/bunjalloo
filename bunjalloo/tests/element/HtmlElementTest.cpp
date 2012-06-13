@@ -14,7 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "HtmlElementTest.h"
+#include <gtest/gtest.h>
 #include "HtmlElement.h"
 #include "HtmlTextAreaElement.h"
 #include "HtmlMetaElement.h"
@@ -25,145 +25,148 @@
 
 using namespace std;
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( HtmlElementTest );
-
-void HtmlElementTest::tearDown()
+class HtmlElementTest : public testing::Test
 {
-  delete m_element;
-  delete m_clone;
-}
-void HtmlElementTest::setUp()
-{
-  m_element = 0;
-  m_clone = 0;
-}
+  protected:
+    HtmlElement * m_element;
+    HtmlElement * m_clone;
 
-void HtmlElementTest::test0()
+    void TearDown() {
+      delete m_element;
+      delete m_clone;
+    }
+
+    void SetUp() {
+      m_element = 0;
+      m_clone = 0;
+    }
+};
+
+TEST_F(HtmlElementTest, 0)
 {
   m_element = ElementFactory::create("html");
-  CPPUNIT_ASSERT( m_element != 0);
+  EXPECT_TRUE( m_element != 0);
 }
 
-void HtmlElementTest::testAttributes()
+TEST_F(HtmlElementTest, Attributes)
 {
   m_element = ElementFactory::create("html");
 
   string expected("en");
-  m_element->setAttribute("lang", string2unicode(expected));
-  string result = unicode2string(m_element->attribute("lang"));
-  CPPUNIT_ASSERT_EQUAL( expected, result);
+  m_element->setAttribute("lang", expected);
+  string result = m_element->attribute("lang");
+  EXPECT_EQ( expected, result);
 
   expected = "newId";
-  m_element->setAttribute("id", string2unicode(expected));
-  result = unicode2string(m_element->attribute("id"));
-  CPPUNIT_ASSERT_EQUAL( expected, result);
+  m_element->setAttribute("id", expected);
+  result = m_element->attribute("id");
+  EXPECT_EQ( expected, result);
 
   expected = "Test title";
-  m_element->setAttribute("title", string2unicode(expected));
-  result = unicode2string(m_element->attribute("title"));
-  CPPUNIT_ASSERT_EQUAL( expected, result);
+  m_element->setAttribute("title", expected);
+  result = m_element->attribute("title");
+  EXPECT_EQ( expected, result);
 
   expected = "fichero";
-  m_element->setAttribute("dir", string2unicode(expected));
-  result = unicode2string(m_element->attribute("dir"));
-  CPPUNIT_ASSERT_EQUAL( expected, result);
+  m_element->setAttribute("dir", expected);
+  result = m_element->attribute("dir");
+  EXPECT_EQ( expected, result);
 
   // try setting some unsupported attribute
-  m_element->setAttribute("test", string2unicode(expected));
-  result = unicode2string(m_element->attribute("test"));
+  m_element->setAttribute("test", expected);
+  result = m_element->attribute("test");
   expected = "";
-  CPPUNIT_ASSERT_EQUAL( expected, result);
+  EXPECT_EQ( expected, result);
 
 
 }
 
-void HtmlElementTest::testAppend()
+TEST_F(HtmlElementTest, Append)
 {
   m_element = ElementFactory::create("html");
   HtmlElement * head = ElementFactory::create("head");
   m_element->append(head);
-  CPPUNIT_ASSERT( m_element->hasChildren());
+  EXPECT_TRUE( m_element->hasChildren());
 }
 
-void HtmlElementTest::testIsa()
+TEST_F(HtmlElementTest, Isa)
 {
   m_element = ElementFactory::create("html");
-  CPPUNIT_ASSERT( m_element->isa("html"));
+  EXPECT_TRUE( m_element->isa("html"));
   delete m_element;
   m_element = ElementFactory::create("head");
-  CPPUNIT_ASSERT( m_element->isa("head"));
+  EXPECT_TRUE( m_element->isa("head"));
 }
 
 
-void HtmlElementTest::testAnchor()
+TEST_F(HtmlElementTest, Anchor)
 {
   m_element = ElementFactory::create("a");
-  CPPUNIT_ASSERT( m_element->isa("a"));
+  EXPECT_TRUE( m_element->isa("a"));
   HtmlAnchorElement * a = dynamic_cast<HtmlAnchorElement*>(m_element);
-  CPPUNIT_ASSERT( a != 0 );
+  EXPECT_TRUE( a != 0 );
 }
 
 
-void HtmlElementTest::testClone()
+TEST_F(HtmlElementTest, Clone)
 {
   m_element = ElementFactory::create("a");
-  m_element->setAttribute("href", string2unicode("http://localhost"));
-  m_element->setAttribute("id", string2unicode("myElement"));
+  m_element->setAttribute("href", "http://localhost");
+  m_element->setAttribute("id", "myElement");
   m_clone = m_element->clone();
-  CPPUNIT_ASSERT( m_clone != 0);
-  CPPUNIT_ASSERT( m_clone->isa("a"));
-  CPPUNIT_ASSERT_EQUAL(unicode2string(m_element->attribute("href")), 
-      unicode2string(m_clone->attribute("href")));
-  CPPUNIT_ASSERT_EQUAL(unicode2string(m_element->attribute("id")), 
-      unicode2string(m_clone->attribute("id")));
+  EXPECT_TRUE( m_clone != 0);
+  EXPECT_TRUE( m_clone->isa("a"));
+  EXPECT_EQ(m_element->attribute("href"),
+      m_clone->attribute("href"));
+  EXPECT_EQ(m_element->attribute("id"),
+      m_clone->attribute("id"));
 }
 
 
-void HtmlElementTest::testParent()
+TEST_F(HtmlElementTest, Parent)
 {
   // add a node, check its parent is the right one
   m_element = ElementFactory::create("html");
   HtmlElement * child = ElementFactory::create("head");
   m_element->append(child);
 
-  CPPUNIT_ASSERT( child->parent() == m_element);
+  EXPECT_TRUE( child->parent() == m_element);
 }
 
-void HtmlElementTest::testAppendText()
+TEST_F(HtmlElementTest, AppendText)
 {
   // parentNode -> add text, add node, add text 
   // check the text nodes are correct
   m_element = ElementFactory::create("body");
   m_element->appendText('T');
-  CPPUNIT_ASSERT(m_element->hasChildren());
+  EXPECT_TRUE(m_element->hasChildren());
   HtmlElement * text = m_element->firstChild();
   string expected("#TEXT");
-  CPPUNIT_ASSERT_EQUAL(expected, text->tagName());
+  EXPECT_EQ(expected, text->tagName());
   HtmlElement * a = ElementFactory::create("a");
   a->appendText('L');
   m_element->append(a);
-  CPPUNIT_ASSERT_EQUAL(a, m_element->lastChild());
-  CPPUNIT_ASSERT(a->hasChildren());
+  EXPECT_EQ(a, m_element->lastChild());
+  EXPECT_TRUE(a->hasChildren());
   m_element->appendText('2');
-  CPPUNIT_ASSERT_EQUAL(expected, m_element->lastChild()->tagName());
+  EXPECT_EQ(expected, m_element->lastChild()->tagName());
 
 }
 
-void HtmlElementTest::testMeta()
+TEST_F(HtmlElementTest, Meta)
 {
   // create a meta node, then check the type
   m_element = ElementFactory::create("meta");
-  CPPUNIT_ASSERT( m_element->isa("meta"));
+  EXPECT_TRUE( m_element->isa("meta"));
   HtmlMetaElement * meta = dynamic_cast<HtmlMetaElement*>(m_element);
-  CPPUNIT_ASSERT( meta != 0 );
+  EXPECT_TRUE( meta != 0 );
 
   string expected("content-type");
-  m_element->setAttribute("http-equiv", string2unicode("content-type"));
-  CPPUNIT_ASSERT_EQUAL(expected, unicode2string(m_element->attribute("http-equiv")));
+  m_element->setAttribute("http-equiv", "content-type");
+  EXPECT_EQ(expected, m_element->attribute("http-equiv"));
 }
 
-void HtmlElementTest::testRemove()
+TEST_F(HtmlElementTest, Remove)
 {
   // create a node, add another, check removal
   m_element = ElementFactory::create("body");
@@ -173,36 +176,36 @@ void HtmlElementTest::testRemove()
   m_element->append(a);
   m_element->append(b);
   size_t expected(3);
-  CPPUNIT_ASSERT_EQUAL(expected, m_element->children().size());
+  EXPECT_EQ(expected, m_element->children().size());
 
   m_element->remove(a);
   expected = 2;
-  CPPUNIT_ASSERT_EQUAL(expected, m_element->children().size());
+  EXPECT_EQ(expected, m_element->children().size());
 
   string expectedText("#TEXT");
-  CPPUNIT_ASSERT_EQUAL(expectedText, m_element->firstChild()->tagName());
+  EXPECT_EQ(expectedText, m_element->firstChild()->tagName());
   expectedText = "b";
-  CPPUNIT_ASSERT_EQUAL(expectedText, m_element->lastChild()->tagName());
+  EXPECT_EQ(expectedText, m_element->lastChild()->tagName());
   delete a;
 }
 
-void HtmlElementTest::testImg()
+TEST_F(HtmlElementTest, Img)
 {
   // create a node, add another, check removal
   m_element = ElementFactory::create("img");
-  m_element->setAttribute("src", string2unicode("image-src"));
+  m_element->setAttribute("src", "image-src");
   string expected("image-src");
-  CPPUNIT_ASSERT_EQUAL(expected, unicode2string(m_element->attribute("src")));
+  EXPECT_EQ(expected, m_element->attribute("src"));
 
   expected = "alternate text";
-  m_element->setAttribute("alt", string2unicode(expected));
-  CPPUNIT_ASSERT_EQUAL(expected, unicode2string(m_element->attribute("alt")));
+  m_element->setAttribute("alt", expected);
+  EXPECT_EQ(expected, m_element->attribute("alt"));
   expected = "minombre";
-  m_element->setAttribute("name", string2unicode(expected));
-  CPPUNIT_ASSERT_EQUAL(expected, unicode2string( m_element->attribute("name")));
+  m_element->setAttribute("name", expected);
+  EXPECT_EQ(expected, m_element->attribute("name"));
 }
 
-void HtmlElementTest::testPreviousSibling()
+TEST_F(HtmlElementTest, PreviousSibling)
 {
   m_element = ElementFactory::create("ul");
   HtmlElement * li = ElementFactory::create("li");
@@ -210,11 +213,11 @@ void HtmlElementTest::testPreviousSibling()
   m_element->append(text);
   m_element->append(li);
   const HtmlElement * ps = m_element->previousSibling(li);
-  CPPUNIT_ASSERT(0 != ps);
-  CPPUNIT_ASSERT(text == ps);
+  EXPECT_TRUE(0 != ps);
+  EXPECT_TRUE(text == ps);
 }
 
-void HtmlElementTest::testNextSibling()
+TEST_F(HtmlElementTest, NextSibling)
 {
   m_element = ElementFactory::create("ul");
   HtmlElement * li = ElementFactory::create("li");
@@ -222,29 +225,29 @@ void HtmlElementTest::testNextSibling()
   m_element->append(text);
   m_element->append(li);
   const HtmlElement * ps = m_element->nextSibling(text);
-  CPPUNIT_ASSERT(0 != ps);
-  CPPUNIT_ASSERT(li == ps);
+  EXPECT_TRUE(0 != ps);
+  EXPECT_TRUE(li == ps);
 }
 
-void HtmlElementTest::testOptionElement()
+TEST_F(HtmlElementTest, OptionElement)
 {
   m_element = ElementFactory::create("option");
-  m_element->setAttribute("value",string2unicode("a"));
-  m_element->setAttribute("label",string2unicode("b"));
+  m_element->setAttribute("value", "a");
+  m_element->setAttribute("label", "b");
   HtmlOptionElement * opt = dynamic_cast<HtmlOptionElement*>(m_element);
-  CPPUNIT_ASSERT(opt != 0);
-  CPPUNIT_ASSERT(not opt->selected());
-  m_element->setAttribute("selected",string2unicode("yes"));
-  CPPUNIT_ASSERT(opt->selected());
+  EXPECT_TRUE(opt != 0);
+  EXPECT_TRUE(not opt->selected());
+  m_element->setAttribute("selected", "yes");
+  EXPECT_TRUE(opt->selected());
   
   string expected("a"); 
-  CPPUNIT_ASSERT_EQUAL( expected , unicode2string(m_element->attribute("value")));
+  EXPECT_EQ( expected , m_element->attribute("value"));
   expected = "b"; 
-  CPPUNIT_ASSERT_EQUAL( expected , unicode2string(m_element->attribute("label")));
+  EXPECT_EQ( expected , m_element->attribute("label"));
 }
 
 
-void HtmlElementTest::testElementsByTagName()
+TEST_F(HtmlElementTest, ElementsByTagName)
 {
   m_element = ElementFactory::create("form");
   HtmlElement * select = ElementFactory::create("select");
@@ -257,37 +260,37 @@ void HtmlElementTest::testElementsByTagName()
   select->append(option2);
 
   size_t expected(1);
-  CPPUNIT_ASSERT_EQUAL( expected , m_element->elementsByTagName("select").size());
+  EXPECT_EQ( expected , m_element->elementsByTagName("select").size());
   expected = 2;
-  CPPUNIT_ASSERT_EQUAL( expected , select->elementsByTagName("option").size());
+  EXPECT_EQ( expected , select->elementsByTagName("option").size());
 
 
 }
 
-void HtmlElementTest::testTextAreaElement()
+TEST_F(HtmlElementTest, TextAreaElement)
 {
   m_element = ElementFactory::create("textarea");
   HtmlTextAreaElement * element = (HtmlTextAreaElement*)m_element;
-  m_element->setAttribute("rows", string2unicode("10"));
-  m_element->setAttribute("cols", string2unicode("80"));
+  m_element->setAttribute("rows", "10");
+  m_element->setAttribute("cols", "80");
   int expected = 10;
   int result = element->rows();
-  CPPUNIT_ASSERT_EQUAL( expected, result);
+  EXPECT_EQ( expected, result);
   expected = 80;
   result = element->cols();
-  CPPUNIT_ASSERT_EQUAL( expected, result);
+  EXPECT_EQ( expected, result);
 }
 
-void HtmlElementTest::testInputElement()
+TEST_F(HtmlElementTest, InputElement)
 {
   m_element = ElementFactory::create("input");
   HtmlInputElement * element = (HtmlInputElement*)m_element;
-  CPPUNIT_ASSERT(not element->hasAltText());
+  EXPECT_TRUE(not element->hasAltText());
 
-  UnicodeString altText = string2unicode("alt text");
-  UnicodeString srcText = string2unicode("image.png");
+  std::string altText = "alt text";
+  std::string srcText = "image.png";
   m_element->setAttribute("src", srcText);
   m_element->setAttribute("alt", altText);
-  CPPUNIT_ASSERT_ASSERTION_PASS(altText == m_element->attribute("alt"));
-  CPPUNIT_ASSERT_ASSERTION_PASS(srcText ==  m_element->attribute("src"));
+  EXPECT_TRUE(altText == m_element->attribute("alt"));
+  EXPECT_TRUE(srcText ==  m_element->attribute("src"));
 }

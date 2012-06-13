@@ -36,8 +36,8 @@ class SpellData:
       self.map[row0[i]] = value
     # set up the gfx and map data if this spell has a palette defined
     if self.map['palette'] != None:
-      self.map['gfx'] = self.nameToData('raw')
-      self.map['map'] = self.nameToData('map')
+      self.map['gfx'] = self.nameToData('Tiles')
+      self.map['map'] = self.nameToData('Map')
     if self.map['castRange'] != 0:
       self.map['castRange'] = (2*self.map['castRange']) + 1
 
@@ -49,11 +49,11 @@ class SpellData:
     name = self.map['spellName']
     # convert spaces to _, lowercase and add _binary_<name>_map_start
     name = name.replace(' ','_').lower()
-    return '_binary_'+name+'_'+dataType+'_start'
+    return name+dataType
 
   def nameToEnum(self):
     name = self.map['spellName']
-    # convert spaces to _, lowercase and add _binary_<name>_map_start
+    # convert spaces to _, lowercase and add SPELL_
     name = name.replace(' ','_').upper()
     return 'SPELL_'+name
 
@@ -118,9 +118,9 @@ def writeHeader(headerFile, row0, types, spells):
 
 def writeBody(bodyFile, spells):
   bodyFile.write('#include "libnds.h"\n')
-  bodyFile.write('#include "SpellData.h"\n')
   bodyFile.write('#include "images.h"\n')
   bodyFile.write('#include "magic.h"\n')
+  bodyFile.write('#include "SpellData.h"\n')
   bodyFile.write('const SpellData s_spellData[] = {\n')
   for i in spells:
     bodyFile.write('  '+str(i)+'\n')

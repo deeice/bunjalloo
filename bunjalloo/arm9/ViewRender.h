@@ -17,26 +17,34 @@
 #ifndef ViewRender_h_seen
 #define ViewRender_h_seen
 
-class View;
-class RichTextArea;
-class HtmlElement;
+class BoxLayout;
 class FormRadio;
+class HtmlElement;
+class RichTextArea;
 class Updater;
+class View;
 class ZipViewer;
 #include <map>
-#include "UnicodeString.h"
 #include "Visitor.h"
 #include "HtmlElementFwd.h"
 
-class ViewRender: public Visitor
+class ViewRender: public Visitor, public ViewI
 {
   public:
     ViewRender(View * self);
     void render();
     void clear();
     void setUpdater(Updater * updater);
+    void add(Component *component);
+    void done(bool resetScroll);
     RichTextArea * textArea();
-    void doTitle(const UnicodeString & str);
+    void doTitle(const std::string & str);
+
+    void textAreas(std::list<RichTextArea*>& textAreas);
+    void insertNewline();
+
+    // implement the ViewI interface.
+    virtual void notify();
 
     // implement the Visitor interface.
     virtual bool visit(HtmlAnchorElement & element);
@@ -86,21 +94,32 @@ class ViewRender: public Visitor
     View * m_self;
     // keep track of the last RichTextArea component added to the ScrollPane
     RichTextArea * m_textArea;
+    std::list<RichTextArea*> m_richTextAreas;
     ZipViewer * m_zipViewer;
     Updater * m_updater;
+    BoxLayout *m_box;
+    bool m_hrefViewed;
+    std::string m_hrefForLink;
+    bool m_pendingNewline;
 
     const HtmlElement * m_lastElement;
-    typedef std::map<UnicodeString, FormRadio*> FormGroupMap;
+    typedef std::map<std::string, FormRadio*> FormGroupMap;
     FormGroupMap m_radioGroup;
 
     void setBgColor(const HtmlElement * body);
     void renderSelect(const HtmlElement * body);
-    void doImage(const UnicodeString & unicode,
-        const UnicodeString & src);
+    void doImage(const std::string & unicode,
+        const std::string & src);
     void doTitle(const HtmlElement * title);
     void renderInput(const HtmlElement * inputElement);
     void renderTextArea(const HtmlElement * inputElement);
     void clearRadioGroups();
 
+    bool hasImage();
+    void renderImage();
+    void pushTextArea();
+
+    template<typename T, typename A>
+      void addLink(T *component, A &a);
 };
 #endif

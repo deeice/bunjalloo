@@ -4,7 +4,8 @@ http://code.google.com/p/quirkysoft
 
 ==Installation==
 
-Unzip the zip file to the root of your flash card.
+Unzip the zip file to the root of your flash card. Make sure the directory
+/data/bunjalloo/fonts exists, with all the contents from the zip.
 
 Patch bunjalloo.nds for your flash card using the DLDI tool from
 http://chishm.drunkencoders.com/DLDI/
@@ -18,7 +19,7 @@ L - Move backwards in the history
 Select - Change the position of the icons
 Touch - Follow link, enter data in forms, press keys, use icons
 
-==Availability==  
+==Availability==
 Bunjalloo is freely available under the GNU General Public License. See
 COPYRIGHT and http://code.google.com/p/quirkysoft/ for further details.
 

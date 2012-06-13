@@ -15,10 +15,15 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include <assert.h>
+#include <algorithm>
+#include <cstdio>
 #include "ElementFactory.h"
 #include "HtmlElement.h"
 #include "HtmlConstants.h"
 #include "HtmlDocument.h"
+#include "string_utils.h"
+#include "ISO_8859_1.h"
+#include "utf8.h"
 
 using namespace std;
 
@@ -34,6 +39,7 @@ void HtmlDocument::walkNode(const HtmlElement * node)
   if (node->hasChildren())
   {
     cout << "+ " << node->tagName() << (node->isBlock()?" (Block)":"") << endl;
+
     m_depth++;
     const ElementList & theChildren = node->children();
     ElementList::const_iterator it(theChildren.begin());
@@ -45,7 +51,12 @@ void HtmlDocument::walkNode(const HtmlElement * node)
   }
   else
   {
-    cout << node->tagName() << endl;;
+    cout << node->tagName();
+    if (node->isa(HtmlConstants::TEXT)) {
+      cout << " " << node->text().substr(0, std::min(size_t(30), node->text().size())) << endl;
+    } else {
+      cout << endl;
+    }
   }
 }
 
@@ -677,6 +688,12 @@ void HtmlDocument::eofInBody()
   }
 }
 
+void HtmlDocument::appendTextToCurrentNode(unsigned int ucodeChar)
+{
+  m_dataGot++;
+  currentNode()->appendText(ucodeChar);
+}
+
 void HtmlDocument::inBody(unsigned int ucodeChar)
 {
   if ((int)ucodeChar == EOF)
@@ -686,8 +703,7 @@ void HtmlDocument::inBody(unsigned int ucodeChar)
   else
   {
     reconstructActiveFormatters();
-    m_dataGot++;
-    currentNode()->appendText(ucodeChar);
+    appendTextToCurrentNode(ucodeChar);
   }
 }
 
@@ -987,8 +1003,7 @@ void HtmlDocument::mainPhase(unsigned int ucodeChar)
           eofInBody();
         }
         else {
-          m_dataGot++;
-          currentNode()->appendText(ucodeChar);
+          appendTextToCurrentNode(ucodeChar);
         }
       }
       break;
@@ -1015,7 +1030,6 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
       // if an end tag appears first, then append a html tag and redo this tag,
       m_state = MAIN;
       m_insertionMode = BEFORE_HEAD;
-      assert(m_openElements.size() == 0);
       m_openElements.push_back(ElementFactory::create(HtmlConstants::HTML_TAG));
       m_isFirst = true;
       /* FALL THROUGH */
@@ -1043,18 +1057,30 @@ void HtmlDocument::handleData(unsigned int ucodeChar)
       }
       else
       {
-        m_dataGot++;
-        currentNode()->appendText(ucodeChar);
+        appendTextToCurrentNode(ucodeChar);
       }
       break;
 
   }
-  // m_data += ucodeChar;
 }
 
 void HtmlDocument::handleBinaryData(const void * data, unsigned int length)
 {
   m_dataGot += length;
+  if (m_mimeType == TEXT_PLAIN)
+  {
+    if (encoding() == HtmlParser::UTF8_ENCODING) {
+      m_data += static_cast<const char*>(data);
+    }
+    else {
+      const char *start(static_cast<const char*>(data));
+      const char *end(start + length);
+      for (; start != end; ++start) {
+        unsigned short value = ISO_8859_1::decode((*start)&0xff);
+        utf8::unchecked::append(value, back_inserter(m_data));
+      }
+    }
+  }
 }
 
 const HtmlElement * HtmlDocument::rootNode() const
@@ -1181,7 +1207,7 @@ bool HtmlDocument::isPhrasing(HtmlElement * node)
 
 void HtmlDocument::reconstructActiveFormatters()
 {
-  if (m_activeFormatters.size() == 0)
+  if (m_activeFormatters.empty())
   {
     return;
   }

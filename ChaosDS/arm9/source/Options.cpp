@@ -62,10 +62,10 @@ OptionScreen::OptionScreen()
     if (buffer[0] != 0)
     {
       // bounding boxes for increase and decrease arrows
-      Rectangle decr = {x*8,ypos*8,8,16};
-      Rectangle incr = {(x+8)*8,ypos*8,8,16};
+      Rectangle decr(x*8,ypos*8,8,16);
+      Rectangle incr((x+8)*8,ypos*8,8,16);
       // bounding box for activate
-      Rectangle actv = {(x+1)*8,ypos*8,64,16};
+      Rectangle actv((x+1)*8,ypos*8,64,16);
       // register the callbacks
       m_hotspots.push_back(new HotSpot(incr, incrOptionCb, this));
       m_hotspots.push_back(new HotSpot(decr, decrOptionCb, this));
@@ -74,7 +74,7 @@ OptionScreen::OptionScreen()
     else
     {
       // bounding box for activate
-      Rectangle actv = {(x-OPTION_VALUE_X)*8,ypos*8,strlen(option[j].m_name)*8,16};
+      Rectangle actv((x-OPTION_VALUE_X)*8,ypos*8,strlen(option[j].m_name)*8,16);
       m_hotspots.push_back(new HotSpot(actv, activateOptionCb, this));
     }
   }

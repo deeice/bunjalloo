@@ -14,14 +14,14 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "UnicodeString.h"
+#include <cstdlib>
 #include "HtmlBodyElement.h"
 #include "Visitor.h"
 IMPLEMENT_ACCEPT(HtmlBodyElement);
 
-const UnicodeString * HtmlBodyElement::attributePtr(const std::string & name) const
+const std::string * HtmlBodyElement::attributePtr(const std::string & name) const
 {
-  const UnicodeString * p = HtmlElement::attributePtr(name);
+  const std::string * p = HtmlElement::attributePtr(name);
   if (p) {
     return p;
   }
@@ -75,7 +75,7 @@ const static ColorMap s_colorMap[] = {
 unsigned int HtmlBodyElement::bgColor() const
 {
   // see if it is a #XXX or #FF0000 type colour
-  std::string bgcol = unicode2string(m_bgcolor);
+  std::string bgcol = m_bgcolor;
   if (bgcol[0] == '#')
   {
     // get next 6 letters

@@ -19,6 +19,7 @@
 #include <string>
 #include <list>
 #include "Rectangle.h"
+#include "util/classhelper.h"
 
 /** Encapsulates links and colored text on a text page.*/
 class Link
@@ -87,6 +88,7 @@ class Link
     bool m_clicked;
     std::string m_anchor;
     std::string m_src;
+    DISALLOW_COPY_AND_ASSIGN(Link);
 };
 
 void Link::setTextStart(unsigned int startPosition)

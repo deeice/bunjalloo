@@ -14,23 +14,30 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <time.h>
+#include <stdio.h>
 #include "Cache.h"
+#include "CacheControl.h"
+#include "HeaderParser.h"
 #include "Document.h"
 #include "URI.h"
 #include "File.h"
+#include "config_defs.h"
 
 const char * Cache::CACHE_DIR("/"DATADIR"/cache");
 
-Cache::Cache(Document & document, bool useCache, bool clearCache)
+Cache::Cache(Document & document, bool useCache)
 : m_document(document), m_useCache(useCache)
 {
   m_fileIds.clear();
+  setUseCache(useCache);
+}
+
+void Cache::setUseCache(bool useCache)
+{
+  m_useCache = useCache;
   if (m_useCache)
   {
-    if (clearCache and nds::File::exists(CACHE_DIR) != nds::File::F_NONE)
-    {
-      nds::File::rmrf(CACHE_DIR);
-    }
     if (nds::File::exists(CACHE_DIR) == nds::File::F_NONE and not nds::File::mkdir(CACHE_DIR) )
     {
       // didn't exist, nor can we make it..
@@ -39,7 +46,7 @@ Cache::Cache(Document & document, bool useCache, bool clearCache)
   }
 }
 
-std::string uri2CacheFile(const URI & uri)
+static std::string uri2CacheFile(const URI & uri)
 {
   // strip #internal from URI
   std::string crc = uri.navigateTo(uri.fileName()).crc32();
@@ -91,22 +98,21 @@ void Cache::feed(const std::string & filename)
 
 void Cache::add(const URI & uri)
 {
-  m_fileIds[uri.crc32int()] = 1;
+  m_fileIds.insert(uri.crc32int());
   const URI & noint(uri.navigateTo(uri.fileName()));
-  m_fileIds[noint.crc32int()] = 1;
+  m_fileIds.insert(noint.crc32int());
 }
 
 void Cache::remove(const URI & uri)
 {
   if (m_useCache)
   {
-    m_document.setCacheFile("");
     std::string cacheFile(uri2CacheFile(uri));
     if (nds::File::exists(cacheFile.c_str()) == nds::File::F_REG)
     {
       nds::File::unlink(cacheFile.c_str());
     }
-    if (nds::File::exists(cacheFile.c_str()) == nds::File::F_REG)
+    if (nds::File::exists((cacheFile+".hdr").c_str()) == nds::File::F_REG)
     {
       nds::File::unlink((cacheFile+".hdr").c_str());
     }
@@ -120,20 +126,28 @@ bool Cache::load(const URI & uri)
   {
     m_document.setCacheFile("");
     std::string cacheFile(uri2CacheFile(uri));
-    if (contains(uri) and nds::File::exists(uri2CacheFile(uri).c_str()) == nds::File::F_REG)
+    if (contains(uri) and nds::File::exists(cacheFile.c_str()) == nds::File::F_REG)
     {
       add(uri);
-      m_document.reset();
+      if (m_document.historyEnabled())
+        m_document.reset();
       feed(cacheFile+".hdr");
       m_document.appendData("\r\n", 2);
-      feed(cacheFile);
-      return true;
+      // now check the cache control header
+      CacheControl control(m_document.headerParser().cacheControl());
+      time_t then(nds::File::mtime(cacheFile.c_str()));
+      control.setResponseTime(then);
+
+      time_t now(::time(0));
+      if (control.shouldCache(now)) {
+        feed(cacheFile);
+        return true;
+      }
+      if (m_document.historyEnabled())
+        m_document.reset();
     }
-    else
-    {
-      add(uri);
-      m_document.setCacheFile(cacheFile);
-    }
+    add(uri);
+    m_document.setCacheFile(cacheFile);
   }
   return false;
 }

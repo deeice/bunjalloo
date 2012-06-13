@@ -38,13 +38,13 @@ static const int DELETE_LETTER(70);
 EditName::EditName()
 {
   // create one big rectangle for the keyboard and 2 smaller ones for OK and back buttons
-  Rectangle lettersRect = { 2*8, 6*8, 25*8, 16*5};
+  Rectangle lettersRect(2*8, 6*8, 25*8, 16*5);
   m_hotspots.push_back(new HotSpot(lettersRect, letterCb, this));
 
-  Rectangle okRect = { 14*8, 16*8, 32, 16 };
+  Rectangle okRect(14*8, 16*8, 32, 16 );
   m_hotspots.push_back(new HotSpot(okRect, okCb, this));
 
-  Rectangle deleteRect = { 25*8, 16*8, 16, 16};
+  Rectangle deleteRect(25*8, 16*8, 16, 16);
   m_hotspots.push_back(new HotSpot(deleteRect, deleteCb, this));
 
 }

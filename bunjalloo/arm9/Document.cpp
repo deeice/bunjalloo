@@ -14,6 +14,7 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+#include <algorithm>
 #include <assert.h>
 #include "Document.h"
 #include "HtmlDocument.h"
@@ -21,6 +22,7 @@
 #include "HeaderParser.h"
 #include "HtmlElement.h"
 #include "CookieJar.h"
+#include "CacheControl.h"
 #include "URI.h"
 
 using namespace std;
@@ -41,9 +43,9 @@ class DocumentHeaderListener: public HeaderListener
 
 Document::Document():
   m_amount(0),
-  m_cookieJar(new CookieJar),
-  m_htmlDocument(new HtmlDocument),
-  m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar)),
+  m_cookieJar(new CookieJar()),
+  m_htmlDocument(new HtmlDocument()),
+  m_headerParser(new HeaderParser(m_htmlDocument,m_cookieJar, new CacheControl())),
   m_headerListener(new DocumentHeaderListener(*this)),
   m_historyEnabled(true)
 {
@@ -103,7 +105,7 @@ const std::string & Document::uri() const
 }
 
 // const char * Document::asText() const
-const UnicodeString & Document::asText() const
+const std::string & Document::asText() const
 {
   return m_htmlDocument->data();
 }
@@ -126,13 +128,16 @@ const HtmlElement * Document::titleNode() const
   if (m_htmlDocument->mimeType() == HtmlDocument::TEXT_HTML)
   {
     const HtmlElement * root(rootNode());
-    assert(root->isa(HtmlConstants::HTML_TAG));
-    assert(root->hasChildren());
-    // firstChild is <HEAD> node
-    const ElementList titles = root->firstChild()->elementsByTagName(HtmlConstants::TITLE_TAG);
-    if (not titles.empty())
+    if (root->isa(HtmlConstants::HTML_TAG) and root->hasChildren())
     {
-      title = titles.front();
+      // firstChild is <HEAD> node
+      const ElementList titles = root->firstChild()->elementsByTagName(HtmlConstants::TITLE_TAG);
+      if (not titles.empty())
+      {
+        title = titles.front();
+        if (not title->hasChildren())
+          title = 0;
+      }
     }
   }
   return title;
@@ -192,7 +197,12 @@ void Document::appendData(const char * data, int size)
     }
     if (not m_headerParser->redirect().empty())
     {
-      currentHistoryUri() = m_headerParser->redirect();
+      if (m_historyEnabled)
+      {
+        URI tmp(currentHistoryUri());
+        currentHistoryUri() = tmp.navigateTo(m_headerParser->redirect()).asString();
+      }
+      setStatus(REDIRECTED);
     }
   }
   notifyAll();
@@ -200,13 +210,23 @@ void Document::appendData(const char * data, int size)
 
 void Document::notifyAll() const
 {
-  for_each(m_views.begin(), m_views.end(), mem_fun(&ViewI::notify));
+  for (std::vector<ViewI*>::const_reverse_iterator it(m_views.rbegin()); it != m_views.rend(); ++it)
+  {
+    size_t size = m_views.size();
+    ViewI * v(*it);
+    v->notify();
+    // someone has been naughty and registered in an update
+    if (m_views.size() != size)
+    {
+      break;
+    }
+  }
 }
 
 void Document::setStatus(Document::Status status)
 {
   m_status = status;
-  if (m_status == LOADED)
+  if (m_status == LOADED_HTML or m_status == LOADED_ITEM)
   {
     m_htmlDocument->handleEOF();
     //m_htmlDocument->dumpDOM();
@@ -287,6 +307,8 @@ void Document::setCacheFile(const std::string & cacheFile)
 #include <gif_lib.h>
 void Document::magicMimeType(const char * data, int length)
 {
+  if (length > 128)
+    length = 128;
   // this is only for local data - data from http should already have
   // content-type in the headers or in meta or whatever.
   if (length < 3)
@@ -309,7 +331,7 @@ void Document::magicMimeType(const char * data, int length)
     {
       // naive check, but if it isn't a jpeg, then the proper
       // isJpeg call will catch it...
-      m_htmlDocument->parseContentType("image/jpeg");
+      m_htmlDocument->parseContentType(HtmlParser::IMAGE_JPEG_STR);
     }
     else if (strncmp("PK", data, 2) == 0)
     {
@@ -320,16 +342,29 @@ void Document::magicMimeType(const char * data, int length)
     {
       string htmlTest(data);
       transform(htmlTest.begin(), htmlTest.end(), htmlTest.begin(), ::tolower);
-      if (htmlTest.find('<') != string::npos
-          or htmlTest.find("html") != string::npos
-          or htmlTest.find("body") != string::npos
+      size_t gt = htmlTest.find('<');
+      size_t doctype = htmlTest.find("<!doctype");
+      size_t html = htmlTest.find("<html");
+      size_t body = htmlTest.find("<body");
+      if ((html != string::npos and html >= gt and (html < 5 or (doctype < html and doctype < 5)))
+          or
+          (body != string::npos and body < 5)
+          or (gt == 0)
          )
       {
         m_htmlDocument->parseContentType("text/html");
       }
       else
       {
-        m_htmlDocument->parseContentType("application/octet-stream");
+        for (const char * src=data; src != data+length; ++src)
+        {
+          if (not isascii(*src))
+          {
+            m_htmlDocument->parseContentType("application/octet-stream");
+            return;
+          }
+        }
+        m_htmlDocument->parseContentType("text/plain");
       }
     }
   }
@@ -363,11 +398,6 @@ int & Document::currentHistoryPosition()
 const int & Document::currentHistoryPosition() const
 {
   return m_historyPosition->second;
-}
-
-bool Document::shouldCache() const
-{
-  return m_headerParser->shouldCache();
 }
 
 unsigned int Document::dataExpected() const

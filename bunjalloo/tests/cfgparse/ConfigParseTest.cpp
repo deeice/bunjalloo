@@ -14,123 +14,103 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include <cppunit/extensions/HelperMacros.h>
+#include <gtest/gtest.h>
 #include "Config.h"
 #include "ConfigParser.h"
-#include "CookieJar.h"
 
 using namespace std;
 
-class ConfigParseTest : public CPPUNIT_NS::TestFixture
+class ConfigParseTest : public testing::Test
 {
-  CPPUNIT_TEST_SUITE( ConfigParseTest );
-  CPPUNIT_TEST( test0 );
-  CPPUNIT_TEST( test1 );
-  CPPUNIT_TEST( test2 );
-  CPPUNIT_TEST( testCfgParse );
-  CPPUNIT_TEST_SUITE_END();
+  protected:
+    void SetUp();
+    void TearDown();
 
-  public:
-  void test0();
-  void test1();
-  void test2();
-  void testCfgParse();
-  void setUp();
-  void tearDown();
-
-  private:
-  CookieJar * m_cookieJar;
-  Config * m_config;
-  ConfigParser * m_configParser;
-
-
+    Config * m_config;
+    ConfigParser * m_configParser;
 };
 
-// Registers the fixture into the 'registry'
-CPPUNIT_TEST_SUITE_REGISTRATION( ConfigParseTest );
-
-void ConfigParseTest::setUp()
+void ConfigParseTest::SetUp()
 {
-  m_cookieJar = new CookieJar;
-  m_config = new Config(*m_cookieJar);
+  m_config = new Config;
+  m_config->reload();
   m_configParser = new ConfigParser(*m_config);
 }
 
-void ConfigParseTest::tearDown()
+void ConfigParseTest::TearDown()
 {
-  delete m_cookieJar;
   delete m_config;
   delete m_configParser;
 }
 
-void ConfigParseTest::test0()
+TEST_F(ConfigParseTest, 0)
 {
   string expected("Hello");
   string line("%Hello%");
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 
   expected = "";
   line = "%%";
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 
   expected = "This is empty: end";
   line = "This is empty:%% end";
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 
   expected = "This is full";
   line = "This is %full%";
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 
   expected = "This is has a percent% sign";
   line = "This is has a percent% sign";
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 }
 
-void ConfigParseTest::test1()
+TEST_F(ConfigParseTest, 1)
 {
   string expected = "This has two values";
   string line = "This has %two% %values%";
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 }
 
 
-void ConfigParseTest::test2()
+TEST_F(ConfigParseTest, 2)
 {
   string expected("selected=1");
   string line("%language=nl?selected=1%");
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 
   expected = "";
   line = "%%";
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 
 }
 
-void ConfigParseTest::testCfgParse()
+TEST_F(ConfigParseTest, CfgParse)
 {
   // collect config value
   string expected("somewhere");
   string line("%cfg:download%");
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 
   // non-config values are empty
   line = "%cfg:rubbish%";
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT( line.empty() );
+  EXPECT_TRUE( line.empty() );
 
   // empty config string
   expected = "";
   line = "%cfg:%";
   m_configParser->replaceMarkers(line);
-  CPPUNIT_ASSERT_EQUAL( expected , line);
+  EXPECT_EQ( expected , line);
 
 }

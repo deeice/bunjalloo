@@ -37,11 +37,11 @@ static const int OPTIONS_STR_LENGTH(7);
 
 Splash::Splash()
 {
-  Rectangle initial = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
-  Rectangle start = {START_TEXT_POS_X*8,START_TEXT_POS_Y*8,
-                     START_STR_LENGTH*8,16};
-  Rectangle option = {OPTION_TEXT_POS_X*8,OPTION_TEXT_POS_Y*8,
-                     OPTIONS_STR_LENGTH*8,16};
+  Rectangle initial(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+  Rectangle start(START_TEXT_POS_X*8,START_TEXT_POS_Y*8,
+                     START_STR_LENGTH*8,16);
+  Rectangle option(OPTION_TEXT_POS_X*8,OPTION_TEXT_POS_Y*8,
+                     OPTIONS_STR_LENGTH*8,16);
   m_hotspots.push_back(new HotSpot(initial, showMenuCb, this));
   m_hotspots.push_back(new HotSpot(start, startCb, this));
   m_hotspots.push_back(new HotSpot(option, optionCb, this));

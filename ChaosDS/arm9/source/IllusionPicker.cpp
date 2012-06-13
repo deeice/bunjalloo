@@ -32,9 +32,9 @@ static const int YES_POS_Y(10);
 IllusionPicker::IllusionPicker():SpellSelect(false) 
 {
   clearHotSpots();
-  Rectangle yesRect = { YES_POS_X*8, YES_POS_Y*8, 6*8, 16};
+  Rectangle yesRect(YES_POS_X*8, YES_POS_Y*8, 6*8, 16);
   m_hotspots.push_back(new HotSpot(yesRect, yesCb, this));
-  Rectangle noRect = { (YES_POS_X*8)+yesRect.w, YES_POS_Y*8, 6*8, 16};
+  Rectangle noRect((YES_POS_X*8)+yesRect.w, YES_POS_Y*8, 6*8, 16);
   m_hotspots.push_back(new HotSpot(noRect, noCb, this));
 }
 

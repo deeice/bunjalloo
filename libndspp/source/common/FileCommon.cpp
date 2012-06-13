@@ -17,6 +17,9 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <dirent.h>
+#include <cstring>
+#include <cstdio>
 #include "File.h"
 using namespace std;
 
@@ -33,9 +36,12 @@ void nds::File::readlines(std::vector<std::string> & lines)
     {
       if (data[i] == '\n')
       {
-        lines.push_back( string(&data[startOfLine], i-startOfLine));
+        lines.push_back(string(&data[startOfLine], i-startOfLine));
         startOfLine = i+1;
       }
+    }
+    if (startOfLine < size) {
+      lines.push_back(string(&data[startOfLine], size - startOfLine));
     }
     delete [] data;
   }
@@ -62,7 +68,8 @@ const char * nds::File::dirname(const char * path)
     return ".";
   }
   else {
-    return str.substr(0, pos).c_str();
+    str = str.substr(0, pos);
+    return str.c_str();
   }
 }
 
@@ -200,3 +207,21 @@ bool nds::File::cpCommon(const char * src, const char * dst)
   return ok;
 }
 
+void nds::File::lsCommon(const char * path, std::vector<std::string> & entries)
+{
+  DIR * dir = ::opendir(path);
+  if (dir == NULL)
+  {
+    return;
+  }
+  struct dirent * ent;
+
+  while ( (ent = ::readdir(dir)) != 0)
+  {
+    if (strcmp( ent->d_name, ".") != 0 and strcmp(ent->d_name, "..") != 0 )
+    {
+      entries.push_back(ent->d_name);
+    }
+  }
+  ::closedir(dir);
+}

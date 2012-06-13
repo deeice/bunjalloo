@@ -24,7 +24,7 @@ class InputText: public TextField
 {
   public:
     InputText(HtmlElement * element);
-    virtual void setText(const UnicodeString & text);
+    virtual void setText(const std::string & text);
 
   private:
     HtmlElement * m_element;

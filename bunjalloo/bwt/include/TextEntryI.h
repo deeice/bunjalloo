@@ -29,12 +29,12 @@ class TextEntryI
     /** Get the text that this TextEntryI holds.
      * @param returnString this reference is filled with the text.
      */
-    virtual void text(UnicodeString & returnString) const = 0;
+    virtual void text(std::string & returnString) const = 0;
 
     /** Set the text that this widget holds.
      * @param text the new text.
      */
-    virtual void setText(const UnicodeString & text) = 0;
+    virtual void setText(const std::string & text) = 0;
 
     /** Set the callback TextListener for this TextEntryI.
      * @param listener the listener to use.

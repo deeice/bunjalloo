@@ -19,6 +19,7 @@
 
 #include <map>
 #include <string>
+#include "util/classhelper.h"
 
 typedef std::map<std::string, std::string> KeyValueMap;
 class PSImpl;
@@ -45,7 +46,7 @@ class ParameterSet
      * @return true if the parameter is set, false otherwise.
      */
     bool parameter(const std::string & key, std::string & value) const;
-    /** Fetch a map of paramter - value pairs.
+    /** Fetch a map of parameter - value pairs.
      * @return a standard map of key,value pairs. The keys are the parameter names.
      */
     const KeyValueMap & keyValueMap() const;
@@ -53,6 +54,7 @@ class ParameterSet
   private:
     PSImpl * m_psImpl;
 
+    DISALLOW_COPY_AND_ASSIGN(ParameterSet);
 };
 
 #endif

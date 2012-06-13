@@ -28,8 +28,10 @@ Canvas & Canvas::instance()
 
 Canvas::~Canvas(){}
 
-Canvas::Canvas()
+Canvas::Canvas():m_frontSub(0), m_backSub(0)
 {
+  m_frontSub = SDLhandler::instance().vramSub(0);
+  m_backSub = new unsigned short[0x16000];
   init();
 }
 
@@ -59,7 +61,7 @@ void Canvas::drawPixel(int x, int y, int colour)
   if (not m_clip.hit(x, y))
     return;
   int layer = ( (y < 192) ? 0:1 );
-  u16 * vram = SDLhandler::instance().vramSub(0);
+  u16 * vram = m_backSub;
   if (layer) {
     y-=192;
     vram = SDLhandler::instance().vramMain(0);
@@ -72,46 +74,25 @@ unsigned short * Canvas::vram(int y)
   int layer = ( (y < 192) ? 1:0 );
   u16 * vram = SDLhandler::instance().vramMain(0);
   if (layer) {
-    vram = SDLhandler::instance().vramSub(0);
+    vram = m_backSub;
   }
   return vram;
 }
 
-/*
-void Canvas::fillRectangle(int x, int y, int w, int h, int colour)
-{
-  if (y < 192 and (y+h) >= 192)
-  {
-    // crosses boundary
-  }
-  else if (y < 192)
-  {
-    u16 * vram = SDLhandler::instance().vramMain(0);
-    vram += x + y * SCREEN_WIDTH;
-    if ( (x+w) > (m_clip.x + m_clip.w))
-    {
-      w = m_clip.w - x - m_clip.x;
-    }
-    if ( (y+h) > (m_clip.y + m_clip.h))
-    {
-      h = m_clip.h - y - m_clip.y;
-    }
-    for (int i = 0; i < h ; ++i) {
-      u16 * end = vram+w;
-      while (vram != end)
-      {
-        *vram++ = colour;
-      }
-      vram += width() - w;
-    }
-  }
-  else
-  {
-  }
-}
-*/
-
 void Canvas::endPaint()
 {
-  // nop
+  SDLhandler::instance().swapMainBuffer();
+  memcpy(m_frontSub, m_backSub, SCREEN_WIDTH*SCREEN_HEIGHT*2);
+}
+
+unsigned short * Canvas::frontVram(int y)
+{
+  int layer(y<192?1:0);
+  if (layer) {
+    return m_frontSub;
+  }
+  SDLhandler::instance().swapMainBuffer();
+  m_frontMain = SDLhandler::instance().vramMain(0);
+  SDLhandler::instance().swapMainBuffer();
+  return m_frontMain;
 }
